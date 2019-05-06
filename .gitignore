@@ -1,0 +1,7 @@
+badapt_dev.*
+build/badapt_dev
+dev
+bin
+obj
+temp
+
