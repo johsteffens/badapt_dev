@@ -64,15 +64,36 @@ BETH_PRECODE( badapt_activator_objects )
 
 self badapt_activator_plain_s = badapt_activator
 {
+    aware_t _;
     sr_s activation;
     func badapt_activator : setup;
     func badapt_activator : reset;
     func badapt_activator : infer;
     func badapt_activator : bgrad;
     func badapt_activator : adapt;
+    func badapt_activator : set_activation;
+    func badapt_activator : get_activation;
+};
+
+/// activator with offset
+self badapt_activator_offset_s = badapt_activator
+{
+    aware_t _;
+    sr_s activation;
+    f3_t [] arr_offset;
+    func badapt_activator : setup;
+    func badapt_activator : reset;
+    func badapt_activator : infer;
+    func badapt_activator : bgrad;
+    func badapt_activator : adapt;
+    func badapt_activator : set_activation;
+    func badapt_activator : get_activation;
 };
 
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+badapt_activator_plain_s*  badapt_activator_plain_s_create_activation(  sr_s activation );
+badapt_activator_offset_s* badapt_activator_offset_s_create_activation( sr_s activation );
 
 /**********************************************************************************************************************/
 

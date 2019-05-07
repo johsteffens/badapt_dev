@@ -10,7 +10,8 @@ int main( void )
     bcore_register_signal_handler( badapt_signal_handler );
     if( bcore_precoder_run_globally() ) { bcore_down( true ); return 0; }
 
-//    bcore_run_signal_selftest( typeof( "bmath_simd" ), NULL );
+    CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
+    CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "bmath_adaptive_mlp" ), NULL ) );
 
     //snn_selftest2();
     bcore_down( true );

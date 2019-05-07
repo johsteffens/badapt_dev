@@ -25,7 +25,7 @@ BETH_PRECODE( badapt_adaptive )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /// resets trainable components with given seed
-    feature strict 'par' void reset( mutable, u2_t rseed );
+    feature strict 'par' void reset( mutable );
 
     /// should be called once before use
     feature strict 'par' void setup( mutable );
@@ -60,8 +60,20 @@ BETH_PRECODE( badapt_adaptive )
     feature        'par' f3_t get_regularization( const,   tp_t type );
     feature        'par' void set_regularization( mutable, tp_t type, f3_t val );
 
+    name    badapt_regularization_l1; // L1-regularization
+    name    badapt_regularization_l2; // L2-regularization (weight decay)
+
+    // ===== features with default implementation =====
+
     /// outputs architecture to text sink (for easy inspection)
-    feature        'par' void arc_to_sink( const, bcore_sink* sink ) = arc_to_sink_fallback;
+    feature 'par' void arc_to_sink( const, bcore_sink* sink ) = arc_to_sink_fallback;
+
+    /// inference for scalar output
+    feature 'par' f3_t infer_f3( const, const bmath_vf3_s* in ) = infer_f3_fallback;
+
+    /// full adaption cycle based on l2 error; adapt_l2_f3 returns estimates result
+    feature 'par' void adapt_l2(    mutable, const bmath_vf3_s* in, const bmath_vf3_s* target, bmath_vf3_s* out ) = adapt_l2_fallback;
+    feature 'par' f3_t adapt_l2_f3( mutable, const bmath_vf3_s* in, f3_t target )                                 = adapt_l2_f3_fallback;
 
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -81,7 +93,7 @@ BETH_PRECODE( badapt_activator )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /// resets trainable components with given seed
-    feature strict 'par' void reset( mutable, u2_t rseed );
+    feature strict 'par' void reset( mutable );
 
     /// should be called once before use
     feature strict 'par' void setup( mutable );
@@ -89,6 +101,10 @@ BETH_PRECODE( badapt_activator )
     /// vector size
     feature        'par' sz_t get_size( const );
     feature        'par' void set_size( mutable, sz_t size );
+
+    /// activation function
+    feature        'par' const sr_s* get_activation( const );
+    feature        'par' void set_activation( mutable, sr_s activation );
 
     /// fast concurrent inference
     feature strict 'par' void infer( const, const bmath_vf3_s* in, bmath_vf3_s* out );
@@ -99,7 +115,7 @@ BETH_PRECODE( badapt_activator )
 
     /// adaptation step after last minfer for given gradient; grad_in can be NULL
     /// grad_in and grad_out may refer to the same object
-    feature strict 'par' void adapt( mutable, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out );
+    feature strict 'par' void adapt( mutable, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out, f3_t step );
 
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
