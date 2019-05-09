@@ -19,6 +19,7 @@
 #include "badapt_test.h"
 #include "badapt_activator.h"
 #include "badapt_mlp.h"
+#include "badapt_training.h"
 
 vd_t badapt_signal_handler( const bcore_signal_s* o )
 {
@@ -41,6 +42,7 @@ vd_t badapt_signal_handler( const bcore_signal_s* o )
             badapt_test_signal_handler,
             badapt_activator_signal_handler,
             badapt_mlp_signal_handler,
+            badapt_training_signal_handler,
         };
 
         ret = bcore_signal_s_broadcast( o, arr, sizeof( arr ) / sizeof( bcore_fp_signal_handler ) );

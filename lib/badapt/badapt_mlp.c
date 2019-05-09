@@ -59,39 +59,44 @@ void badapt_mlp_s_set_out_size( badapt_mlp_s* o, sz_t size )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-f3_t badapt_mlp_s_get_step( const badapt_mlp_s* o )
+f3_t badapt_mlp_s_get_rate( const badapt_mlp_s* o )
 {
-    return o->adapt_step;
+    return o->epsilon / o->epsilon_rate;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void badapt_mlp_s_set_step( badapt_mlp_s* o, f3_t val )
+void badapt_mlp_s_set_rate( badapt_mlp_s* o, f3_t val )
 {
-    o->adapt_step = val;
+    o->epsilon = val * o->epsilon_rate;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-f3_t badapt_mlp_s_get_regularization( const badapt_mlp_s* o, tp_t type )
+f3_t badapt_mlp_s_get_lambda_l1( const badapt_mlp_s* o )
 {
-    switch( type )
-    {
-        case TYPEOF_badapt_regularization_l2: return o->regularization_l2;
-        default: ERR_fa( "Unhandled: '#<sc_t>'", ifnameof( type ) );
-    }
-    return 0;
+    return o->lambda_l1;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void badapt_mlp_s_set_regularization( badapt_mlp_s* o, tp_t type, f3_t val )
+void badapt_mlp_s_set_lambda_l1( badapt_mlp_s* o, f3_t val )
 {
-    switch( type )
-    {
-        case TYPEOF_badapt_regularization_l2: o->regularization_l2 = val; break;
-        default: ERR_fa( "Unhandled: '#<sc_t>'", ifnameof( type ) );
-    }
+    o->lambda_l1 = val;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+f3_t badapt_mlp_s_get_lambda_l2( const badapt_mlp_s* o )
+{
+    return o->lambda_l2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_mlp_s_set_lambda_l2( badapt_mlp_s* o, f3_t val )
+{
+    o->lambda_l2 = val;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -265,6 +270,8 @@ void badapt_mlp_s_setup( badapt_mlp_s* o )
         }
     }
 
+    if( o->epsilon < 0 ) o->epsilon = o->epsilon_rate;
+
     BCORE_LIFE_DOWN();
 }
 
@@ -423,16 +430,21 @@ void badapt_mlp_s_bgrad_adapt( badapt_mlp_s* o, bmath_vf3_s* grad_in, const bmat
 
         ga.size = w->cols;
 
-        badapt_activator_r_adapt( &o->arr_activator.data[ i ], &gb, &gb, b, o->adapt_step );
+        badapt_activator_r_adapt( &o->arr_activator.data[ i ], &gb, &gb, b, o->epsilon );
         bmath_mf3_s_htp_mul_vec( w, &gb, &ga );          // GA <- W^T * GB
+
+
+        f3_t l2_reg_factor = ( 1.0 - o->lambda_l2  * o->epsilon );
+        f3_t l1_reg_offset = o->lambda_l1 * o->epsilon;
 
         for( sz_t i = 0; i < w->rows; i++ )
         {
             f3_t* wr = w->data + i * w->stride;
-            f3_t gi = o->adapt_step * gb.data[ i ];
-            for( sz_t j = 0; j < w->cols; j++ )
+            f3_t gi = o->epsilon * gb.data[ i ];
+            for( sz_t j = 0; j < w->cols; j++ ) wr[ j ] = ( wr[ j ] + a->data[ j ] * gi ) * l2_reg_factor;
+            if( l1_reg_offset > 0 )
             {
-                wr[ j ] = wr[ j ] * ( 1.0 - o->regularization_l2 ) + a->data[ j ] * gi;
+                for( sz_t j = 0; j < w->cols; j++ ) wr[ j ] += ( wr[ j ] > 0 ) ? -l1_reg_offset : l1_reg_offset;
             }
         }
 
@@ -466,8 +478,8 @@ static void selftest()
     mlp->kernels_rate = 0;
     mlp->random_state = 124;
 
-    mlp->act_mid = sr_asd( badapt_activator_offset_s_create_activation( sr_create( TYPEOF_badapt_activation_leaky_relu_s ) ) );
-    mlp->act_out = sr_asd( badapt_activator_offset_s_create_activation( sr_create( TYPEOF_badapt_activation_tanh_s       ) ) );
+    mlp->act_mid = sr_asd( badapt_activator_bias_s_create_activation( sr_create( TYPEOF_badapt_activation_leaky_relu_s ) ) );
+    mlp->act_out = sr_asd( badapt_activator_bias_s_create_activation( sr_create( TYPEOF_badapt_activation_tanh_s       ) ) );
 
     badapt_mlp_s_arc_to_sink( mlp, BCORE_STDOUT );
 

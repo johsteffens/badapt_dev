@@ -24,6 +24,8 @@
 BETH_PRECODE( badapt_adaptive )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    // ===== required features =====
+
     /// resets trainable components with given seed
     feature strict 'par' void reset( mutable );
 
@@ -52,18 +54,17 @@ BETH_PRECODE( badapt_adaptive )
 
     // ===== optional features =====
 
-    /// adaption step
-    feature        'par' f3_t get_step( const );
-    feature        'par' void set_step( mutable, f3_t val );
+    /// adaption rate (1.0 means default rate for the network)
+    feature 'par' f3_t get_rate( const );
+    feature 'par' void set_rate( mutable, f3_t val );
 
-    /// adaption regularization
-    feature        'par' f3_t get_regularization( const,   tp_t type );
-    feature        'par' void set_regularization( mutable, tp_t type, f3_t val );
+    /// regularization (1.0 means default rate for the network)
+    feature 'par' f3_t get_lambda_l1( const );
+    feature 'par' void set_lambda_l1( mutable, f3_t val );
+    feature 'par' f3_t get_lambda_l2( const );
+    feature 'par' void set_lambda_l2( mutable, f3_t val );
 
-    name    badapt_regularization_l1; // L1-regularization
-    name    badapt_regularization_l2; // L2-regularization (weight decay)
-
-    // ===== features with default implementation =====
+    // ===== optional features with default implementation =====
 
     /// outputs architecture to text sink (for easy inspection)
     feature 'par' void arc_to_sink( const, bcore_sink* sink ) = arc_to_sink_fallback;

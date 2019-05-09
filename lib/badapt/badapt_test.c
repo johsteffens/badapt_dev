@@ -76,13 +76,13 @@ void badapt_adaptive_a_test_sine_random( const badapt_adaptive* const_o )
     }
 
     sz_t epochs = 30;
-    f3_t learn_step = 0.0001;
-    f3_t decay = 0.0001 * learn_step;
+    f3_t learn_rate = 1.0;
+    f3_t lambda_l2 = 0.0001;
     f3_t pos_tgt = 0.9;
     f3_t neg_tgt = -pos_tgt;
 
-    badapt_adaptive_a_set_step(  o, learn_step );
-    badapt_adaptive_a_set_regularization( o, TYPEOF_badapt_regularization_l2, decay );
+    badapt_adaptive_a_set_rate( o, learn_rate );
+    badapt_adaptive_a_set_lambda_l2( o, lambda_l2 );
 
     for( sz_t i = 0; i < epochs; i++ )
     {

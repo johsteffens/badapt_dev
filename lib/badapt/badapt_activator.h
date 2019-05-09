@@ -62,6 +62,8 @@ self badapt_activation_softplus_s = badapt_activation
 BETH_PRECODE( badapt_activator_objects )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/** Activator without bias.
+ */
 self badapt_activator_plain_s = badapt_activator
 {
     aware_t _;
@@ -75,12 +77,16 @@ self badapt_activator_plain_s = badapt_activator
     func badapt_activator : get_activation;
 };
 
-/// activator with offset
-self badapt_activator_offset_s = badapt_activator
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/** Activator with bias.
+ *  Bias is not randomized but initialized zero (common practice).
+ */
+self badapt_activator_bias_s = badapt_activator
 {
     aware_t _;
     sr_s activation;
-    f3_t [] arr_offset;
+    f3_t [] arr_bias;
     func badapt_activator : setup;
     func badapt_activator : reset;
     func badapt_activator : infer;
@@ -92,8 +98,8 @@ self badapt_activator_offset_s = badapt_activator
 
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-badapt_activator_plain_s*  badapt_activator_plain_s_create_activation(  sr_s activation );
-badapt_activator_offset_s* badapt_activator_offset_s_create_activation( sr_s activation );
+badapt_activator_plain_s* badapt_activator_plain_s_create_activation( sr_s activation );
+badapt_activator_bias_s*  badapt_activator_bias_s_create_activation(  sr_s activation );
 
 /**********************************************************************************************************************/
 

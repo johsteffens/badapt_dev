@@ -105,16 +105,16 @@ void badapt_activator_plain_s_set_activation( badapt_activator_plain_s* o, sr_s 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-badapt_activator_offset_s* badapt_activator_offset_s_create_activation( sr_s activation )
+badapt_activator_bias_s* badapt_activator_bias_s_create_activation( sr_s activation )
 {
-    badapt_activator_offset_s* o = badapt_activator_offset_s_create();
+    badapt_activator_bias_s* o = badapt_activator_bias_s_create();
     o->activation = activation;
     return o;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_activator_offset_s_setup( badapt_activator_offset_s* o )
+void badapt_activator_bias_s_setup( badapt_activator_bias_s* o )
 {
     if( sr_s_p_type( &o->activation ) != TYPEOF_badapt_activation )
     {
@@ -124,14 +124,14 @@ void badapt_activator_offset_s_setup( badapt_activator_offset_s* o )
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_activator_offset_s_reset( badapt_activator_offset_s* o )
+void badapt_activator_bias_s_reset( badapt_activator_bias_s* o )
 {
-    o->arr_offset_size = 0;
+    o->arr_bias_size = 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_activator_offset_s_infer( const badapt_activator_offset_s* o, const bmath_vf3_s* in, bmath_vf3_s* out )
+void badapt_activator_bias_s_infer( const badapt_activator_bias_s* o, const bmath_vf3_s* in, bmath_vf3_s* out )
 {
     assert( in->size == out->size );
     assert( sr_s_p_type( &o->activation ) == TYPEOF_badapt_activation_s );
@@ -139,20 +139,20 @@ void badapt_activator_offset_s_infer( const badapt_activator_offset_s* o, const 
     const badapt_activation_s* activation_p = o->activation.p;
     const badapt_activation  * activation_o = o->activation.o;
 
-    if( o->arr_offset_size == 0 )
+    if( o->arr_bias_size == 0 )
     {
         for( sz_t i = 0; i < out->size; i++ ) out->data[ i ] = badapt_activation_p_fx( activation_p, activation_o, in->data[ i ] );
     }
     else
     {
-        assert( in->size == o->arr_offset_size );
-        for( sz_t i = 0; i < out->size; i++ ) out->data[ i ] = badapt_activation_p_fx( activation_p, activation_o, in->data[ i ] + o->arr_offset_data[ i ] );
+        assert( in->size == o->arr_bias_size );
+        for( sz_t i = 0; i < out->size; i++ ) out->data[ i ] = badapt_activation_p_fx( activation_p, activation_o, in->data[ i ] + o->arr_bias_data[ i ] );
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_activator_offset_s_bgrad( const badapt_activator_offset_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out )
+void badapt_activator_bias_s_bgrad( const badapt_activator_bias_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out )
 {
     assert( grad_in->size == grad_out->size );
     assert( grad_in->size ==      out->size );
@@ -164,29 +164,29 @@ void badapt_activator_offset_s_bgrad( const badapt_activator_offset_s* o, bmath_
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_activator_offset_s_adapt( badapt_activator_offset_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out, f3_t step )
+void badapt_activator_bias_s_adapt( badapt_activator_bias_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out, f3_t step )
 {
-    badapt_activator_offset_s_bgrad( o, grad_in, grad_out, out );
+    badapt_activator_bias_s_bgrad( o, grad_in, grad_out, out );
 
-    if( o->arr_offset_size == 0 )
+    if( o->arr_bias_size == 0 )
     {
         bcore_array_a_set_size( ( bcore_array* )o, out->size );
-        for( sz_t i = 0; i < out->size; i++ ) o->arr_offset_data[ i ] = 0;
+        for( sz_t i = 0; i < out->size; i++ ) o->arr_bias_data[ i ] = 0;
     }
 
-    for( sz_t i = 0; i < out->size; i++ ) o->arr_offset_data[ i ] += grad_in->data[ i ] * step;
+    for( sz_t i = 0; i < out->size; i++ ) o->arr_bias_data[ i ] += grad_in->data[ i ] * step;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const sr_s* badapt_activator_offset_s_get_activation( const badapt_activator_offset_s* o )
+const sr_s* badapt_activator_bias_s_get_activation( const badapt_activator_bias_s* o )
 {
     return &o->activation;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_activator_offset_s_set_activation( badapt_activator_offset_s* o, sr_s activation )
+void badapt_activator_bias_s_set_activation( badapt_activator_bias_s* o, sr_s activation )
 {
     sr_s_copy( &o->activation, &activation );
     sr_down( activation );
