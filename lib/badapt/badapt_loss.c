@@ -13,63 +13,38 @@
  *  limitations under the License.
  */
 
-#include "badapt_features.h"
+#include "badapt_loss.h"
 
 /**********************************************************************************************************************/
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_adaptive_arc_to_sink_fallback( const badapt_adaptive* o, bcore_sink* sink )
+f3_t badapt_loss_l2_s_loss( const badapt_loss_l2_s* o, const bmath_vf3_s* out, const bmath_vf3_s* target )
 {
-    bcore_txt_ml_a_to_sink( o, sink );
+    return bmath_vf3_s_f3_sub_sqr( target, out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-f3_t badapt_adaptive_infer_f3_fallback( const badapt_adaptive* o, const bmath_vf3_s* in )
+f3_t badapt_loss_l2_s_loss_f3( const badapt_loss_l2_s* o, f3_t out, f3_t target )
 {
-    bmath_vf3_s v_out;
-    f3_t out = 0;
-    bmath_vf3_s_init_weak( &v_out, &out, 1 );
-    badapt_adaptive_a_infer( o, in, &v_out );
-    return out;
+    return f3_sqr( target - out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_adaptive_adapt_loss_fallback( badapt_adaptive* o, const badapt_loss* loss, const bmath_vf3_s* in, const bmath_vf3_s* target, bmath_vf3_s* out )
+void badapt_loss_l2_s_bgrad( const badapt_loss_l2_s* o, const bmath_vf3_s* out, const bmath_vf3_s* target, bmath_vf3_s* grad )
 {
-    BCORE_LIFE_INIT();
-    BCORE_LIFE_CREATE( bmath_vf3_s, grad );
-    ASSERT( out != NULL );
-    bmath_vf3_s_set_size( grad, out->size );
-    badapt_adaptive_a_minfer( o, in, out );
-    badapt_loss_a_bgrad( loss, out, target, grad );
-    badapt_adaptive_a_bgrad_adapt( o, NULL, grad );
-    BCORE_LIFE_DOWN();
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-f3_t badapt_adaptive_adapt_loss_f3_fallback( badapt_adaptive* o, const badapt_loss* loss, const bmath_vf3_s* in, f3_t target )
-{
-    bmath_vf3_s v_target;
-    bmath_vf3_s v_out;
-    f3_t out = 0;
-
-    bmath_vf3_s_init_weak( &v_target, &target, 1 );
-    bmath_vf3_s_init_weak( &v_out, &out, 1 );
-    badapt_adaptive_a_adapt_loss( o, loss, in, &v_target, &v_out );
-    return out;
+    bmath_vf3_s_sub( target, out, grad );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 
-vd_t badapt_features_signal_handler( const bcore_signal_s* o )
+vd_t badapt_loss_signal_handler( const bcore_signal_s* o )
 {
-    switch( bcore_signal_s_handle_type( o, typeof( "badapt_features" ) ) )
+    switch( bcore_signal_s_handle_type( o, typeof( "badapt_loss" ) ) )
     {
         case TYPEOF_init1:
         {

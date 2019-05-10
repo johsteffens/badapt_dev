@@ -29,10 +29,10 @@ BETH_PRECODE( badapt_training_data )
 
 BETH_PRECODE( badapt_supplier )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    feature strict 'par' void fetch_batch_sample( mutable, badapt_sample_s* dst );
-    feature strict 'par' void fetch_valid_sample( mutable, badapt_sample_s* dst );
-    feature        'par' void fetch_batch_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_batch_data_default;
-    feature        'par' void fetch_valid_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_valid_data_default;
+    feature strict 'pa' void fetch_batch_sample( mutable, badapt_sample_s* dst );
+    feature strict 'pa' void fetch_valid_sample( mutable, badapt_sample_s* dst );
+    feature        'pa' void fetch_batch_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_batch_data_default;
+    feature        'pa' void fetch_valid_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_valid_data_default;
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 BETH_PRECODE( badapt_training_objects )

@@ -14,6 +14,7 @@
  */
 
 #include "badapt_test.h"
+#include "badapt_loss.h"
 
 /**********************************************************************************************************************/
 
@@ -29,6 +30,8 @@ void badapt_adaptive_a_test_sine_random( const badapt_adaptive* const_o )
     badapt_adaptive_a_reset( o );
     badapt_adaptive_a_setup( o );
     badapt_adaptive_a_arc_to_sink( o, BCORE_STDOUT );
+
+    badapt_loss* loss = BCORE_LIFE_A_PUSH( badapt_loss_l2_s_create() );
 
     // Learn differentiating between a sine wave of arbitrary amplitude and frequency from
     // a random walk curve.
@@ -77,9 +80,9 @@ void badapt_adaptive_a_test_sine_random( const badapt_adaptive* const_o )
 
     sz_t epochs = 30;
     f3_t learn_rate = 1.0;
-    f3_t lambda_l2 = 0.0001;
-    f3_t pos_tgt = 0.9;
-    f3_t neg_tgt = -pos_tgt;
+    f3_t lambda_l2  = 0.0001;
+    f3_t pos_tgt    = 0.9;
+    f3_t neg_tgt    = -pos_tgt;
 
     badapt_adaptive_a_set_rate( o, learn_rate );
     badapt_adaptive_a_set_lambda_l2( o, lambda_l2 );
@@ -91,14 +94,13 @@ void badapt_adaptive_a_test_sine_random( const badapt_adaptive* const_o )
         {
             const bmath_vf3_s* pos_vec = pos_set_trn->data[ j ].o;
             const bmath_vf3_s* neg_vec = neg_set_trn->data[ j ].o;
-            f3_t pos_est = badapt_adaptive_a_adapt_l2_f3( o, pos_vec, pos_tgt );
-            f3_t neg_est = badapt_adaptive_a_adapt_l2_f3( o, neg_vec, neg_tgt );
-            err += f3_sqr( pos_est - pos_tgt );
-            err += f3_sqr( neg_est - neg_tgt );
+            f3_t pos_est = badapt_adaptive_a_adapt_loss_f3( o, loss, pos_vec, pos_tgt );
+            f3_t neg_est = badapt_adaptive_a_adapt_loss_f3( o, loss, neg_vec, neg_tgt );
+            err += badapt_loss_a_loss_f3( loss, pos_est, pos_tgt );
+            err += badapt_loss_a_loss_f3( loss, neg_est, neg_tgt );
         }
 
         err = f3_srt( err / ( samples * 2 ) );
-
         bcore_msg_fa( "#pl6 {#<sz_t>}: err = #<f3_t>\n", i, err );
     }
 
@@ -121,8 +123,9 @@ void badapt_adaptive_a_test_sine_random( const badapt_adaptive* const_o )
             const bmath_vf3_s* neg_vec = neg_set_tst->data[ j ].o;
             f3_t pos_est = badapt_adaptive_a_infer_f3( o_tst, pos_vec );
             f3_t neg_est = badapt_adaptive_a_infer_f3( o_tst, neg_vec );
-            err += f3_sqr( pos_est - pos_tgt );
-            err += f3_sqr( neg_est - neg_tgt );
+
+            err += badapt_loss_a_loss_f3( loss, pos_est, pos_tgt );
+            err += badapt_loss_a_loss_f3( loss, neg_est, neg_tgt );
         }
 
         err = f3_srt( err / ( samples * 2 ) );

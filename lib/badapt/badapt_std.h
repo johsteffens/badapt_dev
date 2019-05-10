@@ -20,5 +20,9 @@
 
 #include "bmath_std.h"
 #include "badapt_signal.h"
+#include "badapt_features.h"
+#include "badapt_activator.h"
+#include "badapt_training.h"
+#include "badapt_mlp.h"
 
 #endif // BADAPT_STD_H

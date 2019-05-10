@@ -72,7 +72,7 @@ void badapt_trainer_s_run( const badapt_trainer_s* o, badapt_adaptive* adaptive 
                 for( sz_t i = 0; i < o->batch_size; i++ )
                 {
                     const badapt_sample_s* sample = &buffer_batch->arr_data[ i ];
-                    badapt_adaptive_a_adapt_l2( adaptive, &sample->in, &sample->out, NULL );
+//                    badapt_adaptive_a_adapt_l2( adaptive, &sample->in, &sample->out, NULL );
                 }
             }
         }

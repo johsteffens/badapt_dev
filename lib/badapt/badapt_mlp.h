@@ -46,16 +46,14 @@ self badapt_mlp_s = badapt_adaptive
     f3_t lambda_l1         = 0;      // l1-regularization
     f3_t lambda_l2         = 0;      // l2-regularization
 
-    f3_t regularization_l2 = 0;    // (deprecated) l2-regularization step (weight decay)
-    f3_t regularization_l1 = 0;    // (deprecated) l1-regularization step
-    sr_s act_mid;                  // (default: softplus) middle activation function
-    sr_s act_out;                  // (default: tanh) output activation function
+    badapt_arr_layer_activator_s arr_layer_activator;
+
     u2_t random_state      = 1234; // (default: 1234) random state variable (for random initialization)
     // ==============================================================
 
     // === trained data =============================================
-    bmath_arr_mf3_s   arr_w;  // weight matrix
-    bcore_arr_sr_s    arr_activator; // activators
+    bmath_arr_mf3_s          arr_w;         // weight matrix
+    badapt_arr_activator_s   arr_activator; // activators
     // ==============================================================
 
     // === runtime data =============================================

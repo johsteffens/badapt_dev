@@ -62,12 +62,25 @@ self badapt_activation_softplus_s = badapt_activation
 BETH_PRECODE( badapt_activator_objects )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// specifies which activator is used for which layer; negative layer number means relative to last layer + 1
+self badapt_layer_activator_s = bcore_inst
+{
+    aware_t _;
+    sz_t layer;
+    aware badapt_activator => activator;
+};
+
+self badapt_arr_activator_s       = bcore_array { aware_t _; aware badapt_activator   => [] arr; };
+self badapt_arr_layer_activator_s = bcore_array { aware_t _; badapt_layer_activator_s    [] arr; };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /** Activator without bias.
  */
 self badapt_activator_plain_s = badapt_activator
 {
     aware_t _;
-    sr_s activation;
+    aware badapt_activation => activation;
     func badapt_activator : setup;
     func badapt_activator : reset;
     func badapt_activator : infer;
@@ -85,7 +98,7 @@ self badapt_activator_plain_s = badapt_activator
 self badapt_activator_bias_s = badapt_activator
 {
     aware_t _;
-    sr_s activation;
+    aware badapt_activation => activation;
     f3_t [] arr_bias;
     func badapt_activator : setup;
     func badapt_activator : reset;
@@ -98,8 +111,15 @@ self badapt_activator_bias_s = badapt_activator
 
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-badapt_activator_plain_s* badapt_activator_plain_s_create_activation( sr_s activation );
-badapt_activator_bias_s*  badapt_activator_bias_s_create_activation(  sr_s activation );
+badapt_activator* badapt_activator_create_from_types( tp_t tp_activator, tp_t tp_activation );
+badapt_layer_activator_s* badapt_layer_activator_s_create_from_types( sz_t layer, tp_t tp_activator, tp_t tp_activation );
+void badapt_arr_layer_activator_s_push_from_types( badapt_arr_layer_activator_s* o, sz_t layer, tp_t tp_activator, tp_t tp_activation );
+
+/// constructs array from layer-activators
+void badapt_arr_activator_s_setup_from_arr_layer_activator( badapt_arr_activator_s* o, const badapt_arr_layer_activator_s* arr, sz_t layers );
+
+badapt_activator_plain_s* badapt_activator_plain_s_create_activation( const badapt_activation* activation );
+badapt_activator_bias_s*  badapt_activator_bias_s_create_activation(  const badapt_activation* activation );
 
 /**********************************************************************************************************************/
 

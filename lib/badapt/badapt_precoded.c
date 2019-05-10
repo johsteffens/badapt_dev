@@ -18,6 +18,28 @@
 #include "badapt_features.h"
 
 //----------------------------------------------------------------------------------------------------------------------
+// group: badapt_loss
+
+BCORE_DEFINE_SPECT( bcore_inst, badapt_loss )
+"{"
+    "bcore_spect_header_s header;"
+    "feature strict aware badapt_loss : loss;"
+    "feature strict aware badapt_loss : loss_f3;"
+    "feature strict aware badapt_loss : bgrad;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_error
+
+BCORE_DEFINE_SPECT( bcore_inst, badapt_error )
+"{"
+    "bcore_spect_header_s header;"
+    "feature strict aware badapt_error : err;"
+    "feature strict aware badapt_error : err_f3;"
+    "feature strict aware badapt_error : bgrad;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
 // group: badapt_adaptive
 
 BCORE_DEFINE_SPECT( bcore_inst, badapt_adaptive )
@@ -41,8 +63,8 @@ BCORE_DEFINE_SPECT( bcore_inst, badapt_adaptive )
     "feature aware badapt_adaptive : set_lambda_l2;"
     "feature aware badapt_adaptive : arc_to_sink = badapt_adaptive_arc_to_sink_fallback;"
     "feature aware badapt_adaptive : infer_f3 = badapt_adaptive_infer_f3_fallback;"
-    "feature aware badapt_adaptive : adapt_l2 = badapt_adaptive_adapt_l2_fallback;"
-    "feature aware badapt_adaptive : adapt_l2_f3 = badapt_adaptive_adapt_l2_f3_fallback;"
+    "feature aware badapt_adaptive : adapt_loss = badapt_adaptive_adapt_loss_fallback;"
+    "feature aware badapt_adaptive : adapt_loss_f3 = badapt_adaptive_adapt_loss_f3_fallback;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -114,10 +136,29 @@ BCORE_DEFINE_OBJECT_INST( badapt_activation, badapt_activation_softplus_s )
 //----------------------------------------------------------------------------------------------------------------------
 // group: badapt_activator_objects
 
+BCORE_DEFINE_OBJECT_INST( bcore_inst, badapt_layer_activator_s )
+"{"
+    "aware_t _;"
+    "sz_t layer;"
+    "aware badapt_activator => activator;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST( bcore_array, badapt_arr_activator_s )
+"{"
+    "aware_t _;"
+    "aware badapt_activator => [] arr;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST( bcore_array, badapt_arr_layer_activator_s )
+"{"
+    "aware_t _;"
+    "badapt_layer_activator_s [] arr;"
+"}";
+
 BCORE_DEFINE_OBJECT_INST( badapt_activator, badapt_activator_plain_s )
 "{"
     "aware_t _;"
-    "sr_s activation;"
+    "aware badapt_activation => activation;"
     "func badapt_activator : setup;"
     "func badapt_activator : reset;"
     "func badapt_activator : infer;"
@@ -130,7 +171,7 @@ BCORE_DEFINE_OBJECT_INST( badapt_activator, badapt_activator_plain_s )
 BCORE_DEFINE_OBJECT_INST( badapt_activator, badapt_activator_bias_s )
 "{"
     "aware_t _;"
-    "sr_s activation;"
+    "aware badapt_activation => activation;"
     "f3_t [] arr_bias;"
     "func badapt_activator : setup;"
     "func badapt_activator : reset;"
@@ -139,6 +180,21 @@ BCORE_DEFINE_OBJECT_INST( badapt_activator, badapt_activator_bias_s )
     "func badapt_activator : adapt;"
     "func badapt_activator : set_activation;"
     "func badapt_activator : get_activation;"
+"}";
+
+/**********************************************************************************************************************/
+// source: badapt_loss
+#include "badapt_loss.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_loss_objects
+
+BCORE_DEFINE_OBJECT_INST( badapt_loss, badapt_loss_l2_s )
+"{"
+    "aware_t _;"
+    "func badapt_loss : loss;"
+    "func badapt_loss : loss_f3;"
+    "func badapt_loss : bgrad;"
 "}";
 
 /**********************************************************************************************************************/
@@ -160,13 +216,10 @@ BCORE_DEFINE_OBJECT_INST( badapt_adaptive, badapt_mlp_s )
     "f3_t epsilon = -1;"
     "f3_t lambda_l1 = 0;"
     "f3_t lambda_l2 = 0;"
-    "f3_t regularization_l2 = 0;"
-    "f3_t regularization_l1 = 0;"
-    "sr_s act_mid;"
-    "sr_s act_out;"
+    "badapt_arr_layer_activator_s arr_layer_activator;"
     "u2_t random_state = 1234;"
     "bmath_arr_mf3_s arr_w;"
-    "bcore_arr_sr_s arr_activator;"
+    "badapt_arr_activator_s arr_activator;"
     "hidden sz_t max_buffer_size;"
     "hidden bmath_arr_vf3_s arr_a;"
     "hidden bmath_arr_vf3_s arr_b;"
@@ -248,7 +301,15 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 2234409412 ) );
+            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 3873864417 ) );
+            BCORE_REGISTER_FEATURE( badapt_loss_loss );
+            BCORE_REGISTER_FEATURE( badapt_loss_loss_f3 );
+            BCORE_REGISTER_FEATURE( badapt_loss_bgrad );
+            BCORE_REGISTER_SPECT( badapt_loss );
+            BCORE_REGISTER_FEATURE( badapt_error_err );
+            BCORE_REGISTER_FEATURE( badapt_error_err_f3 );
+            BCORE_REGISTER_FEATURE( badapt_error_bgrad );
+            BCORE_REGISTER_SPECT( badapt_error );
             BCORE_REGISTER_FEATURE( badapt_adaptive_reset );
             BCORE_REGISTER_FEATURE( badapt_adaptive_setup );
             BCORE_REGISTER_FEATURE( badapt_adaptive_get_in_size );
@@ -267,12 +328,12 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FEATURE( badapt_adaptive_set_lambda_l2 );
             BCORE_REGISTER_FEATURE( badapt_adaptive_arc_to_sink );
             BCORE_REGISTER_FEATURE( badapt_adaptive_infer_f3 );
-            BCORE_REGISTER_FEATURE( badapt_adaptive_adapt_l2 );
-            BCORE_REGISTER_FEATURE( badapt_adaptive_adapt_l2_f3 );
+            BCORE_REGISTER_FEATURE( badapt_adaptive_adapt_loss );
+            BCORE_REGISTER_FEATURE( badapt_adaptive_adapt_loss_f3 );
             BCORE_REGISTER_FFUNC( badapt_adaptive_arc_to_sink, badapt_adaptive_arc_to_sink_fallback );
             BCORE_REGISTER_FFUNC( badapt_adaptive_infer_f3, badapt_adaptive_infer_f3_fallback );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_adapt_l2, badapt_adaptive_adapt_l2_fallback );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_adapt_l2_f3, badapt_adaptive_adapt_l2_f3_fallback );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_adapt_loss, badapt_adaptive_adapt_loss_fallback );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_adapt_loss_f3, badapt_adaptive_adapt_loss_f3_fallback );
             BCORE_REGISTER_SPECT( badapt_adaptive );
             BCORE_REGISTER_FEATURE( badapt_activation_fx );
             BCORE_REGISTER_FEATURE( badapt_activation_dy );
@@ -299,6 +360,9 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_activation_fx, badapt_activation_softplus_s_fx );
             BCORE_REGISTER_FFUNC( badapt_activation_dy, badapt_activation_softplus_s_dy );
             BCORE_REGISTER_OBJECT( badapt_activation_softplus_s );
+            BCORE_REGISTER_OBJECT( badapt_layer_activator_s );
+            BCORE_REGISTER_OBJECT( badapt_arr_activator_s );
+            BCORE_REGISTER_OBJECT( badapt_arr_layer_activator_s );
             BCORE_REGISTER_FFUNC( badapt_activator_setup, badapt_activator_plain_s_setup );
             BCORE_REGISTER_FFUNC( badapt_activator_reset, badapt_activator_plain_s_reset );
             BCORE_REGISTER_FFUNC( badapt_activator_infer, badapt_activator_plain_s_infer );
@@ -315,6 +379,10 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_activator_set_activation, badapt_activator_bias_s_set_activation );
             BCORE_REGISTER_FFUNC( badapt_activator_get_activation, badapt_activator_bias_s_get_activation );
             BCORE_REGISTER_OBJECT( badapt_activator_bias_s );
+            BCORE_REGISTER_FFUNC( badapt_loss_loss, badapt_loss_l2_s_loss );
+            BCORE_REGISTER_FFUNC( badapt_loss_loss_f3, badapt_loss_l2_s_loss_f3 );
+            BCORE_REGISTER_FFUNC( badapt_loss_bgrad, badapt_loss_l2_s_bgrad );
+            BCORE_REGISTER_OBJECT( badapt_loss_l2_s );
             BCORE_REGISTER_FFUNC( badapt_adaptive_reset, badapt_mlp_s_reset );
             BCORE_REGISTER_FFUNC( badapt_adaptive_setup, badapt_mlp_s_setup );
             BCORE_REGISTER_FFUNC( badapt_adaptive_get_in_size, badapt_mlp_s_get_in_size );

@@ -107,9 +107,6 @@ void badapt_mlp_s_setup( badapt_mlp_s* o )
     bl_t learning = true;
     ASSERT( o->layers >= 2 );
 
-    if( !bcore_trait_is_of( sr_s_type( &o->act_mid ), TYPEOF_badapt_activator ) ) ERR_fa( "act_mid: '#<sc_t>' is not of badapt_activator", ifnameof( sr_s_type( &o->act_mid ) ) );
-    if( !bcore_trait_is_of( sr_s_type( &o->act_out ), TYPEOF_badapt_activator ) ) ERR_fa( "act_out: '#<sc_t>' is not of badapt_activator", ifnameof( sr_s_type( &o->act_out ) ) );
-
     BCORE_LIFE_INIT();
 
     typedef struct
@@ -173,19 +170,15 @@ void badapt_mlp_s_setup( badapt_mlp_s* o )
     o->max_buffer_size = 0;
 
     // preexisting activators are reused
-    if( o->arr_activator.size != o->layers )
+    if( o->arr_activator.arr_size != o->layers )
     {
-        bcore_arr_sr_s_set_size( &o->arr_activator, o->layers );
-        for( sz_t i = 0; i < o->layers; i++ )
-        {
-            sr_s_copy( &o->arr_activator.data[ i ], ( i < o->layers - 1 ) ? &o->act_mid : &o->act_out );
-        }
+        badapt_arr_activator_s_setup_from_arr_layer_activator( &o->arr_activator, &o->arr_layer_activator, o->layers );
     }
 
     // set up matrices
     for( sz_t i = 0; i < o->layers; i++ )
     {
-        badapt_activator_r_setup( &o->arr_activator.data[ i ] );
+        badapt_activator_a_setup( o->arr_activator.arr_data[ i ] );
 
         const bmath_snn_arc_item_s* item = bcore_array_a_get( arr_bmath_snn_arc_item_s, i ).o;
 
@@ -213,8 +206,6 @@ void badapt_mlp_s_setup( badapt_mlp_s* o )
         o->max_buffer_size = sz_max( o->max_buffer_size, a->size );
         o->max_buffer_size = sz_max( o->max_buffer_size, b->size );
     }
-
-    bcore_arr_sr_s_set_spect( &o->arr_activator, TYPEOF_badapt_activator_s );
 
     sz_t buf_part_size = o->max_buffer_size * 2;
 
@@ -285,7 +276,7 @@ void badapt_mlp_s_reset( badapt_mlp_s* o )
     bmath_vf3_s_clear( &o->buf_ab );
     bmath_vf3_s_clear( &o->in );
     bmath_vf3_s_clear( &o->out );
-    bcore_arr_sr_s_clear( &o->arr_activator );
+    badapt_arr_activator_s_clear( &o->arr_activator );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -317,8 +308,9 @@ void badapt_mlp_s_arc_to_sink( const badapt_mlp_s* o, bcore_sink* sink )
         const bmath_mf3_s* w = &o->arr_w.data[ i ];
         const bmath_vf3_s* b = &o->arr_b.data[ i ];
         st_s* st_activation = st_s_create();
-        st_s_push_fa( st_activation, "#<sc_t>", ifnameof( sr_s_type( &o->arr_activator.data[ i ] ) ) );
-        st_s_push_fa( st_activation, " : #<sc_t>", ifnameof( sr_s_type( badapt_activator_a_get_activation( ( badapt_activator* )o->arr_activator.data[ i ].o ) ) ) );
+
+        st_s_push_fa( st_activation, "#<sc_t>", ifnameof( *( aware_t* )o->arr_activator.arr_data[ i ] ) );
+        st_s_push_fa( st_activation, " : #<sc_t>", ifnameof( *( aware_t* )badapt_activator_a_get_activation( o->arr_activator.arr_data[ i ] ) ) );
 
         bcore_sink_a_push_fa( sink,
                               "layer #pl2 {#<sz_t>}:"
@@ -353,7 +345,7 @@ void badapt_mlp_s_infer( const badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3
         const bmath_mf3_s* w = &o->arr_w.data[ i ];
         b.size = w->rows;
         bmath_mf3_s_mul_vec( w, &a, &b );       // b = w * a
-        badapt_activator_r_infer( &o->arr_activator.data[ i ], &b, &b );
+        badapt_activator_a_infer( o->arr_activator.arr_data[ i ], &b, &b );
         bmath_vf3_s_swapr( &a, &b );
     }
 
@@ -375,7 +367,7 @@ void badapt_mlp_s_minfer( badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3_s* o
               bmath_vf3_s* b = &o->arr_b.data[ i ];
         const bmath_mf3_s* w = &o->arr_w.data[ i ];
         bmath_mf3_s_mul_vec( w, a, b );       // b = w * a
-        badapt_activator_r_infer( &o->arr_activator.data[ i ], b, b );
+        badapt_activator_a_infer( o->arr_activator.arr_data[ i ], b, b );
     }
     if( out ) bmath_vf3_s_cpy( &o->out, out );
 }
@@ -398,7 +390,7 @@ void badapt_mlp_s_bgrad( const badapt_mlp_s* o, bmath_vf3_s* grad_in, const bmat
         const bmath_vf3_s*  b = &o->arr_b.data[ i ];
         const bmath_mf3_s*  w = &o->arr_w.data[ i ];
         ga.size = w->cols;
-        badapt_activator_r_bgrad( &o->arr_activator.data[ i ], &gb, &gb, b );
+        badapt_activator_a_bgrad( o->arr_activator.arr_data[ i ], &gb, &gb, b );
         bmath_mf3_s_htp_mul_vec( w, &gb, &ga );          // GA <- W^T * GB
         bmath_vf3_s_swapr( &ga, &gb );
     }
@@ -430,7 +422,7 @@ void badapt_mlp_s_bgrad_adapt( badapt_mlp_s* o, bmath_vf3_s* grad_in, const bmat
 
         ga.size = w->cols;
 
-        badapt_activator_r_adapt( &o->arr_activator.data[ i ], &gb, &gb, b, o->epsilon );
+        badapt_activator_a_adapt( o->arr_activator.arr_data[ i ], &gb, &gb, b, o->epsilon );
         bmath_mf3_s_htp_mul_vec( w, &gb, &ga );          // GA <- W^T * GB
 
 
@@ -478,8 +470,8 @@ static void selftest()
     mlp->kernels_rate = 0;
     mlp->random_state = 124;
 
-    mlp->act_mid = sr_asd( badapt_activator_bias_s_create_activation( sr_create( TYPEOF_badapt_activation_leaky_relu_s ) ) );
-    mlp->act_out = sr_asd( badapt_activator_bias_s_create_activation( sr_create( TYPEOF_badapt_activation_tanh_s       ) ) );
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_leaky_relu_s );
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_tanh_s );
 
     badapt_mlp_s_arc_to_sink( mlp, BCORE_STDOUT );
 
