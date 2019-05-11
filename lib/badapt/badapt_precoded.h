@@ -32,6 +32,10 @@
       badapt_loss_loss_f3 loss_f3; \
       badapt_loss_bgrad bgrad; \
   }; \
+  static inline badapt_loss* badapt_loss_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_badapt_loss, t ); return ( badapt_loss* )bcore_inst_t_create( t ); } \
+  static inline badapt_loss* badapt_loss_a_clone( const badapt_loss* o ) { return ( badapt_loss* )bcore_inst_a_clone( ( bcore_inst* )o ); } \
+  static inline void badapt_loss_a_discard( badapt_loss* o ) { bcore_inst_a_discard( ( bcore_inst* )o ); } \
+  static inline void badapt_loss_a_replicate( badapt_loss** o, const badapt_loss* src ) { bcore_inst_a_replicate( ( bcore_inst** )o, ( bcore_inst* )src ); } \
   static inline f3_t badapt_loss_p_loss( const badapt_loss_s* __p, const badapt_loss* o, const bmath_vf3_s* out, const bmath_vf3_s* target ) { return __p->loss( o, out, target ); } \
   static inline f3_t badapt_loss_a_loss( const badapt_loss* o, const bmath_vf3_s* out, const bmath_vf3_s* target ) { return badapt_loss_s_get_aware( o )->loss( o, out, target ); } \
   static inline bl_t badapt_loss_p_defines_loss( const badapt_loss_s* __p ) { return true; } \
@@ -44,36 +48,6 @@
   static inline void badapt_loss_a_bgrad( const badapt_loss* o, const bmath_vf3_s* out, const bmath_vf3_s* target, bmath_vf3_s* grad ) { badapt_loss_s_get_aware( o )->bgrad( o, out, target, grad ); } \
   static inline bl_t badapt_loss_p_defines_bgrad( const badapt_loss_s* __p ) { return true; } \
   static inline bl_t badapt_loss_a_defines_bgrad( const badapt_loss* o ) { return true; }
-
-//----------------------------------------------------------------------------------------------------------------------
-// group: badapt_error
-
-#define TYPEOF_badapt_error 894487686
-#define TYPEOF_badapt_error_s 2088101944
-#define BETH_EXPAND_GROUP_badapt_error \
-  BCORE_FORWARD_OBJECT( badapt_error ); \
-  typedef f3_t (*badapt_error_err)( const badapt_error* o, const bmath_vf3_s* out, const bmath_vf3_s* target ); \
-  typedef f3_t (*badapt_error_err_f3)( const badapt_error* o, f3_t out, f3_t target ); \
-  typedef void (*badapt_error_bgrad)( const badapt_error* o, const bmath_vf3_s* out, const bmath_vf3_s* target, bmath_vf3_s* grad ); \
-  BCORE_DECLARE_SPECT( badapt_error ) \
-  { \
-      bcore_spect_header_s header; \
-      badapt_error_err err; \
-      badapt_error_err_f3 err_f3; \
-      badapt_error_bgrad bgrad; \
-  }; \
-  static inline f3_t badapt_error_p_err( const badapt_error_s* __p, const badapt_error* o, const bmath_vf3_s* out, const bmath_vf3_s* target ) { return __p->err( o, out, target ); } \
-  static inline f3_t badapt_error_a_err( const badapt_error* o, const bmath_vf3_s* out, const bmath_vf3_s* target ) { return badapt_error_s_get_aware( o )->err( o, out, target ); } \
-  static inline bl_t badapt_error_p_defines_err( const badapt_error_s* __p ) { return true; } \
-  static inline bl_t badapt_error_a_defines_err( const badapt_error* o ) { return true; } \
-  static inline f3_t badapt_error_p_err_f3( const badapt_error_s* __p, const badapt_error* o, f3_t out, f3_t target ) { return __p->err_f3( o, out, target ); } \
-  static inline f3_t badapt_error_a_err_f3( const badapt_error* o, f3_t out, f3_t target ) { return badapt_error_s_get_aware( o )->err_f3( o, out, target ); } \
-  static inline bl_t badapt_error_p_defines_err_f3( const badapt_error_s* __p ) { return true; } \
-  static inline bl_t badapt_error_a_defines_err_f3( const badapt_error* o ) { return true; } \
-  static inline void badapt_error_p_bgrad( const badapt_error_s* __p, const badapt_error* o, const bmath_vf3_s* out, const bmath_vf3_s* target, bmath_vf3_s* grad ) { __p->bgrad( o, out, target, grad ); } \
-  static inline void badapt_error_a_bgrad( const badapt_error* o, const bmath_vf3_s* out, const bmath_vf3_s* target, bmath_vf3_s* grad ) { badapt_error_s_get_aware( o )->bgrad( o, out, target, grad ); } \
-  static inline bl_t badapt_error_p_defines_bgrad( const badapt_error_s* __p ) { return true; } \
-  static inline bl_t badapt_error_a_defines_bgrad( const badapt_error* o ) { return true; }
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: badapt_adaptive
@@ -126,6 +100,10 @@
       badapt_adaptive_adapt_loss adapt_loss; \
       badapt_adaptive_adapt_loss_f3 adapt_loss_f3; \
   }; \
+  static inline badapt_adaptive* badapt_adaptive_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_badapt_adaptive, t ); return ( badapt_adaptive* )bcore_inst_t_create( t ); } \
+  static inline badapt_adaptive* badapt_adaptive_a_clone( const badapt_adaptive* o ) { return ( badapt_adaptive* )bcore_inst_a_clone( ( bcore_inst* )o ); } \
+  static inline void badapt_adaptive_a_discard( badapt_adaptive* o ) { bcore_inst_a_discard( ( bcore_inst* )o ); } \
+  static inline void badapt_adaptive_a_replicate( badapt_adaptive** o, const badapt_adaptive* src ) { bcore_inst_a_replicate( ( bcore_inst** )o, ( bcore_inst* )src ); } \
   static inline void badapt_adaptive_a_reset( badapt_adaptive* o ) { badapt_adaptive_s_get_aware( o )->reset( o ); } \
   static inline bl_t badapt_adaptive_a_defines_reset( const badapt_adaptive* o ) { return true; } \
   static inline void badapt_adaptive_a_setup( badapt_adaptive* o ) { badapt_adaptive_s_get_aware( o )->setup( o ); } \
@@ -186,6 +164,10 @@
       badapt_activation_fx fx; \
       badapt_activation_dy dy; \
   }; \
+  static inline badapt_activation* badapt_activation_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_badapt_activation, t ); return ( badapt_activation* )bcore_inst_t_create( t ); } \
+  static inline badapt_activation* badapt_activation_a_clone( const badapt_activation* o ) { return ( badapt_activation* )bcore_inst_a_clone( ( bcore_inst* )o ); } \
+  static inline void badapt_activation_a_discard( badapt_activation* o ) { bcore_inst_a_discard( ( bcore_inst* )o ); } \
+  static inline void badapt_activation_a_replicate( badapt_activation** o, const badapt_activation* src ) { bcore_inst_a_replicate( ( bcore_inst** )o, ( bcore_inst* )src ); } \
   static inline f3_t badapt_activation_p_fx( const badapt_activation_s* __p, const badapt_activation* o, f3_t x ) { return __p->fx( o, x ); } \
   static inline f3_t badapt_activation_a_fx( const badapt_activation* o, f3_t x ) { return badapt_activation_s_get_aware( o )->fx( o, x ); } \
   static inline bl_t badapt_activation_p_defines_fx( const badapt_activation_s* __p ) { return true; } \
@@ -224,6 +206,10 @@
       badapt_activator_bgrad bgrad; \
       badapt_activator_adapt adapt; \
   }; \
+  static inline badapt_activator* badapt_activator_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_badapt_activator, t ); return ( badapt_activator* )bcore_inst_t_create( t ); } \
+  static inline badapt_activator* badapt_activator_a_clone( const badapt_activator* o ) { return ( badapt_activator* )bcore_inst_a_clone( ( bcore_inst* )o ); } \
+  static inline void badapt_activator_a_discard( badapt_activator* o ) { bcore_inst_a_discard( ( bcore_inst* )o ); } \
+  static inline void badapt_activator_a_replicate( badapt_activator** o, const badapt_activator* src ) { bcore_inst_a_replicate( ( bcore_inst** )o, ( bcore_inst* )src ); } \
   static inline void badapt_activator_a_reset( badapt_activator* o ) { badapt_activator_s_get_aware( o )->reset( o ); } \
   static inline bl_t badapt_activator_a_defines_reset( const badapt_activator* o ) { return true; } \
   static inline void badapt_activator_a_setup( badapt_activator* o ) { badapt_activator_s_get_aware( o )->setup( o ); } \
@@ -429,6 +415,10 @@
       badapt_supplier_fetch_batch_data fetch_batch_data; \
       badapt_supplier_fetch_valid_data fetch_valid_data; \
   }; \
+  static inline badapt_supplier* badapt_supplier_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_badapt_supplier, t ); return ( badapt_supplier* )bcore_inst_t_create( t ); } \
+  static inline badapt_supplier* badapt_supplier_a_clone( const badapt_supplier* o ) { return ( badapt_supplier* )bcore_inst_a_clone( ( bcore_inst* )o ); } \
+  static inline void badapt_supplier_a_discard( badapt_supplier* o ) { bcore_inst_a_discard( ( bcore_inst* )o ); } \
+  static inline void badapt_supplier_a_replicate( badapt_supplier** o, const badapt_supplier* src ) { bcore_inst_a_replicate( ( bcore_inst** )o, ( bcore_inst* )src ); } \
   static inline void badapt_supplier_p_fetch_batch_sample( const badapt_supplier_s* __p, badapt_supplier* o, badapt_sample_s* dst ) { __p->fetch_batch_sample( o, dst ); } \
   static inline void badapt_supplier_a_fetch_batch_sample( badapt_supplier* o, badapt_sample_s* dst ) { badapt_supplier_s_get_aware( o )->fetch_batch_sample( o, dst ); } \
   static inline bl_t badapt_supplier_p_defines_fetch_batch_sample( const badapt_supplier_s* __p ) { return true; } \

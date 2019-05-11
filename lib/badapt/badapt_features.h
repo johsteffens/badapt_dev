@@ -31,16 +31,6 @@ BETH_PRECODE( badapt_loss )
 
 /**********************************************************************************************************************/
 
-/// error function
-BETH_PRECODE( badapt_error )
-#ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    feature strict 'pa' f3_t err(    const, const bmath_vf3_s* out, const bmath_vf3_s* target );                    // error function
-    feature strict 'pa' f3_t err_f3( const, f3_t               out, f3_t               target );                    // error function on scalars
-    feature strict 'pa' void bgrad(  const, const bmath_vf3_s* out, const bmath_vf3_s* target, bmath_vf3_s* grad ); // computes error minimizing backward gradient of x
-#endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-/**********************************************************************************************************************/
-
 BETH_PRECODE( badapt_adaptive )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

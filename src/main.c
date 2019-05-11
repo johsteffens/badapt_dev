@@ -24,6 +24,19 @@ void activator_test( void )
     BCORE_LIFE_DOWN();
 }
 
+void virtual_test( void )
+{
+    badapt_activation* o1 = badapt_activation_t_create( TYPEOF_badapt_activation_leaky_relu_s );
+    badapt_activation* o2 = badapt_activation_a_clone ( o1 );
+    badapt_activation_a_replicate( &o2, o1 );
+
+    bcore_txt_ml_a_to_stdout( o1 );
+    bcore_txt_ml_a_to_stdout( o2 );
+
+    badapt_activation_a_discard( o1 );
+    badapt_activation_a_discard( o2 );
+}
+
 int main( void )
 {
     bcore_register_signal_handler( bmath_signal_handler );
@@ -31,8 +44,8 @@ int main( void )
     if( bcore_precoder_run_globally() ) { bcore_down( true ); return 0; }
 
     //activator_test();
+    //virtual_test();
     //return 0;
-
 
     CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
     CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "bmath_adaptive_mlp" ), NULL ) );

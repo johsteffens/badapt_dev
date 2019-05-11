@@ -29,17 +29,6 @@ BCORE_DEFINE_SPECT( bcore_inst, badapt_loss )
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: badapt_error
-
-BCORE_DEFINE_SPECT( bcore_inst, badapt_error )
-"{"
-    "bcore_spect_header_s header;"
-    "feature strict aware badapt_error : err;"
-    "feature strict aware badapt_error : err_f3;"
-    "feature strict aware badapt_error : bgrad;"
-"}";
-
-//----------------------------------------------------------------------------------------------------------------------
 // group: badapt_adaptive
 
 BCORE_DEFINE_SPECT( bcore_inst, badapt_adaptive )
@@ -301,15 +290,11 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 3873864417 ) );
+            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 4257973299 ) );
             BCORE_REGISTER_FEATURE( badapt_loss_loss );
             BCORE_REGISTER_FEATURE( badapt_loss_loss_f3 );
             BCORE_REGISTER_FEATURE( badapt_loss_bgrad );
             BCORE_REGISTER_SPECT( badapt_loss );
-            BCORE_REGISTER_FEATURE( badapt_error_err );
-            BCORE_REGISTER_FEATURE( badapt_error_err_f3 );
-            BCORE_REGISTER_FEATURE( badapt_error_bgrad );
-            BCORE_REGISTER_SPECT( badapt_error );
             BCORE_REGISTER_FEATURE( badapt_adaptive_reset );
             BCORE_REGISTER_FEATURE( badapt_adaptive_setup );
             BCORE_REGISTER_FEATURE( badapt_adaptive_get_in_size );

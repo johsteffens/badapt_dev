@@ -76,16 +76,11 @@ void badapt_arr_activator_s_setup_from_arr_layer_activator( badapt_arr_activator
         {
             for( sz_t j = last_layer + 1; j < layer; j++ )
             {
-                if( layers + j < o->arr_size )
-                {
-                    bcore_inst_a_discard( o->arr_data[ layers + j ] );
-                    o->arr_data[ layers + j ] = bcore_inst_a_clone( ( bcore_inst* )o->arr_data[ last_layer ] );
-                }
+                if( layers + j < o->arr_size ) badapt_activator_a_replicate( &o->arr_data[ layers + j ], o->arr_data[ last_layer < 0 ? layers + last_layer : last_layer ] );
             }
             if( layers + layer < o->arr_size )
             {
-                bcore_inst_a_discard( o->arr_data[ layers + layer ] );
-                o->arr_data[ layers + layer ] = bcore_inst_a_clone( ( bcore_inst* )activator );
+                badapt_activator_a_replicate( &o->arr_data[ layers + layer ], activator );
                 last_layer = layer;
             }
         }
@@ -93,16 +88,11 @@ void badapt_arr_activator_s_setup_from_arr_layer_activator( badapt_arr_activator
         {
             for( sz_t j = last_layer + 1; j < layer; j++ )
             {
-                if( j < o->arr_size )
-                {
-                    bcore_inst_a_discard( o->arr_data[ j ] );
-                    o->arr_data[ j ] = bcore_inst_a_clone( ( bcore_inst* )o->arr_data[ last_layer ] );
-                }
+                if( j < o->arr_size )  badapt_activator_a_replicate( &o->arr_data[ j ], o->arr_data[ last_layer < 0 ? layers + last_layer : last_layer ] );
             }
             if( layer < o->arr_size )
             {
-                bcore_inst_a_discard( o->arr_data[ layer ] );
-                o->arr_data[ layer ] = bcore_inst_a_clone( ( bcore_inst* )activator );
+                badapt_activator_a_replicate( &o->arr_data[ layer ], activator );
                 last_layer = layer;
             }
         }
@@ -113,7 +103,7 @@ void badapt_arr_activator_s_setup_from_arr_layer_activator( badapt_arr_activator
     {
         if( !o->arr_data[ i ] && ( i > 0 ) )
         {
-            o->arr_data[ i ] = bcore_inst_a_clone( ( bcore_inst* )o->arr_data[ i - 1 ] );
+            o->arr_data[ i ] = badapt_activator_a_clone( o->arr_data[ i - 1 ] );
         }
 
         if( !o->arr_data[ i ] ) ERR_fa( "Layer #<sz_t> could not be initialized.", i );
@@ -127,8 +117,7 @@ void badapt_arr_activator_s_setup_from_arr_layer_activator( badapt_arr_activator
 badapt_activator_plain_s* badapt_activator_plain_s_create_activation( const badapt_activation* activation )
 {
     badapt_activator_plain_s* o = badapt_activator_plain_s_create();
-    bcore_inst_a_discard( ( bcore_inst* )o->activation );
-    o->activation = bcore_inst_a_clone( ( bcore_inst* )activation );
+    badapt_activation_a_replicate( &o->activation, activation );
     return o;
 }
 
@@ -182,8 +171,7 @@ const badapt_activation* badapt_activator_plain_s_get_activation( const badapt_a
 
 void badapt_activator_plain_s_set_activation( badapt_activator_plain_s* o, const badapt_activation* activation )
 {
-    bcore_inst_a_discard( ( bcore_inst* )o->activation );
-    o->activation = bcore_inst_a_clone( ( bcore_inst* )activation );
+    badapt_activation_a_replicate( &o->activation, activation );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -258,8 +246,7 @@ const badapt_activation* badapt_activator_bias_s_get_activation( const badapt_ac
 
 void badapt_activator_bias_s_set_activation( badapt_activator_bias_s* o, const badapt_activation* activation )
 {
-    bcore_inst_a_discard( (bcore_inst*)o->activation );
-    o->activation = bcore_inst_a_clone( ( bcore_inst* ) activation );
+    badapt_activation_a_replicate( &o->activation, activation );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
