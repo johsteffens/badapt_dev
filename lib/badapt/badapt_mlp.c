@@ -18,6 +18,8 @@
 #include "bmath_plot.h"
 #include "badapt_mlp.h"
 #include "badapt_test.h"
+#include "badapt_training.h"
+#include "badapt_problem.h"
 
 /**********************************************************************************************************************/
 
@@ -460,7 +462,7 @@ void badapt_mlp_s_decay( badapt_mlp_s* o, f3_t decay )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void selftest()
+void badapt_mlp_s_test_sine_random()
 {
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_mlp_s, mlp );
@@ -469,6 +471,7 @@ static void selftest()
     mlp->layers = 8;
     mlp->kernels_rate = 0;
     mlp->random_state = 124;
+    mlp->epsilon_rate = 0.0001;
 
     badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_leaky_relu_s );
     badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_tanh_s );
@@ -479,6 +482,148 @@ static void selftest()
 
     BCORE_LIFE_RETURN();
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_mlp_s_test_binary_add()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_mlp_s, mlp );
+
+    mlp->input_kernels = 32;
+    mlp->layers        = 6;
+    mlp->kernels_rate  = -0.1;
+    mlp->random_state  = 124;
+    mlp->epsilon_rate  = 0.00005;
+    mlp->lambda_l1     = 0.0001;
+
+    BCORE_LIFE_CREATE( badapt_problem_binary_add_s, problem );
+    problem->bits = 8;
+
+    BCORE_LIFE_CREATE( badapt_trainer_s, trainer );
+
+    trainer->fetch_cycles_per_iteration = 30;
+    trainer->max_iterations = 100;
+
+
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_leaky_relu_s );
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_tanh_s );
+
+    badapt_mlp_s_setup( mlp );
+
+    badapt_mlp_s_arc_to_sink( mlp, BCORE_STDOUT );
+
+    BCORE_LIFE_CREATE( badapt_trainer_state_s, state );
+    badapt_adaptive_a_replicate( &state->adaptive, ( badapt_adaptive* )mlp );
+
+    badapt_supplier_a_replicate( &state->supplier, ( badapt_supplier* ) problem );
+
+    BCORE_LIFE_CREATE( badapt_training_guide_std_s, guide );
+//    guide->annealing_factor = 0.99;
+    badapt_training_guide_a_replicate( &state->guide, ( badapt_training_guide* )guide );
+
+    state->log = bcore_inst_a_clone( ( bcore_inst* )BCORE_STDOUT );
+
+    badapt_trainer_s_run( trainer, state );
+
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_mlp_s_test_binary_mul()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_mlp_s, mlp );
+
+    mlp->input_kernels = 32;
+    mlp->layers        = 6;
+    mlp->kernels_rate  = 0.1;
+    mlp->random_state  = 124;
+    mlp->epsilon_rate  = 0.0001;
+    mlp->lambda_l1     = 0.001;
+
+    BCORE_LIFE_CREATE( badapt_problem_binary_mul_s, problem );
+    problem->bits = 5;
+
+    BCORE_LIFE_CREATE( badapt_trainer_s, trainer );
+
+    trainer->fetch_cycles_per_iteration = 30;
+    trainer->max_iterations = 100;
+
+
+    /// Note: To solve the multiplyier a bias seems inhibiting (for addition it seems supportive)
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_leaky_relu_s );
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_tanh_s );
+
+    badapt_mlp_s_setup( mlp );
+
+    badapt_mlp_s_arc_to_sink( mlp, BCORE_STDOUT );
+
+    BCORE_LIFE_CREATE( badapt_trainer_state_s, state );
+    badapt_adaptive_a_replicate( &state->adaptive, ( badapt_adaptive* )mlp );
+
+    badapt_supplier_a_replicate( &state->supplier, ( badapt_supplier* ) problem );
+
+    BCORE_LIFE_CREATE( badapt_training_guide_std_s, guide );
+//    guide->annealing_factor = 0.99;
+    badapt_training_guide_a_replicate( &state->guide, ( badapt_training_guide* )guide );
+
+    state->log = bcore_inst_a_clone( ( bcore_inst* )BCORE_STDOUT );
+
+    badapt_trainer_s_run( trainer, state );
+
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_mlp_s_test_binary_xsg3()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_mlp_s, mlp );
+
+    mlp->input_kernels = 30;
+    mlp->layers        = 2;
+    mlp->kernels_rate  = 0;
+    mlp->random_state  = 124;
+    mlp->epsilon_rate  = 0.0001;
+    mlp->lambda_l1     = 0.001;
+
+    BCORE_LIFE_CREATE( badapt_problem_binary_xsg3_s, problem );
+
+    /// xsg3 <= 17 bits is learned very easily with 2 layers, while 18 bits seems extremely difficult for any configurations
+    problem->bits = 17;
+
+    BCORE_LIFE_CREATE( badapt_trainer_s, trainer );
+
+    trainer->fetch_cycles_per_iteration = 30;
+    trainer->max_iterations = 100;
+
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_leaky_relu_s );
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_tanh_s );
+
+    badapt_mlp_s_setup( mlp );
+
+    badapt_mlp_s_arc_to_sink( mlp, BCORE_STDOUT );
+
+    BCORE_LIFE_CREATE( badapt_trainer_state_s, state );
+    badapt_adaptive_a_replicate( &state->adaptive, ( badapt_adaptive* )mlp );
+
+    badapt_supplier_a_replicate( &state->supplier, ( badapt_supplier* ) problem );
+
+    BCORE_LIFE_CREATE( badapt_training_guide_std_s, guide );
+//    guide->annealing_factor = 0.99;
+    badapt_training_guide_a_replicate( &state->guide, ( badapt_training_guide* )guide );
+
+    state->log = bcore_inst_a_clone( ( bcore_inst* )BCORE_STDOUT );
+
+    badapt_trainer_s_run( trainer, state );
+
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 #endif
 
@@ -497,7 +642,7 @@ vd_t badapt_mlp_signal_handler( const bcore_signal_s* o )
 
         case TYPEOF_selftest:
         {
-            selftest();
+            badapt_mlp_s_test_sine_random();
         }
         break;
 

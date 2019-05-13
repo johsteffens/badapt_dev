@@ -24,7 +24,7 @@
 
 /// activation function
 BETH_PRECODE( badapt_activation_objects )
-#ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef BETH_PRECODE_SECTION
 
 self badapt_activation_tanh_s = badapt_activation
 {
@@ -54,13 +54,13 @@ self badapt_activation_softplus_s = badapt_activation
     func badapt_activation : dy;
 };
 
-#endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#endif // BETH_PRECODE_SECTION
 
 /**********************************************************************************************************************/
 
 /// activation function
 BETH_PRECODE( badapt_activator_objects )
-#ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef BETH_PRECODE_SECTION
 
 /// specifies which activator is used for which layer; negative layer number means relative to last layer + 1
 self badapt_layer_activator_s = bcore_inst
@@ -109,7 +109,7 @@ self badapt_activator_bias_s = badapt_activator
     func badapt_activator : get_activation;
 };
 
-#endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#endif // BETH_PRECODE_SECTION
 
 badapt_activator* badapt_activator_create_from_types( tp_t tp_activator, tp_t tp_activation );
 badapt_layer_activator_s* badapt_layer_activator_s_create_from_types( sz_t layer, tp_t tp_activator, tp_t tp_activation );

@@ -17,6 +17,7 @@
 #include "badapt_precoded.h"
 #include "badapt_features.h"
 #include "badapt_test.h"
+#include "badapt_problem.h"
 #include "badapt_activator.h"
 #include "badapt_loss.h"
 #include "badapt_mlp.h"
@@ -41,6 +42,7 @@ vd_t badapt_signal_handler( const bcore_signal_s* o )
             badapt_precoded_signal_handler,
             badapt_features_signal_handler,
             badapt_test_signal_handler,
+            badapt_problem_signal_handler,
             badapt_activator_signal_handler,
             badapt_loss_signal_handler,
             badapt_mlp_signal_handler,

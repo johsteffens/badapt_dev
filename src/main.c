@@ -47,8 +47,12 @@ int main( void )
     //virtual_test();
     //return 0;
 
-    CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
-    CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "bmath_adaptive_mlp" ), NULL ) );
+//    badapt_mlp_s_test_sine_random();
+//    badapt_mlp_s_test_binary_add();
+//    badapt_mlp_s_test_binary_mul();
+    badapt_mlp_s_test_binary_xsg3();
+    //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
+    //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "bmath_adaptive_mlp" ), NULL ) );
 
     //snn_selftest2();
     bcore_down( true );

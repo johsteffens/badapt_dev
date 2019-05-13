@@ -92,6 +92,11 @@ self badapt_mlp_s = badapt_adaptive
 
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+void badapt_mlp_s_test_sine_random();
+void badapt_mlp_s_test_binary_add();
+void badapt_mlp_s_test_binary_mul();
+void badapt_mlp_s_test_binary_xsg3();
+
 /**********************************************************************************************************************/
 
 vd_t badapt_mlp_signal_handler( const bcore_signal_s* o );

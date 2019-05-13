@@ -15,6 +15,8 @@
 
 #include "badapt_test.h"
 #include "badapt_loss.h"
+#include "badapt_training.h"
+#include "badapt_problem.h"
 
 /**********************************************************************************************************************/
 
@@ -24,118 +26,47 @@ void badapt_adaptive_a_test_sine_random( const badapt_adaptive* const_o )
 {
     BCORE_LIFE_INIT();
 
-    badapt_adaptive* o = BCORE_LIFE_A_PUSH( bcore_inst_a_clone( ( bcore_inst* )const_o ) );
-    badapt_adaptive_a_set_in_size(  o, 32 );
-    badapt_adaptive_a_set_out_size( o, 1 );
-    badapt_adaptive_a_reset( o );
-    badapt_adaptive_a_setup( o );
-    badapt_adaptive_a_arc_to_sink( o, BCORE_STDOUT );
+    BCORE_LIFE_CREATE( badapt_trainer_s, trainer );
 
-    badapt_loss* loss = BCORE_LIFE_A_PUSH( badapt_loss_l2_s_create() );
+    BCORE_LIFE_CREATE( badapt_trainer_state_s, state );
+    badapt_adaptive_a_replicate( &state->adaptive, const_o );
 
-    // Learn differentiating between a sine wave of arbitrary amplitude and frequency from
-    // a random walk curve.
-    BCORE_LIFE_CREATE( bcore_arr_sr_s, pos_set_trn );
-    BCORE_LIFE_CREATE( bcore_arr_sr_s, neg_set_trn );
-    BCORE_LIFE_CREATE( bcore_arr_sr_s, pos_set_tst );
-    BCORE_LIFE_CREATE( bcore_arr_sr_s, neg_set_tst );
+    BCORE_LIFE_CREATE( badapt_problem_sine_random_s, problem );
+    badapt_supplier_a_replicate( &state->supplier, ( badapt_supplier* ) problem );
 
-    sz_t samples = 10000;
-    u2_t rval = 123;
-    for( sz_t i = 0; i < samples * 2; i++ )
-    {
-        sz_t input_size = badapt_adaptive_a_get_in_size( o );
-        bmath_vf3_s* pos_vec = bmath_vf3_s_create();
-        bmath_vf3_s* neg_vec = bmath_vf3_s_create();
-        bmath_vf3_s_set_size( pos_vec, input_size );
-        bmath_vf3_s_set_size( neg_vec, input_size );
+    state->log = bcore_inst_a_clone( ( bcore_inst* )BCORE_STDOUT );
 
-        f3_t omega = 1.0 * f3_pi() * f3_rnd_pos( &rval );
-        f3_t amplitude = 4.0 * f3_rnd_pos( &rval );
-
-        f3_t rwalker = f3_rnd_sym( &rval );
-
-        for( sz_t i = 0; i < input_size; i++ )
-        {
-            rwalker += f3_rnd_sym( &rval );
-            f3_t vp = sin( omega * i ) * amplitude;
-            f3_t vr = rwalker;
-            f3_t vn = vr;
-
-            pos_vec->data[ i ] = vp;
-            neg_vec->data[ i ] = vn;
-        }
-
-        if( ( i & 1 ) == 0 )
-        {
-            bcore_arr_sr_s_push_sr( pos_set_trn, sr_asd( pos_vec ) );
-            bcore_arr_sr_s_push_sr( neg_set_trn, sr_asd( neg_vec ) );
-        }
-        else
-        {
-            bcore_arr_sr_s_push_sr( pos_set_tst, sr_asd( pos_vec ) );
-            bcore_arr_sr_s_push_sr( neg_set_tst, sr_asd( neg_vec ) );
-        }
-    }
-
-    sz_t epochs = 30;
-    f3_t learn_rate = 1.0;
-    f3_t lambda_l2  = 0.0001;
-    f3_t pos_tgt    = 0.9;
-    f3_t neg_tgt    = -pos_tgt;
-
-    badapt_adaptive_a_set_rate( o, learn_rate );
-    badapt_adaptive_a_set_lambda_l2( o, lambda_l2 );
-
-    for( sz_t i = 0; i < epochs; i++ )
-    {
-        f3_t err = 0;
-        for( sz_t j = 0; j < samples; j++ )
-        {
-            const bmath_vf3_s* pos_vec = pos_set_trn->data[ j ].o;
-            const bmath_vf3_s* neg_vec = neg_set_trn->data[ j ].o;
-            f3_t pos_est = badapt_adaptive_a_adapt_loss_f3( o, loss, pos_vec, pos_tgt );
-            f3_t neg_est = badapt_adaptive_a_adapt_loss_f3( o, loss, neg_vec, neg_tgt );
-            err += badapt_loss_a_loss_f3( loss, pos_est, pos_tgt );
-            err += badapt_loss_a_loss_f3( loss, neg_est, neg_tgt );
-        }
-
-        err = f3_srt( err / ( samples * 2 ) );
-        bcore_msg_fa( "#pl6 {#<sz_t>}: err = #<f3_t>\n", i, err );
-    }
-
-    bcore_sink_buffer_s* sink_buf = BCORE_LIFE_A_PUSH( bcore_sink_buffer_s_create() );
-    bcore_source_buffer_s* source_buf = BCORE_LIFE_A_PUSH( bcore_source_buffer_s_create() );
-    bcore_bin_ml_a_to_sink( o, ( bcore_sink* )sink_buf );
-
-    source_buf->data = sink_buf->data;
-    source_buf->size = sink_buf->size;
-
-    badapt_adaptive* o_tst = BCORE_LIFE_A_PUSH( bcore_inst_t_create( *( aware_t* )o ) );
-    bcore_bin_ml_a_from_source( o_tst, ( bcore_source* )source_buf );
-    badapt_adaptive_a_setup( o_tst );
-
-    {
-        f3_t err = 0;
-        for( sz_t j = 0; j < samples; j++ )
-        {
-            const bmath_vf3_s* pos_vec = pos_set_tst->data[ j ].o;
-            const bmath_vf3_s* neg_vec = neg_set_tst->data[ j ].o;
-            f3_t pos_est = badapt_adaptive_a_infer_f3( o_tst, pos_vec );
-            f3_t neg_est = badapt_adaptive_a_infer_f3( o_tst, neg_vec );
-
-            err += badapt_loss_a_loss_f3( loss, pos_est, pos_tgt );
-            err += badapt_loss_a_loss_f3( loss, neg_est, neg_tgt );
-        }
-
-        err = f3_srt( err / ( samples * 2 ) );
-
-        bcore_msg_fa( "tst_err = #<f3_t>\n", err );
-    }
+    badapt_trainer_s_run( trainer, state );
 
     BCORE_LIFE_RETURN();
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_adaptive_a_test_binary_add( const badapt_adaptive* const_o )
+{
+    BCORE_LIFE_INIT();
+
+    BCORE_LIFE_CREATE( badapt_trainer_s, trainer );
+
+    BCORE_LIFE_CREATE( badapt_trainer_state_s, state );
+    badapt_adaptive_a_replicate( &state->adaptive, const_o );
+
+    BCORE_LIFE_CREATE( badapt_problem_binary_add_s, problem );
+    badapt_supplier_a_replicate( &state->supplier, ( badapt_supplier* ) problem );
+
+    BCORE_LIFE_CREATE( badapt_training_guide_std_s, guide );
+    guide->annealing_factor = 0.99;
+    badapt_training_guide_a_replicate( &state->guide, ( badapt_training_guide* )guide );
+
+    state->log = bcore_inst_a_clone( ( bcore_inst* )BCORE_STDOUT );
+
+    badapt_trainer_s_run( trainer, state );
+
+    BCORE_LIFE_RETURN();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 

@@ -23,16 +23,16 @@
 
 /// loss function
 BETH_PRECODE( badapt_loss )
-#ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef BETH_PRECODE_SECTION
     feature strict 'pa' f3_t loss(    const, const bmath_vf3_s* out, const bmath_vf3_s* target );                    // loss function
     feature strict 'pa' f3_t loss_f3( const, f3_t               out, f3_t               target );                    // loss function on scalars
     feature strict 'pa' void bgrad(   const, const bmath_vf3_s* out, const bmath_vf3_s* target, bmath_vf3_s* grad ); // computes loss minimizing backward gradient of x
-#endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#endif // BETH_PRECODE_SECTION
 
 /**********************************************************************************************************************/
 
 BETH_PRECODE( badapt_adaptive )
-#ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef BETH_PRECODE_SECTION
 
     // ===== required features =====
 
@@ -86,22 +86,22 @@ BETH_PRECODE( badapt_adaptive )
     feature 'a' void adapt_loss(    mutable, const badapt_loss* loss, const bmath_vf3_s* in, const bmath_vf3_s* target, bmath_vf3_s* out ) = adapt_loss_fallback;
     feature 'a' f3_t adapt_loss_f3( mutable, const badapt_loss* loss, const bmath_vf3_s* in, f3_t target )                                 = adapt_loss_f3_fallback;
 
-#endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#endif // BETH_PRECODE_SECTION
 
 /**********************************************************************************************************************/
 
 /// activation function
 BETH_PRECODE( badapt_activation )
-#ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef BETH_PRECODE_SECTION
     feature strict 'pa' f3_t fx( const, f3_t x ); // y  = f( x )
     feature strict 'pa' f3_t dy( const, f3_t y ); // dy = d( y ) (derivative applied on y)
-#endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#endif // BETH_PRECODE_SECTION
 
 /**********************************************************************************************************************/
 
 /// activator: (adaptive) activation applied to a vector
 BETH_PRECODE( badapt_activator )
-#ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef BETH_PRECODE_SECTION
 
     /// resets trainable components with given seed
     feature strict 'a' void reset( mutable );
@@ -128,7 +128,7 @@ BETH_PRECODE( badapt_activator )
     /// grad_in and grad_out may refer to the same object
     feature strict 'a' void adapt( mutable, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out, f3_t step );
 
-#endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#endif // BETH_PRECODE_SECTION
 
 /**********************************************************************************************************************/
 
