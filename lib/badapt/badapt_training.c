@@ -47,7 +47,7 @@ bl_t badapt_training_guide_std_s_callback( const badapt_training_guide_std_s* o,
 {
     if( state->log )
     {
-        bcore_sink_a_pushf( state->log, "% 6zi: err%8.3g|bias %8.3g|prog %8.3g|rate %8.3g\n", state->iteration, state->error, state->bias, state->progress, state->rate );
+        bcore_sink_a_pushf( state->log, "% 6zi: err%6.3f|progress %6.3f|bias %6.3f|rate %5.3f\n", state->iteration, state->error, state->progress, state->bias, state->rate );
     }
 
     state->rate *= o->annealing_factor;

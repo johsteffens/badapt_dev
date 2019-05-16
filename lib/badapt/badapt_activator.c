@@ -58,6 +58,17 @@ void badapt_arr_layer_activator_s_push_from_types( badapt_arr_layer_activator_s*
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void badapt_arr_layer_activator_s_push_from_names( badapt_arr_layer_activator_s* o, sz_t layer, sc_t activator, sc_t activation )
+{
+    BCORE_LIFE_INIT();
+    tp_t tp_activator  = typeof( ( ( st_s* )BCORE_LIFE_A_PUSH( st_s_create_fa( "badapt_activator_#<sc_t>_s", activator   ) ) )->sc );
+    tp_t tp_activation = typeof( ( ( st_s* )BCORE_LIFE_A_PUSH( st_s_create_fa( "badapt_activation_#<sc_t>_s", activation ) ) )->sc );
+    badapt_arr_layer_activator_s_push_from_types( o, layer, tp_activator, tp_activation );
+    BCORE_LIFE_DOWN();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void badapt_arr_activator_s_setup_from_arr_layer_activator( badapt_arr_activator_s* o, const badapt_arr_layer_activator_s* arg_arr, sz_t layers )
 {
     BCORE_LIFE_INIT();
@@ -110,6 +121,28 @@ void badapt_arr_activator_s_setup_from_arr_layer_activator( badapt_arr_activator
     }
 
     BCORE_LIFE_DOWN();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const badapt_activator* badapt_arr_layer_activator_s_get_activator( const badapt_arr_layer_activator_s* o, sz_t index, sz_t layers )
+{
+    sz_t best_layer_index = -1;
+    sz_t best_arr_index = -1;
+    for( sz_t i = 0; i < o->arr_size; i++ )
+    {
+        const badapt_layer_activator_s* layer_activator = &o->arr_data[ i ];
+        sz_t layer_index = layer_activator->layer < 0 ? layers + layer_activator->layer : layer_activator->layer;
+        if( index >= layer_index && layer_index > best_layer_index )
+        {
+            best_layer_index = layer_index;
+            best_arr_index = i;
+        }
+    }
+
+    if( best_arr_index == -1 ) ERR_fa( "No activator found for index '#<sz_t>' of '#<sz_t>' layers.", index, layers );
+
+    return o->arr_data[ best_arr_index ].activator;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

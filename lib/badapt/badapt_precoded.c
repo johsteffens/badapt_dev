@@ -83,9 +83,18 @@ BCORE_DEFINE_SPECT( bcore_inst, badapt_activator )
     "feature strict aware badapt_activator : adapt;"
 "}";
 
-/**********************************************************************************************************************/
-// source: badapt_test
-#include "badapt_test.h"
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_builder
+
+BCORE_DEFINE_SPECT( bcore_inst, badapt_builder )
+"{"
+    "bcore_spect_header_s header;"
+    "feature strict aware badapt_builder : get_in_size;"
+    "feature strict aware badapt_builder : set_in_size;"
+    "feature strict aware badapt_builder : get_out_size;"
+    "feature strict aware badapt_builder : set_out_size;"
+    "feature strict aware badapt_builder : build;"
+"}";
 
 /**********************************************************************************************************************/
 // source: badapt_problem
@@ -260,6 +269,22 @@ BCORE_DEFINE_OBJECT_INST( badapt_loss, badapt_loss_l2_s )
 //----------------------------------------------------------------------------------------------------------------------
 // group: badapt_mlp
 
+BCORE_DEFINE_OBJECT_INST( bcore_inst, badapt_mlp_layer_s )
+"{"
+    "aware_t _;"
+    "sz_t input_size;"
+    "sz_t kernels;"
+    "bmath_mf3_s wgt;"
+    "aware badapt_activator => act;"
+    "hidden bmath_vf3_s out;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST( bcore_array, badapt_mlp_arr_layer_s )
+"{"
+    "aware_t _;"
+    "badapt_mlp_layer_s [] arr;"
+"}";
+
 BCORE_DEFINE_OBJECT_INST( badapt_adaptive, badapt_mlp_s )
 "{"
     "aware_t _;"
@@ -274,14 +299,9 @@ BCORE_DEFINE_OBJECT_INST( badapt_adaptive, badapt_mlp_s )
     "f3_t lambda_l2 = 0;"
     "badapt_arr_layer_activator_s arr_layer_activator;"
     "u2_t random_state = 1234;"
-    "bmath_arr_mf3_s arr_w;"
-    "badapt_arr_activator_s arr_activator;"
+    "badapt_mlp_arr_layer_s arr_layer;"
     "hidden sz_t max_buffer_size;"
-    "hidden bmath_arr_vf3_s arr_a;"
-    "hidden bmath_arr_vf3_s arr_b;"
-    "hidden bmath_vf3_s buf_ab;"
     "hidden bmath_vf3_s in;"
-    "hidden bmath_vf3_s out;"
     "func badapt_adaptive : reset;"
     "func badapt_adaptive : setup;"
     "func badapt_adaptive : get_in_size;"
@@ -391,7 +411,7 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 4199813984 ) );
+            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 790943954 ) );
             BCORE_REGISTER_FEATURE( badapt_loss_loss );
             BCORE_REGISTER_FEATURE( badapt_loss_loss_f3 );
             BCORE_REGISTER_FEATURE( badapt_loss_bgrad );
@@ -434,6 +454,12 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FEATURE( badapt_activator_bgrad );
             BCORE_REGISTER_FEATURE( badapt_activator_adapt );
             BCORE_REGISTER_SPECT( badapt_activator );
+            BCORE_REGISTER_FEATURE( badapt_builder_get_in_size );
+            BCORE_REGISTER_FEATURE( badapt_builder_set_in_size );
+            BCORE_REGISTER_FEATURE( badapt_builder_get_out_size );
+            BCORE_REGISTER_FEATURE( badapt_builder_set_out_size );
+            BCORE_REGISTER_FEATURE( badapt_builder_build );
+            BCORE_REGISTER_SPECT( badapt_builder );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_sine_random_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_sine_random_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_sine_random_s_get_out_size );
@@ -493,6 +519,8 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_loss_loss_f3, badapt_loss_l2_s_loss_f3 );
             BCORE_REGISTER_FFUNC( badapt_loss_bgrad, badapt_loss_l2_s_bgrad );
             BCORE_REGISTER_OBJECT( badapt_loss_l2_s );
+            BCORE_REGISTER_OBJECT( badapt_mlp_layer_s );
+            BCORE_REGISTER_OBJECT( badapt_mlp_arr_layer_s );
             BCORE_REGISTER_FFUNC( badapt_adaptive_reset, badapt_mlp_s_reset );
             BCORE_REGISTER_FFUNC( badapt_adaptive_setup, badapt_mlp_s_setup );
             BCORE_REGISTER_FFUNC( badapt_adaptive_get_in_size, badapt_mlp_s_get_in_size );

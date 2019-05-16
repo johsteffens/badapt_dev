@@ -17,7 +17,6 @@
 #include "bmath_std.h"
 #include "bmath_plot.h"
 #include "badapt_mlp.h"
-#include "badapt_test.h"
 #include "badapt_training.h"
 #include "badapt_problem.h"
 
@@ -106,162 +105,63 @@ void badapt_mlp_s_set_lambda_l2( badapt_mlp_s* o, f3_t val )
 /// Preserves weights if already initialized, otherwise randomly initializes weights
 void badapt_mlp_s_setup( badapt_mlp_s* o )
 {
-    bl_t learning = true;
     ASSERT( o->layers >= 2 );
 
     BCORE_LIFE_INIT();
 
-    typedef struct
+    if( o->layers != o->arr_layer.arr_size )
     {
-        sz_t size;
-        sz_t kernels;
-    } bmath_snn_arc_item_s;
-
-    sc_t bmath_snn_arc_item_s_def =
-    "{"
-        "sz_t size;"
-        "sz_t kernels;"
-    "}";
-
-    tp_t typeof_bmath_snn_arc_item_s = bcore_flect_type_parse_fa( "bmath_snn_arc_item_s = #<sc_t>;", bmath_snn_arc_item_s_def );
-    tp_t typeof_arr_bmath_snn_arc_item_s = bcore_flect_type_parse_fa( "{ aware_t _; bmath_snn_arc_item_s [] arr; };" );
-    bcore_array* arr_bmath_snn_arc_item_s = BCORE_LIFE_A_PUSH( bcore_inst_t_create( typeof_arr_bmath_snn_arc_item_s ) );
-
-    bmath_snn_arc_item_s item = { 0 };
+        badapt_mlp_arr_layer_s_set_size( &o->arr_layer, o->layers );
+    }
 
     f3_t kernels = o->input_kernels;
 
+    const badapt_mlp_layer_s* prev_layer = NULL;
+
     // first layer
     {
-        item.size    = o->input_size;
-        item.kernels = lrint( kernels );
-        bcore_array_a_push( arr_bmath_snn_arc_item_s, sr_twc( typeof_bmath_snn_arc_item_s, &item ) );
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ 0 ];
+        layer->input_size = o->input_size;
+        layer->kernels = lrint( kernels );
+        prev_layer = layer;
     }
 
     for( sz_t i = 1; i < o->layers - 1; i++ )
     {
         kernels *= ( 1.0 + o->kernels_rate );
-        sz_t prev_kernels = item.kernels;
-        item.size         = prev_kernels;
-        item.kernels      = lrint( kernels );
-        ASSERT( item.kernels > 0 );
-        bcore_array_a_push( arr_bmath_snn_arc_item_s, sr_twc( typeof_bmath_snn_arc_item_s, &item ) );
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ i ];
+        layer->input_size = prev_layer->kernels;
+        layer->kernels = lrint( kernels );
+        prev_layer = layer;
     }
 
     // last layer
     {
-        const bmath_snn_arc_item_s* last_item = bcore_array_a_get_last( arr_bmath_snn_arc_item_s ).o;
-        item = *last_item;
-        sz_t prev_kernels = item.kernels;
-        item.size  = prev_kernels;
-        item.kernels = o->output_kernels;
-        bcore_array_a_push( arr_bmath_snn_arc_item_s, sr_twc( typeof_bmath_snn_arc_item_s, &item ) );
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ o->layers - 1 ];
+        layer->input_size = prev_layer->kernels;
+        layer->kernels = o->output_kernels;
     }
 
-    bmath_arr_vf3_s_set_size( &o->arr_a, o->layers );
-    bmath_arr_vf3_s_set_size( &o->arr_b, o->layers );
-
-    // preexisting weights are reused
-    if( o->arr_w.size != o->layers )
-    {
-        bmath_arr_mf3_s_clear( &o->arr_w );
-        bmath_arr_mf3_s_set_size( &o->arr_w, o->layers );
-    }
-
-    sz_t buf_full_size = o->input_size;
     o->max_buffer_size = 0;
-
-    // preexisting activators are reused
-    if( o->arr_activator.arr_size != o->layers )
-    {
-        badapt_arr_activator_s_setup_from_arr_layer_activator( &o->arr_activator, &o->arr_layer_activator, o->layers );
-    }
 
     // set up matrices
     for( sz_t i = 0; i < o->layers; i++ )
     {
-        badapt_activator_a_setup( o->arr_activator.arr_data[ i ] );
-
-        const bmath_snn_arc_item_s* item = bcore_array_a_get( arr_bmath_snn_arc_item_s, i ).o;
-
-        bmath_vf3_s* a  = &o->arr_a.data[ i ];
-        bmath_vf3_s* b  = &o->arr_b.data[ i ];
-        bmath_mf3_s* w  = &o->arr_w.data[ i ];
-
-        a->size   = item->size;
-        a->space  = 0; // not owning data
-        b->size   = item->kernels;
-        b->space  = 0; // not owning data
-
-        if( w->size == 0 )
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ i ];
+        if( layer->wgt.rows != layer->kernels || layer->input_size )
         {
-            bmath_mf3_s_set_size( w, item->kernels, item->size );
-            bmath_mf3_s_set_random( w, false, false, 0, 1.0, -0.5, 0.5, &o->random_state );
-        }
-        else
-        {
-            ASSERT( w->rows == item->kernels );
-            ASSERT( w->cols == item->size );
+            bmath_mf3_s_set_size( &layer->wgt, layer->kernels, layer->input_size );
+            bmath_mf3_s_set_random( &layer->wgt, false, false, 0, 1.0, -0.5, 0.5, &o->random_state );
         }
 
-        buf_full_size += b->size;
-        o->max_buffer_size = sz_max( o->max_buffer_size, a->size );
-        o->max_buffer_size = sz_max( o->max_buffer_size, b->size );
+        if( !layer->act ) layer->act = badapt_activator_a_clone( badapt_arr_layer_activator_s_get_activator( &o->arr_layer_activator, i, o->layers ) );
+
+        badapt_activator_a_setup( layer->act );
+        o->max_buffer_size = sz_max( o->max_buffer_size, layer->input_size );
+        o->max_buffer_size = sz_max( o->max_buffer_size, layer->kernels );
     }
 
-    sz_t buf_part_size = o->max_buffer_size * 2;
-
-    if( learning )
-    {
-        bmath_vf3_s_set_size( &o->buf_ab,  buf_full_size );
-    }
-    else
-    {
-        bmath_vf3_s_set_size( &o->buf_ab, buf_part_size );
-    }
-
-    sz_t buf_index = 0;
-
-    // distribute buffer space
-    for( sz_t i = 0; i < o->layers; i++ )
-    {
-        bl_t even_layer = ( ( i & 1 ) == 0 );
-
-        bmath_vf3_s* a  = &o->arr_a.data[ i ];
-        bmath_vf3_s* b  = &o->arr_b.data[ i ];
-
-        if( learning )
-        {
-            a->data = o->buf_ab.data + buf_index;
-            b->data = o->buf_ab.data + buf_index + a->size;
-        }
-        else
-        {
-            a->data =  even_layer ? o->buf_ab.data : o->buf_ab.data + o->max_buffer_size;
-            b->data = !even_layer ? o->buf_ab.data : o->buf_ab.data + o->max_buffer_size;
-        }
-
-        buf_index += a->size;
-
-        ASSERT( a->data - o->buf_ab.data + a->size <= o->buf_ab.size );
-        ASSERT( b->data - o->buf_ab.data + b->size <= o->buf_ab.size );
-
-        // first layer
-        if( i == 0 )
-        {
-            bmath_vf3_s_clear( &o->in );
-            o->in.data = a->data;
-            o->in.size = o->input_size;
-        }
-
-        // last layer
-        if( i == o->layers - 1 )
-        {
-            bmath_vf3_s_clear( &o->out );
-            o->out.data = b->data;
-            o->out.size = o->output_kernels;
-        }
-    }
+    bmath_vf3_s_set_size( &o->in, o->input_size );
 
     if( o->epsilon < 0 ) o->epsilon = o->epsilon_rate;
 
@@ -272,13 +172,8 @@ void badapt_mlp_s_setup( badapt_mlp_s* o )
 
 void badapt_mlp_s_reset( badapt_mlp_s* o )
 {
-    bmath_arr_mf3_s_clear( &o->arr_w );
-    bmath_arr_vf3_s_clear( &o->arr_a );
-    bmath_arr_vf3_s_clear( &o->arr_b );
-    bmath_vf3_s_clear( &o->buf_ab );
     bmath_vf3_s_clear( &o->in );
-    bmath_vf3_s_clear( &o->out );
-    badapt_arr_activator_s_clear( &o->arr_activator );
+    badapt_mlp_arr_layer_s_clear( &o->arr_layer );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -288,9 +183,9 @@ void badapt_mlp_s_arc_to_sink( const badapt_mlp_s* o, bcore_sink* sink )
     sz_t pad = 24;
     sz_t weights = 0;
     sz_t ops = 0;
-    for( sz_t i = 0; i < o->arr_w.size; i++ )
+    for( sz_t i = 0; i < o->arr_layer.arr_size; i++ )
     {
-        const bmath_mf3_s* w = &o->arr_w.data[ i ];
+        const bmath_mf3_s* w = &o->arr_layer.arr_data[ i ].wgt;
         weights += w->size;
         ops     += w->size;
     }
@@ -304,15 +199,16 @@ void badapt_mlp_s_arc_to_sink( const badapt_mlp_s* o, bcore_sink* sink )
     bcore_sink_a_push_fa( sink, "#pn.{weights } #pl3 {#<sz_t>}\n", pad, weights );
     bcore_sink_a_push_fa( sink, "#pn.{ops } #pl3 {#<sz_t>}\n",     pad, ops );
 
-    for( sz_t i = 0; i < o->arr_w.size; i++ )
+    for( sz_t i = 0; i < o->arr_layer.arr_size; i++ )
     {
-        const bmath_vf3_s* a = &o->arr_a.data[ i ];
-        const bmath_mf3_s* w = &o->arr_w.data[ i ];
-        const bmath_vf3_s* b = &o->arr_b.data[ i ];
+        const badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ i ];
+
+        const bmath_mf3_s* w = &layer->wgt;
+        const bmath_vf3_s* b = &layer->out;
         st_s* st_activation = st_s_create();
 
-        st_s_push_fa( st_activation, "#<sc_t>", ifnameof( *( aware_t* )o->arr_activator.arr_data[ i ] ) );
-        st_s_push_fa( st_activation, " : #<sc_t>", ifnameof( *( aware_t* )badapt_activator_a_get_activation( o->arr_activator.arr_data[ i ] ) ) );
+        st_s_push_fa( st_activation, "#<sc_t>", ifnameof( *( aware_t* )layer->act ) );
+        st_s_push_fa( st_activation, " : #<sc_t>", ifnameof( *( aware_t* )badapt_activator_a_get_activation( layer->act ) ) );
 
         bcore_sink_a_push_fa( sink,
                               "layer #pl2 {#<sz_t>}:"
@@ -321,7 +217,7 @@ void badapt_mlp_s_arc_to_sink( const badapt_mlp_s* o, bcore_sink* sink )
                               " b(#pl2 {#<sz_t>})"
                               " #<sc_t>"
                               "\n",
-                            i, a->size, w->rows, w->cols, b->size, st_activation->sc );
+                              i, layer->input_size, w->rows, w->cols, b->size, st_activation->sc );
 
         st_s_discard( st_activation );
     }
@@ -331,7 +227,7 @@ void badapt_mlp_s_arc_to_sink( const badapt_mlp_s* o, bcore_sink* sink )
 
 void badapt_mlp_s_infer( const badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    if( o->arr_a.size == 0 ) ERR_fa( "Network was not setup. Call setup() first." );
+    if( o->arr_layer.arr_size == 0 ) ERR_fa( "Network was not setup. Call setup() first." );
     bmath_vf3_s a, b;
     bmath_vf3_s_init( &a );
     bmath_vf3_s_init( &b );
@@ -342,12 +238,13 @@ void badapt_mlp_s_infer( const badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3
 
     bmath_vf3_s_copy( &a, in );
 
-    for( sz_t i = 0; i < o->arr_w.size; i++ )
+    for( sz_t i = 0; i < o->layers; i++ )
     {
-        const bmath_mf3_s* w = &o->arr_w.data[ i ];
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ i ];
+        const bmath_mf3_s* w = &layer->wgt;
         b.size = w->rows;
         bmath_mf3_s_mul_vec( w, &a, &b );       // b = w * a
-        badapt_activator_a_infer( o->arr_activator.arr_data[ i ], &b, &b );
+        badapt_activator_a_infer( layer->act, &b, &b );
         bmath_vf3_s_swapr( &a, &b );
     }
 
@@ -361,17 +258,21 @@ void badapt_mlp_s_infer( const badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3
 
 void badapt_mlp_s_minfer( badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    if( o->arr_a.size == 0 ) ERR_fa( "Network was not setup. Call setup() first." );
+    if( o->arr_layer.arr_size == 0 ) ERR_fa( "Network was not setup. Call setup() first." );
     bmath_vf3_s_cpy( in, &o->in );
-    for( sz_t i = 0; i < o->arr_w.size; i++ )
+    bmath_vf3_s* b = NULL;
+    for( sz_t i = 0; i < o->layers; i++ )
     {
-        const bmath_vf3_s* a = &o->arr_a.data[ i ];
-              bmath_vf3_s* b = &o->arr_b.data[ i ];
-        const bmath_mf3_s* w = &o->arr_w.data[ i ];
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ i ];
+        const bmath_vf3_s* a = ( i > 0 ) ? &o->arr_layer.arr_data[ i - 1 ].out : &o->in;
+        b = &layer->out;
+        const bmath_mf3_s* w = &layer->wgt;
+        if( b->size != w->rows ) bmath_vf3_s_set_size( b, w->rows );
+
         bmath_mf3_s_mul_vec( w, a, b );       // b = w * a
-        badapt_activator_a_infer( o->arr_activator.arr_data[ i ], b, b );
+        badapt_activator_a_infer( layer->act, b, b );
     }
-    if( out ) bmath_vf3_s_cpy( &o->out, out );
+    if( out ) bmath_vf3_s_cpy( b, out );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -387,12 +288,13 @@ void badapt_mlp_s_bgrad( const badapt_mlp_s* o, bmath_vf3_s* grad_in, const bmat
     bmath_vf3_s_set_space( &gb, o->max_buffer_size );
     bmath_vf3_s_copy( &gb, grad_out );
 
-    for( sz_t i = o->arr_w.size - 1; i >= 0; i-- )
+    for( sz_t i = o->layers - 1; i >= 0; i-- )
     {
-        const bmath_vf3_s*  b = &o->arr_b.data[ i ];
-        const bmath_mf3_s*  w = &o->arr_w.data[ i ];
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ i ];
+        const bmath_vf3_s* b = &layer->out;
+        const bmath_mf3_s* w = &layer->wgt;
         ga.size = w->cols;
-        badapt_activator_a_bgrad( o->arr_activator.arr_data[ i ], &gb, &gb, b );
+        badapt_activator_a_bgrad( layer->act, &gb, &gb, b );
         bmath_mf3_s_htp_mul_vec( w, &gb, &ga );          // GA <- W^T * GB
         bmath_vf3_s_swapr( &ga, &gb );
     }
@@ -416,17 +318,17 @@ void badapt_mlp_s_bgrad_adapt( badapt_mlp_s* o, bmath_vf3_s* grad_in, const bmat
     bmath_vf3_s_set_space( &gb, o->max_buffer_size );
     bmath_vf3_s_copy( &gb, grad_out );
 
-    for( sz_t i = o->arr_w.size - 1; i >= 0; i-- )
+    for( sz_t i = o->layers - 1; i >= 0; i-- )
     {
-        const bmath_vf3_s*  a = &o->arr_a.data[ i ];
-        const bmath_vf3_s*  b = &o->arr_b.data[ i ];
-              bmath_mf3_s*  w = &o->arr_w.data[ i ];
+        badapt_mlp_layer_s* layer = &o->arr_layer.arr_data[ i ];
+        const bmath_vf3_s* a = ( i > 0 ) ? &o->arr_layer.arr_data[ i - 1 ].out : &o->in;
+        const bmath_vf3_s* b = &o->arr_layer.arr_data[ i ].out;
+              bmath_mf3_s* w = &layer->wgt;
 
         ga.size = w->cols;
 
-        badapt_activator_a_adapt( o->arr_activator.arr_data[ i ], &gb, &gb, b, o->epsilon );
+        badapt_activator_a_adapt( layer->act, &gb, &gb, b, o->epsilon );
         bmath_mf3_s_htp_mul_vec( w, &gb, &ga );          // GA <- W^T * GB
-
 
         f3_t l2_reg_factor = ( 1.0 - o->lambda_l2  * o->epsilon );
         f3_t l1_reg_offset = o->lambda_l1 * o->epsilon;
@@ -453,32 +355,41 @@ void badapt_mlp_s_bgrad_adapt( badapt_mlp_s* o, bmath_vf3_s* grad_in, const bmat
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void badapt_mlp_s_decay( badapt_mlp_s* o, f3_t decay )
-{
-    f3_t f = ( 1.0 - decay );
-    f = f3_max( 0, f );
-    for( sz_t i = 0; i < o->arr_w.size; i++ ) bmath_mf3_s_mul_scl_f3( &o->arr_w.data[ i ], f, &o->arr_w.data[ i ] );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 void badapt_mlp_s_test_sine_random()
 {
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_mlp_s, mlp );
 
-    mlp->input_kernels = 32;
-    mlp->layers = 8;
-    mlp->kernels_rate = 0;
-    mlp->random_state = 124;
-    mlp->epsilon_rate = 0.0001;
+    mlp->input_kernels = 16;
+    mlp->layers        = 4;
+    mlp->kernels_rate  = 0;
+    mlp->random_state  = 124;
+    mlp->epsilon_rate  = 0.0008;
 
-    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_leaky_relu_s );
-    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_tanh_s );
+    badapt_arr_layer_activator_s_push_from_names( &mlp->arr_layer_activator,  0, "bias", "leaky_relu" );
+    badapt_arr_layer_activator_s_push_from_names( &mlp->arr_layer_activator, -1, "bias", "tanh" );
 
+    BCORE_LIFE_CREATE( badapt_problem_sine_random_s, problem );
+    problem->input_size = 32;
+
+    BCORE_LIFE_CREATE( badapt_trainer_s, trainer );
+
+    trainer->fetch_cycles_per_iteration = 10;
+    trainer->max_iterations = 10;
+
+    badapt_mlp_s_setup( mlp );
     badapt_mlp_s_arc_to_sink( mlp, BCORE_STDOUT );
 
-    badapt_adaptive_a_test_sine_random( ( badapt_adaptive* )mlp );
+    BCORE_LIFE_CREATE( badapt_trainer_state_s, state );
+    badapt_adaptive_a_replicate( &state->adaptive, ( badapt_adaptive* )mlp );
+    badapt_supplier_a_replicate( &state->supplier, ( badapt_supplier* )problem );
+
+    BCORE_LIFE_CREATE( badapt_training_guide_std_s, guide );
+    badapt_training_guide_a_replicate( &state->guide, ( badapt_training_guide* )guide );
+
+    state->log = bcore_inst_a_clone( ( bcore_inst* )BCORE_STDOUT );
+
+    badapt_trainer_s_run( trainer, state );
 
     BCORE_LIFE_RETURN();
 }
@@ -505,9 +416,8 @@ void badapt_mlp_s_test_binary_add()
     trainer->fetch_cycles_per_iteration = 30;
     trainer->max_iterations = 100;
 
-
-    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_leaky_relu_s );
-    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_tanh_s );
+    badapt_arr_layer_activator_s_push_from_names( &mlp->arr_layer_activator,  0, "bias", "leaky_relu" );
+    badapt_arr_layer_activator_s_push_from_names( &mlp->arr_layer_activator, -1, "bias", "tanh" );
 
     badapt_mlp_s_setup( mlp );
 
@@ -551,10 +461,9 @@ void badapt_mlp_s_test_binary_mul()
     trainer->fetch_cycles_per_iteration = 30;
     trainer->max_iterations = 100;
 
-
     /// Note: To solve the multiplyier a bias seems inhibiting (for addition it seems supportive)
-    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_leaky_relu_s );
-    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_tanh_s );
+    badapt_arr_layer_activator_s_push_from_names( &mlp->arr_layer_activator,  0, "plain", "leaky_relu" );
+    badapt_arr_layer_activator_s_push_from_names( &mlp->arr_layer_activator, -1, "plain", "tanh" );
 
     badapt_mlp_s_setup( mlp );
 
@@ -592,7 +501,7 @@ void badapt_mlp_s_test_binary_xsg3()
 
     BCORE_LIFE_CREATE( badapt_problem_binary_xsg3_s, problem );
 
-    /// xsg3 <= 17 bits is learned very easily with 2 layers, while 18 bits seems extremely difficult for any configurations
+    /// xsg3 <= 17 bits is learned very easily with 2 layers, while >= 18 bits seems extremely difficult for any configurations
     problem->bits = 17;
 
     BCORE_LIFE_CREATE( badapt_trainer_s, trainer );
@@ -601,7 +510,7 @@ void badapt_mlp_s_test_binary_xsg3()
     trainer->max_iterations = 100;
 
     badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator,  0, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_leaky_relu_s );
-    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s, TYPEOF_badapt_activation_tanh_s );
+    badapt_arr_layer_activator_s_push_from_types( &mlp->arr_layer_activator, -1, TYPEOF_badapt_activator_bias_s,  TYPEOF_badapt_activation_tanh_s );
 
     badapt_mlp_s_setup( mlp );
 

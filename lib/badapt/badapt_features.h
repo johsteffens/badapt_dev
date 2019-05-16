@@ -31,6 +31,7 @@ BETH_PRECODE( badapt_loss )
 
 /**********************************************************************************************************************/
 
+/// adaptive unit
 BETH_PRECODE( badapt_adaptive )
 #ifdef BETH_PRECODE_SECTION
 
@@ -127,6 +128,25 @@ BETH_PRECODE( badapt_activator )
     /// adaptation step after last minfer for given gradient; grad_in can be NULL
     /// grad_in and grad_out may refer to the same object
     feature strict 'a' void adapt( mutable, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out, f3_t step );
+
+#endif // BETH_PRECODE_SECTION
+
+/**********************************************************************************************************************/
+
+/// builder: constructs the adaptive architecture
+BETH_PRECODE( badapt_builder )
+#ifdef BETH_PRECODE_SECTION
+
+    /// input vector size
+    feature strict 'a' sz_t get_in_size( const );
+    feature strict 'a' void set_in_size( mutable, sz_t size );
+
+    /// output vector size
+    feature strict 'a' sz_t get_out_size( const );
+    feature strict 'a' void set_out_size( mutable, sz_t size );
+
+    /// builds adaptive ready to be trained; passes ownership
+    feature strict 'a' badapt_adaptive* build( const );
 
 #endif // BETH_PRECODE_SECTION
 

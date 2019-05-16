@@ -26,6 +26,22 @@
 BETH_PRECODE( badapt_mlp )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+self badapt_mlp_layer_s = bcore_inst
+{
+    aware_t _;
+    sz_t input_size;
+    sz_t kernels;
+    bmath_mf3_s                wgt;
+    aware  badapt_activator => act;
+    hidden bmath_vf3_s         out;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+self badapt_mlp_arr_layer_s = bcore_array { aware_t _; badapt_mlp_layer_s [] arr; };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /** Simple scalable multi layer perceptron vector -> vector
  *  Set/change architecture parameters. Then run query/learn as needed.
  *  Call reset if parameters need change.
@@ -36,33 +52,26 @@ self badapt_mlp_s = badapt_adaptive
 
     // === architecture parameters ================================
     sz_t input_size;               // input vector size
-    sz_t input_kernels     = 8;    // (default 8) kernels on input layer
-    sz_t output_kernels    = 1;    // (default 1) kernels on output layer
-    sz_t layers            = 2;    // (default 2) number of layers
-    f3_t kernels_rate      = 0;    // (default 0) rate at which number of kernels increase per layer (negative: decrease); last layer excluded
+    sz_t input_kernels   = 8;    // (default 8) kernels on input layer
+    sz_t output_kernels  = 1;    // (default 1) kernels on output layer
+    sz_t layers          = 2;    // (default 2) number of layers
+    f3_t kernels_rate    = 0;    // (default 0) rate at which number of kernels increase per layer (negative: decrease); last layer excluded
 
-    f3_t epsilon_rate      = 0.0001; // epsilon per rate
-    f3_t epsilon           = -1;     // current learning rate (-1 means uninitialized)
-    f3_t lambda_l1         = 0;      // l1-regularization
-    f3_t lambda_l2         = 0;      // l2-regularization
+    f3_t epsilon_rate    = 0.0001; // epsilon per rate
+    f3_t epsilon         = -1;     // current learning rate (-1 means uninitialized)
+    f3_t lambda_l1       = 0;      // l1-regularization
+    f3_t lambda_l2       = 0;      // l2-regularization
 
     badapt_arr_layer_activator_s arr_layer_activator;
 
-    u2_t random_state      = 1234; // (default: 1234) random state variable (for random initialization)
+    u2_t random_state   = 1234; // (default: 1234) random state variable (for random initialization)
     // ==============================================================
 
-    // === trained data =============================================
-    bmath_arr_mf3_s          arr_w;         // weight matrix
-    badapt_arr_activator_s   arr_activator; // activators
-    // ==============================================================
+    badapt_mlp_arr_layer_s arr_layer;     // layer array
 
     // === runtime data =============================================
-    hidden sz_t              max_buffer_size;
-    hidden bmath_arr_vf3_s   arr_a;  // input  vector (weak map to buf)
-    hidden bmath_arr_vf3_s   arr_b;  // output vector (weak map to buf)
-    hidden bmath_vf3_s       buf_ab; // data buffer for a and b vector
-    hidden bmath_vf3_s       in;     // input vector weak map to arr_a[ 0 ]
-    hidden bmath_vf3_s       out;    // output vector weak map to arr_b[ layers-1 ]
+    hidden sz_t        max_buffer_size;
+    hidden bmath_vf3_s in;     // input vector weak map to arr_a[ 0 ]
     // ==============================================================
 
     // === adaptive functions =======================================
