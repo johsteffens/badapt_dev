@@ -16,6 +16,7 @@
 #include "badapt_training.h"
 
 /**********************************************************************************************************************/
+// badapt_supplier
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -43,15 +44,34 @@ void badapt_supplier_fetch_valid_data_default( badapt_supplier* o, badapt_arr_sa
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void badapt_supplier_setup_builder_default( const badapt_supplier* o, badapt_builder* builder )
+{
+    badapt_builder_a_set_in_size ( builder, badapt_supplier_a_get_in_size( o ) );
+    badapt_builder_a_set_out_size( builder, badapt_supplier_a_get_out_size( o ) );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+/// badapt_training
+
+//----------------------------------------------------------------------------------------------------------------------
+
 bl_t badapt_training_guide_std_s_callback( const badapt_training_guide_std_s* o, badapt_trainer_state_s* state )
 {
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_dynamics_s, dynamics );
+    badapt_adaptive_a_get_dynamics( state->adaptive, dynamics );
+
     if( state->log )
     {
-        bcore_sink_a_pushf( state->log, "% 6zi: err%6.3f|progress %6.3f|bias %6.3f|rate %5.3f\n", state->iteration, state->error, state->progress, state->bias, state->rate );
+        bcore_sink_a_pushf( state->log, "% 6zi: err%6.3f|progress %6.3f|bias %6.3f|log( eps ) %5.3f\n", state->iteration, state->error, state->progress, state->bias, log( dynamics->epsilon ) );
     }
 
-    state->rate *= o->annealing_factor;
+    dynamics->epsilon *= o->annealing_factor;
+    badapt_adaptive_a_set_dynamics( state->adaptive, dynamics );
 
+    BCORE_LIFE_RETURN( true );
     return true;
 }
 
@@ -79,19 +99,10 @@ void badapt_trainer_s_run( const badapt_trainer_s* o, badapt_trainer_state_s* st
     BCORE_LIFE_CREATE( badapt_arr_sample_s, buffer_batch );
     BCORE_LIFE_CREATE( bmath_vf3_s, out );
 
-    if( badapt_adaptive_a_get_in_size( state->adaptive ) != badapt_supplier_a_get_in_size( state->supplier ) )
-    {
-        badapt_adaptive_a_set_in_size( state->adaptive, badapt_supplier_a_get_in_size( state->supplier ) );
-    }
-
-    if( badapt_adaptive_a_get_out_size( state->adaptive ) != badapt_supplier_a_get_out_size( state->supplier ) )
-    {
-        badapt_adaptive_a_set_out_size( state->adaptive, badapt_supplier_a_get_out_size( state->supplier ) );
-    }
+    ASSERT( badapt_adaptive_a_get_in_size( state->adaptive ) == badapt_supplier_a_get_in_size( state->supplier ) );
+    ASSERT( badapt_adaptive_a_get_out_size( state->adaptive ) == badapt_supplier_a_get_out_size( state->supplier ) );
 
     bmath_vf3_s_set_size( out, badapt_adaptive_a_get_out_size( state->adaptive ) );
-
-    badapt_adaptive_a_setup( state->adaptive );
 
     bcore_array_a_set_size( ( bcore_array* )buffer_valid, 0 );
     badapt_supplier_a_fetch_valid_data( state->supplier, buffer_valid, o->valid_size );
@@ -100,7 +111,6 @@ void badapt_trainer_s_run( const badapt_trainer_s* o, badapt_trainer_state_s* st
 
     for( ; state->iteration < o->max_iterations; state->iteration++ )
     {
-        badapt_adaptive_a_set_rate( state->adaptive, state->rate );
         f3_t trn_error = 0;
         f3_t trn_weight = 0;
         for( sz_t fetch_cycle = 0; fetch_cycle < o->fetch_cycles_per_iteration; fetch_cycle++ )

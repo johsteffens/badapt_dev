@@ -17,7 +17,7 @@
 #define BADAPT_TRAINING_H
 
 #include "bmath_std.h"
-#include "badapt_features.h"
+#include "badapt_adaptive.h"
 
 /**********************************************************************************************************************/
 /// features
@@ -37,15 +37,18 @@ BETH_PRECODE( badapt_training_data )
 
 BETH_PRECODE( badapt_supplier )
 #ifdef BETH_PRECODE_SECTION
-    feature strict 'pa' sz_t get_in_size(  const );
-    feature strict 'pa' sz_t get_out_size( const );
-    feature strict 'pa' void fetch_batch_sample( mutable, badapt_sample_s*     dst );
-    feature strict 'pa' void fetch_valid_sample( mutable, badapt_sample_s*     dst );
-    feature        'pa' void fetch_batch_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_batch_data_default;
-    feature        'pa' void fetch_valid_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_valid_data_default;
+    feature strict 'a' sz_t get_in_size(  const );
+    feature strict 'a' sz_t get_out_size( const );
+    feature strict 'a' void fetch_batch_sample( mutable, badapt_sample_s*     dst );
+    feature strict 'a' void fetch_valid_sample( mutable, badapt_sample_s*     dst );
+    feature        'a' void fetch_batch_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_batch_data_default;
+    feature        'a' void fetch_valid_data(   mutable, badapt_arr_sample_s* dst, sz_t size ) = fetch_valid_data_default;
 
     // returns preferred loss function
-    feature        'pa' const badapt_loss* preferred_loss( const );
+    feature        'a' const badapt_loss* preferred_loss( const );
+
+    // sets up builder parameters where suitable
+    feature        'a' void setup_builder( const, badapt_builder* builder ) = setup_builder_default;
 #endif // BETH_PRECODE_SECTION
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -79,7 +82,6 @@ self badapt_trainer_state_s = bcore_inst
 {
     aware_t _;
 
-    f3_t rate      = 1.0; // learning rate
     sz_t iteration = 0;
     f3_t error     = 0;
     f3_t progress  = 0;
@@ -113,13 +115,13 @@ BETH_PRECODE( badapt_training_guide )
 
 //----------------------------------------------------------------------------------------------------------------------
 
-BETH_PRECODE( badapt_training_objects2 )
+BETH_PRECODE( badapt_training_objects_2 )
 #ifdef BETH_PRECODE_SECTION
 
 self badapt_training_guide_std_s = badapt_training_guide
 {
     aware_t _;
-    f3_t annealing_factor = 1.0;
+    f3_t annealing_factor = 0.99;
     func badapt_training_guide : callback;
 };
 

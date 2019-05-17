@@ -31,66 +31,6 @@ BETH_PRECODE( badapt_loss )
 
 /**********************************************************************************************************************/
 
-/// adaptive unit
-BETH_PRECODE( badapt_adaptive )
-#ifdef BETH_PRECODE_SECTION
-
-    // ===== required features =====
-
-    /// resets trainable components with given seed
-    feature strict 'a' void reset( mutable );
-
-    /// should be called once before use
-    feature strict 'a' void setup( mutable );
-
-    /// input vector size
-    feature strict 'a' sz_t get_in_size( const );
-    feature strict 'a' void set_in_size( mutable, sz_t size );
-
-    /// output vector size
-    feature strict 'a' sz_t get_out_size( const );
-    feature strict 'a' void set_out_size( mutable, sz_t size );
-
-    /// fast concurrent inference
-    feature strict 'a' void infer( const, const bmath_vf3_s* in, bmath_vf3_s* out );
-
-    /// mutable inference (used for training)
-    feature strict 'a' void minfer( mutable, const bmath_vf3_s* in, bmath_vf3_s* out );
-
-    /// fast concurrent gradient backpropagation (no changing of state)
-    feature strict 'a' void bgrad( const, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out );
-
-    /// gradient backpropagation with adaptation; relates to after last call to minfer for given gradient; grad_in can be NULL
-    feature strict 'a' void bgrad_adapt( mutable, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out );
-
-    // ===== optional features =====
-
-    /// adaption rate (1.0 means default rate for the network)
-    feature 'a' f3_t get_rate( const );
-    feature 'a' void set_rate( mutable, f3_t val );
-
-    /// regularization (1.0 means default rate for the network)
-    feature 'a' f3_t get_lambda_l1( const );
-    feature 'a' void set_lambda_l1( mutable, f3_t val );
-    feature 'a' f3_t get_lambda_l2( const );
-    feature 'a' void set_lambda_l2( mutable, f3_t val );
-
-    // ===== optional features with default implementation =====
-
-    /// outputs architecture to text sink (for easy inspection)
-    feature 'a' void arc_to_sink( const, bcore_sink* sink ) = arc_to_sink_fallback;
-
-    /// inference for scalar output
-    feature 'a' f3_t infer_f3( const, const bmath_vf3_s* in ) = infer_f3_fallback;
-
-    /// full adaption cycle based on loss function; adapt_loss_f3 returns estimates result
-    feature 'a' void adapt_loss(    mutable, const badapt_loss* loss, const bmath_vf3_s* in, const bmath_vf3_s* target, bmath_vf3_s* out ) = adapt_loss_fallback;
-    feature 'a' f3_t adapt_loss_f3( mutable, const badapt_loss* loss, const bmath_vf3_s* in, f3_t target )                                 = adapt_loss_f3_fallback;
-
-#endif // BETH_PRECODE_SECTION
-
-/**********************************************************************************************************************/
-
 /// activation function
 BETH_PRECODE( badapt_activation )
 #ifdef BETH_PRECODE_SECTION
@@ -128,25 +68,6 @@ BETH_PRECODE( badapt_activator )
     /// adaptation step after last minfer for given gradient; grad_in can be NULL
     /// grad_in and grad_out may refer to the same object
     feature strict 'a' void adapt( mutable, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out, const bmath_vf3_s* out, f3_t step );
-
-#endif // BETH_PRECODE_SECTION
-
-/**********************************************************************************************************************/
-
-/// builder: constructs the adaptive architecture
-BETH_PRECODE( badapt_builder )
-#ifdef BETH_PRECODE_SECTION
-
-    /// input vector size
-    feature strict 'a' sz_t get_in_size( const );
-    feature strict 'a' void set_in_size( mutable, sz_t size );
-
-    /// output vector size
-    feature strict 'a' sz_t get_out_size( const );
-    feature strict 'a' void set_out_size( mutable, sz_t size );
-
-    /// builds adaptive ready to be trained; passes ownership
-    feature strict 'a' badapt_adaptive* build( const );
 
 #endif // BETH_PRECODE_SECTION
 

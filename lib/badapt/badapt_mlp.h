@@ -17,9 +17,8 @@
 #define BADAPT_MLP_H
 
 #include "bcore_std.h"
-#include "badapt_features.h"
-#include "badapt_precoded.h"
 #include "badapt_activator.h"
+#include "badapt_adaptive.h"
 
 /**********************************************************************************************************************/
 
@@ -51,23 +50,9 @@ self badapt_mlp_s = badapt_adaptive
     aware_t _;
 
     // === architecture parameters ================================
-    sz_t input_size;               // input vector size
-    sz_t input_kernels   = 8;    // (default 8) kernels on input layer
-    sz_t output_kernels  = 1;    // (default 1) kernels on output layer
-    sz_t layers          = 2;    // (default 2) number of layers
-    f3_t kernels_rate    = 0;    // (default 0) rate at which number of kernels increase per layer (negative: decrease); last layer excluded
 
-    f3_t epsilon_rate    = 0.0001; // epsilon per rate
-    f3_t epsilon         = -1;     // current learning rate (-1 means uninitialized)
-    f3_t lambda_l1       = 0;      // l1-regularization
-    f3_t lambda_l2       = 0;      // l2-regularization
-
-    badapt_arr_layer_activator_s arr_layer_activator;
-
-    u2_t random_state   = 1234; // (default: 1234) random state variable (for random initialization)
-    // ==============================================================
-
-    badapt_mlp_arr_layer_s arr_layer;     // layer array
+    badapt_dynamics_s      dynamics;
+    badapt_mlp_arr_layer_s arr_layer;
 
     // === runtime data =============================================
     hidden sz_t        max_buffer_size;
@@ -75,20 +60,11 @@ self badapt_mlp_s = badapt_adaptive
     // ==============================================================
 
     // === adaptive functions =======================================
-    func badapt_adaptive : reset;
-    func badapt_adaptive : setup;
-
     func badapt_adaptive : get_in_size;
-    func badapt_adaptive : set_in_size;
     func badapt_adaptive : get_out_size;
-    func badapt_adaptive : set_out_size;
 
-    func badapt_adaptive : get_rate;
-    func badapt_adaptive : set_rate;
-    func badapt_adaptive : get_lambda_l1;
-    func badapt_adaptive : set_lambda_l1;
-    func badapt_adaptive : get_lambda_l2;
-    func badapt_adaptive : set_lambda_l2;
+    func badapt_adaptive : get_dynamics;
+    func badapt_adaptive : set_dynamics;
 
     func badapt_adaptive : arc_to_sink;
     func badapt_adaptive : infer;
@@ -99,12 +75,47 @@ self badapt_mlp_s = badapt_adaptive
     // ==============================================================
 };
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// Builder creating a funnel structure of kernels
+self badapt_builder_mlp_funnel_s = badapt_builder
+{
+    aware_t _;
+
+    sz_t input_size;               // input vector size
+    sz_t input_kernels   = 8;      // kernels on input layer
+    sz_t output_kernels  = 1;      // kernels on output layer
+    sz_t layers          = 2;      // number of layers
+    f3_t kernels_rate    = 0;      // rate at which number of kernels increase per layer (negative: decrease); last layer excluded
+    u2_t random_seed     = 1234;   // random seed variable (for random initialization)
+    badapt_dynamics_s dynamics;
+
+    badapt_arr_layer_activator_s arr_layer_activator;
+
+    // === builder functions =======================================
+
+    /// input vector size
+    func badapt_builder : get_in_size;
+    func badapt_builder : set_in_size;
+
+    /// output vector size
+    func badapt_builder : get_out_size;
+    func badapt_builder : set_out_size;
+
+    /// builds adaptive ready to be trained; passes ownership
+    func badapt_builder : build;
+
+    // ==============================================================
+};
+
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void badapt_mlp_s_test_sine_random();
 void badapt_mlp_s_test_binary_add();
 void badapt_mlp_s_test_binary_mul();
 void badapt_mlp_s_test_binary_xsg3();
+void badapt_mlp_s_test_binary_hash();
+void badapt_mlp_s_test_polynom();
 
 /**********************************************************************************************************************/
 

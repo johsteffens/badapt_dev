@@ -25,6 +25,8 @@
 BETH_PRECODE( badapt_problem_objects )
 #ifdef BETH_PRECODE_SECTION
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /** Type: Classifier
  *  Method: Differentiate between a sine wave of arbitrary amplitude and frequency from a random walk curve.
  */
@@ -35,6 +37,29 @@ self badapt_problem_sine_random_s = badapt_supplier
     u2_t rval       = 1234;
     f3_t pos_tgt    =  0.9;
     f3_t neg_tgt    = -0.9;
+    aware badapt_loss* preferred_loss = badapt_loss_l2_s;
+
+    func badapt_supplier : preferred_loss;
+    func badapt_supplier : get_in_size;
+    func badapt_supplier : get_out_size;
+    func badapt_supplier : fetch_batch_sample;
+    func badapt_supplier : fetch_valid_sample;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/** Type: Regression
+ *  Method: Estimate polynomial coefficients for a signal within range -1, 1
+ */
+self badapt_problem_polynom_s = badapt_supplier
+{
+    aware_t _;
+    sz_t input_size  = 32;
+    sz_t output_size = 3;   // polynomial order + 1
+    f3_t range       = 1.0; // +/- range of coefficients
+    u2_t rval        = 1234;
+    f3_t noise_level = 0;   // additive noise to input signal
+
     aware badapt_loss* preferred_loss = badapt_loss_l2_s;
 
     func badapt_supplier : preferred_loss;
@@ -106,6 +131,30 @@ self badapt_problem_binary_xsg3_s = badapt_supplier
     func badapt_supplier : fetch_batch_sample;
     func badapt_supplier : fetch_valid_sample;
 };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/** Type: Encoder
+ *  Method: hashing
+ */
+self badapt_problem_binary_hash_s = badapt_supplier
+{
+    aware_t _;
+    sz_t bits  = 4; // input size = bits; output size = bits
+    u2_t rval  = 1234;
+    f3_t val_h =  0.9;
+    f3_t val_l = -0.9;
+    bl_t reverse = false;
+
+    aware badapt_loss* preferred_loss = badapt_loss_l2_s;
+    func badapt_supplier : preferred_loss;
+    func badapt_supplier : get_in_size;
+    func badapt_supplier : get_out_size;
+    func badapt_supplier : fetch_batch_sample;
+    func badapt_supplier : fetch_valid_sample;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // BETH_PRECODE_SECTION
 

@@ -155,7 +155,7 @@ void badapt_problem_binary_mul_s_fetch_valid_sample( badapt_problem_binary_mul_s
 //----------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-// badapt_problem_binary_mul_s
+// badapt_problem_binary_xsg3_s
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -190,6 +190,90 @@ void badapt_problem_binary_xsg3_s_fetch_valid_sample( badapt_problem_binary_xsg3
 {
     /// no need to separate between batch and valid
     badapt_problem_binary_xsg3_s_fetch_batch_sample( o, dst );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+// badapt_problem_binary_hash_s
+
+//----------------------------------------------------------------------------------------------------------------------
+
+sz_t  badapt_problem_binary_hash_s_get_in_size(  const badapt_problem_binary_hash_s* o ) { return o->bits; }
+sz_t  badapt_problem_binary_hash_s_get_out_size( const badapt_problem_binary_hash_s* o ) { return o->bits; }
+const badapt_loss* badapt_problem_binary_hash_s_preferred_loss( const badapt_problem_binary_hash_s* o ) { return o->preferred_loss; }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_binary_hash_s_fetch_batch_sample( badapt_problem_binary_hash_s* o, badapt_sample_s* dst )
+{
+    bmath_vf3_s_set_size( &dst->in,  o->bits );
+    bmath_vf3_s_set_size( &dst->out, o->bits );
+
+    tp_t vi = ( o->rval = bcore_xsg1_u2( o->rval ) ) & ( ( 1 << o->bits ) - 1 );
+    tp_t vo = bcore_tp_fold_tp( bcore_tp_init(), vi ) & ( ( 1 << o->bits ) - 1 );
+
+    if( o->reverse ) tp_t_swap( &vi, &vo );
+
+    for( sz_t i = 0; i < o->bits; i++ )
+    {
+        dst->in.data[ i ] = ( ( vi & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+    }
+
+    for( sz_t i = 0; i < dst->out.size; i++ )
+    {
+        dst->out.data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_binary_hash_s_fetch_valid_sample( badapt_problem_binary_hash_s* o, badapt_sample_s* dst )
+{
+    /// no need to separate between batch and valid
+    badapt_problem_binary_hash_s_fetch_batch_sample( o, dst );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+// badapt_problem_polynom_s
+
+//----------------------------------------------------------------------------------------------------------------------
+
+sz_t  badapt_problem_polynom_s_get_in_size(  const badapt_problem_polynom_s* o ) { return o->input_size; }
+sz_t  badapt_problem_polynom_s_get_out_size( const badapt_problem_polynom_s* o ) { return o->output_size; }
+const badapt_loss* badapt_problem_polynom_s_preferred_loss( const badapt_problem_polynom_s* o ) { return o->preferred_loss; }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_polynom_s_fetch_batch_sample( badapt_problem_polynom_s* o, badapt_sample_s* dst )
+{
+    bmath_vf3_s_set_size( &dst->in,  o->input_size );
+    bmath_vf3_s_set_size( &dst->out, o->output_size );
+
+    for( sz_t i = 0; i < o->output_size; i++ ) dst->out.data[ i ] = f3_xsg1_sym( &o->rval );
+    for( sz_t i = 0; i < o->input_size;  i++ )
+    {
+        f3_t x1 = 2.0 * ( ( ( f3_t )i / ( o->input_size - 1 ) ) - 0.5 );
+        f3_t x = 1.0;
+        f3_t y = 0;
+        for( sz_t i = 0; i < o->output_size; i++ )
+        {
+            y += x * dst->out.data[ i ] * o->range;
+            x *= x1;
+        }
+
+        dst->in.data[ i ] = y + o->noise_level * f3_xsg1_sym( &o->rval );
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_polynom_s_fetch_valid_sample( badapt_problem_polynom_s* o, badapt_sample_s* dst )
+{
+    /// no need to separate between batch and valid
+    badapt_problem_polynom_s_fetch_batch_sample( o, dst );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
