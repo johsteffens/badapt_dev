@@ -55,6 +55,8 @@ void badapt_c1d_s_set_dynamics( badapt_c1d_s* o, const badapt_dynamics_s* dynami
 
 void badapt_c1d_s_arc_to_sink( const badapt_c1d_s* o, bcore_sink* sink )
 {
+    bcore_sink_a_push_fa( sink, "#<sc_t>\n",  ifnameof( *(aware_t*)o ) );
+
     sz_t pad = 24;
     sz_t weights = 0;
     sz_t ops = 0;
@@ -535,6 +537,131 @@ void badapt_c1d_s_test_sine_random()
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+void badapt_c1d_s_test_binary_add()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_problem_binary_add_s, problem );
+    BCORE_LIFE_CREATE( badapt_builder_c1d_funnel_s, builder );
+    BCORE_LIFE_CREATE( badapt_trainer_s,            trainer );
+
+    problem->bits = 8;
+
+    builder->input_kernels     = 7;
+    builder->input_step        = 2;
+    builder->input_convolution_size = 4;
+    builder->convolution_size  = 2;
+    builder->reduction_step    = 2;
+    builder->kernels_rate      = 0.5;
+    builder->random_seed       = 124;
+    builder->dynamics.epsilon  = 0.0003;
+//    builder->dynamics.lambda_l2 = 0.0001;
+//    builder->dynamics.lambda_l1 = 0.0001;
+
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator,  0, "bias", "leaky_relu" );
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator, -1, "bias", "tanh" );
+
+    trainer->fetch_cycles_per_iteration = 30;
+    trainer->max_iterations = 10;
+
+    badapt_c1d_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_c1d_s_test_binary_mul()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_problem_binary_mul_s, problem );
+    BCORE_LIFE_CREATE( badapt_builder_c1d_funnel_s, builder );
+    BCORE_LIFE_CREATE( badapt_trainer_s,            trainer );
+
+    problem->bits = 5;
+
+    builder->input_kernels     = 32;
+    builder->input_step        = 1;
+    builder->input_convolution_size = 4;
+    builder->convolution_size  = 2;
+    builder->reduction_step    = 2;
+    builder->kernels_rate      = 0.1;
+    builder->random_seed       = 124;
+    builder->dynamics.epsilon  = 0.0003;
+
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator,  0, "plain", "leaky_relu" );
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator, -1, "plain", "tanh" );
+
+    trainer->fetch_cycles_per_iteration = 30;
+    trainer->max_iterations = 10;
+
+    badapt_c1d_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_c1d_s_test_binary_xsg3()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_problem_binary_xsg3_s, problem );
+    BCORE_LIFE_CREATE( badapt_builder_c1d_funnel_s,  builder );
+    BCORE_LIFE_CREATE( badapt_trainer_s,             trainer );
+
+    /// xsg3 <= 17 bits is learned very easily with 2 layers, while >= 18 bits seems extremely difficult for any configurations
+    problem->bits = 17;
+
+    /// xsg3 seems to be best (very easily) learned with a shallow mlp. A cnn appears to have trouble.
+    builder->input_kernels     = 16;
+    builder->input_step        = 2;
+    builder->input_convolution_size = 4;
+    builder->convolution_size  = 3;
+    builder->reduction_step    = 3;
+    builder->kernels_rate      = 0.2;
+    builder->random_seed       = 126;
+    builder->dynamics.epsilon  = 0.001;
+
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator,  0, "bias", "leaky_relu" );
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator, -1, "bias",  "tanh" );
+
+    trainer->fetch_cycles_per_iteration = 30;
+    trainer->max_iterations = 10;
+
+    badapt_c1d_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_c1d_s_test_binary_hash()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_problem_binary_hash_s, problem );
+    BCORE_LIFE_CREATE( badapt_builder_c1d_funnel_s,  builder );
+    BCORE_LIFE_CREATE( badapt_trainer_s,             trainer );
+
+    problem->bits = 9;
+    problem->reverse = true; // reverse hashing is a hard problem for mlp and cnn
+
+    builder->input_kernels     = 16;
+    builder->input_step        = 1;
+    builder->input_convolution_size = 2;
+    builder->convolution_size  = 2;
+    builder->reduction_step    = 2;
+    builder->kernels_rate      = 0.5;
+    builder->random_seed       = 124;
+    builder->dynamics.epsilon  = 0.0003;
+
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator,  0, "bias", "leaky_relu" );
+    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator, -1, "bias",  "tanh" );
+
+    trainer->fetch_cycles_per_iteration = 30;
+    trainer->max_iterations = 100;
+
+    badapt_c1d_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 void badapt_c1d_s_test_polynom()
 {
     BCORE_LIFE_INIT();
@@ -557,7 +684,6 @@ void badapt_c1d_s_test_polynom()
     builder->dynamics.epsilon  = 0.001;
 //    builder->dynamics.lambda_l2  = 0.001;
 
-//    badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator,  0, "bias", "leaky_relu" );
     badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator,  0, "bias", "leaky_relu" );
     badapt_arr_layer_activator_s_push_from_names( &builder->arr_layer_activator, -1, "bias", "tanh" );
 
