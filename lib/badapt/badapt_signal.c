@@ -20,7 +20,10 @@
 #include "badapt_problem.h"
 #include "badapt_activator.h"
 #include "badapt_loss.h"
+
 #include "badapt_mlp.h"
+#include "badapt_c1d.h"
+
 #include "badapt_training.h"
 
 vd_t badapt_signal_handler( const bcore_signal_s* o )
@@ -45,7 +48,10 @@ vd_t badapt_signal_handler( const bcore_signal_s* o )
             badapt_problem_signal_handler,
             badapt_activator_signal_handler,
             badapt_loss_signal_handler,
+
             badapt_mlp_signal_handler,
+            badapt_c1d_signal_handler,
+
             badapt_training_signal_handler,
         };
 

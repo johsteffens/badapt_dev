@@ -13,11 +13,11 @@
  *  limitations under the License.
  */
 
-/** Multi Layer Perceptron.
+/** 1D Convolutional Network
  */
 
-#ifndef BADAPT_MLP_H
-#define BADAPT_MLP_H
+#ifndef BADAPT_C1D_H
+#define BADAPT_C1D_H
 
 #include "bcore_std.h"
 #include "badapt_activator.h"
@@ -25,14 +25,18 @@
 
 /**********************************************************************************************************************/
 
-BETH_PRECODE( badapt_mlp )
+BETH_PRECODE( badapt_c1d )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-self badapt_mlp_layer_s = bcore_inst
+self badapt_c1d_layer_s = bcore_inst
 {
     aware_t _;
-    sz_t input_size;
-    sz_t kernels;
+    sz_t input_size;  // input vector size
+    sz_t stride;      // convolution step size (stride of spliced matrix)
+    sz_t steps;       // number of convolution steps
+    sz_t kernel_size; // size of single kernel (rows of kernel matrix)
+    sz_t kernels;     // number of kernels     (cols of kernel matrix)
+
     bmath_mf3_s                wgt;
     aware  badapt_activator => act;
     hidden bmath_vf3_s         out;
@@ -40,22 +44,24 @@ self badapt_mlp_layer_s = bcore_inst
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-self badapt_mlp_arr_layer_s = bcore_array { aware_t _; badapt_mlp_layer_s [] arr; };
+self badapt_c1d_arr_layer_s = bcore_array { aware_t _; badapt_c1d_layer_s [] arr; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-self badapt_mlp_s = badapt_adaptive
+self badapt_c1d_s = badapt_adaptive
 {
     aware_t _;
 
     // === architecture parameters ================================
 
     badapt_dynamics_s      dynamics;
-    badapt_mlp_arr_layer_s arr_layer;
+    badapt_c1d_arr_layer_s arr_layer;
     sz_t max_buffer_size;
 
     // === runtime data =============================================
+
     hidden bmath_vf3_s in;
+
     // ==============================================================
 
     // === adaptive functions =======================================
@@ -77,16 +83,20 @@ self badapt_mlp_s = badapt_adaptive
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// Builder creating a funnel structure of kernels
-self badapt_builder_mlp_funnel_s = badapt_builder
+self badapt_builder_c1d_funnel_s = badapt_builder
 {
     aware_t _;
 
-    sz_t input_size;               // input vector size
-    sz_t input_kernels   = 8;      // kernels on input layer
-    sz_t output_kernels  = 1;      // kernels on output layer
-    sz_t layers          = 2;      // number of layers
-    f3_t kernels_rate    = 0;      // rate at which number of kernels increase per layer (negative: decrease); last layer excluded
-    u2_t random_seed     = 1234;   // random seed variable (for random initialization)
+    sz_t input_size                ; // input vector size
+    sz_t input_step             = 1; // input vector stepping
+    sz_t input_convolution_size = 2; // first layer convolution
+    sz_t input_kernels          = 8; // kernels on input layer
+    sz_t output_kernels         = 1; // kernels on output layer
+    f3_t kernels_rate           = 0; // rate at which number kernels increase per layer (negative: decrease)
+    sz_t reduction_step         = 2; // dimensionality reduction stepping
+    sz_t convolution_size       = 2; // dimensionality convolution size
+    u2_t random_seed         = 1234; // random seed variable (for random initialization)
+
     badapt_dynamics_s dynamics;
 
     badapt_arr_layer_activator_s arr_layer_activator;
@@ -109,17 +119,17 @@ self badapt_builder_mlp_funnel_s = badapt_builder
 
 #endif // BETH_PRECODE_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void badapt_mlp_s_test_sine_random();
-void badapt_mlp_s_test_binary_add();
-void badapt_mlp_s_test_binary_mul();
-void badapt_mlp_s_test_binary_xsg3();
-void badapt_mlp_s_test_binary_hash();
-void badapt_mlp_s_test_polynom();
+void badapt_c1d_s_test_sine_random();
+void badapt_c1d_s_test_binary_add();
+void badapt_c1d_s_test_binary_mul();
+void badapt_c1d_s_test_binary_xsg3();
+void badapt_c1d_s_test_binary_hash();
+void badapt_c1d_s_test_polynom();
 
 /**********************************************************************************************************************/
 
-vd_t badapt_mlp_signal_handler( const bcore_signal_s* o );
+vd_t badapt_c1d_signal_handler( const bcore_signal_s* o );
 
 /**********************************************************************************************************************/
 
-#endif // BADAPT_MLP_H
+#endif // BADAPT_C1D_H

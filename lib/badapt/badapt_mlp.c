@@ -130,7 +130,7 @@ void badapt_mlp_s_infer( const badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3
 void badapt_mlp_s_minfer( badapt_mlp_s* o, const bmath_vf3_s* in, bmath_vf3_s* out )
 {
     if( o->arr_layer.arr_size == 0 ) ERR_fa( "Network was not setup. Call setup() first." );
-    bmath_vf3_s_cpy( in, &o->in );
+    bmath_vf3_s_copy( &o->in, in );
     bmath_vf3_s* b = NULL;
     for( sz_t i = 0; i < o->arr_layer.arr_size; i++ )
     {
@@ -311,9 +311,7 @@ badapt_adaptive* badapt_builder_mlp_funnel_s_build( const badapt_builder_mlp_fun
 
     mlp->max_buffer_size = max_buffer_size;
 
-    bmath_vf3_s_set_size( &mlp->in, o->input_size );
-
-    badapt_dynamics_s_copy( &mlp->dynamics, &o->dynamics ); //TODO: activate
+    badapt_dynamics_s_copy( &mlp->dynamics, &o->dynamics );
 
     BCORE_LIFE_RETURN( ( badapt_adaptive* )mlp );
 }
@@ -321,6 +319,7 @@ badapt_adaptive* badapt_builder_mlp_funnel_s_build( const badapt_builder_mlp_fun
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+/// tests
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -510,7 +509,7 @@ void badapt_mlp_s_test_polynom()
 
     trainer->fetch_cycles_per_iteration = 3;
     trainer->batch_cycles_per_fetch = 10;
-    trainer->max_iterations = 100;
+    trainer->max_iterations = 10;
 
     badapt_mlp_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
     BCORE_LIFE_RETURN();

@@ -490,6 +490,59 @@
   BETH_EXPAND_ITEM_badapt_builder_mlp_funnel_s
 
 /**********************************************************************************************************************/
+// source: badapt_c1d
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_c1d
+
+#define TYPEOF_badapt_c1d 4280081428
+  #define TYPEOF_badapt_c1d_layer_s 169352500
+  #define BETH_EXPAND_ITEM_badapt_c1d_layer_s \
+    BCORE_DECLARE_OBJECT( badapt_c1d_layer_s ) \
+      {aware_t _;sz_t input_size;sz_t stride;sz_t steps;sz_t kernel_size;sz_t kernels;bmath_mf3_s wgt;badapt_activator* act;bmath_vf3_s out;};
+  #define TYPEOF_badapt_c1d_arr_layer_s 2858590876
+  #define BETH_EXPAND_ITEM_badapt_c1d_arr_layer_s \
+    BCORE_DECLARE_OBJECT( badapt_c1d_arr_layer_s ) \
+      {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( badapt_c1d_layer_s, arr_ );}; \
+    static inline void badapt_c1d_arr_layer_s_set_space( badapt_c1d_arr_layer_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_badapt_c1d_arr_layer_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_c1d_arr_layer_s_set_size( badapt_c1d_arr_layer_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_badapt_c1d_arr_layer_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_c1d_arr_layer_s_clear( badapt_c1d_arr_layer_s* o ) { bcore_array_t_set_space( TYPEOF_badapt_c1d_arr_layer_s, ( bcore_array* )o, 0 ); } \
+    static inline void badapt_c1d_arr_layer_s_push_c( badapt_c1d_arr_layer_s* o, const badapt_c1d_layer_s* v ) { bcore_array_t_push( TYPEOF_badapt_c1d_arr_layer_s, ( bcore_array* )o, sr_twc( TYPEOF_badapt_c1d_layer_s, v ) ); } \
+    static inline void badapt_c1d_arr_layer_s_push_d( badapt_c1d_arr_layer_s* o,       badapt_c1d_layer_s* v ) { bcore_array_t_push( TYPEOF_badapt_c1d_arr_layer_s, ( bcore_array* )o, sr_tsd( TYPEOF_badapt_c1d_layer_s, v ) ); } \
+    static inline badapt_c1d_layer_s* badapt_c1d_arr_layer_s_push( badapt_c1d_arr_layer_s* o ) \
+    { \
+        bcore_array_t_push( TYPEOF_badapt_c1d_arr_layer_s, ( bcore_array* )o, sr_null() ); \
+        return bcore_array_t_get_last( TYPEOF_badapt_c1d_arr_layer_s, ( bcore_array* )o ).o; \
+    }
+  #define TYPEOF_badapt_c1d_s 2405996614
+  #define BETH_EXPAND_ITEM_badapt_c1d_s \
+    BCORE_DECLARE_OBJECT( badapt_c1d_s ) \
+      {aware_t _;badapt_dynamics_s dynamics;badapt_c1d_arr_layer_s arr_layer;sz_t max_buffer_size;bmath_vf3_s in;}; \
+    sz_t badapt_c1d_s_get_in_size( const badapt_c1d_s* o ); \
+    sz_t badapt_c1d_s_get_out_size( const badapt_c1d_s* o ); \
+    void badapt_c1d_s_get_dynamics( const badapt_c1d_s* o, badapt_dynamics_s* dynamics ); \
+    void badapt_c1d_s_set_dynamics( badapt_c1d_s* o, const badapt_dynamics_s* dynamics ); \
+    void badapt_c1d_s_arc_to_sink( const badapt_c1d_s* o, bcore_sink* sink ); \
+    void badapt_c1d_s_infer( const badapt_c1d_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
+    void badapt_c1d_s_minfer( badapt_c1d_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
+    void badapt_c1d_s_bgrad( const badapt_c1d_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out ); \
+    void badapt_c1d_s_bgrad_adapt( badapt_c1d_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out );
+  #define TYPEOF_badapt_builder_c1d_funnel_s 437767695
+  #define BETH_EXPAND_ITEM_badapt_builder_c1d_funnel_s \
+    BCORE_DECLARE_OBJECT( badapt_builder_c1d_funnel_s ) \
+      {aware_t _;sz_t input_size;sz_t input_step;sz_t input_convolution_size;sz_t input_kernels;sz_t output_kernels;f3_t kernels_rate;sz_t reduction_step;sz_t convolution_size;u2_t random_seed;badapt_dynamics_s dynamics;badapt_arr_layer_activator_s arr_layer_activator;}; \
+    sz_t badapt_builder_c1d_funnel_s_get_in_size( const badapt_builder_c1d_funnel_s* o ); \
+    void badapt_builder_c1d_funnel_s_set_in_size( badapt_builder_c1d_funnel_s* o, sz_t size ); \
+    sz_t badapt_builder_c1d_funnel_s_get_out_size( const badapt_builder_c1d_funnel_s* o ); \
+    void badapt_builder_c1d_funnel_s_set_out_size( badapt_builder_c1d_funnel_s* o, sz_t size ); \
+    badapt_adaptive* badapt_builder_c1d_funnel_s_build( const badapt_builder_c1d_funnel_s* o );
+#define BETH_EXPAND_GROUP_badapt_c1d \
+  BETH_EXPAND_ITEM_badapt_c1d_layer_s \
+  BETH_EXPAND_ITEM_badapt_c1d_arr_layer_s \
+  BETH_EXPAND_ITEM_badapt_c1d_s \
+  BETH_EXPAND_ITEM_badapt_builder_c1d_funnel_s
+
+/**********************************************************************************************************************/
 // source: badapt_training
 
 //----------------------------------------------------------------------------------------------------------------------
