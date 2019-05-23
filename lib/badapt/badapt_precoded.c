@@ -121,8 +121,8 @@ BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_sine_random_s )
     "func badapt_supplier : preferred_loss;"
     "func badapt_supplier : get_in_size;"
     "func badapt_supplier : get_out_size;"
-    "func badapt_supplier : fetch_batch_sample;"
-    "func badapt_supplier : fetch_valid_sample;"
+    "func badapt_supplier : fetch_sample_tio;"
+    "func badapt_supplier : fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_polynom_s )
@@ -137,8 +137,8 @@ BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_polynom_s )
     "func badapt_supplier : preferred_loss;"
     "func badapt_supplier : get_in_size;"
     "func badapt_supplier : get_out_size;"
-    "func badapt_supplier : fetch_batch_sample;"
-    "func badapt_supplier : fetch_valid_sample;"
+    "func badapt_supplier : fetch_sample_tio;"
+    "func badapt_supplier : fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_add_s )
@@ -152,8 +152,8 @@ BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_add_s )
     "func badapt_supplier : preferred_loss;"
     "func badapt_supplier : get_in_size;"
     "func badapt_supplier : get_out_size;"
-    "func badapt_supplier : fetch_batch_sample;"
-    "func badapt_supplier : fetch_valid_sample;"
+    "func badapt_supplier : fetch_sample_tio;"
+    "func badapt_supplier : fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_mul_s )
@@ -167,8 +167,8 @@ BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_mul_s )
     "func badapt_supplier : preferred_loss;"
     "func badapt_supplier : get_in_size;"
     "func badapt_supplier : get_out_size;"
-    "func badapt_supplier : fetch_batch_sample;"
-    "func badapt_supplier : fetch_valid_sample;"
+    "func badapt_supplier : fetch_sample_tio;"
+    "func badapt_supplier : fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_xsg3_s )
@@ -182,8 +182,8 @@ BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_xsg3_s )
     "func badapt_supplier : preferred_loss;"
     "func badapt_supplier : get_in_size;"
     "func badapt_supplier : get_out_size;"
-    "func badapt_supplier : fetch_batch_sample;"
-    "func badapt_supplier : fetch_valid_sample;"
+    "func badapt_supplier : fetch_sample_tio;"
+    "func badapt_supplier : fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_hash_s )
@@ -198,8 +198,8 @@ BCORE_DEFINE_OBJECT_INST( badapt_supplier, badapt_problem_binary_hash_s )
     "func badapt_supplier : preferred_loss;"
     "func badapt_supplier : get_in_size;"
     "func badapt_supplier : get_out_size;"
-    "func badapt_supplier : fetch_batch_sample;"
-    "func badapt_supplier : fetch_valid_sample;"
+    "func badapt_supplier : fetch_sample_tio;"
+    "func badapt_supplier : fetch_sample_vio;"
 "}";
 
 /**********************************************************************************************************************/
@@ -430,21 +430,6 @@ BCORE_DEFINE_OBJECT_INST( badapt_builder, badapt_builder_c1d_funnel_s )
 #include "badapt_training.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: badapt_training_data
-
-BCORE_DEFINE_OBJECT_INST( bcore_inst, badapt_sample_s )
-"{"
-    "bmath_vf3_s in;"
-    "bmath_vf3_s out;"
-"}";
-
-BCORE_DEFINE_OBJECT_INST( bcore_array, badapt_arr_sample_s )
-"{"
-    "aware_t _;"
-    "badapt_sample_s [] arr;"
-"}";
-
-//----------------------------------------------------------------------------------------------------------------------
 // group: badapt_supplier
 
 BCORE_DEFINE_SPECT( bcore_inst, badapt_supplier )
@@ -452,29 +437,51 @@ BCORE_DEFINE_SPECT( bcore_inst, badapt_supplier )
     "bcore_spect_header_s header;"
     "feature strict aware badapt_supplier : get_in_size;"
     "feature strict aware badapt_supplier : get_out_size;"
-    "feature strict aware badapt_supplier : fetch_batch_sample;"
-    "feature strict aware badapt_supplier : fetch_valid_sample;"
-    "feature aware badapt_supplier : fetch_batch_data = badapt_supplier_fetch_batch_data_default;"
-    "feature aware badapt_supplier : fetch_valid_data = badapt_supplier_fetch_valid_data_default;"
+    "feature aware badapt_supplier : fetch_sample_tin;"
+    "feature aware badapt_supplier : fetch_sample_tio;"
+    "feature aware badapt_supplier : fetch_sample_vin;"
+    "feature aware badapt_supplier : fetch_sample_vio;"
     "feature aware badapt_supplier : preferred_loss;"
     "feature aware badapt_supplier : setup_builder = badapt_supplier_setup_builder_default;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: badapt_training_objects
+// group: badapt_guide
 
-BCORE_DEFINE_OBJECT_INST( bcore_inst, badapt_trainer_s )
+BCORE_DEFINE_SPECT( bcore_inst, badapt_guide )
 "{"
-    "aware_t _;"
-    "aware badapt_loss => loss;"
-    "sz_t batch_size = 10000;"
-    "sz_t batch_cycles_per_fetch = 1;"
-    "sz_t fetch_cycles_per_iteration = 4;"
-    "sz_t valid_size = 10000;"
-    "sz_t max_iterations = 10;"
+    "bcore_spect_header_s header;"
+    "feature strict aware badapt_guide : callback;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST( bcore_inst, badapt_trainer_state_s )
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_training_state
+
+BCORE_DEFINE_SPECT( bcore_inst, badapt_training_state )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware badapt_training_state : set_adaptive;"
+    "feature aware badapt_training_state : get_adaptive;"
+    "feature aware badapt_training_state : set_supplier;"
+    "feature aware badapt_training_state : get_supplier;"
+    "feature aware badapt_training_state : set_guide;"
+    "feature aware badapt_training_state : get_guide;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_trainer
+
+BCORE_DEFINE_SPECT( bcore_inst, badapt_trainer )
+"{"
+    "bcore_spect_header_s header;"
+    "feature strict aware badapt_trainer : run;"
+    "feature strict aware badapt_trainer : create_state;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_training_objects
+
+BCORE_DEFINE_OBJECT_INST( badapt_training_state, badapt_training_state_std_s )
 "{"
     "aware_t _;"
     "sz_t iteration = 0;"
@@ -483,27 +490,53 @@ BCORE_DEFINE_OBJECT_INST( bcore_inst, badapt_trainer_state_s )
     "f3_t bias = 0;"
     "aware badapt_adaptive => adaptive;"
     "aware badapt_supplier => supplier;"
-    "aware badapt_training_guide => guide = badapt_training_guide_std_s;"
+    "aware badapt_guide => guide = badapt_guide_std_s;"
     "hidden aware bcore_sink -> log;"
+    "func badapt_training_state : set_adaptive;"
+    "func badapt_training_state : get_adaptive;"
+    "func badapt_training_state : set_supplier;"
+    "func badapt_training_state : get_supplier;"
+    "func badapt_training_state : set_guide;"
+    "func badapt_training_state : get_guide;"
 "}";
 
-//----------------------------------------------------------------------------------------------------------------------
-// group: badapt_training_guide
-
-BCORE_DEFINE_SPECT( bcore_inst, badapt_training_guide )
-"{"
-    "bcore_spect_header_s header;"
-    "feature strict aware badapt_training_guide : callback;"
-"}";
-
-//----------------------------------------------------------------------------------------------------------------------
-// group: badapt_training_objects_2
-
-BCORE_DEFINE_OBJECT_INST( badapt_training_guide, badapt_training_guide_std_s )
+BCORE_DEFINE_OBJECT_INST( badapt_guide, badapt_guide_std_s )
 "{"
     "aware_t _;"
     "f3_t annealing_factor = 0.99;"
-    "func badapt_training_guide : callback;"
+    "func badapt_guide : callback;"
+"}";
+
+/**********************************************************************************************************************/
+// source: badapt_trainer
+#include "badapt_trainer.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_trainer_objects
+
+BCORE_DEFINE_OBJECT_INST( badapt_trainer, badapt_trainer_batch_s )
+"{"
+    "aware_t _;"
+    "aware badapt_loss => loss;"
+    "sz_t batch_size = 10000;"
+    "sz_t batch_cycles_per_fetch = 1;"
+    "sz_t fetch_cycles_per_iteration = 4;"
+    "sz_t valid_size = 10000;"
+    "sz_t max_iterations = 10;"
+    "func badapt_trainer : run;"
+    "func badapt_trainer : create_state;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST( bcore_inst, badapt_sample_batch_s )
+"{"
+    "bmath_vf3_s in;"
+    "bmath_vf3_s out;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST( bcore_array, badapt_arr_sample_batch_s )
+"{"
+    "aware_t _;"
+    "badapt_sample_batch_s [] arr;"
 "}";
 
 /**********************************************************************************************************************/
@@ -515,7 +548,7 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 4231736278 ) );
+            bcore_const_x_set_d( typeof( "badapt_precoded_hash" ), sr_tp( 931744147 ) );
             BCORE_REGISTER_FEATURE( badapt_loss_loss );
             BCORE_REGISTER_FEATURE( badapt_loss_loss_f3 );
             BCORE_REGISTER_FEATURE( badapt_loss_bgrad );
@@ -560,38 +593,38 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_sine_random_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_sine_random_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_sine_random_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_batch_sample, badapt_problem_sine_random_s_fetch_batch_sample );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_valid_sample, badapt_problem_sine_random_s_fetch_valid_sample );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_sine_random_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_sine_random_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_sine_random_s );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_polynom_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_polynom_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_polynom_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_batch_sample, badapt_problem_polynom_s_fetch_batch_sample );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_valid_sample, badapt_problem_polynom_s_fetch_valid_sample );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_polynom_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_polynom_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_polynom_s );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_binary_add_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_binary_add_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_binary_add_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_batch_sample, badapt_problem_binary_add_s_fetch_batch_sample );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_valid_sample, badapt_problem_binary_add_s_fetch_valid_sample );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_binary_add_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_binary_add_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_binary_add_s );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_binary_mul_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_binary_mul_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_binary_mul_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_batch_sample, badapt_problem_binary_mul_s_fetch_batch_sample );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_valid_sample, badapt_problem_binary_mul_s_fetch_valid_sample );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_binary_mul_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_binary_mul_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_binary_mul_s );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_binary_xsg3_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_binary_xsg3_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_binary_xsg3_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_batch_sample, badapt_problem_binary_xsg3_s_fetch_batch_sample );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_valid_sample, badapt_problem_binary_xsg3_s_fetch_valid_sample );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_binary_xsg3_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_binary_xsg3_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_binary_xsg3_s );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_binary_hash_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_binary_hash_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_binary_hash_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_batch_sample, badapt_problem_binary_hash_s_fetch_batch_sample );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_valid_sample, badapt_problem_binary_hash_s_fetch_valid_sample );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_binary_hash_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_binary_hash_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_binary_hash_s );
             BCORE_REGISTER_FFUNC( badapt_activation_fx, badapt_activation_tanh_s_fx );
             BCORE_REGISTER_FFUNC( badapt_activation_dy, badapt_activation_tanh_s_dy );
@@ -664,26 +697,42 @@ vd_t badapt_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_builder_set_out_size, badapt_builder_c1d_funnel_s_set_out_size );
             BCORE_REGISTER_FFUNC( badapt_builder_build, badapt_builder_c1d_funnel_s_build );
             BCORE_REGISTER_OBJECT( badapt_builder_c1d_funnel_s );
-            BCORE_REGISTER_OBJECT( badapt_sample_s );
-            BCORE_REGISTER_OBJECT( badapt_arr_sample_s );
             BCORE_REGISTER_FEATURE( badapt_supplier_get_in_size );
             BCORE_REGISTER_FEATURE( badapt_supplier_get_out_size );
-            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_batch_sample );
-            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_valid_sample );
-            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_batch_data );
-            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_valid_data );
+            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_sample_tin );
+            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_sample_tio );
+            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_sample_vin );
+            BCORE_REGISTER_FEATURE( badapt_supplier_fetch_sample_vio );
             BCORE_REGISTER_FEATURE( badapt_supplier_preferred_loss );
             BCORE_REGISTER_FEATURE( badapt_supplier_setup_builder );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_batch_data, badapt_supplier_fetch_batch_data_default );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_valid_data, badapt_supplier_fetch_valid_data_default );
             BCORE_REGISTER_FFUNC( badapt_supplier_setup_builder, badapt_supplier_setup_builder_default );
             BCORE_REGISTER_SPECT( badapt_supplier );
-            BCORE_REGISTER_OBJECT( badapt_trainer_s );
-            BCORE_REGISTER_OBJECT( badapt_trainer_state_s );
-            BCORE_REGISTER_FEATURE( badapt_training_guide_callback );
-            BCORE_REGISTER_SPECT( badapt_training_guide );
-            BCORE_REGISTER_FFUNC( badapt_training_guide_callback, badapt_training_guide_std_s_callback );
-            BCORE_REGISTER_OBJECT( badapt_training_guide_std_s );
+            BCORE_REGISTER_FEATURE( badapt_guide_callback );
+            BCORE_REGISTER_SPECT( badapt_guide );
+            BCORE_REGISTER_FEATURE( badapt_training_state_set_adaptive );
+            BCORE_REGISTER_FEATURE( badapt_training_state_get_adaptive );
+            BCORE_REGISTER_FEATURE( badapt_training_state_set_supplier );
+            BCORE_REGISTER_FEATURE( badapt_training_state_get_supplier );
+            BCORE_REGISTER_FEATURE( badapt_training_state_set_guide );
+            BCORE_REGISTER_FEATURE( badapt_training_state_get_guide );
+            BCORE_REGISTER_SPECT( badapt_training_state );
+            BCORE_REGISTER_FEATURE( badapt_trainer_run );
+            BCORE_REGISTER_FEATURE( badapt_trainer_create_state );
+            BCORE_REGISTER_SPECT( badapt_trainer );
+            BCORE_REGISTER_FFUNC( badapt_training_state_set_adaptive, badapt_training_state_std_s_set_adaptive );
+            BCORE_REGISTER_FFUNC( badapt_training_state_get_adaptive, badapt_training_state_std_s_get_adaptive );
+            BCORE_REGISTER_FFUNC( badapt_training_state_set_supplier, badapt_training_state_std_s_set_supplier );
+            BCORE_REGISTER_FFUNC( badapt_training_state_get_supplier, badapt_training_state_std_s_get_supplier );
+            BCORE_REGISTER_FFUNC( badapt_training_state_set_guide, badapt_training_state_std_s_set_guide );
+            BCORE_REGISTER_FFUNC( badapt_training_state_get_guide, badapt_training_state_std_s_get_guide );
+            BCORE_REGISTER_OBJECT( badapt_training_state_std_s );
+            BCORE_REGISTER_FFUNC( badapt_guide_callback, badapt_guide_std_s_callback );
+            BCORE_REGISTER_OBJECT( badapt_guide_std_s );
+            BCORE_REGISTER_FFUNC( badapt_trainer_run, badapt_trainer_batch_s_run );
+            BCORE_REGISTER_FFUNC( badapt_trainer_create_state, badapt_trainer_batch_s_create_state );
+            BCORE_REGISTER_OBJECT( badapt_trainer_batch_s );
+            BCORE_REGISTER_OBJECT( badapt_sample_batch_s );
+            BCORE_REGISTER_OBJECT( badapt_arr_sample_batch_s );
         }
         break;
         default: break;

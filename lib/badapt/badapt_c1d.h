@@ -13,7 +13,7 @@
  *  limitations under the License.
  */
 
-/** 1D Convolutional Network
+/** 1D Convolutional Neural Network
  */
 
 #ifndef BADAPT_C1D_H

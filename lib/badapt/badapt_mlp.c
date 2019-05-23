@@ -17,7 +17,7 @@
 #include "bmath_std.h"
 #include "bmath_plot.h"
 #include "badapt_mlp.h"
-#include "badapt_training.h"
+#include "badapt_trainer.h"
 #include "badapt_problem.h"
 
 /**********************************************************************************************************************/
@@ -325,18 +325,16 @@ badapt_adaptive* badapt_builder_mlp_funnel_s_build( const badapt_builder_mlp_fun
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void badapt_mlp_s_run_training( badapt_supplier* problem, badapt_builder* builder, const badapt_trainer_s* trainer )
+void badapt_mlp_s_run_training( badapt_supplier* problem, badapt_builder* builder, const badapt_trainer_batch_s* trainer )
 {
     BCORE_LIFE_INIT();
-    BCORE_LIFE_CREATE( badapt_trainer_state_s,       state );
-    BCORE_LIFE_CREATE( badapt_training_guide_std_s,  guide );
+    badapt_training_state* state = BCORE_LIFE_A_PUSH( badapt_trainer_batch_s_create_state( trainer ) );
     badapt_supplier_a_setup_builder( problem, builder );
-    state->adaptive = badapt_builder_a_build( builder );
-    badapt_supplier_a_replicate( &state->supplier, problem );
-    badapt_training_guide_a_replicate( &state->guide, ( badapt_training_guide* )guide );
-    state->log = bcore_inst_a_clone( ( bcore_inst* )BCORE_STDOUT );
-    badapt_adaptive_a_arc_to_sink( state->adaptive, BCORE_STDOUT );
-    badapt_trainer_s_run( trainer, state );
+    badapt_training_state_a_set_adaptive( state, BCORE_LIFE_A_PUSH( badapt_builder_a_build( builder ) ) );
+    badapt_training_state_a_set_supplier( state, problem );
+    badapt_training_state_a_set_guide( state, ( badapt_guide* )BCORE_LIFE_A_PUSH( badapt_guide_std_s_create() ) );
+    badapt_adaptive_a_arc_to_sink( badapt_training_state_a_get_adaptive( state ), BCORE_STDOUT );
+    badapt_trainer_batch_s_run( trainer, ( badapt_training_state* )state );
     BCORE_LIFE_RETURN();
 }
 
@@ -347,7 +345,7 @@ void badapt_mlp_s_test_sine_random()
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_problem_sine_random_s, problem );
     BCORE_LIFE_CREATE( badapt_builder_mlp_funnel_s,  builder );
-    BCORE_LIFE_CREATE( badapt_trainer_s,             trainer );
+    BCORE_LIFE_CREATE( badapt_trainer_batch_s,             trainer );
 
     problem->input_size = 32;
 
@@ -374,7 +372,7 @@ void badapt_mlp_s_test_binary_add()
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_problem_binary_add_s, problem );
     BCORE_LIFE_CREATE( badapt_builder_mlp_funnel_s, builder );
-    BCORE_LIFE_CREATE( badapt_trainer_s,            trainer );
+    BCORE_LIFE_CREATE( badapt_trainer_batch_s,            trainer );
 
     problem->bits = 8;
 
@@ -403,7 +401,7 @@ void badapt_mlp_s_test_binary_mul()
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_problem_binary_mul_s, problem );
     BCORE_LIFE_CREATE( badapt_builder_mlp_funnel_s, builder );
-    BCORE_LIFE_CREATE( badapt_trainer_s,            trainer );
+    BCORE_LIFE_CREATE( badapt_trainer_batch_s,            trainer );
 
     problem->bits = 5;
 
@@ -432,7 +430,7 @@ void badapt_mlp_s_test_binary_xsg3()
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_problem_binary_xsg3_s, problem );
     BCORE_LIFE_CREATE( badapt_builder_mlp_funnel_s,  builder );
-    BCORE_LIFE_CREATE( badapt_trainer_s,             trainer );
+    BCORE_LIFE_CREATE( badapt_trainer_batch_s,             trainer );
 
     /// xsg3 <= 17 bits is learned very easily with 2 layers, while >= 18 bits seems extremely difficult for any configurations
     problem->bits = 17;
@@ -461,7 +459,7 @@ void badapt_mlp_s_test_binary_hash()
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_problem_binary_hash_s, problem );
     BCORE_LIFE_CREATE( badapt_builder_mlp_funnel_s,  builder );
-    BCORE_LIFE_CREATE( badapt_trainer_s,             trainer );
+    BCORE_LIFE_CREATE( badapt_trainer_batch_s,             trainer );
 
     problem->bits = 9;
     problem->reverse = true;
@@ -491,7 +489,7 @@ void badapt_mlp_s_test_polynom()
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_problem_polynom_s,     problem );
     BCORE_LIFE_CREATE( badapt_builder_mlp_funnel_s,  builder );
-    BCORE_LIFE_CREATE( badapt_trainer_s,             trainer );
+    BCORE_LIFE_CREATE( badapt_trainer_batch_s,             trainer );
 
     problem->input_size  = 16;
     problem->output_size = 8;   // polynomial order + 1

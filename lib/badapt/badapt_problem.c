@@ -27,13 +27,13 @@ const badapt_loss* badapt_problem_sine_random_s_preferred_loss( const badapt_pro
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_sine_random_s_fetch_batch_sample( badapt_problem_sine_random_s* o, badapt_sample_s* dst )
+void badapt_problem_sine_random_s_fetch_sample_tio( badapt_problem_sine_random_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
     o->rval = bcore_xsg1_u2( o->rval );
     bl_t pos = ( o->rval & 1 ) == 0; // pos vs neg sample
     o->rval = bcore_xsg1_u2( o->rval );
-    bmath_vf3_s_set_size( &dst->in,  o->input_size );
-    bmath_vf3_s_set_size( &dst->out, 1 );
+    bmath_vf3_s_set_size( in,  o->input_size );
+    bmath_vf3_s_set_size( out, 1 );
 
     f3_t omega = 1.0 * f3_pi() * f3_rnd_pos( &o->rval );
     f3_t amplitude = 4.0 * f3_rnd_pos( &o->rval );
@@ -43,9 +43,9 @@ void badapt_problem_sine_random_s_fetch_batch_sample( badapt_problem_sine_random
         for( sz_t i = 0; i < o->input_size; i++ )
         {
             f3_t vp = sin( omega * i ) * amplitude;
-            dst->in.data[ i ] = vp;
+            in->data[ i ] = vp;
         }
-        dst->out.data[ 0 ] = o->pos_tgt;
+        out->data[ 0 ] = o->pos_tgt;
     }
     else
     {
@@ -54,18 +54,18 @@ void badapt_problem_sine_random_s_fetch_batch_sample( badapt_problem_sine_random
         {
             rwalker += f3_rnd_sym( &o->rval );
             f3_t vn = rwalker;
-            dst->in.data[ i ] = vn;
+            in->data[ i ] = vn;
         }
-        dst->out.data[ 0 ] = o->neg_tgt;
+        out->data[ 0 ] = o->neg_tgt;
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_sine_random_s_fetch_valid_sample( badapt_problem_sine_random_s* o, badapt_sample_s* dst )
+void badapt_problem_sine_random_s_fetch_sample_vio( badapt_problem_sine_random_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
     /// no need to separate between batch and valid
-    badapt_problem_sine_random_s_fetch_batch_sample( o, dst );
+    badapt_problem_sine_random_s_fetch_sample_tio( o, in, out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -81,10 +81,10 @@ const badapt_loss* badapt_problem_binary_add_s_preferred_loss( const badapt_prob
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_add_s_fetch_batch_sample( badapt_problem_binary_add_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_add_s_fetch_sample_tio( badapt_problem_binary_add_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    bmath_vf3_s_set_size( &dst->in,  o->bits * 2 );
-    bmath_vf3_s_set_size( &dst->out, o->bits + 1 );
+    bmath_vf3_s_set_size( in,  o->bits * 2 );
+    bmath_vf3_s_set_size( out, o->bits + 1 );
 
     u2_t v1 = ( o->rval = bcore_xsg1_u2( o->rval ) ) & ( ( 1 << o->bits ) - 1 );
     u2_t v2 = ( o->rval = bcore_xsg1_u2( o->rval ) ) & ( ( 1 << o->bits ) - 1 );
@@ -92,22 +92,22 @@ void badapt_problem_binary_add_s_fetch_batch_sample( badapt_problem_binary_add_s
 
     for( sz_t i = 0; i < o->bits; i++ )
     {
-        dst->in.data[ i           ] = ( ( v1 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
-        dst->in.data[ i + o->bits ] = ( ( v2 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        in->data[ i           ] = ( ( v1 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        in->data[ i + o->bits ] = ( ( v2 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 
     for( sz_t i = 0; i <= o->bits; i++ )
     {
-        dst->out.data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        out->data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_add_s_fetch_valid_sample( badapt_problem_binary_add_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_add_s_fetch_sample_vio( badapt_problem_binary_add_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
     /// no need to separate between batch and valid
-    badapt_problem_binary_add_s_fetch_batch_sample( o, dst );
+    badapt_problem_binary_add_s_fetch_sample_tio( o, in, out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -123,10 +123,10 @@ const badapt_loss* badapt_problem_binary_mul_s_preferred_loss( const badapt_prob
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_mul_s_fetch_batch_sample( badapt_problem_binary_mul_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_mul_s_fetch_sample_tio( badapt_problem_binary_mul_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    bmath_vf3_s_set_size( &dst->in,  o->bits * 2 );
-    bmath_vf3_s_set_size( &dst->out, o->bits * 2 );
+    bmath_vf3_s_set_size( in,  o->bits * 2 );
+    bmath_vf3_s_set_size( out, o->bits * 2 );
 
     u2_t v1 = ( o->rval = bcore_xsg1_u2( o->rval ) ) & ( ( 1 << o->bits ) - 1 );
     u2_t v2 = ( o->rval = bcore_xsg1_u2( o->rval ) ) & ( ( 1 << o->bits ) - 1 );
@@ -134,22 +134,22 @@ void badapt_problem_binary_mul_s_fetch_batch_sample( badapt_problem_binary_mul_s
 
     for( sz_t i = 0; i < o->bits; i++ )
     {
-        dst->in.data[ i           ] = ( ( v1 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
-        dst->in.data[ i + o->bits ] = ( ( v2 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        in->data[ i           ] = ( ( v1 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        in->data[ i + o->bits ] = ( ( v2 & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 
-    for( sz_t i = 0; i < dst->out.size; i++ )
+    for( sz_t i = 0; i < out->size; i++ )
     {
-        dst->out.data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        out->data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_mul_s_fetch_valid_sample( badapt_problem_binary_mul_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_mul_s_fetch_sample_vio( badapt_problem_binary_mul_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
     /// no need to separate between batch and valid
-    badapt_problem_binary_mul_s_fetch_batch_sample( o, dst );
+    badapt_problem_binary_mul_s_fetch_sample_tio( o, in, out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -165,31 +165,31 @@ const badapt_loss* badapt_problem_binary_xsg3_s_preferred_loss( const badapt_pro
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_xsg3_s_fetch_batch_sample( badapt_problem_binary_xsg3_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_xsg3_s_fetch_sample_tio( badapt_problem_binary_xsg3_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    bmath_vf3_s_set_size( &dst->in,  o->bits );
-    bmath_vf3_s_set_size( &dst->out, o->bits );
+    bmath_vf3_s_set_size( in,  o->bits );
+    bmath_vf3_s_set_size( out, o->bits );
 
     u2_t vi = ( o->rval = bcore_xsg1_u2( o->rval ) ) & ( ( 1 << o->bits ) - 1 );
     u2_t vo = bcore_xsg3_u2( vi ) & ( ( 1 << o->bits ) - 1 );
 
     for( sz_t i = 0; i < o->bits; i++ )
     {
-        dst->in.data[ i ] = ( ( vi & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        in->data[ i ] = ( ( vi & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 
-    for( sz_t i = 0; i < dst->out.size; i++ )
+    for( sz_t i = 0; i < out->size; i++ )
     {
-        dst->out.data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        out->data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_xsg3_s_fetch_valid_sample( badapt_problem_binary_xsg3_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_xsg3_s_fetch_sample_vio( badapt_problem_binary_xsg3_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
     /// no need to separate between batch and valid
-    badapt_problem_binary_xsg3_s_fetch_batch_sample( o, dst );
+    badapt_problem_binary_xsg3_s_fetch_sample_tio( o, in, out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -205,10 +205,10 @@ const badapt_loss* badapt_problem_binary_hash_s_preferred_loss( const badapt_pro
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_hash_s_fetch_batch_sample( badapt_problem_binary_hash_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_hash_s_fetch_sample_tio( badapt_problem_binary_hash_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    bmath_vf3_s_set_size( &dst->in,  o->bits );
-    bmath_vf3_s_set_size( &dst->out, o->bits );
+    bmath_vf3_s_set_size( in,  o->bits );
+    bmath_vf3_s_set_size( out, o->bits );
 
     tp_t vi = ( o->rval = bcore_xsg1_u2( o->rval ) ) & ( ( 1 << o->bits ) - 1 );
     tp_t vo = bcore_tp_fold_tp( bcore_tp_init(), vi ) & ( ( 1 << o->bits ) - 1 );
@@ -217,21 +217,21 @@ void badapt_problem_binary_hash_s_fetch_batch_sample( badapt_problem_binary_hash
 
     for( sz_t i = 0; i < o->bits; i++ )
     {
-        dst->in.data[ i ] = ( ( vi & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        in->data[ i ] = ( ( vi & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 
-    for( sz_t i = 0; i < dst->out.size; i++ )
+    for( sz_t i = 0; i < out->size; i++ )
     {
-        dst->out.data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
+        out->data[ i ] = ( ( vo & ( 1 << i ) ) != 0 ) ? 1.0 : -1.0;
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_binary_hash_s_fetch_valid_sample( badapt_problem_binary_hash_s* o, badapt_sample_s* dst )
+void badapt_problem_binary_hash_s_fetch_sample_vio( badapt_problem_binary_hash_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
     /// no need to separate between batch and valid
-    badapt_problem_binary_hash_s_fetch_batch_sample( o, dst );
+    badapt_problem_binary_hash_s_fetch_sample_tio( o, in, out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -247,12 +247,12 @@ const badapt_loss* badapt_problem_polynom_s_preferred_loss( const badapt_problem
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_polynom_s_fetch_batch_sample( badapt_problem_polynom_s* o, badapt_sample_s* dst )
+void badapt_problem_polynom_s_fetch_sample_tio( badapt_problem_polynom_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    bmath_vf3_s_set_size( &dst->in,  o->input_size );
-    bmath_vf3_s_set_size( &dst->out, o->output_size );
+    bmath_vf3_s_set_size( in,  o->input_size );
+    bmath_vf3_s_set_size( out, o->output_size );
 
-    for( sz_t i = 0; i < o->output_size; i++ ) dst->out.data[ i ] = f3_xsg1_sym( &o->rval );
+    for( sz_t i = 0; i < o->output_size; i++ ) out->data[ i ] = f3_xsg1_sym( &o->rval );
     for( sz_t i = 0; i < o->input_size;  i++ )
     {
         f3_t x1 = 2.0 * ( ( ( f3_t )i / ( o->input_size - 1 ) ) - 0.5 );
@@ -260,20 +260,20 @@ void badapt_problem_polynom_s_fetch_batch_sample( badapt_problem_polynom_s* o, b
         f3_t y = 0;
         for( sz_t i = 0; i < o->output_size; i++ )
         {
-            y += x * dst->out.data[ i ] * o->range;
+            y += x * out->data[ i ] * o->range;
             x *= x1;
         }
 
-        dst->in.data[ i ] = y + o->noise_level * f3_xsg1_sym( &o->rval );
+        in->data[ i ] = y + o->noise_level * f3_xsg1_sym( &o->rval );
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void badapt_problem_polynom_s_fetch_valid_sample( badapt_problem_polynom_s* o, badapt_sample_s* dst )
+void badapt_problem_polynom_s_fetch_sample_vio( badapt_problem_polynom_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
     /// no need to separate between batch and valid
-    badapt_problem_polynom_s_fetch_batch_sample( o, dst );
+    badapt_problem_polynom_s_fetch_sample_tio( o, in, out );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
