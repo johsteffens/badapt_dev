@@ -3,6 +3,8 @@
 #include <sys/time.h>
 
 #include "badapt_std.h"
+#include "badapt_dev_signal.h"
+#include "badapt_ern.h"
 
 void activator_test( void )
 {
@@ -30,25 +32,28 @@ int main( void )
 {
     bcore_register_signal_handler( bmath_signal_handler );
     bcore_register_signal_handler( badapt_signal_handler );
+    bcore_register_signal_handler( badapt_dev_signal_handler );
     if( bcore_precoder_run_globally() ) { bcore_down( true ); return 0; }
 
     //activator_test();
     //virtual_test();
     //return 0;
 
-    badapt_mlp_s_test_sine_random();
+//    badapt_mlp_s_test_sine_random();
 //    badapt_mlp_s_test_binary_add();
 //    badapt_mlp_s_test_binary_mul();
 //    badapt_mlp_s_test_binary_xsg3();
 //    badapt_mlp_s_test_binary_hash();
 //    badapt_mlp_s_test_polynom();
 
-    badapt_c1d_s_test_sine_random();
+//    badapt_c1d_s_test_sine_random();
 //    badapt_c1d_s_test_binary_add();
 //    badapt_c1d_s_test_binary_mul();
 //    badapt_c1d_s_test_binary_xsg3();
 //    badapt_c1d_s_test_binary_hash();
 //    badapt_c1d_s_test_polynom();
+
+    badapt_ern_s_test_recurrent_kjv();
 
     //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
     //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "bmath_adaptive_mlp" ), NULL ) );
