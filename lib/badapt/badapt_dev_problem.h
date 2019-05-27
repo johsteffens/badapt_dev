@@ -55,6 +55,19 @@ self badapt_problem_recurrent_kjv_s = badapt_supplier
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+self badapt_guide_char_encode_s = badapt_guide
+{
+    aware_t _;
+    aware badapt_guide => guide_default = badapt_guide_std_s;
+    bcore_arr_sz_s -> charmap;
+    st_s           -> charset;
+    f3_t pos_tgt    =  0.9;
+    f3_t neg_tgt    = -0.9;
+    func badapt_guide : callback;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #endif // BETH_PRECODE_SECTION
 
 /**********************************************************************************************************************/

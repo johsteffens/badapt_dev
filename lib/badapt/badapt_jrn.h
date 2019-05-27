@@ -13,20 +13,20 @@
  *  limitations under the License.
  */
 
-/** Elman Recurrent Network
+/** Jordan Recurrent Network
  *
  *  Schematics (activation omitted):
  *
  *       vec_input---->wgt_input-----.
  *                                  (+)-->vec_hidden-->wgt_hidden-->vec_output
- *    .->vec_context-->wgt_context---'        |
- *    |                                       |
- *    '---------------------------------------'
+ *    .->vec_context-->wgt_context---'                                   |
+ *    |                                                                  |
+ *    '------------------------------------------------------------------'
  *
  */
 
-#ifndef BADAPT_ERN_H
-#define BADAPT_ERN_H
+#ifndef BADAPT_JRN_H
+#define BADAPT_JRN_H
 
 #include "bcore_std.h"
 #include "badapt_activator.h"
@@ -35,12 +35,12 @@
 
 /**********************************************************************************************************************/
 
-BETH_PRECODE( badapt_ern )
+BETH_PRECODE( badapt_jrn )
 #ifdef BETH_PRECODE_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-self badapt_ern_s = badapt_adaptive
+self badapt_jrn_s = badapt_adaptive
 {
     aware_t _;
 
@@ -85,7 +85,7 @@ self badapt_ern_s = badapt_adaptive
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-self badapt_builder_ern_s = badapt_builder
+self badapt_builder_jrn_s = badapt_builder
 {
     aware_t _;
 
@@ -122,12 +122,12 @@ self badapt_builder_ern_s = badapt_builder
 /**********************************************************************************************************************/
 // tests
 
-void badapt_ern_s_test_recurrent_kjv();
+void badapt_jrn_s_test_recurrent_kjv();
 
 /**********************************************************************************************************************/
 
-vd_t badapt_ern_signal_handler( const bcore_signal_s* o );
+vd_t badapt_jrn_signal_handler( const bcore_signal_s* o );
 
 /**********************************************************************************************************************/
 
-#endif // BADAPT_ERN_H
+#endif // BADAPT_JRN_H

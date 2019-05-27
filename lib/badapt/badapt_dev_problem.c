@@ -19,8 +19,17 @@
 /**********************************************************************************************************************/
 #ifdef TYPEOF_badapt_problem_recurrent_kjv_s
 
-//static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 []!.,:;\"\n";
-static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyz ";
+static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 []!.,:;";
+//static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyz ";
+
+//----------------------------------------------------------------------------------------------------------------------
+
+static void char_to_vec( const st_s* charset, const bcore_arr_sz_s* charmap, f3_t pos_tgt, f3_t neg_tgt, u0_t c, bmath_vf3_s* vec )
+{
+    bmath_vf3_s_set_size( vec, charset->size );
+    sz_t idx = charmap->data[ c ];
+    for( sz_t i = 0; i < vec->size; i++ ) vec->data[ i ] = ( i == idx ) ? pos_tgt : neg_tgt;
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,15 +46,6 @@ sz_t badapt_problem_recurrent_kjv_s_get_out_size( const badapt_problem_recurrent
 }
 
 const badapt_loss* badapt_problem_recurrent_kjv_s_preferred_loss( const badapt_problem_recurrent_kjv_s* o ) { return o->preferred_loss; }
-
-//----------------------------------------------------------------------------------------------------------------------
-
-static void badapt_problem_recurrent_kjv_s_char_to_vec( badapt_problem_recurrent_kjv_s* o, u0_t c, bmath_vf3_s* vec )
-{
-    bmath_vf3_s_set_size( vec, o->charset->size );
-    sz_t idx = o->charmap->data[ c ];
-    for( sz_t i = 0; i < vec->size; i++ ) vec->data[ i ] = ( i == idx ) ? o->pos_tgt : o->neg_tgt;
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -78,8 +78,8 @@ void badapt_problem_recurrent_kjv_s_fetch_sample_tio( badapt_problem_recurrent_k
 
     u0_t cur_char = c;
 
-    badapt_problem_recurrent_kjv_s_char_to_vec( o, o->t_last_char,  in );
-    badapt_problem_recurrent_kjv_s_char_to_vec( o,       cur_char, out );
+    char_to_vec( o->charset, o->charmap, o->pos_tgt, o->neg_tgt, o->t_last_char,  in );
+    char_to_vec( o->charset, o->charmap, o->pos_tgt, o->neg_tgt,       cur_char, out );
 
 //    bcore_msg_fa( "#<char>", cur_char );
 
@@ -97,6 +97,46 @@ void badapt_problem_recurrent_kjv_s_fetch_sample_vio( badapt_problem_recurrent_k
 //----------------------------------------------------------------------------------------------------------------------
 
 #endif // TYPEOF_badapt_problem_recurrent_kjv_s
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+// badapt_guide_char_encode_s
+
+bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, badapt_training_state* state )
+{
+    BCORE_LIFE_INIT();
+    badapt_adaptive* adaptive = BCORE_LIFE_A_PUSH( badapt_adaptive_a_clone( badapt_training_state_a_get_adaptive( state ) ) );
+    sz_t vec_size = bcore_strlen( kjv_charset );
+    BCORE_LIFE_CREATE( bmath_vf3_s, vin );
+    BCORE_LIFE_CREATE( bmath_vf3_s, vout );
+    bmath_vf3_s_set_size( vin, vec_size );
+    bmath_vf3_s_set_size( vout, vec_size );
+
+    bmath_vf3_s_zro( vin );
+
+    u2_t rval = 1234;
+
+    for( sz_t i = 0; i < 64; i++ )
+    {
+        badapt_adaptive_a_minfer( adaptive, vin, vout );
+        bmath_vf3_s_add_scl_f3( vout, -bmath_vf3_s_min( vout ), vout );
+        bmath_vf3_s_mul_f3( vout, 1.0 / bmath_vf3_s_max( vout ), vout );
+
+        for( sz_t j = 0; j < vec_size; j++ ) vout->data[ j ] *= 1.0 - 0.2 * f3_xsg2_pos( &rval );
+
+        u0_t c = kjv_charset[ bmath_vf3_s_idx_max( vout ) ];
+        for( sz_t j = 0; j < vec_size; j++ ) vin->data[ j ] = ( kjv_charset[ j ] == c ) ? 0.9 : -0.9;
+        bcore_msg_fa( "#<char>", c );
+    }
+    bcore_msg_fa( ";  " );
+
+    BCORE_LIFE_DOWN();
+
+    return badapt_guide_a_callback( o->guide_default, state );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 
