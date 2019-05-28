@@ -260,7 +260,7 @@ void badapt_jrn_s_test_recurrent_kjv()
 
     trainer->fetch_cycles_per_iteration = 10;
     trainer->batch_cycles_per_fetch = 1;
-    trainer->max_iterations = 100;
+    trainer->max_iterations = 10;
 
     badapt_jrn_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
     BCORE_LIFE_RETURN();

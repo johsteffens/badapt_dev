@@ -36,6 +36,9 @@ int main( void )
     bcore_register_signal_handler( badapt_dev_signal_handler );
     if( bcore_precoder_run_globally() ) { bcore_down( true ); return 0; }
 
+//    bcore_quicktypes_to_stdout( NULL );
+//    return 0;
+
     //activator_test();
     //virtual_test();
     //return 0;
