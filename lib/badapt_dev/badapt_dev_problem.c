@@ -19,7 +19,8 @@
 /**********************************************************************************************************************/
 #ifdef TYPEOF_badapt_problem_recurrent_kjv_s
 
-static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 []!.,:;";
+static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ !.,";
+//static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 []!.,:;";
 //static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyz ";
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -113,20 +114,41 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
     bmath_vf3_s_set_size( vin, vec_size );
     bmath_vf3_s_set_size( vout, vec_size );
 
-    bmath_vf3_s_zro( vin );
-
     u2_t rval = 1234;
+    sz_t text_size = 92;
 
-    for( sz_t i = 0; i < 64; i++ )
+    bmath_vf3_s_set_random( vin, 1.0, -0.1, 0.1, &rval );
+
+    f3_t exp = 4;
+
+    for( sz_t i = 0; i < text_size; i++ )
     {
         badapt_adaptive_a_minfer( adaptive, vin, vout );
         bmath_vf3_s_add_scl_f3( vout, -bmath_vf3_s_min( vout ), vout );
         bmath_vf3_s_mul_f3( vout, 1.0 / bmath_vf3_s_max( vout ), vout );
 
-        for( sz_t j = 0; j < vec_size; j++ ) vout->data[ j ] *= 1.0 - 0.2 * f3_xsg2_pos( &rval );
+        f3_t sum = 0;
+        for( sz_t j = 0; j < vec_size; j++ )
+        {
+            sum += pow( vout->data[ j ], exp );
+        }
 
-        u0_t c = kjv_charset[ bmath_vf3_s_idx_max( vout ) ];
-        for( sz_t j = 0; j < vec_size; j++ ) vin->data[ j ] = ( kjv_charset[ j ] == c ) ? 0.9 : -0.9;
+        f3_t thr = f3_xsg2_pos( &rval ) * sum;
+
+        sum = 0;
+        sz_t idx = 0;
+        for( sz_t j = 0; j < vec_size; j++ )
+        {
+            sum += pow( vout->data[ j ], exp );
+            if( sum > thr )
+            {
+                idx = j;
+                break;
+            }
+        }
+
+        u0_t c = kjv_charset[ idx ];
+        for( sz_t j = 0; j < vec_size; j++ ) vin->data[ j ] = ( j == idx ) ? 0.9 : -0.9;
         bcore_msg_fa( "#<char>", c );
     }
     bcore_msg_fa( ";  " );

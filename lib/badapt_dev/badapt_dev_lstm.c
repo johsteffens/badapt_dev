@@ -16,15 +16,16 @@
 #include "bcore_std.h"
 #include "bmath_std.h"
 #include "bmath_plot.h"
-#include "badapt_dev_jrn.h"
+#include "badapt_dev_lstm.h"
 #include "badapt_trainer.h"
 #include "badapt_dev_problem.h"
+
+#ifdef TYPEOF_badapt_dev_lstm_s
 
 /**********************************************************************************************************************/
 /// tests
 
-
-void badapt_dev_jrn_s_run_training( badapt_supplier* problem, badapt_builder* builder, const badapt_trainer_batch_s* trainer )
+void badapt_dev_lstm_s_run_training( badapt_supplier* problem, badapt_builder* builder, const badapt_trainer_batch_s* trainer )
 {
     BCORE_LIFE_INIT();
     badapt_training_state* state = BCORE_LIFE_A_PUSH( badapt_trainer_batch_s_create_state( trainer ) );
@@ -38,15 +39,15 @@ void badapt_dev_jrn_s_run_training( badapt_supplier* problem, badapt_builder* bu
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-void badapt_dev_jrn_s_test_recurrent_kjv()
+/*
+void badapt_dev_lstm_s_test_recurrent_kjv()
 {
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( badapt_problem_recurrent_kjv_s, problem );
-    BCORE_LIFE_CREATE( badapt_builder_jrn_s,   builder );
+    BCORE_LIFE_CREATE( badapt_builder_lstm_s,  builder );
     BCORE_LIFE_CREATE( badapt_trainer_batch_s, trainer );
 
-    builder->size_hidden        = 32;
+    builder->size_hidden        = 256;
     builder->dynamics.epsilon   = 0.01;
     builder->dynamics.lambda_l2 = 0.00001;
     builder->context_epsilon_factor = 0.1;
@@ -60,19 +61,21 @@ void badapt_dev_jrn_s_test_recurrent_kjv()
     trainer->batch_cycles_per_fetch = 1;
     trainer->max_iterations = 10;
 
-    badapt_dev_jrn_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
+    badapt_dev_lstm_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
     BCORE_LIFE_RETURN();
 }
-
+*/
 // ---------------------------------------------------------------------------------------------------------------------
+
+#endif // TYPEOF_badapt_dev_lstm_s
 
 /**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-vd_t badapt_dev_jrn_signal_handler( const bcore_signal_s* o )
+vd_t badapt_dev_lstm_signal_handler( const bcore_signal_s* o )
 {
-    switch( bcore_signal_s_handle_type( o, typeof( "badapt_jrn" ) ) )
+    switch( bcore_signal_s_handle_type( o, typeof( "badapt_lstm" ) ) )
     {
         case TYPEOF_init1:
         {
