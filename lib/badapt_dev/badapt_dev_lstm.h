@@ -52,7 +52,7 @@ BETH_PRECODE( badapt_dev_lstm )
 #ifdef BETH_PRECODE_SECTION
 
 
-self :s = aware badapt_adaptive
+stamp :s = aware badapt_adaptive
 {
     // === architecture parameters ================================
 

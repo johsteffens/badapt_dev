@@ -31,7 +31,7 @@ BETH_PRECODE( badapt_dev_problem_objects )
 /** Type: Recurrent Sequence Estimator
  *  Method: Estimate characters of KJV Bible
  */
-self badapt_problem_recurrent_kjv_s = badapt_supplier
+stamp badapt_problem_recurrent_kjv_s = badapt_supplier
 {
     aware_t _;
     aware bcore_source => source;
@@ -55,7 +55,7 @@ self badapt_problem_recurrent_kjv_s = badapt_supplier
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-self badapt_guide_char_encode_s = badapt_guide
+stamp badapt_guide_char_encode_s = badapt_guide
 {
     aware_t _;
     aware badapt_guide => guide_default = badapt_guide_std_s;

@@ -225,7 +225,7 @@ vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 1102584776 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 2009519644 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_kjv_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_kjv_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_kjv_s_get_out_size );
