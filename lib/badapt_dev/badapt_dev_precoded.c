@@ -33,11 +33,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_kjv_s )
     "f3_t pos_tgt = 0.9;"
     "f3_t neg_tgt = -0.9;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
-    "func badapt_supplier : preferred_loss;"
-    "func badapt_supplier : get_in_size;"
-    "func badapt_supplier : get_out_size;"
-    "func badapt_supplier : fetch_sample_tio;"
-    "func badapt_supplier : fetch_sample_vio;"
+    "func badapt_supplier:preferred_loss;"
+    "func badapt_supplier:get_in_size;"
+    "func badapt_supplier:get_out_size;"
+    "func badapt_supplier:fetch_sample_tio;"
+    "func badapt_supplier:fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
@@ -49,7 +49,7 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
     "st_s -> charset;"
     "f3_t pos_tgt = 0.9;"
     "f3_t neg_tgt = -0.9;"
-    "func badapt_guide : callback;"
+    "func badapt_guide:callback;"
 "}";
 
 /**********************************************************************************************************************/
@@ -93,13 +93,13 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_dev_ern_s )
     "hidden bmath_mf3_s gw_hx;"
     "hidden bmath_mf3_s gw_hc;"
     "hidden badapt_dev_ern_arr_layer_s arr_layer;"
-    "func : get_in_size;"
-    "func : get_out_size;"
-    "func : get_dynamics_std;"
-    "func : set_dynamics_std;"
-    "func : arc_to_sink;"
-    "func : minfer;"
-    "func : bgrad_adapt;"
+    "func :get_in_size;"
+    "func :get_out_size;"
+    "func :get_dynamics_std;"
+    "func :set_dynamics_std;"
+    "func :arc_to_sink;"
+    "func :minfer;"
+    "func :bgrad_adapt;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( badapt_dev_ern_builder_s )
@@ -113,11 +113,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_dev_ern_builder_s )
     "u2_t random_seed = 1234;"
     "aware badapt_activator => a_h;"
     "aware badapt_activator => a_o;"
-    "func : get_in_size;"
-    "func : set_in_size;"
-    "func : get_out_size;"
-    "func : set_out_size;"
-    "func : build;"
+    "func :get_in_size;"
+    "func :set_in_size;"
+    "func :get_out_size;"
+    "func :set_out_size;"
+    "func :build;"
 "}";
 
 /**********************************************************************************************************************/
@@ -162,13 +162,13 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_dev_jrn_s )
     "hidden bmath_mf3_s gw_hc;"
     "hidden bmath_mf3_s gw_oh;"
     "hidden badapt_dev_jrn_arr_layer_s arr_layer;"
-    "func : get_in_size;"
-    "func : get_out_size;"
-    "func : get_dynamics_std;"
-    "func : set_dynamics_std;"
-    "func : arc_to_sink;"
-    "func : minfer;"
-    "func : bgrad_adapt;"
+    "func :get_in_size;"
+    "func :get_out_size;"
+    "func :get_dynamics_std;"
+    "func :set_dynamics_std;"
+    "func :arc_to_sink;"
+    "func :minfer;"
+    "func :bgrad_adapt;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( badapt_dev_jrn_builder_s )
@@ -182,11 +182,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_dev_jrn_builder_s )
     "u2_t random_seed = 1234;"
     "aware badapt_activator => a_h;"
     "aware badapt_activator => a_o;"
-    "func : get_in_size;"
-    "func : set_in_size;"
-    "func : get_out_size;"
-    "func : set_out_size;"
-    "func : build;"
+    "func :get_in_size;"
+    "func :set_in_size;"
+    "func :get_out_size;"
+    "func :set_out_size;"
+    "func :build;"
 "}";
 
 /**********************************************************************************************************************/
@@ -225,7 +225,7 @@ vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 2009519644 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 3769331262 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_kjv_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_kjv_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_kjv_s_get_out_size );

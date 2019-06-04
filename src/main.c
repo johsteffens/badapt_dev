@@ -57,10 +57,10 @@ int main( void )
 //    badapt_c1d_s_test_binary_hash();
 //    badapt_c1d_s_test_polynom();
 
-//    CPU_TIME_TO_STDOUT( badapt_ern_s_test_recurrent_kjv() );
+    CPU_TIME_TO_STDOUT( badapt_ern_s_test_recurrent_kjv() );
 //    CPU_TIME_TO_STDOUT( badapt_dev_ern_s_test_recurrent_kjv() );
-    CPU_TIME_TO_STDOUT( badapt_jrn_s_test_recurrent_kjv() );
-    CPU_TIME_TO_STDOUT( badapt_dev_jrn_s_test_recurrent_kjv() );
+//    CPU_TIME_TO_STDOUT( badapt_jrn_s_test_recurrent_kjv() );
+//    CPU_TIME_TO_STDOUT( badapt_dev_jrn_s_test_recurrent_kjv() );
 //    badapt_dev_jrn_s_test_recurrent_kjv();
 
     //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
