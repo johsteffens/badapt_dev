@@ -16,14 +16,57 @@
 #include "badapt_dev_problem.h"
 #include "badapt_loss.h"
 
-/**********************************************************************************************************************/
-#ifdef TYPEOF_badapt_problem_recurrent_kjv_s
-
-static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ !.,";
-//static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 []!.,:;";
-//static sc_t kjv_charset = "abcdefghijklmnopqrstuvwxyz ";
+static sc_t encode_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ !.,";
+//static sc_t encode_charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 []!.,:;";
+//static sc_t encode_charset = "abcdefghijklmnopqrstuvwxyz ";
 
 //----------------------------------------------------------------------------------------------------------------------
+
+
+/**********************************************************************************************************************/
+/// badapt_problem_recurrent_abc_s
+
+sz_t badapt_problem_recurrent_abc_s_get_in_size(  const badapt_problem_recurrent_abc_s* o )
+{
+    return bcore_strlen( encode_charset );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+sz_t badapt_problem_recurrent_abc_s_get_out_size( const badapt_problem_recurrent_abc_s* o )
+{
+    return bcore_strlen( encode_charset );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_recurrent_abc_s_fetch_sample_tio( badapt_problem_recurrent_abc_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
+{
+    if(  in->size == 0 ) bmath_vf3_s_set_size( in,  badapt_problem_recurrent_abc_s_get_in_size( o ) );
+    if( out->size == 0 ) bmath_vf3_s_set_size( out, badapt_problem_recurrent_abc_s_get_out_size( o ) );
+    sz_t size    = in->size;
+    sz_t in_idx  = o->index;
+    sz_t out_idx = ( o->index + 1 ) % out->size;
+    o->index = out_idx;
+    for( sz_t i = 0; i < size; i++ )
+    {
+        in ->data[ i ] = ( i ==  in_idx ) ? o->pos_tgt : o->neg_tgt;
+        out->data[ i ] = ( i == out_idx ) ? o->pos_tgt : o->neg_tgt;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_recurrent_abc_s_fetch_sample_vio( badapt_problem_recurrent_abc_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
+{
+    /// TODO: separate between batch and valid
+    badapt_problem_recurrent_abc_s_fetch_sample_tio( o, in, out );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+/// badapt_problem_recurrent_kjv_s
 
 static void char_to_vec( const st_s* charset, const bcore_arr_sz_s* charmap, f3_t pos_tgt, f3_t neg_tgt, u0_t c, bmath_vf3_s* vec )
 {
@@ -36,17 +79,15 @@ static void char_to_vec( const st_s* charset, const bcore_arr_sz_s* charmap, f3_
 
 sz_t badapt_problem_recurrent_kjv_s_get_in_size(  const badapt_problem_recurrent_kjv_s* o )
 {
-    return o->charset ? o->charset->size : bcore_strlen( kjv_charset );
+    return o->charset ? o->charset->size : bcore_strlen( encode_charset );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 sz_t badapt_problem_recurrent_kjv_s_get_out_size( const badapt_problem_recurrent_kjv_s* o )
 {
-    return o->charset ? o->charset->size : bcore_strlen( kjv_charset );
+    return o->charset ? o->charset->size : bcore_strlen( encode_charset );
 }
-
-const badapt_loss* badapt_problem_recurrent_kjv_s_preferred_loss( const badapt_problem_recurrent_kjv_s* o ) { return o->preferred_loss; }
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +97,7 @@ static void badapt_problem_recurrent_kjv_s_create_charmap( badapt_problem_recurr
     {
         o->charmap = bcore_arr_sz_s_create();
         bcore_arr_sz_s_fill( o->charmap, 256, -1 );
-        o->charset = st_s_create_sc( kjv_charset );
+        o->charset = st_s_create_sc( encode_charset );
         for( sz_t i = 0; i < o->charset->size; i++ ) o->charmap->data[ ( u0_t )o->charset->data[ i ] ] = i;
     }
 }
@@ -97,10 +138,6 @@ void badapt_problem_recurrent_kjv_s_fetch_sample_vio( badapt_problem_recurrent_k
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#endif // TYPEOF_badapt_problem_recurrent_kjv_s
-
-//----------------------------------------------------------------------------------------------------------------------
-
 /**********************************************************************************************************************/
 // badapt_guide_char_encode_s
 
@@ -108,48 +145,40 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
 {
     BCORE_LIFE_INIT();
     badapt_adaptive* adaptive = BCORE_LIFE_A_PUSH( badapt_adaptive_a_clone( badapt_training_state_a_get_adaptive( state ) ) );
-    sz_t vec_size = bcore_strlen( kjv_charset );
+    if( badapt_adaptive_a_defines_reset( adaptive ) ) badapt_adaptive_a_reset( adaptive );
+    sz_t vec_size = bcore_strlen( encode_charset );
     BCORE_LIFE_CREATE( bmath_vf3_s, vin );
     BCORE_LIFE_CREATE( bmath_vf3_s, vout );
     bmath_vf3_s_set_size( vin, vec_size );
     bmath_vf3_s_set_size( vout, vec_size );
 
-    u2_t rval = 1234;
     sz_t text_size = 92;
 
-    bmath_vf3_s_set_random( vin, 1.0, -0.1, 0.1, &rval );
+    bmath_vf3_s_zro( vin );
 
-    f3_t exp = 4;
+    sc_t txt0 = "something";
+
+    for( sz_t i = 0; txt0[ i ] != 0; i++ )
+    {
+        u0_t c = txt0[ i ];
+        for( sz_t j = 0; j < vec_size; j++ ) vin->data[ j ] = ( j == i ) ? o->pos_tgt : o->neg_tgt;
+        bcore_msg_fa( "#<char>", c );
+        badapt_adaptive_a_minfer( adaptive, vin, vout );
+    }
+
+    f3_t heat = 0.1;
 
     for( sz_t i = 0; i < text_size; i++ )
     {
-        badapt_adaptive_a_minfer( adaptive, vin, vout );
-        bmath_vf3_s_add_scl_f3( vout, -bmath_vf3_s_min( vout ), vout );
-        bmath_vf3_s_mul_f3( vout, 1.0 / bmath_vf3_s_max( vout ), vout );
+        u2_t rval = 1234432 * bmath_vf3_s_f3_sum( vout );
 
-        f3_t sum = 0;
-        for( sz_t j = 0; j < vec_size; j++ )
-        {
-            sum += pow( vout->data[ j ], exp );
-        }
+        for( sz_t j = 0; j < vout->size; j++ ) vout->data[ j ] += f3_rnd_pos( &rval ) * heat;
 
-        f3_t thr = f3_xsg2_pos( &rval ) * sum;
-
-        sum = 0;
-        sz_t idx = 0;
-        for( sz_t j = 0; j < vec_size; j++ )
-        {
-            sum += pow( vout->data[ j ], exp );
-            if( sum > thr )
-            {
-                idx = j;
-                break;
-            }
-        }
-
-        u0_t c = kjv_charset[ idx ];
-        for( sz_t j = 0; j < vec_size; j++ ) vin->data[ j ] = ( j == idx ) ? 0.9 : -0.9;
+        sz_t idx = bmath_vf3_s_idx_max( vout );
+        u0_t c = encode_charset[ idx ];
+        for( sz_t j = 0; j < vec_size; j++ ) vin->data[ j ] = ( j == idx ) ? o->pos_tgt : o->neg_tgt;
         bcore_msg_fa( "#<char>", c );
+        badapt_adaptive_a_minfer( adaptive, vin, vout );
     }
     bcore_msg_fa( ";  " );
 

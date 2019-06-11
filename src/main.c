@@ -5,6 +5,7 @@
 #include "badapt_std.h"
 #include "badapt_dev_signal.h"
 #include "badapt_dev_ern.h"
+#include "badapt_dev_lstm.h"
 #include "badapt_dev_jrn.h"
 
 void activator_test( void )
@@ -57,11 +58,11 @@ int main( void )
 //    badapt_c1d_s_test_binary_hash();
 //    badapt_c1d_s_test_polynom();
 
-    CPU_TIME_TO_STDOUT( badapt_ern_s_test_recurrent_kjv() );
-//    CPU_TIME_TO_STDOUT( badapt_dev_ern_s_test_recurrent_kjv() );
-//    CPU_TIME_TO_STDOUT( badapt_jrn_s_test_recurrent_kjv() );
-//    CPU_TIME_TO_STDOUT( badapt_dev_jrn_s_test_recurrent_kjv() );
-//    badapt_dev_jrn_s_test_recurrent_kjv();
+//    CPU_TIME_TO_STDOUT( badapt_dev_lstm_test_recurrent_abc() );
+//    CPU_TIME_TO_STDOUT( badapt_ern_test_recurrent_abc() );
+
+    CPU_TIME_TO_STDOUT( badapt_dev_lstm_test_recurrent_kjv() );
+//    CPU_TIME_TO_STDOUT( badapt_ern_test_recurrent_kjv() );
 
     //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
     //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "bmath_adaptive_mlp" ), NULL ) );
