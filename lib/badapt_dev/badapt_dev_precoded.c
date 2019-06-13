@@ -26,8 +26,8 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_abc_s )
     "aware_t _;"
     "sz_t index = 0;"
     "u2_t rval = 1234;"
-    "f3_t pos_tgt = 0.9;"
-    "f3_t neg_tgt = 0.1;"
+    "f3_t pos_tgt = 1.0;"
+    "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
     "func badapt_supplier:preferred_loss;"
     "func badapt_supplier:get_in_size;"
@@ -46,8 +46,29 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_kjv_s )
     "u0_t t_last_char = 0;"
     "u0_t v_last_char = 0;"
     "u2_t rval = 1234;"
-    "f3_t pos_tgt = 0.9;"
-    "f3_t neg_tgt = 0.1;"
+    "f3_t pos_tgt = 1.0;"
+    "f3_t neg_tgt = 0.0;"
+    "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
+    "func badapt_supplier:preferred_loss;"
+    "func badapt_supplier:get_in_size;"
+    "func badapt_supplier:get_out_size;"
+    "func badapt_supplier:fetch_sample_tio;"
+    "func badapt_supplier:fetch_sample_vio;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_text_s )
+"aware badapt_supplier"
+"{"
+    "st_s text_file;"
+    "st_s ignore_line_char;"
+    "aware bcore_source => source;"
+    "bcore_arr_sz_s => charmap;"
+    "st_s => charset;"
+    "u0_t t_last_char = 0;"
+    "u0_t v_last_char = 0;"
+    "u2_t rval = 1234;"
+    "f3_t pos_tgt = 1.0;"
+    "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
     "func badapt_supplier:preferred_loss;"
     "func badapt_supplier:get_in_size;"
@@ -63,8 +84,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
     "aware badapt_guide => guide_default = badapt_guide_std_s;"
     "bcore_arr_sz_s -> charmap;"
     "st_s -> charset;"
-    "f3_t pos_tgt = 0.9;"
-    "f3_t neg_tgt = 0.1;"
+    "f3_t pos_tgt = 1.0;"
+    "f3_t neg_tgt = 0.0;"
+    "st_s txt_trigger;"
+    "sz_t txt_size = 128;"
+    "f3_t heat = 0.3;"
     "func badapt_guide:callback;"
 "}";
 
@@ -75,74 +99,6 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
 //----------------------------------------------------------------------------------------------------------------------
 // group: badapt_dev_ern
 
-/**********************************************************************************************************************/
-// source: badapt_dev_jrn
-#include "badapt_dev_jrn.h"
-
-//----------------------------------------------------------------------------------------------------------------------
-// group: badapt_dev_jrn
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_jrn_layer_s )
-"bcore_inst"
-"{"
-    "hidden bmath_vf3_s v_x;"
-    "hidden bmath_vf3_s v_c;"
-    "hidden bmath_vf3_s v_h;"
-    "hidden bmath_vf3_s v_o;"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_jrn_arr_layer_s )
-"aware bcore_array"
-"{"
-    "badapt_dev_jrn_layer_s => [] arr;"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_jrn_s )
-"aware badapt_adaptive"
-"{"
-    "sz_t size_input;"
-    "sz_t size_hidden;"
-    "sz_t size_output;"
-    "sz_t size_unfolded;"
-    "badapt_dynamics_std_s dynamics;"
-    "bmath_mf3_s w_hx;"
-    "bmath_mf3_s w_hc;"
-    "bmath_mf3_s w_oh;"
-    "aware badapt_activator => a_h;"
-    "aware badapt_activator => a_o;"
-    "hidden bmath_vf3_s v_go;"
-    "hidden bmath_vf3_s v_gc;"
-    "hidden bmath_vf3_s v_gh;"
-    "hidden bmath_mf3_s gw_hx;"
-    "hidden bmath_mf3_s gw_hc;"
-    "hidden bmath_mf3_s gw_oh;"
-    "hidden badapt_dev_jrn_arr_layer_s arr_layer;"
-    "func :get_in_size;"
-    "func :get_out_size;"
-    "func :get_dynamics_std;"
-    "func :set_dynamics_std;"
-    "func :arc_to_sink;"
-    "func :minfer;"
-    "func :bgrad_adapt;"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_jrn_builder_s )
-"aware badapt_builder"
-"{"
-    "sz_t size_input;"
-    "sz_t size_hidden = 8;"
-    "sz_t size_output = 1;"
-    "sz_t size_unfolded = 1;"
-    "badapt_dynamics_std_s dynamics;"
-    "u2_t random_seed = 1234;"
-    "aware badapt_activator => a_h;"
-    "aware badapt_activator => a_o;"
-    "func :get_in_size;"
-    "func :set_in_size;"
-    "func :get_out_size;"
-    "func :set_out_size;"
-    "func :build;"
-"}";
 
 /**********************************************************************************************************************/
 // source: badapt_dev_lstm
@@ -264,7 +220,7 @@ vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 1265129220 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 2475196561 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -277,24 +233,14 @@ vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_recurrent_kjv_s_fetch_sample_tio );
             BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_recurrent_kjv_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_recurrent_kjv_s );
+            BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_text_s_preferred_loss );
+            BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_text_s_get_in_size );
+            BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_text_s_get_out_size );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_recurrent_text_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_recurrent_text_s_fetch_sample_vio );
+            BCORE_REGISTER_OBJECT( badapt_problem_recurrent_text_s );
             BCORE_REGISTER_FFUNC( badapt_guide_callback, badapt_guide_char_encode_s_callback );
             BCORE_REGISTER_OBJECT( badapt_guide_char_encode_s );
-            BCORE_REGISTER_OBJECT( badapt_dev_jrn_layer_s );
-            BCORE_REGISTER_OBJECT( badapt_dev_jrn_arr_layer_s );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_get_in_size, badapt_dev_jrn_s_get_in_size );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_get_out_size, badapt_dev_jrn_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_get_dynamics_std, badapt_dev_jrn_s_get_dynamics_std );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_set_dynamics_std, badapt_dev_jrn_s_set_dynamics_std );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_arc_to_sink, badapt_dev_jrn_s_arc_to_sink );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_minfer, badapt_dev_jrn_s_minfer );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_bgrad_adapt, badapt_dev_jrn_s_bgrad_adapt );
-            BCORE_REGISTER_OBJECT( badapt_dev_jrn_s );
-            BCORE_REGISTER_FFUNC( badapt_builder_get_in_size, badapt_dev_jrn_builder_s_get_in_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_set_in_size, badapt_dev_jrn_builder_s_set_in_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_get_out_size, badapt_dev_jrn_builder_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_set_out_size, badapt_dev_jrn_builder_s_set_out_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_build, badapt_dev_jrn_builder_s_build );
-            BCORE_REGISTER_OBJECT( badapt_dev_jrn_builder_s );
             BCORE_REGISTER_OBJECT( badapt_dev_lstm_layer_s );
             BCORE_REGISTER_OBJECT( badapt_dev_lstm_arr_layer_s );
             BCORE_REGISTER_FFUNC( badapt_adaptive_get_in_size, badapt_dev_lstm_s_get_in_size );

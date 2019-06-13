@@ -139,6 +139,89 @@ void badapt_problem_recurrent_kjv_s_fetch_sample_vio( badapt_problem_recurrent_k
 //----------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+/// badapt_problem_recurrent_text_s
+
+sz_t badapt_problem_recurrent_text_s_get_in_size(  const badapt_problem_recurrent_text_s* o )
+{
+    return o->charset ? o->charset->size : bcore_strlen( encode_charset );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+sz_t badapt_problem_recurrent_text_s_get_out_size( const badapt_problem_recurrent_text_s* o )
+{
+    return o->charset ? o->charset->size : bcore_strlen( encode_charset );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+static void badapt_problem_recurrent_text_s_create_charmap( badapt_problem_recurrent_text_s* o )
+{
+    if( !o->charmap )
+    {
+        o->charmap = bcore_arr_sz_s_create();
+        bcore_arr_sz_s_fill( o->charmap, 256, -1 );
+        o->charset = st_s_create_sc( encode_charset );
+        for( sz_t i = 0; i < o->charset->size; i++ ) o->charmap->data[ ( u0_t )o->charset->data[ i ] ] = i;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_recurrent_text_s_fetch_sample_tio( badapt_problem_recurrent_text_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
+{
+    if( !o->source )
+    {
+        if( o->text_file.size == 0 ) ERR_fa( "Source file not specified" );
+        o->source = bcore_file_open_source( o->text_file.sc );
+    }
+    if( !o->charmap ) badapt_problem_recurrent_text_s_create_charmap( o );
+
+    if( o->t_last_char == 0 ) o->t_last_char = bcore_source_a_get_u0( o->source );
+
+    u0_t c;
+
+    if( o->ignore_line_char.size > 0 )
+    {
+        while( bcore_source_a_inspect_u0( o->source ) == o->ignore_line_char.sc[ 0 ] )
+        {
+            while( bcore_source_a_get_u0( o->source ) != '\n' )
+            {
+                if( bcore_source_a_eos( o->source ) )
+                {
+                    bcore_source_a_set_index( o->source, 0 );
+                    break;
+                }
+            }
+        }
+    }
+
+    while( o->charmap->data[ ( c = bcore_source_a_get_u0( o->source ) ) ] == -1 )
+    {
+        if( bcore_source_a_eos( o->source ) ) bcore_source_a_set_index( o->source, 0 );
+    }
+
+    u0_t cur_char = c;
+
+    char_to_vec( o->charset, o->charmap, o->pos_tgt, o->neg_tgt, o->t_last_char,  in );
+    char_to_vec( o->charset, o->charmap, o->pos_tgt, o->neg_tgt,       cur_char, out );
+
+//    bcore_msg_fa( "#<char>", cur_char );
+
+    o->t_last_char = cur_char;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void badapt_problem_recurrent_text_s_fetch_sample_vio( badapt_problem_recurrent_text_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
+{
+    /// TODO: separate between batch and valid
+    badapt_problem_recurrent_text_s_fetch_sample_tio( o, in, out );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
 // badapt_guide_char_encode_s
 
 bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, badapt_training_state* state )
@@ -152,11 +235,9 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
     bmath_vf3_s_set_size( vin, vec_size );
     bmath_vf3_s_set_size( vout, vec_size );
 
-    sz_t text_size = 92;
-
     bmath_vf3_s_zro( vin );
 
-    sc_t txt0 = "something";
+    sc_t txt0 = o->txt_trigger.sc;
 
     for( sz_t i = 0; txt0[ i ] != 0; i++ )
     {
@@ -166,13 +247,11 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
         badapt_adaptive_a_minfer( adaptive, vin, vout );
     }
 
-    f3_t heat = 0.1;
-
-    for( sz_t i = 0; i < text_size; i++ )
+    for( sz_t i = 0; i < o->txt_size; i++ )
     {
-        u2_t rval = 1234432 * bmath_vf3_s_f3_sum( vout );
+        u2_t rval = 12341234 * bmath_vf3_s_f3_sum( vout );
 
-        for( sz_t j = 0; j < vout->size; j++ ) vout->data[ j ] += f3_rnd_pos( &rval ) * heat;
+        for( sz_t j = 0; j < vout->size; j++ ) vout->data[ j ] += f3_rnd_pos( &rval ) * o->heat;
 
         sz_t idx = bmath_vf3_s_idx_max( vout );
         u0_t c = encode_charset[ idx ];

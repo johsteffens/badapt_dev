@@ -264,6 +264,7 @@ stamp :builder = aware badapt_builder
 
 void badapt_dev_lstm_test_recurrent_abc();
 void badapt_dev_lstm_test_recurrent_kjv();
+void badapt_dev_lstm_test_recurrent_kjv2();
 
 /**********************************************************************************************************************/
 
