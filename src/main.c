@@ -7,28 +7,6 @@
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
 
-void activator_test( void )
-{
-    BCORE_LIFE_INIT();
-
-    BCORE_LIFE_CREATE( badapt_arr_activator_s, arr_a );
-    BCORE_LIFE_CREATE( badapt_arr_layer_activator_s, arr_l );
-
-    badapt_arr_layer_activator_s_push_c( arr_l, badapt_layer_activator_s_create_from_types(  0, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_leaky_relu_s ) );
-    badapt_arr_layer_activator_s_push_c( arr_l, badapt_layer_activator_s_create_from_types(  3, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_softplus_s ) );
-    badapt_arr_layer_activator_s_push_c( arr_l, badapt_layer_activator_s_create_from_types( -1, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_tanh_s ) );
-    badapt_arr_layer_activator_s_push_c( arr_l, badapt_layer_activator_s_create_from_types( -3, TYPEOF_badapt_activator_plain_s, TYPEOF_badapt_activation_relu_s ) );
-
-    badapt_arr_activator_s_setup_from_arr_layer_activator( arr_a, arr_l, 10 );
-
-    bcore_txt_ml_a_to_stdout( arr_l );
-    bcore_txt_ml_a_to_stdout( arr_a );
-
-    BCORE_LIFE_DOWN();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 int main( int argc, char** argv )
 {
     bcore_register_signal_handler( bmath_signal_handler );
@@ -58,14 +36,14 @@ int main( int argc, char** argv )
     //virtual_test();
     //return 0;
 
-//    badapt_mlp_s_test_sine_random();
+    badapt_mlp_s_test_sine_random();
 //    badapt_mlp_s_test_binary_add();
 //    badapt_mlp_s_test_binary_mul();
 //    badapt_mlp_s_test_binary_xsg3();
 //    badapt_mlp_s_test_binary_hash();
 //    badapt_mlp_s_test_polynom();
 
-//    badapt_c1d_s_test_sine_random();
+    badapt_c1d_s_test_sine_random();
 //    badapt_c1d_s_test_binary_add();
 //    badapt_c1d_s_test_binary_mul();
 //    badapt_c1d_s_test_binary_xsg3();
@@ -73,7 +51,7 @@ int main( int argc, char** argv )
 //    badapt_c1d_s_test_polynom();
 
 //    CPU_TIME_TO_STDOUT( badapt_dev_lstm_test_recurrent_abc() );
-//    CPU_TIME_TO_STDOUT( badapt_ern_test_recurrent_abc() );
+    CPU_TIME_TO_STDOUT( badapt_ern_test_recurrent_abc() );
 
 //      CPU_TIME_TO_STDOUT( badapt_dev_lstm_test_recurrent_kjv() );
 

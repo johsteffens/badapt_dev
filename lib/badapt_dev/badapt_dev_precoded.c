@@ -99,7 +99,6 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
 //----------------------------------------------------------------------------------------------------------------------
 // group: badapt_dev_ern
 
-
 /**********************************************************************************************************************/
 // source: badapt_dev_lstm
 #include "badapt_dev_lstm.h"
@@ -220,7 +219,7 @@ vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 2475196561 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 1702489928 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );

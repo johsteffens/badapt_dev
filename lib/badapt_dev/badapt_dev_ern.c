@@ -52,9 +52,8 @@ void badapt_ern_test_recurrent_abc()
 
 //    builder->dynamics.lambda_l1 = 0.0001;
 
-//    builder->a_h = badapt_activator_create_from_names( "bias", "leaky_relu" );
-    builder->a_h = badapt_activator_create_from_names( "bias", "tanh" );
-    builder->a_o = badapt_activator_create_from_names( "bias", "lgst" );
+    builder->a_h = badapt_activator_create_from_names( "plain", "tanh" );
+    builder->a_o = badapt_activator_create_from_names( "plain", "lgst" );
 
     trainer->fetch_cycles_per_iteration = 10;
 //    trainer->batch_cycles_per_fetch = 1;
@@ -82,9 +81,9 @@ void badapt_ern_test_recurrent_kjv()
 
 //    builder->dynamics.lambda_l1 = 0.0001;
 
-//    builder->a_h = badapt_activator_create_from_names( "bias", "leaky_relu" );
-    builder->a_h = badapt_activator_create_from_names( "bias", "tanh" );
-    builder->a_o = badapt_activator_create_from_names( "bias", "lgst" );
+//    builder->a_h = badapt_activator_create_from_names( "plain", "leaky_relu" );
+    builder->a_h = badapt_activator_create_from_names( "plain", "tanh" );
+    builder->a_o = badapt_activator_create_from_names( "plain", "lgst" );
 
     trainer->fetch_cycles_per_iteration = 10;
 //    trainer->batch_cycles_per_fetch = 1;
