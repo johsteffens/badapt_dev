@@ -17,6 +17,7 @@
 #include "bmath_std.h"
 #include "bmath_plot.h"
 #include "badapt_dev_lstm.h"
+#include "badapt_lstm.h"
 #include "badapt_trainer.h"
 #include "badapt_dev_problem.h"
 
@@ -607,19 +608,37 @@ void badapt_dev_lstm_test_recurrent_abc()
     BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );
     BCORE_LIFE_CREATE( badapt_guide_char_encode_s,     guide );
 
-    st_s_copy_sc( &guide->txt_trigger, "this" );
-
+    st_s_copy_sc( &guide->txt_trigger, "abc" );
     builder->random_seed        = 111;
-    builder->size_unfolded      = 25;
+    builder->size_unfolded      = 10;
     builder->size_hidden        = 20;
     builder->dynamics.epsilon   = 0.02;
     builder->dynamics.lambda_l2 = 0.00001;
-
-//    builder->dynamics.lambda_l1 = 0.0001;
-
     trainer->fetch_cycles_per_iteration = 10;
-//    trainer->batch_cycles_per_fetch = 1;
-    trainer->max_iterations = 100;
+    trainer->max_iterations = 5;
+
+    badapt_dev_lstm_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, ( badapt_guide* )guide, trainer );
+    BCORE_LIFE_RETURN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void badapt_lstm_test_recurrent_abc()
+{
+    BCORE_LIFE_INIT();
+    BCORE_LIFE_CREATE( badapt_problem_recurrent_abc_s, problem );
+    BCORE_LIFE_CREATE( badapt_lstm_builder_s,          builder );
+    BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );
+    BCORE_LIFE_CREATE( badapt_guide_char_encode_s,     guide );
+
+    st_s_copy_sc( &guide->txt_trigger, "abc" );
+    builder->random_seed        = 111;
+    builder->size_unfolded      = 10;
+    builder->size_hidden        = 20;
+    builder->dynamics.epsilon   = 0.02;
+    builder->dynamics.lambda_l2 = 0.00001;
+    trainer->fetch_cycles_per_iteration = 10;
+    trainer->max_iterations = 5;
 
     badapt_dev_lstm_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, ( badapt_guide* )guide, trainer );
     BCORE_LIFE_RETURN();
