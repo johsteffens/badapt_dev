@@ -121,6 +121,15 @@
   BETH_EXPAND_ITEM_badapt_dev_lstm_builder_s
 
 /**********************************************************************************************************************/
+// source: badapt_dev_symbolic
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: badapt_dev_symbolic
+
+#define TYPEOF_badapt_dev_symbolic 854225988
+#define BETH_EXPAND_GROUP_badapt_dev_symbolic
+
+/**********************************************************************************************************************/
 
 vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o );
 
