@@ -211,11 +211,103 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_builder_s )
 "}";
 
 /**********************************************************************************************************************/
-// source: badapt_dev_symbolic
-#include "badapt_dev_symbolic.h"
+// source: badapt_sym
+#include "badapt_sym.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: badapt_dev_symbolic
+// group: badapt_sym
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_items_s )
+"aware bcore_array"
+"{"
+    "aware badapt_sym => [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_link_s )
+"aware badapt_sym"
+"{"
+    "tp_t name;"
+    "aware badapt_sym -> target;"
+    "func :get_name;"
+    "func :parse;"
+    "func :to_sink;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_args_s )
+"aware bcore_array"
+"{"
+    "badapt_sym_link_s [];"
+    "func badapt_sym:parse;"
+    "func badapt_sym:to_sink;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_dim_s )
+"aware badapt_sym"
+"{"
+    "badapt_sym_link_s link;"
+    "sz_t literal = -1;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_dims_s )
+"aware bcore_array"
+"{"
+    "badapt_sym_dim_s [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_mutor_s )
+"aware badapt_sym"
+"{"
+    "tp_t name;"
+    "tp_t type;"
+    "badapt_sym_dims_s dims;"
+    "func :get_name;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_node_s )
+"aware badapt_sym"
+"{"
+    "tp_t name;"
+    "badapt_sym_args_s args_in;"
+    "badapt_sym_args_s args_out;"
+    "badapt_sym_items_s body;"
+    "func :get_name;"
+    "func bcore_inst_call:init_x;"
+    "func bcore_inst_call:discard_e;"
+    "func :parse;"
+    "func :to_sink;"
+"}";
+
+void badapt_sym_node_s_init_x( badapt_sym_node_s* o )
+{
+    badapt_sym_items_s_clear( &o->body );
+    badapt_sym_args_s_clear( &o->args_in );
+    badapt_sym_args_s_clear( &o->args_out );
+}
+
+void badapt_sym_node_s_discard_e( badapt_sym_node_s* o )
+{
+    badapt_sym_items_s_clear( &o->body );
+    badapt_sym_args_s_clear( &o->args_in );
+    badapt_sym_args_s_clear( &o->args_out );
+}
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_sym_frame_s )
+"aware badapt_sym"
+"{"
+    "bcore_hmap_name_s hmap_name;"
+    "badapt_sym_node_s root;"
+    "func bcore_inst_call:discard_e;"
+    "func :parse;"
+    "func :to_sink;"
+"}";
+
+BCORE_DEFINE_SPECT( bcore_inst, badapt_sym )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware badapt_sym : get_name;"
+    "feature aware badapt_sym : parse;"
+    "feature aware badapt_sym : to_sink;"
+"}";
 
 /**********************************************************************************************************************/
 
@@ -226,7 +318,7 @@ vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 535126252 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_precoded_hash" ), sr_tp( 158103379 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -266,6 +358,32 @@ vd_t badapt_dev_precoded_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_builder_set_out_size, badapt_dev_lstm_builder_s_set_out_size );
             BCORE_REGISTER_FFUNC( badapt_builder_build, badapt_dev_lstm_builder_s_build );
             BCORE_REGISTER_OBJECT( badapt_dev_lstm_builder_s );
+            BCORE_REGISTER_FEATURE( badapt_sym_get_name );
+            BCORE_REGISTER_FEATURE( badapt_sym_parse );
+            BCORE_REGISTER_FEATURE( badapt_sym_to_sink );
+            BCORE_REGISTER_OBJECT( badapt_sym_items_s );
+            BCORE_REGISTER_FFUNC( badapt_sym_get_name, badapt_sym_link_s_get_name );
+            BCORE_REGISTER_FFUNC( badapt_sym_parse, badapt_sym_link_s_parse );
+            BCORE_REGISTER_FFUNC( badapt_sym_to_sink, badapt_sym_link_s_to_sink );
+            BCORE_REGISTER_OBJECT( badapt_sym_link_s );
+            BCORE_REGISTER_FFUNC( badapt_sym_parse, badapt_sym_args_s_parse );
+            BCORE_REGISTER_FFUNC( badapt_sym_to_sink, badapt_sym_args_s_to_sink );
+            BCORE_REGISTER_OBJECT( badapt_sym_args_s );
+            BCORE_REGISTER_OBJECT( badapt_sym_dim_s );
+            BCORE_REGISTER_OBJECT( badapt_sym_dims_s );
+            BCORE_REGISTER_FFUNC( badapt_sym_get_name, badapt_sym_mutor_s_get_name );
+            BCORE_REGISTER_OBJECT( badapt_sym_mutor_s );
+            BCORE_REGISTER_FFUNC( badapt_sym_get_name, badapt_sym_node_s_get_name );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, badapt_sym_node_s_init_x );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_discard_e, badapt_sym_node_s_discard_e );
+            BCORE_REGISTER_FFUNC( badapt_sym_parse, badapt_sym_node_s_parse );
+            BCORE_REGISTER_FFUNC( badapt_sym_to_sink, badapt_sym_node_s_to_sink );
+            BCORE_REGISTER_OBJECT( badapt_sym_node_s );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_discard_e, badapt_sym_frame_s_discard_e );
+            BCORE_REGISTER_FFUNC( badapt_sym_parse, badapt_sym_frame_s_parse );
+            BCORE_REGISTER_FFUNC( badapt_sym_to_sink, badapt_sym_frame_s_to_sink );
+            BCORE_REGISTER_OBJECT( badapt_sym_frame_s );
+            BCORE_REGISTER_SPECT( badapt_sym );
         }
         break;
         default: break;

@@ -6,6 +6,7 @@
 #include "badapt_dev_signal.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
+#include "badapt_sym.h"
 
 int main( int argc, char** argv )
 {
@@ -28,9 +29,19 @@ int main( int argc, char** argv )
     s2_t ret = 0;
     BCORE_LIFE_CREATE( bcore_main_frame_s, main_frame );
     ret = bcore_main_frame_s_main( main_frame, argc, argv );
+    if( ret >= 0 )
+    {
+        BCORE_LIFE_DOWN();
+        bcore_down( true );
+        return ret;
+    }
+
+    badapt_sym_test();
 
 //    bcore_quicktypes_to_stdout( NULL );
 //    return 0;
+
+
 
     //activator_test();
     //virtual_test();
@@ -50,8 +61,8 @@ int main( int argc, char** argv )
 //    badapt_c1d_s_test_binary_hash();
 //    badapt_c1d_s_test_polynom();
 
-    CPU_TIME_TO_STDOUT( badapt_dev_lstm_test_recurrent_abc() );
-    CPU_TIME_TO_STDOUT( badapt_lstm_test_recurrent_abc() );
+//    CPU_TIME_TO_STDOUT( badapt_dev_lstm_test_recurrent_abc() );
+//    CPU_TIME_TO_STDOUT( badapt_lstm_test_recurrent_abc() );
 //    CPU_TIME_TO_STDOUT( badapt_ern_test_recurrent_abc() );
 
 //      CPU_TIME_TO_STDOUT( badapt_dev_lstm_test_recurrent_kjv() );

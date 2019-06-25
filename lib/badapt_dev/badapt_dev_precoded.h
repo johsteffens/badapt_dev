@@ -19,6 +19,7 @@
 // group: badapt_dev_problem_objects
 
 #define TYPEOF_badapt_dev_problem_objects 483428364
+#define TYPEOF_badapt_dev_problem_objects_s 3324364078
   #define TYPEOF_badapt_problem_recurrent_abc_s 3613882751
   #define BETH_EXPAND_ITEM_badapt_problem_recurrent_abc_s \
     BCORE_DECLARE_OBJECT( badapt_problem_recurrent_abc_s ) \
@@ -52,6 +53,11 @@
       {aware_t _;badapt_guide* guide_default;bcore_arr_sz_s* charmap;st_s* charset;f3_t pos_tgt;f3_t neg_tgt;st_s txt_trigger;sz_t txt_size;f3_t heat;}; \
     bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, badapt_training_state* state );
 #define BETH_EXPAND_GROUP_badapt_dev_problem_objects \
+  BCORE_FORWARD_OBJECT( badapt_dev_problem_objects ); \
+  BCORE_FORWARD_OBJECT( badapt_problem_recurrent_abc_s ); \
+  BCORE_FORWARD_OBJECT( badapt_problem_recurrent_kjv_s ); \
+  BCORE_FORWARD_OBJECT( badapt_problem_recurrent_text_s ); \
+  BCORE_FORWARD_OBJECT( badapt_guide_char_encode_s ); \
   BETH_EXPAND_ITEM_badapt_problem_recurrent_abc_s \
   BETH_EXPAND_ITEM_badapt_problem_recurrent_kjv_s \
   BETH_EXPAND_ITEM_badapt_problem_recurrent_text_s \
@@ -64,7 +70,9 @@
 // group: badapt_dev_ern
 
 #define TYPEOF_badapt_dev_ern 3818246179
-#define BETH_EXPAND_GROUP_badapt_dev_ern
+#define TYPEOF_badapt_dev_ern_s 3653613765
+#define BETH_EXPAND_GROUP_badapt_dev_ern \
+  BCORE_FORWARD_OBJECT( badapt_dev_ern );
 
 /**********************************************************************************************************************/
 // source: badapt_dev_lstm
@@ -73,6 +81,7 @@
 // group: badapt_dev_lstm
 
 #define TYPEOF_badapt_dev_lstm 523027522
+#define TYPEOF_badapt_dev_lstm_s 571246780
   #define TYPEOF_badapt_dev_lstm_layer_s 1346955122
   #define BETH_EXPAND_ITEM_badapt_dev_lstm_layer_s \
     BCORE_DECLARE_OBJECT( badapt_dev_lstm_layer_s ) \
@@ -115,19 +124,139 @@
     static inline void badapt_dev_lstm_builder_s_set_out_size( badapt_dev_lstm_builder_s* o, sz_t size ){ o->size_output = size; } \
     badapt_adaptive* badapt_dev_lstm_builder_s_build( const badapt_dev_lstm_builder_s* o );
 #define BETH_EXPAND_GROUP_badapt_dev_lstm \
+  BCORE_FORWARD_OBJECT( badapt_dev_lstm ); \
+  BCORE_FORWARD_OBJECT( badapt_dev_lstm_layer_s ); \
+  BCORE_FORWARD_OBJECT( badapt_dev_lstm_arr_layer_s ); \
+  BCORE_FORWARD_OBJECT( badapt_dev_lstm_s ); \
+  BCORE_FORWARD_OBJECT( badapt_dev_lstm_builder_s ); \
   BETH_EXPAND_ITEM_badapt_dev_lstm_layer_s \
   BETH_EXPAND_ITEM_badapt_dev_lstm_arr_layer_s \
   BETH_EXPAND_ITEM_badapt_dev_lstm_s \
   BETH_EXPAND_ITEM_badapt_dev_lstm_builder_s
 
 /**********************************************************************************************************************/
-// source: badapt_dev_symbolic
+// source: badapt_sym
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: badapt_dev_symbolic
+// group: badapt_sym
 
-#define TYPEOF_badapt_dev_symbolic 854225988
-#define BETH_EXPAND_GROUP_badapt_dev_symbolic
+#define TYPEOF_badapt_sym 3324390599
+#define TYPEOF_badapt_sym_s 1394124257
+  #define TYPEOF_badapt_sym_items_s 2288997294
+  #define BETH_EXPAND_ITEM_badapt_sym_items_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_items_s ) \
+      {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( badapt_sym, );}; \
+    static inline void badapt_sym_items_s_set_space( badapt_sym_items_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_badapt_sym_items_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_sym_items_s_set_size( badapt_sym_items_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_badapt_sym_items_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_sym_items_s_clear( badapt_sym_items_s* o ) { bcore_array_t_set_space( TYPEOF_badapt_sym_items_s, ( bcore_array* )o, 0 ); } \
+    static inline void badapt_sym_items_s_push_c( badapt_sym_items_s* o, const badapt_sym* v ) { bcore_array_t_push( TYPEOF_badapt_sym_items_s, ( bcore_array* )o, sr_awc( v ) ); } \
+    static inline void badapt_sym_items_s_push_d( badapt_sym_items_s* o,       badapt_sym* v ) { bcore_array_t_push( TYPEOF_badapt_sym_items_s, ( bcore_array* )o, sr_asd( v ) ); } \
+    static inline badapt_sym* badapt_sym_items_s_push_t( badapt_sym_items_s* o, tp_t t ) \
+    { \
+        bcore_trait_assert_satisfied_type( TYPEOF_badapt_sym, t ); \
+        bcore_array_t_push( TYPEOF_badapt_sym_items_s, ( bcore_array* )o, sr_t_create( t ) ); \
+        return bcore_array_t_get_last( TYPEOF_badapt_sym_items_s, ( bcore_array* )o ).o; \
+    }
+  #define TYPEOF_badapt_sym_link_s 1439323522
+  #define BETH_EXPAND_ITEM_badapt_sym_link_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_link_s ) \
+      {aware_t _;tp_t name;badapt_sym* target;}; \
+    static inline tp_t badapt_sym_link_s_get_name( const badapt_sym_link_s* o ){ return o->name; } \
+    void badapt_sym_link_s_parse( badapt_sym_link_s* o, badapt_sym_frame_s* frame, const badapt_sym_node_s* node, bcore_source* source ); \
+    void badapt_sym_link_s_to_sink( const badapt_sym_link_s* o, const badapt_sym_frame_s* frame, bcore_sink* sink );
+  #define TYPEOF_badapt_sym_args_s 764949831
+  #define BETH_EXPAND_ITEM_badapt_sym_args_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_args_s ) \
+      {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( badapt_sym_link_s, );}; \
+    void badapt_sym_args_s_parse( badapt_sym_args_s* o, badapt_sym_frame_s* frame, const badapt_sym_node_s* node, bcore_source* source ); \
+    void badapt_sym_args_s_to_sink( const badapt_sym_args_s* o, const badapt_sym_frame_s* frame, bcore_sink* sink ); \
+    static inline void badapt_sym_args_s_set_space( badapt_sym_args_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_badapt_sym_args_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_sym_args_s_set_size( badapt_sym_args_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_badapt_sym_args_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_sym_args_s_clear( badapt_sym_args_s* o ) { bcore_array_t_set_space( TYPEOF_badapt_sym_args_s, ( bcore_array* )o, 0 ); } \
+    static inline void badapt_sym_args_s_push_c( badapt_sym_args_s* o, const badapt_sym_link_s* v ) { bcore_array_t_push( TYPEOF_badapt_sym_args_s, ( bcore_array* )o, sr_twc( TYPEOF_badapt_sym_link_s, v ) ); } \
+    static inline void badapt_sym_args_s_push_d( badapt_sym_args_s* o,       badapt_sym_link_s* v ) { bcore_array_t_push( TYPEOF_badapt_sym_args_s, ( bcore_array* )o, sr_tsd( TYPEOF_badapt_sym_link_s, v ) ); } \
+    static inline badapt_sym_link_s* badapt_sym_args_s_push( badapt_sym_args_s* o ) \
+    { \
+        bcore_array_t_push( TYPEOF_badapt_sym_args_s, ( bcore_array* )o, sr_null() ); \
+        return bcore_array_t_get_last( TYPEOF_badapt_sym_args_s, ( bcore_array* )o ).o; \
+    }
+  #define TYPEOF_badapt_sym_dim_s 3466652560
+  #define BETH_EXPAND_ITEM_badapt_sym_dim_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_dim_s ) \
+      {aware_t _;badapt_sym_link_s link;sz_t literal;};
+  #define TYPEOF_badapt_sym_dims_s 4075956897
+  #define BETH_EXPAND_ITEM_badapt_sym_dims_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_dims_s ) \
+      {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( badapt_sym_dim_s, );}; \
+    static inline void badapt_sym_dims_s_set_space( badapt_sym_dims_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_badapt_sym_dims_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_sym_dims_s_set_size( badapt_sym_dims_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_badapt_sym_dims_s, ( bcore_array* )o, size ); } \
+    static inline void badapt_sym_dims_s_clear( badapt_sym_dims_s* o ) { bcore_array_t_set_space( TYPEOF_badapt_sym_dims_s, ( bcore_array* )o, 0 ); } \
+    static inline void badapt_sym_dims_s_push_c( badapt_sym_dims_s* o, const badapt_sym_dim_s* v ) { bcore_array_t_push( TYPEOF_badapt_sym_dims_s, ( bcore_array* )o, sr_twc( TYPEOF_badapt_sym_dim_s, v ) ); } \
+    static inline void badapt_sym_dims_s_push_d( badapt_sym_dims_s* o,       badapt_sym_dim_s* v ) { bcore_array_t_push( TYPEOF_badapt_sym_dims_s, ( bcore_array* )o, sr_tsd( TYPEOF_badapt_sym_dim_s, v ) ); } \
+    static inline badapt_sym_dim_s* badapt_sym_dims_s_push( badapt_sym_dims_s* o ) \
+    { \
+        bcore_array_t_push( TYPEOF_badapt_sym_dims_s, ( bcore_array* )o, sr_null() ); \
+        return bcore_array_t_get_last( TYPEOF_badapt_sym_dims_s, ( bcore_array* )o ).o; \
+    }
+  #define TYPEOF_badapt_sym_mutor_s 1112669061
+  #define BETH_EXPAND_ITEM_badapt_sym_mutor_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_mutor_s ) \
+      {aware_t _;tp_t name;tp_t type;badapt_sym_dims_s dims;}; \
+    static inline tp_t badapt_sym_mutor_s_get_name( const badapt_sym_mutor_s* o ){ return o->name; }
+  #define TYPEOF_badapt_sym_node_s 1222120550
+  #define BETH_EXPAND_ITEM_badapt_sym_node_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_node_s ) \
+      {aware_t _;tp_t name;badapt_sym_args_s args_in;badapt_sym_args_s args_out;badapt_sym_items_s body;}; \
+    static inline tp_t badapt_sym_node_s_get_name( const badapt_sym_node_s* o ){ return o->name; } \
+    void badapt_sym_node_s_init_x( badapt_sym_node_s* o ); \
+    void badapt_sym_node_s_discard_e( badapt_sym_node_s* o ); \
+    void badapt_sym_node_s_parse( badapt_sym_node_s* o, badapt_sym_frame_s* frame, const badapt_sym_node_s* node, bcore_source* source ); \
+    void badapt_sym_node_s_to_sink( const badapt_sym_node_s* o, const badapt_sym_frame_s* frame, bcore_sink* sink );
+  #define TYPEOF_badapt_sym_frame_s 1570699831
+  #define BETH_EXPAND_ITEM_badapt_sym_frame_s \
+    BCORE_DECLARE_OBJECT( badapt_sym_frame_s ) \
+      {aware_t _;bcore_hmap_name_s hmap_name;badapt_sym_node_s root;}; \
+    static inline void badapt_sym_frame_s_discard_e( badapt_sym_frame_s* o ){ badapt_sym_node_s_discard_e( &o->root ); } \
+    void badapt_sym_frame_s_parse( badapt_sym_frame_s* o, badapt_sym_frame_s* frame, const badapt_sym_node_s* node, bcore_source* source ); \
+    void badapt_sym_frame_s_to_sink( const badapt_sym_frame_s* o, const badapt_sym_frame_s* frame, bcore_sink* sink );
+#define BETH_EXPAND_GROUP_badapt_sym \
+  BCORE_FORWARD_OBJECT( badapt_sym ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_items_s ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_link_s ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_args_s ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_dim_s ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_dims_s ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_mutor_s ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_node_s ); \
+  BCORE_FORWARD_OBJECT( badapt_sym_frame_s ); \
+  typedef tp_t (*badapt_sym_get_name)( const badapt_sym* o ); \
+  typedef void (*badapt_sym_parse)( badapt_sym* o, badapt_sym_frame_s* frame, const badapt_sym_node_s* node, bcore_source* source ); \
+  typedef void (*badapt_sym_to_sink)( const badapt_sym* o, const badapt_sym_frame_s* frame, bcore_sink* sink ); \
+  BCORE_DECLARE_SPECT( badapt_sym ) \
+  { \
+      bcore_spect_header_s header; \
+      badapt_sym_get_name get_name; \
+      badapt_sym_parse parse; \
+      badapt_sym_to_sink to_sink; \
+  }; \
+  static inline badapt_sym* badapt_sym_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_badapt_sym, t ); return ( badapt_sym* )bcore_inst_t_create( t ); } \
+  static inline badapt_sym* badapt_sym_a_clone( const badapt_sym* o ) { return ( badapt_sym* )bcore_inst_a_clone( ( bcore_inst* )o ); } \
+  static inline void badapt_sym_a_discard( badapt_sym* o ) { bcore_inst_a_discard( ( bcore_inst* )o ); } \
+  static inline void badapt_sym_a_replicate( badapt_sym** o, const badapt_sym* src ) { bcore_inst_a_replicate( ( bcore_inst** )o, ( bcore_inst* )src ); } \
+  static inline tp_t badapt_sym_a_get_name( const badapt_sym* o ) { return badapt_sym_s_get_aware( o )->get_name( o ); } \
+  static inline bl_t badapt_sym_a_defines_get_name( const badapt_sym* o ) { return badapt_sym_s_get_aware( o )->get_name != NULL; } \
+  static inline void badapt_sym_a_parse( badapt_sym* o, badapt_sym_frame_s* frame, const badapt_sym_node_s* node, bcore_source* source ) { badapt_sym_s_get_aware( o )->parse( o, frame, node, source ); } \
+  static inline bl_t badapt_sym_a_defines_parse( const badapt_sym* o ) { return badapt_sym_s_get_aware( o )->parse != NULL; } \
+  static inline void badapt_sym_a_to_sink( const badapt_sym* o, const badapt_sym_frame_s* frame, bcore_sink* sink ) { badapt_sym_s_get_aware( o )->to_sink( o, frame, sink ); } \
+  static inline bl_t badapt_sym_a_defines_to_sink( const badapt_sym* o ) { return badapt_sym_s_get_aware( o )->to_sink != NULL; } \
+  BETH_EXPAND_ITEM_badapt_sym_items_s \
+  BETH_EXPAND_ITEM_badapt_sym_link_s \
+  BETH_EXPAND_ITEM_badapt_sym_args_s \
+  BETH_EXPAND_ITEM_badapt_sym_dim_s \
+  BETH_EXPAND_ITEM_badapt_sym_dims_s \
+  BETH_EXPAND_ITEM_badapt_sym_mutor_s \
+  BETH_EXPAND_ITEM_badapt_sym_node_s \
+  BETH_EXPAND_ITEM_badapt_sym_frame_s
 
 /**********************************************************************************************************************/
 
