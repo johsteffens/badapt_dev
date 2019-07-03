@@ -6,7 +6,7 @@
 #include "badapt_dev_signal.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
-#include "badapt_sym.h"
+#include "bsym.h"
 
 int main( int argc, char** argv )
 {
@@ -36,7 +36,7 @@ int main( int argc, char** argv )
         return ret;
     }
 
-    badapt_sym_test();
+    bsym_test();
 
 //    bcore_quicktypes_to_stdout( NULL );
 //    return 0;

@@ -48,25 +48,25 @@
     node layer = ( dim_h, x, ci, hi ) => ( co, ho )
     {
         // = type def
-        mutor adaptive w_fx = [ dim_h ][ dimof( x ) ]#, w_fh = [ dim_h ][ dimof( x ) ]#, b_f = [ dim_h ]#;
-        mutor adaptive w_ix = [ dim_h ][ dimof( x ) ]#, w_ih = [ dim_h ][ dimof( x ) ]#, b_i = [ dim_h ]#;
-        mutor adaptive w_ox = [ dim_h ][ dimof( x ) ]#, w_oh = [ dim_h ][ dimof( x ) ]#, b_o = [ dim_h ]#;
-        mutor adaptive w_qx = [ dim_h ][ dimof( x ) ]#, w_qh = [ dim_h ][ dimof( x ) ]#, b_q = [ dim_h ]#;
+        holor w_fx = [ dim_h ][ dimof( x ) ]#, w_fh = [ dim_h ][ dimof( x ) ]#, b_f = [ dim_h ]#;
+        holor w_ix = [ dim_h ][ dimof( x ) ]#, w_ih = [ dim_h ][ dimof( x ) ]#, b_i = [ dim_h ]#;
+        holor w_ox = [ dim_h ][ dimof( x ) ]#, w_oh = [ dim_h ][ dimof( x ) ]#, b_o = [ dim_h ]#;
+        holor w_qx = [ dim_h ][ dimof( x ) ]#, w_qh = [ dim_h ][ dimof( x ) ]#, b_q = [ dim_h ]#;
 
         link v_f -> act_sig ( ( w_fx * x ) + ( w_fh * hi ) + b_f );
         link v_i -> act_sig ( ( w_ix * x ) + ( w_ih * hi ) + b_i );
         link v_o -> act_sig ( ( w_ox * x ) + ( w_oh * hi ) + b_o );
         link v_q -> act_tanh( ( w_qx * x ) + ( w_qh * hi ) + b_q );
 
-        co  -> ( v_f <o> ci ) + ( v_i <o> v_q );
+        co  -> ( v_f <*> ci ) + ( v_i <*> v_q );
         link v_d -> act_tanh( co );
-        ho  -> ( v_o <o> v_d );
+        ho  -> ( v_o <*> v_d );
     };
 
     node lstm = ( dim_h, x ) => ( y )
     {
-        mutor adaptive w_r = [ dim_h ][ dimof( x ) ]#, b_r = [ dim_h ]#;
-        mutor recurrent c = [ dim_h ]#, h = [ dim_h ]#;
+        holor adaptive w_r = [ dim_h ][ dimof( x ) ]#, b_r = [ dim_h ]#;
+        holor recurrent c = [ dim_h ]#, h = [ dim_h ]#;
 
         node l1 = layer( dim_h -> dim_h, x -> x, ci -> c, hi -> h );
 
@@ -88,8 +88,8 @@
 
 */
 
-#ifndef BADAPT_SYM_H
-#define BADAPT_SYM_H
+#ifndef BSYM_H
+#define BSYM_H
 
 #include "bcore_std.h"
 #include "badapt_activator.h"
@@ -98,43 +98,34 @@
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_badapt_operator0
-BETH_PRECODE( badapt_operator0 )
+#ifdef TYPEOF_bsym_op0
+BETH_PRECODE( bsym_op0 )
 #ifdef BETH_PRECODE_SECTION
 
-feature 'a' sr_s forward( const ) = { ERR_fa( "Not implemented." ); return sr_null(); };
-
-stamp :scalar = aware :
-{
-    f3_t value;
-    func :forward = { return sr_f3( o->value ); };
-}; // scalar constant
+stamp :holor  = aware bcore_array { sz_t []; }; // fully size determined holor
+stamp :number = aware :           { f3_t v;  }; // used as const scalar
 
 #endif // BETH_PRECODE_SECTION
-#endif // TYPEOF_badapt_operator0
+#endif // TYPEOF_bsym_op0
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_badapt_operator1
-BETH_PRECODE( badapt_operator1 )
+#ifdef TYPEOF_bsym_op1
+BETH_PRECODE( bsym_op1 )
 #ifdef BETH_PRECODE_SECTION
-
-feature 'a' sr_s forward( const, sr_s arg ) = { ERR_fa( "Not implemented." ); return sr_null(); };
 
 stamp :linear = aware : { };
 stamp :tanh   = aware : { };
 stamp :dimof  = aware : { }; // dimension of input
 
 #endif // BETH_PRECODE_SECTION
-#endif // TYPEOF_badapt_operator1
+#endif // TYPEOF_bsym_op1
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_badapt_operator2
-BETH_PRECODE( badapt_operator2 )
+#ifdef TYPEOF_bsym_op2
+BETH_PRECODE( bsym_op2 )
 #ifdef BETH_PRECODE_SECTION
-
-feature 'a' sr_s forward( const, sr_s arg1, sr_s arg2 ) = { ERR_fa( "Not implemented." ); return sr_null(); };
 
 /// we prepend '__' when operators are not meant to be used by name but by an associated symbol
 stamp :__mul   = aware : { }; // symbol '*'
@@ -143,133 +134,149 @@ stamp :__plus  = aware : { }; // symbol '+'
 stamp :__minus = aware : { }; // symbol '-'
 
 #endif // BETH_PRECODE_SECTION
-#endif // TYPEOF_badapt_operator2
+#endif // TYPEOF_bsym_op2
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_badapt_sym
-BETH_PRECODE( badapt_sym )
+#ifdef TYPEOF_bsym_net
+BETH_PRECODE( bsym_net )
 #ifdef BETH_PRECODE_SECTION
 
-feature 'a' bl_t is_operator( const ) = { return false; }; // item is operator
-feature 'a' bl_t is_node(     const ) = { return false; }; // item is node
-feature 'a' bl_t is_link(     const ) = { return false; }; // item is link
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+feature 'a' void set_body( mutable, :body_s* body ) = {};
+feature 'a' void trace_to_sink( const, sz_t indent, bcore_sink* sink ) = { /*ERR_fa( "Cannot trace #<sc_t>", ifnameof( *(aware_t*)o ) );*/ };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :items = aware bcore_array
+stamp :body  = aware bcore_array
 {
-    aware badapt_sym => [];
+    aware : => [];
+    bcore_hmap_name_s -> hmap_name;
+    func bcore_inst_call : copy_x =
+    {
+        for( sz_t i = 0; i < o->size; i++ ) bsym_net_a_set_body( o->data[ i ], o );
+    };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// The target of a link can be null, another link or an operator
-stamp :link = aware :
+/** This adress scheme is necessary to make sub-networks copyable
+ *  Direct addressing or owning is difficult because networks are not necessarily trees
+ *  and may even be cyclic.
+ */
+stamp :address = aware bcore_inst
+{
+    sz_t index; // index of this link in body (note that 0 may be a valid index)
+    hidden vd_t body;  // pointer to :body_s; null indicates that the address is not set
+    func bsym_net : trace_to_sink;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :link  = aware :
 {
     tp_t name;
-    aware badapt_sym -> target;
-    hidden vd_t frame;
-    func : is_link = { return true; };
+    :address_s target;
+    :address_s root;
+
+    bl_t flag; // used during embedding
+
+    func bsym_net : set_body =
+    {
+        if( o->target.body && o->target.body == o->root.body )
+        {
+            o->target.body = body;
+        }
+        o->root.body = body;
+    };
+
+    func bsym_net : trace_to_sink;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :args = aware bcore_array
-{
-    :link_s [];
-
-    hidden vd_t frame;
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :dim  = aware bcore_inst  { :link_s link; };
-stamp :dims = aware bcore_array { :dim_s []; };
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :mutor = aware :
+stamp :node  = aware bcore_array
 {
     tp_t name;
-    tp_t type; // adaptive, recurrent, etc
-    :dims_s dims;
+    :address_s [] targets;
+    :address_s root;
+    private :address_s -> new_root; // only used during embedding
+    sr_s load;
+    private :body_s -> body;
+    func bsym_net : set_body =
+    {
+        for( sz_t i = 0; i < o->targets_size; i++ )
+        {
+            :address_s* target = &o->targets_data[ i ];
+            if( target->body && target->body == o->root.body )
+            {
+                target->body = body;
+            }
+        }
+        o->root.body = body;
+    };
 
-    hidden vd_t frame;
+    func bsym_net : trace_to_sink;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :holor = aware :
+{
+    sz_t dims;
+    func bsym_net : trace_to_sink;
+}; // dim determined holor
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#endif // BETH_PRECODE_SECTION
+#endif // TYPEOF_bsym_net
+
+#ifdef TYPEOF_bsym_sem
+BETH_PRECODE( bsym_sem )
+#ifdef BETH_PRECODE_SECTION
+
+stamp :links = aware bcore_array { bsym_net_link_s []; };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :frame = aware bcore_array
+{
+    hidden bcore_hmap_name_s -> hmap_name;
+    private :frame_s  -> parent;
+    aware : => [];
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :node = aware :
 {
-    /// certain names refer to predefined binary and unary operators
     tp_t name;
-    :args_s  args_in;
-    :args_s  args_out;
-    :items_s body;
-
-    /* we want to copy the pointer but not treat it as link */
-    hidden vd_t parent_node;
-    hidden vd_t frame;
-
-    /// optional data load (e.g. const value)
-    sr_s load;
-
-    func : is_node = { return true; };
+    sz_t args_in;
+    sz_t args_out;
+    bsym_net_body_s body;
+    :frame_s -> frame;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// const-operator
-stamp :operator0 = aware :
-{
-    aware badapt_operator0 => operator;
-    func : is_operator = { return true; };
-};
-
-// unary-operator
-stamp :operator1 = aware :
-{
-    :link_s link;
-    aware badapt_operator1 => operator;
-    func : is_operator = { return true; };
-};
-
-// binary-operator
-stamp :operator2 = aware :
-{
-    :link_s link1;
-    :link_s link2;
-    aware badapt_operator2 => operator;
-    func : is_operator = { return true; };
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :frame = aware bcore_inst
-{
-    bcore_hmap_name_s hmap_name;
-    :node_s root;
-
-    func bcore_inst_call : init_x =
-    {
-        badapt_sym_frame_s_setup( o );
-    };
-};
+/// evaluation stack indicators
+stamp :stack_flag = aware : {}; // binary operator expecting completion
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // BETH_PRECODE_SECTION
-#endif // TYPEOF_badapt_sym
-
-void badapt_sym_frame_s_setup( badapt_sym_frame_s* o );
-
-void badapt_sym_test( void );
+#endif // TYPEOF_bsym_sem
 
 /**********************************************************************************************************************/
 
-vd_t badapt_sym_signal_handler( const bcore_signal_s* o );
+void bsym_test( void );
 
 /**********************************************************************************************************************/
 
-#endif // BADAPT_SYM_H
+vd_t bsym_signal_handler( const bcore_signal_s* o );
+
+/**********************************************************************************************************************/
+
+#endif // BSYM_H
