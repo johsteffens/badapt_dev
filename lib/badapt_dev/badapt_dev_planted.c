@@ -29,11 +29,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_abc_s )
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
-    "func badapt_supplier:preferred_loss;"
-    "func badapt_supplier:get_in_size;"
-    "func badapt_supplier:get_out_size;"
-    "func badapt_supplier:fetch_sample_tio;"
-    "func badapt_supplier:fetch_sample_vio;"
+    "func ^:preferred_loss;"
+    "func ^:get_in_size;"
+    "func ^:get_out_size;"
+    "func ^:fetch_sample_tio;"
+    "func ^:fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_kjv_s )
@@ -49,11 +49,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_kjv_s )
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
-    "func badapt_supplier:preferred_loss;"
-    "func badapt_supplier:get_in_size;"
-    "func badapt_supplier:get_out_size;"
-    "func badapt_supplier:fetch_sample_tio;"
-    "func badapt_supplier:fetch_sample_vio;"
+    "func ^:preferred_loss;"
+    "func ^:get_in_size;"
+    "func ^:get_out_size;"
+    "func ^:fetch_sample_tio;"
+    "func ^:fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_text_s )
@@ -70,11 +70,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_text_s )
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
-    "func badapt_supplier:preferred_loss;"
-    "func badapt_supplier:get_in_size;"
-    "func badapt_supplier:get_out_size;"
-    "func badapt_supplier:fetch_sample_tio;"
-    "func badapt_supplier:fetch_sample_vio;"
+    "func ^:preferred_loss;"
+    "func ^:get_in_size;"
+    "func ^:get_out_size;"
+    "func ^:fetch_sample_tio;"
+    "func ^:fetch_sample_vio;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
@@ -89,7 +89,7 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
     "st_s txt_trigger;"
     "sz_t txt_size = 128;"
     "f3_t heat = 0.3;"
-    "func badapt_guide:callback;"
+    "func ^:callback;"
 "}";
 
 /**********************************************************************************************************************/
@@ -175,15 +175,15 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_s )
     "hidden bmath_vf3_s d_b_o;"
     "hidden bmath_vf3_s d_b_q;"
     "hidden badapt_dev_lstm_arr_layer_s arr_layer;"
-    "func :get_in_size;"
-    "func :get_out_size;"
-    "func :get_dynamics_std;"
-    "func :set_dynamics_std;"
-    "func :arc_to_sink;"
-    "func :minfer;"
-    "func :bgrad_adapt;"
-    "func :reset;"
-    "func :get_weights_min_max;"
+    "func ^:get_in_size;"
+    "func ^:get_out_size;"
+    "func ^:get_dynamics_std;"
+    "func ^:set_dynamics_std;"
+    "func ^:arc_to_sink;"
+    "func ^:minfer;"
+    "func ^:bgrad_adapt;"
+    "func ^:reset;"
+    "func ^:get_weights_min_max;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_builder_s )
@@ -203,11 +203,11 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_builder_s )
     "aware badapt_activator => a_d;"
     "aware badapt_activator => a_r;"
     "func bcore_inst_call:init_x;"
-    "func :get_in_size;"
-    "func :set_in_size;"
-    "func :get_out_size;"
-    "func :set_out_size;"
-    "func :build;"
+    "func ^:get_in_size;"
+    "func ^:set_in_size;"
+    "func ^:get_out_size;"
+    "func ^:set_out_size;"
+    "func ^:build;"
 "}";
 
 /**********************************************************************************************************************/
@@ -301,8 +301,8 @@ BCORE_DEFINE_OBJECT_INST_P( bsym_net_link_s )
     "bsym_net_address_s target;"
     "bsym_net_address_s root;"
     "bl_t flag;"
-    "func bsym_net:set_body;"
-    "func bsym_net:trace_to_sink;"
+    "func ^:set_body;"
+    "func ^:trace_to_sink;"
 "}";
 
 void bsym_net_link_s_set_body( bsym_net_link_s* o, bsym_net_body_s* body )
@@ -345,7 +345,7 @@ BCORE_DEFINE_OBJECT_INST_P( bsym_net_holor_s )
 "{"
     "tp_t type;"
     "sz_t dims;"
-    "func bsym_net:trace_to_sink;"
+    "func ^:trace_to_sink;"
 "}";
 
 BCORE_DEFINE_SPECT( bcore_inst, bsym_net )
@@ -396,7 +396,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 1186237741 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 3611820443 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );

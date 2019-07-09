@@ -109,8 +109,8 @@
 
 /**********************************************************************************************************************/
 
-BETH_PRECODE( badapt_dev_lstm )
-#ifdef BETH_PRECODE_SECTION
+PLANT_GROUP( badapt_dev_lstm, bcore_inst )
+#ifdef PLANT_SECTION
 
 stamp :layer = bcore_inst
 {
@@ -201,16 +201,16 @@ stamp : = aware badapt_adaptive
     // ==============================================================
 
     // === adaptive functions =======================================
-    func : get_in_size      = { return o->size_input; };
-    func : get_out_size     = { return o->size_output; };
-    func : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
-    func : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
+    func badapt_adaptive : get_in_size      = { return o->size_input; };
+    func badapt_adaptive : get_out_size     = { return o->size_output; };
+    func badapt_adaptive : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
+    func badapt_adaptive : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
 
-    func : arc_to_sink;
-    func : minfer;
-    func : bgrad_adapt;
-    func : reset;
-    func : get_weights_min_max;
+    func badapt_adaptive : arc_to_sink;
+    func badapt_adaptive : minfer;
+    func badapt_adaptive : bgrad_adapt;
+    func badapt_adaptive : reset;
+    func badapt_adaptive : get_weights_min_max;
     // ==============================================================
 };
 
@@ -242,22 +242,22 @@ stamp :builder = aware badapt_builder
     func bcore_inst_call : init_x;
 
     /// input vector size
-    func : get_in_size = { return o->size_input; };
-    func : set_in_size = { o->size_input = size; };
+    func badapt_builder : get_in_size = { return o->size_input; };
+    func badapt_builder : set_in_size = { o->size_input = size; };
 
     /// output vector size
-    func : get_out_size = { return o->size_output; };
-    func : set_out_size = { o->size_output = size; };
+    func badapt_builder : get_out_size = { return o->size_output; };
+    func badapt_builder : set_out_size = { o->size_output = size; };
 
     /// builds adaptive ready to be trained; passes ownership
-    func : build;
+    func badapt_builder : build;
 
     // ==============================================================
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#endif // BETH_PRECODE_SECTION
+#endif // PLANT_SECTION
 
 /**********************************************************************************************************************/
 // tests

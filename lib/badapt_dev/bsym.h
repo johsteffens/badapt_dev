@@ -99,33 +99,33 @@
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_bsym_op0
-BETH_PRECODE( bsym_op0 )
-#ifdef BETH_PRECODE_SECTION
+PLANT_GROUP( bsym_op0, bcore_inst )
+#ifdef PLANT_SECTION
 
 stamp :holor  = aware bcore_array { sz_t []; }; // fully size determined holor
 stamp :number = aware :           { f3_t v;  }; // used as const scalar
 
-#endif // BETH_PRECODE_SECTION
+#endif // PLANT_SECTION
 #endif // TYPEOF_bsym_op0
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_bsym_op1
-BETH_PRECODE( bsym_op1 )
-#ifdef BETH_PRECODE_SECTION
+PLANT_GROUP( bsym_op1, bcore_inst )
+#ifdef PLANT_SECTION
 
 stamp :linear = aware : { };
 stamp :tanh   = aware : { };
 stamp :dimof  = aware : { }; // dimension of input
 
-#endif // BETH_PRECODE_SECTION
+#endif // PLANT_SECTION
 #endif // TYPEOF_bsym_op1
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_bsym_op2
-BETH_PRECODE( bsym_op2 )
-#ifdef BETH_PRECODE_SECTION
+PLANT_GROUP( bsym_op2, bcore_inst )
+#ifdef PLANT_SECTION
 
 set enroll;
 
@@ -135,14 +135,14 @@ stamp :__hmul  = aware : { }; // symbol '<*>' (hadamard product)
 stamp :__plus  = aware : { }; // symbol '+'
 stamp :__minus = aware : { }; // symbol '-'
 
-#endif // BETH_PRECODE_SECTION
+#endif // PLANT_SECTION
 #endif // TYPEOF_bsym_op2
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_bsym_net
-BETH_PRECODE( bsym_net )
-#ifdef BETH_PRECODE_SECTION
+PLANT_GROUP( bsym_net, bcore_inst )
+#ifdef PLANT_SECTION
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -237,14 +237,14 @@ stamp :holor = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#endif // BETH_PRECODE_SECTION
+#endif // PLANT_SECTION
 #endif // TYPEOF_bsym_net
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_bsym_sem
-BETH_PRECODE( bsym_sem )
-#ifdef BETH_PRECODE_SECTION
+PLANT_GROUP( bsym_sem, bcore_inst )
+#ifdef PLANT_SECTION
 
 stamp :links = aware bcore_array { bsym_net_link_s []; };
 
@@ -275,7 +275,7 @@ stamp :stack_flag = aware : {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#endif // BETH_PRECODE_SECTION
+#endif // PLANT_SECTION
 #endif // TYPEOF_bsym_sem
 
 /**********************************************************************************************************************/

@@ -34,13 +34,13 @@
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_badapt_dev_ern
-BETH_PRECODE( badapt_dev_ern )
-#ifdef BETH_PRECODE_SECTION
+PLANT_GROUP( badapt_dev_ern, bcore_inst )
+#ifdef PLANT_SECTION
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#endif // BETH_PRECODE_SECTION
+#endif // PLANT_SECTION
 #endif // TYPEOF_badapt_dev_ern
 
 
