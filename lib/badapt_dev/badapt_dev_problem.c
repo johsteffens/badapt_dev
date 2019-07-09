@@ -59,7 +59,6 @@ void badapt_problem_recurrent_abc_s_fetch_sample_tio( badapt_problem_recurrent_a
 
 void badapt_problem_recurrent_abc_s_fetch_sample_vio( badapt_problem_recurrent_abc_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    /// TODO: separate between batch and valid
     badapt_problem_recurrent_abc_s_fetch_sample_tio( o, in, out );
 }
 
@@ -132,7 +131,6 @@ void badapt_problem_recurrent_kjv_s_fetch_sample_tio( badapt_problem_recurrent_k
 
 void badapt_problem_recurrent_kjv_s_fetch_sample_vio( badapt_problem_recurrent_kjv_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    /// TODO: separate between batch and valid
     badapt_problem_recurrent_kjv_s_fetch_sample_tio( o, in, out );
 }
 
@@ -215,7 +213,6 @@ void badapt_problem_recurrent_text_s_fetch_sample_tio( badapt_problem_recurrent_
 
 void badapt_problem_recurrent_text_s_fetch_sample_vio( badapt_problem_recurrent_text_s* o, bmath_vf3_s* in, bmath_vf3_s* out )
 {
-    /// TODO: separate between batch and valid
     badapt_problem_recurrent_text_s_fetch_sample_tio( o, in, out );
 }
 
@@ -285,9 +282,9 @@ vd_t badapt_dev_problem_signal_handler( const bcore_signal_s* o )
         }
         break;
 
-        case TYPEOF_precoder:
+        case TYPEOF_plant:
         {
-            bcore_precoder_compile( "badapt_dev_precoded", __FILE__ );
+            bcore_plant_compile( "badapt_dev_planted", __FILE__ );
         }
         break;
 

@@ -677,9 +677,9 @@ vd_t badapt_dev_lstm_signal_handler( const bcore_signal_s* o )
         }
         break;
 
-        case TYPEOF_precoder:
+        case TYPEOF_plant:
         {
-            bcore_precoder_compile( "badapt_dev_precoded", __FILE__ );
+            bcore_plant_compile( "badapt_dev_planted", __FILE__ );
         }
         break;
 

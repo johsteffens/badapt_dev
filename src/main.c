@@ -14,10 +14,10 @@ int main( int argc, char** argv )
     bcore_register_signal_handler( badapt_signal_handler );
     bcore_register_signal_handler( badapt_dev_signal_handler );
 
-    // precoder
+    // plant
     if( argc > 1 && sc_t_equal( argv[ 1 ], "-p" ) )
     {
-        if( bcore_precoder_run_globally() )
+        if( bcore_plant_run_globally() )
         {
             bcore_down( true );
             return 0;

@@ -26,13 +26,13 @@
     ========================================
     MLP
 
-    node layer = ( dim_y, x ) => ( y )
+    node layer = ( y ) => ( dim_y, x )
     {
         mutor adaptive w = [ dim_y ][ dimof( x ) ]#, b = [ dim_y ]#;
         y -> ( w * x ) + b;
     };
 
-    node mlp = ( x ) => ( y )
+    node mlp = ( y ) => ( x )
     {
         node l1 = layer( dim -> 10, x -> x    );
         node l2 = layer( dim -> 20, x -> act_relu( l1.y ) );
@@ -45,7 +45,7 @@
     ========================================
     LSTM
 
-    node layer = ( dim_h, x, ci, hi ) => ( co, ho )
+    node layer =  ( co, ho ) => ( dim_h, x, ci, hi )
     {
         // = type def
         holor w_fx = [ dim_h ][ dimof( x ) ]#, w_fh = [ dim_h ][ dimof( x ) ]#, b_f = [ dim_h ]#;
@@ -63,7 +63,7 @@
         ho  -> ( v_o <*> v_d );
     };
 
-    node lstm = ( dim_h, x ) => ( y )
+    node lstm = ( y ) => ( dim_h, x )
     {
         holor adaptive w_r = [ dim_h ][ dimof( x ) ]#, b_r = [ dim_h ]#;
         holor recurrent c = [ dim_h ]#, h = [ dim_h ]#;
@@ -94,7 +94,7 @@
 #include "bcore_std.h"
 #include "badapt_activator.h"
 #include "badapt_adaptive.h"
-#include "badapt_dev_precoded.h"
+#include "badapt_dev_planted.h"
 
 /**********************************************************************************************************************/
 
@@ -126,6 +126,8 @@ stamp :dimof  = aware : { }; // dimension of input
 #ifdef TYPEOF_bsym_op2
 BETH_PRECODE( bsym_op2 )
 #ifdef BETH_PRECODE_SECTION
+
+set enroll;
 
 /// we prepend '__' when operators are not meant to be used by name but by an associated symbol
 stamp :__mul   = aware : { }; // symbol '*'
@@ -222,8 +224,13 @@ stamp :node  = aware bcore_array
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// holor types
+name adaptive;
+name buffer;
+
 stamp :holor = aware :
 {
+    tp_t type;
     sz_t dims;
     func bsym_net : trace_to_sink;
 }; // dim determined holor
@@ -233,20 +240,13 @@ stamp :holor = aware :
 #endif // BETH_PRECODE_SECTION
 #endif // TYPEOF_bsym_net
 
+/**********************************************************************************************************************/
+
 #ifdef TYPEOF_bsym_sem
 BETH_PRECODE( bsym_sem )
 #ifdef BETH_PRECODE_SECTION
 
 stamp :links = aware bcore_array { bsym_net_link_s []; };
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :frame = aware bcore_array
-{
-    hidden bcore_hmap_name_s -> hmap_name;
-    private :frame_s  -> parent;
-    aware : => [];
-};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -256,13 +256,22 @@ stamp :node = aware :
     sz_t args_in;
     sz_t args_out;
     bsym_net_body_s body;
-    :frame_s -> frame;
+    :node_base_s => node_base;
+    hidden bcore_hmap_name_s -> hmap_name;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :node_base = aware bcore_array
+{
+    private :node_base_s -> parent;
+    aware : => [];
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// evaluation stack indicators
-stamp :stack_flag = aware : {}; // binary operator expecting completion
+stamp :stack_flag = aware : {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
