@@ -13,9 +13,6 @@
  *  limitations under the License.
  */
 
-/** Symbolic representation of an adaptive
- */
-
 /*
     ========================================
 
@@ -88,197 +85,371 @@
 
 */
 
+/**
+ *  Symbolic language to describe a graph of operators on holors.
+ *
+ *  Semantic Cell Concept:
+ *  A semantic graph communicates with the objects outside its body through input an output channels.
+ *  All links of a graph 'x' to outside objects the node must pass though an input channel of 'x'.
+ *  Inside objects may not be referenced directly by outside objects.
+ *  A graph adhering to this concept is called 'cell'
+ *  An construction of a new graph must conclude with converting it to a cell.
+ *  Cells can be used as objects for constricting new graphs.
+ *
+ *  Static Links:
+ *  Defined links of an input channel of a semantic graph are never changed or freed again.
+ *  Different use cases of a graph are achieved by creating graph-copies and assigning links of those copies differently.
+ */
+
 #ifndef BSYM_H
 #define BSYM_H
 
-#include "bcore_std.h"
+#include "bmath_std.h"
 #include "badapt_activator.h"
 #include "badapt_adaptive.h"
 #include "badapt_dev_planted.h"
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_bsym_op0
-PLANT_GROUP( bsym_op0, bcore_inst )
-#ifdef PLANT_SECTION
-
-stamp :holor  = aware bcore_array { sz_t []; }; // fully size determined holor
-stamp :number = aware :           { f3_t v;  }; // used as const scalar
-
-#endif // PLANT_SECTION
-#endif // TYPEOF_bsym_op0
-
-/**********************************************************************************************************************/
-
-#ifdef TYPEOF_bsym_op1
-PLANT_GROUP( bsym_op1, bcore_inst )
-#ifdef PLANT_SECTION
-
-stamp :linear = aware : { };
-stamp :tanh   = aware : { };
-stamp :dimof  = aware : { }; // dimension of input
-
-#endif // PLANT_SECTION
-#endif // TYPEOF_bsym_op1
-
-/**********************************************************************************************************************/
-
-#ifdef TYPEOF_bsym_op2
-PLANT_GROUP( bsym_op2, bcore_inst )
-#ifdef PLANT_SECTION
-
-set enroll;
-
-/// we prepend '__' when operators are not meant to be used by name but by an associated symbol
-stamp :__mul   = aware : { }; // symbol '*'
-stamp :__hmul  = aware : { }; // symbol '<*>' (hadamard product)
-stamp :__plus  = aware : { }; // symbol '+'
-stamp :__minus = aware : { }; // symbol '-'
-
-#endif // PLANT_SECTION
-#endif // TYPEOF_bsym_op2
-
-/**********************************************************************************************************************/
-
-#ifdef TYPEOF_bsym_net
-PLANT_GROUP( bsym_net, bcore_inst )
+#ifdef TYPEOF_bsym
+PLANT_GROUP( bsym, bcore_inst )
 #ifdef PLANT_SECTION
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' void set_body( mutable, :body_s* body ) = {};
-feature 'a' void trace_to_sink( const, sz_t indent, bcore_sink* sink ) = { /*ERR_fa( "Cannot trace #<sc_t>", ifnameof( *(aware_t*)o ) );*/ };
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :body  = aware bcore_array
+stamp :source_info = aware bcore_inst
 {
-    aware : => [];
-    bcore_hmap_name_s -> hmap_name;
-    func bcore_inst_call : copy_x =
-    {
-        for( sz_t i = 0; i < o->size; i++ ) bsym_net_a_set_body( o->data[ i ], o );
-    };
+    aware bcore_source -> source;
+    sz_t index;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/** This adress scheme is necessary to make sub-networks copyable
- *  Direct addressing or owning is difficult because networks are not necessarily trees
- *  and may even be cyclic.
- */
-stamp :address = aware bcore_inst
+/// operators
+group :op =
 {
-    sz_t index; // index of this link in body (note that 0 may be a valid index)
-    hidden vd_t body;  // pointer to :body_s; null indicates that the address is not set
-    func bsym_net : trace_to_sink;
-};
+    feature 'a' void trace_to_sink( const, sz_t indent, bcore_sink* sink ) = {};
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :link  = aware :
-{
-    tp_t name;
-    :address_s target;
-    :address_s root;
-
-    bl_t flag; // used during embedding
-
-    func bsym_net : set_body =
+    /// nullary operator (arity 0)
+    group :ar0 =
     {
-        if( o->target.body && o->target.body == o->root.body )
+        /// holor types
+        name adaptive;
+        name buffer;
+        name const;  // for literals
+
+        feature strict 'a' bl_t compute_hf3( const, bmath_hf3_s* r );
+
+        stamp :holor  = aware :
         {
-            o->target.body = body;
-        }
-        o->root.body = body;
-    };
+            tp_t type;
+            bmath_hf3_s hf3;
 
-    func bsym_net : trace_to_sink;
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :node  = aware bcore_array
-{
-    tp_t name;
-    :address_s [] targets;
-    :address_s root;
-    private :address_s -> new_root; // only used during embedding
-    sr_s load;
-    private :body_s -> body;
-    func bsym_net : set_body =
-    {
-        for( sz_t i = 0; i < o->targets_size; i++ )
-        {
-            :address_s* target = &o->targets_data[ i ];
-            if( target->body && target->body == o->root.body )
+            func :: : trace_to_sink =
             {
-                target->body = body;
-            }
-        }
-        o->root.body = body;
+                bcore_sink_a_push_fa( sink, "(#<sc_t>)", ifnameof( o->type ) );
+                bmath_hf3_s_trace_to_sink( &o->hf3, indent, sink );
+            };
+
+            func : : compute_hf3 =
+            {
+                bmath_hf3_s_copy( r, &o->hf3 ); return true;
+            };
+        };
     };
 
-    func bsym_net : trace_to_sink;
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /// unary operator (arity 1)
+    group :ar1 = retrievable
+    {
+        feature strict 'a' sc_t get_symbol( const );
+        feature 'a' bl_t compute_hf3( const, const bmath_hf3_s* a, bmath_hf3_s* r );
+
+        stamp :linear = aware :
+        {
+            func : :get_symbol = { return "linear"; };
+            func : :compute_hf3 = { bmath_hf3_s_copy( r, a ); return true; };
+        };
+
+        stamp :tanh   = aware :
+        {
+            func : :get_symbol = { return "tanh"  ; };
+
+            func : :compute_hf3 =
+            {
+                bmath_hf3_s_copy_d_data( r, a );
+                if( a->v_size > 0 )
+                {
+                    bmath_hf3_s_fit_v_size( r );
+                    for( sz_t i = 0; i < a->v_size; i++ ) r->v_data[ i ] = tanh( a->v_data[ i ] );
+                }
+                return true;
+            };
+        };
+
+        stamp :dimof  = aware :
+        {
+            func : :get_symbol = { return "dimof" ; };
+
+            func : :compute_hf3 =
+            {
+                if( bmath_hf3_s_d_product( a ) == 0 ) return false;
+                bmath_hf3_s_set_d_size( r, 0 );
+                bmath_hf3_s_fit_v_size( r );
+                if( a->d_size > 0 )
+                {
+                    r->v_data[ 0 ] = a->d_data[ a->d_size - 1 ];
+                }
+                else
+                {
+                    r->v_data[ 0 ] = 1;
+                }
+                return true;
+            };
+        };
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /// binary operator (arity 2)
+    group :ar2 = retrievable
+    {
+        feature strict 'a' sc_t get_symbol( const );
+        feature 'a' bl_t compute_hf3( const, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r );
+
+        stamp :mul   = aware :
+        {
+            func : :get_symbol  = { return "*"; };
+            func : :compute_hf3;
+        };
+
+        stamp :hmul   = aware :
+        {
+            func : :get_symbol  = { return "<*>"; };
+            func : :compute_hf3;
+        };
+
+        stamp :plus   = aware :
+        {
+            func : :get_symbol  = { return "+"; };
+            func : :compute_hf3;
+        };
+
+        stamp :minus   = aware :
+        {
+            func : :get_symbol  = { return "-"; };
+            func : :compute_hf3;
+        };
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// holor types
-name adaptive;
-name buffer;
-
-stamp :holor = aware :
+/// graph objects
+group :net =
 {
-    tp_t type;
-    sz_t dims;
-    func bsym_net : trace_to_sink;
-}; // dim determined holor
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /// Visualization / Debugging
+    feature 'a' void trace_to_sink( const, sz_t indent, bcore_sink* sink ) = {};
+
+    /// Name of link or node
+    feature 'a' tp_t get_name( const ) = { return 0; };
+
+    /// Used during cell construction
+    feature 'a' void set_body( mutable, :body_s* body ) = {};
+
+    /// (traceback) computes hf3 on nodes
+    feature 'a' bmath_hf3_s* trace_compute_hf3( mutable ) = { return NULL; };
+
+    /// (traceback) resets hf3 computation
+    feature 'a' void trace_reset_hf3( mutable ) = {};
+
+    /// (traceback) sets hf3 index; returns highest index specified so far; a new index value must be >= start_index
+    feature 'a' sz_t trace_set_hf3_index( mutable, sz_t start_index ) = { return -1; };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :body = aware bcore_array
+    {
+        aware : => [];
+        func bcore_inst_call : copy_x =
+        {
+            for( sz_t i = 0; i < o->size; i++ ) :a_set_body( o->data[ i ], o );
+        };
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /** This adress scheme is necessary to make sub-graphs copyable
+     *  Direct addressing or owning is difficult because graphs are not necessarily trees
+     *  they may even be cyclic.
+     */
+    stamp :address = aware bcore_inst
+    {
+        sz_t index; // index of this link in body (note that 0 may be a valid index)
+        hidden vd_t body;  // pointer to :body_s; null indicates that the address is not set
+        func : : trace_to_sink =
+        {
+            ::net* net = :address_s_get_net( o );
+            if( net ) :a_trace_to_sink( net, indent, sink );
+        };
+
+        func : : trace_compute_hf3 =
+        {
+            ::net* net = :address_s_get_net( o );
+            return net ? :a_trace_compute_hf3( net ) : NULL;
+        };
+
+        func : : trace_reset_hf3 =
+        {
+            ::net* net = :address_s_get_net( o );
+            if( net ) :a_trace_reset_hf3( net );
+        };
+
+        func : : trace_set_hf3_index =
+        {
+            ::net* net = :address_s_get_net( o );
+            return net ? :a_trace_set_hf3_index( net, start_index ) : -1;
+        };
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :link  = aware :
+    {
+        tp_t name;
+        :address_s target;
+        :address_s root;
+
+        bl_t flag; // used during cell computing
+
+        func : : get_name = { return o->name; };
+
+        func : : set_body =
+        {
+            if( o->target.body && o->target.body == o->root.body )
+            {
+                o->target.body = body;
+            }
+            o->root.body = body;
+        };
+
+        func : : trace_to_sink =
+        {
+            bcore_sink_a_push_fa( sink, "(#<sc_t>) --> ", :link_s_get_name_sc( o ) );
+            :address_s_trace_to_sink( &o->target, indent, sink );
+        };
+
+        func : : trace_compute_hf3   = { return :address_s_trace_compute_hf3(   &o->target ); };
+        func : : trace_reset_hf3     = {        :address_s_trace_reset_hf3(     &o->target ); };
+        func : : trace_set_hf3_index = { return :address_s_trace_set_hf3_index( &o->target, start_index ); };
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :node = aware bcore_array
+    {
+        tp_t name;
+        :address_s [] targets;
+        :address_s root;
+
+        aware ::op* op;
+
+        ::source_info_s source_info;
+
+        /// holor adata
+
+        bmath_hf3_s => hf3;  // output holor (constructed during tracing)
+        sz_t hf3_index = -1; // holor index (used for virtual machine construction)
+
+        private :address_s -> new_root; // only used during embedding
+
+        /// functions
+
+        func : : get_name = { return o->name; };
+
+        func : : set_body =
+        {
+            for( sz_t i = 0; i < o->targets_size; i++ )
+            {
+                :address_s* target = &o->targets_data[ i ];
+                if( target->body && target->body == o->root.body )
+                {
+                    target->body = body;
+                }
+            }
+            o->root.body = body;
+        };
+
+        func : : trace_to_sink;
+        func : : trace_compute_hf3;
+        func : : trace_reset_hf3 =
+        {
+            bmath_hf3_s_detach( &o->hf3 );
+            for( sz_t i = 0; i < o->targets_size; i++ ) :address_s_trace_reset_hf3( &o->targets_data[ i ] );
+        };
+
+        func : : trace_set_hf3_index =
+        {
+            if( o->hf3_index >= 0 ) return o->hf3_index;
+            sz_t last_index = start_index - 1;
+            for( sz_t i = 0; i < o->targets_size; i++ )
+            {
+                last_index = sz_max( last_index, :address_s_trace_set_hf3_index( &o->targets_data[ i ], last_index + 1 ) );
+            }
+            o->hf3_index = last_index + 1;
+            return o->hf3_index;
+        };
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// semantic objects
+group :sem =
+{
+    stamp :graph = aware :
+    {
+        tp_t name;
+        sz_t args_in;
+        sz_t args_out;
+        bsym_net_body_s body;
+        :graph_base_s => graph_base;
+        hidden bcore_arr_st_s -> arr_symbol_op2;
+        ::source_info_s source_info;
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :graph_base = aware bcore_array
+    {
+        private :graph_base_s -> parent;
+        aware : => [];
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /// evaluation stack indicators
+    stamp :stack_flag = aware : {};
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+};
+
 #endif // PLANT_SECTION
-#endif // TYPEOF_bsym_net
+#endif // TYPEOF_bsym
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_bsym_sem
-PLANT_GROUP( bsym_sem, bcore_inst )
-#ifdef PLANT_SECTION
-
-stamp :links = aware bcore_array { bsym_net_link_s []; };
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :node = aware :
-{
-    tp_t name;
-    sz_t args_in;
-    sz_t args_out;
-    bsym_net_body_s body;
-    :node_base_s => node_base;
-    hidden bcore_hmap_name_s -> hmap_name;
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :node_base = aware bcore_array
-{
-    private :node_base_s -> parent;
-    aware : => [];
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-/// evaluation stack indicators
-stamp :stack_flag = aware : {};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#endif // PLANT_SECTION
-#endif // TYPEOF_bsym_sem
-
-/**********************************************************************************************************************/
+bsym_net* bsym_net_address_s_get_net( const bsym_net_address_s* o );
+sc_t      bsym_net_link_s_get_name_sc( const bsym_net_link_s* o );
+void      bmath_hf3_s_trace_to_sink( const bmath_hf3_s* o, sz_t indent, bcore_sink* sink );
 
 void bsym_test( void );
 

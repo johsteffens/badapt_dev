@@ -103,171 +103,152 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
 // source: badapt_dev_lstm
 #include "badapt_dev_lstm.h"
 
-//----------------------------------------------------------------------------------------------------------------------
-// group: badapt_dev_lstm
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_layer_s )
-"bcore_inst"
-"{"
-    "bmath_vf3_s v_x;"
-    "bmath_vf3_s v_f;"
-    "bmath_vf3_s v_i;"
-    "bmath_vf3_s v_o;"
-    "bmath_vf3_s v_q;"
-    "bmath_vf3_s v_c;"
-    "bmath_vf3_s v_d;"
-    "bmath_vf3_s v_h;"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_arr_layer_s )
-"aware bcore_array"
-"{"
-    "badapt_dev_lstm_layer_s => [] arr;"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_s )
-"aware badapt_adaptive"
-"{"
-    "sz_t size_input;"
-    "sz_t size_hidden;"
-    "sz_t size_output;"
-    "sz_t size_unfolded;"
-    "badapt_dynamics_std_s dynamics;"
-    "bmath_mf3_s w_fx;"
-    "bmath_mf3_s w_fh;"
-    "bmath_mf3_s w_ix;"
-    "bmath_mf3_s w_ih;"
-    "bmath_mf3_s w_ox;"
-    "bmath_mf3_s w_oh;"
-    "bmath_mf3_s w_qx;"
-    "bmath_mf3_s w_qh;"
-    "bmath_mf3_s w_rh;"
-    "bmath_vf3_s b_f;"
-    "bmath_vf3_s b_i;"
-    "bmath_vf3_s b_o;"
-    "bmath_vf3_s b_q;"
-    "bmath_vf3_s b_r;"
-    "aware badapt_activator => a_f;"
-    "aware badapt_activator => a_i;"
-    "aware badapt_activator => a_o;"
-    "aware badapt_activator => a_q;"
-    "aware badapt_activator => a_d;"
-    "aware badapt_activator => a_r;"
-    "hidden bmath_vf3_s v_r;"
-    "hidden bmath_vf3_s d_v_r;"
-    "hidden bmath_vf3_s d_v_f;"
-    "hidden bmath_vf3_s d_v_i;"
-    "hidden bmath_vf3_s d_v_o;"
-    "hidden bmath_vf3_s d_v_q;"
-    "hidden bmath_vf3_s d_v_c;"
-    "hidden bmath_vf3_s d_v_d;"
-    "hidden bmath_vf3_s d_v_h;"
-    "hidden bmath_mf3_s d_w_fx;"
-    "hidden bmath_mf3_s d_w_fh;"
-    "hidden bmath_mf3_s d_w_ix;"
-    "hidden bmath_mf3_s d_w_ih;"
-    "hidden bmath_mf3_s d_w_ox;"
-    "hidden bmath_mf3_s d_w_oh;"
-    "hidden bmath_mf3_s d_w_qx;"
-    "hidden bmath_mf3_s d_w_qh;"
-    "hidden bmath_vf3_s d_b_f;"
-    "hidden bmath_vf3_s d_b_i;"
-    "hidden bmath_vf3_s d_b_o;"
-    "hidden bmath_vf3_s d_b_q;"
-    "hidden badapt_dev_lstm_arr_layer_s arr_layer;"
-    "func ^:get_in_size;"
-    "func ^:get_out_size;"
-    "func ^:get_dynamics_std;"
-    "func ^:set_dynamics_std;"
-    "func ^:arc_to_sink;"
-    "func ^:minfer;"
-    "func ^:bgrad_adapt;"
-    "func ^:reset;"
-    "func ^:get_weights_min_max;"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( badapt_dev_lstm_builder_s )
-"aware badapt_builder"
-"{"
-    "sz_t size_input;"
-    "sz_t size_hidden = 8;"
-    "sz_t size_output = 1;"
-    "sz_t size_unfolded = 2;"
-    "badapt_dynamics_std_s dynamics;"
-    "u2_t random_seed = 1234;"
-    "f3_t random_range = 0.5;"
-    "aware badapt_activator => a_f;"
-    "aware badapt_activator => a_i;"
-    "aware badapt_activator => a_o;"
-    "aware badapt_activator => a_q;"
-    "aware badapt_activator => a_d;"
-    "aware badapt_activator => a_r;"
-    "func bcore_inst_call:init_x;"
-    "func ^:get_in_size;"
-    "func ^:set_in_size;"
-    "func ^:get_out_size;"
-    "func ^:set_out_size;"
-    "func ^:build;"
-"}";
-
 /**********************************************************************************************************************/
 // source: bsym
 #include "bsym.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: bsym_op0
+// group: bsym
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_op0_holor_s )
-"aware bcore_array"
+BCORE_DEFINE_OBJECT_INST_P( bsym_source_info_s )
+"aware bcore_inst"
 "{"
-    "sz_t [];"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( bsym_op0_number_s )
-"aware bsym_op0"
-"{"
-    "f3_t v;"
+    "aware bcore_source -> source;"
+    "sz_t index;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: bsym_op1
+// group: bsym_op
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_op1_linear_s )
-"aware bsym_op1"
+BCORE_DEFINE_SPECT( bsym, bsym_op )
 "{"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( bsym_op1_tanh_s )
-"aware bsym_op1"
-"{"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( bsym_op1_dimof_s )
-"aware bsym_op1"
-"{"
+    "bcore_spect_header_s header;"
+    "feature aware bsym_op : trace_to_sink = bsym_op_trace_to_sink__;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: bsym_op2
+// group: bsym_op_ar0
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_op2___mul_s )
-"aware bsym_op2"
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar0_holor_s )
+"aware bsym_op_ar0"
 "{"
+    "tp_t type;"
+    "bmath_hf3_s hf3;"
+    "func bsym_op:trace_to_sink;"
+    "func ^:compute_hf3;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_op2___hmul_s )
-"aware bsym_op2"
+void bsym_op_ar0_holor_s_trace_to_sink( const bsym_op_ar0_holor_s* o, sz_t indent, bcore_sink* sink )
+{
+    bcore_sink_a_push_fa( sink, "(#<sc_t>)", ifnameof( o->type ) );
+    bmath_hf3_s_trace_to_sink( &o->hf3, indent, sink );
+}
+
+bl_t bsym_op_ar0_holor_s_compute_hf3( const bsym_op_ar0_holor_s* o, bmath_hf3_s* r )
+{
+    bmath_hf3_s_copy( r, &o->hf3 ); return true;
+}
+
+BCORE_DEFINE_SPECT( bsym_op, bsym_op_ar0 )
 "{"
+    "bcore_spect_header_s header;"
+    "feature strict aware bsym_op_ar0 : compute_hf3;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_op2___plus_s )
-"aware bsym_op2"
+//----------------------------------------------------------------------------------------------------------------------
+// group: bsym_op_ar1
+
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar1_linear_s )
+"aware bsym_op_ar1"
 "{"
+    "func ^:get_symbol;"
+    "func ^:compute_hf3;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_op2___minus_s )
-"aware bsym_op2"
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar1_tanh_s )
+"aware bsym_op_ar1"
 "{"
+    "func ^:get_symbol;"
+    "func ^:compute_hf3;"
+"}";
+
+bl_t bsym_op_ar1_tanh_s_compute_hf3( const bsym_op_ar1_tanh_s* o, const bmath_hf3_s* a, bmath_hf3_s* r )
+{
+    bmath_hf3_s_copy_d_data( r, a );
+    if( a->v_size > 0 )
+    {
+        bmath_hf3_s_fit_v_size( r );
+        for( sz_t i = 0; i < a->v_size; i++ ) r->v_data[ i ] = tanh( a->v_data[ i ] );
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar1_dimof_s )
+"aware bsym_op_ar1"
+"{"
+    "func ^:get_symbol;"
+    "func ^:compute_hf3;"
+"}";
+
+bl_t bsym_op_ar1_dimof_s_compute_hf3( const bsym_op_ar1_dimof_s* o, const bmath_hf3_s* a, bmath_hf3_s* r )
+{
+    if( bmath_hf3_s_d_product( a ) == 0 ) return false;
+    bmath_hf3_s_set_d_size( r, 0 );
+    bmath_hf3_s_fit_v_size( r );
+    if( a->d_size > 0 )
+    {
+        r->v_data[ 0 ] = a->d_data[ a->d_size - 1 ];
+    }
+    else
+    {
+        r->v_data[ 0 ] = 1;
+    }
+    return true;
+}
+
+BCORE_DEFINE_SPECT( bsym_op, bsym_op_ar1 )
+"{"
+    "bcore_spect_header_s header;"
+    "feature strict aware bsym_op_ar1 : get_symbol;"
+    "feature aware bsym_op_ar1 : compute_hf3;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bsym_op_ar2
+
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar2_mul_s )
+"aware bsym_op_ar2"
+"{"
+    "func ^:get_symbol;"
+    "func ^:compute_hf3;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar2_hmul_s )
+"aware bsym_op_ar2"
+"{"
+    "func ^:get_symbol;"
+    "func ^:compute_hf3;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar2_plus_s )
+"aware bsym_op_ar2"
+"{"
+    "func ^:get_symbol;"
+    "func ^:compute_hf3;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( bsym_op_ar2_minus_s )
+"aware bsym_op_ar2"
+"{"
+    "func ^:get_symbol;"
+    "func ^:compute_hf3;"
+"}";
+
+BCORE_DEFINE_SPECT( bsym_op, bsym_op_ar2 )
+"{"
+    "bcore_spect_header_s header;"
+    "feature strict aware bsym_op_ar2 : get_symbol;"
+    "feature aware bsym_op_ar2 : compute_hf3;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -277,7 +258,6 @@ BCORE_DEFINE_OBJECT_INST_P( bsym_net_body_s )
 "aware bcore_array"
 "{"
     "aware bsym_net=> [];"
-    "bcore_hmap_name_s -> hmap_name;"
     "func bcore_inst_call:copy_x;"
 "}";
 
@@ -292,7 +272,34 @@ BCORE_DEFINE_OBJECT_INST_P( bsym_net_address_s )
     "sz_t index;"
     "hidden vd_t body;"
     "func bsym_net:trace_to_sink;"
+    "func bsym_net:trace_compute_hf3;"
+    "func bsym_net:trace_reset_hf3;"
+    "func bsym_net:trace_set_hf3_index;"
 "}";
+
+void bsym_net_address_s_trace_to_sink( const bsym_net_address_s* o, sz_t indent, bcore_sink* sink )
+{
+    bsym_net* net = bsym_net_address_s_get_net( o );
+    if( net ) bsym_net_a_trace_to_sink( net, indent, sink );
+}
+
+bmath_hf3_s* bsym_net_address_s_trace_compute_hf3( bsym_net_address_s* o )
+{
+    bsym_net* net = bsym_net_address_s_get_net( o );
+    return net ? bsym_net_a_trace_compute_hf3( net ) : NULL;
+}
+
+void bsym_net_address_s_trace_reset_hf3( bsym_net_address_s* o )
+{
+    bsym_net* net = bsym_net_address_s_get_net( o );
+    if( net ) bsym_net_a_trace_reset_hf3( net );
+}
+
+sz_t bsym_net_address_s_trace_set_hf3_index( bsym_net_address_s* o, sz_t start_index )
+{
+    bsym_net* net = bsym_net_address_s_get_net( o );
+    return net ? bsym_net_a_trace_set_hf3_index( net, start_index ) : -1;
+}
 
 BCORE_DEFINE_OBJECT_INST_P( bsym_net_link_s )
 "aware bsym_net"
@@ -301,8 +308,12 @@ BCORE_DEFINE_OBJECT_INST_P( bsym_net_link_s )
     "bsym_net_address_s target;"
     "bsym_net_address_s root;"
     "bl_t flag;"
+    "func ^:get_name;"
     "func ^:set_body;"
     "func ^:trace_to_sink;"
+    "func ^:trace_compute_hf3;"
+    "func ^:trace_reset_hf3;"
+    "func ^:trace_set_hf3_index;"
 "}";
 
 void bsym_net_link_s_set_body( bsym_net_link_s* o, bsym_net_body_s* body )
@@ -314,17 +325,29 @@ void bsym_net_link_s_set_body( bsym_net_link_s* o, bsym_net_body_s* body )
     o->root.body = body;
 }
 
+void bsym_net_link_s_trace_to_sink( const bsym_net_link_s* o, sz_t indent, bcore_sink* sink )
+{
+    bcore_sink_a_push_fa( sink, "(#<sc_t>) --> ", bsym_net_link_s_get_name_sc( o ) );
+    bsym_net_address_s_trace_to_sink( &o->target, indent, sink );
+}
+
 BCORE_DEFINE_OBJECT_INST_P( bsym_net_node_s )
 "aware bcore_array"
 "{"
     "tp_t name;"
     "bsym_net_address_s [] targets;"
     "bsym_net_address_s root;"
+    "aware bsym_op* op;"
+    "bsym_source_info_s source_info;"
+    "bmath_hf3_s => hf3;"
+    "sz_t hf3_index = -1;"
     "private bsym_net_address_s -> new_root;"
-    "sr_s load;"
-    "private bsym_net_body_s -> body;"
+    "func bsym_net:get_name;"
     "func bsym_net:set_body;"
     "func bsym_net:trace_to_sink;"
+    "func bsym_net:trace_compute_hf3;"
+    "func bsym_net:trace_reset_hf3;"
+    "func bsym_net:trace_set_hf3_index;"
 "}";
 
 void bsym_net_node_s_set_body( bsym_net_node_s* o, bsym_net_body_s* body )
@@ -340,45 +363,54 @@ void bsym_net_node_s_set_body( bsym_net_node_s* o, bsym_net_body_s* body )
     o->root.body = body;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_net_holor_s )
-"aware bsym_net"
-"{"
-    "tp_t type;"
-    "sz_t dims;"
-    "func ^:trace_to_sink;"
-"}";
+void bsym_net_node_s_trace_reset_hf3( bsym_net_node_s* o )
+{
+    bmath_hf3_s_detach( &o->hf3 );
+    for( sz_t i = 0; i < o->targets_size; i++ ) bsym_net_address_s_trace_reset_hf3( &o->targets_data[ i ] );
+}
 
-BCORE_DEFINE_SPECT( bcore_inst, bsym_net )
+sz_t bsym_net_node_s_trace_set_hf3_index( bsym_net_node_s* o, sz_t start_index )
+{
+    if( o->hf3_index >= 0 ) return o->hf3_index;
+    sz_t last_index = start_index - 1;
+    for( sz_t i = 0; i < o->targets_size; i++ )
+    {
+        last_index = sz_max( last_index, bsym_net_address_s_trace_set_hf3_index( &o->targets_data[ i ], last_index + 1 ) );
+    }
+    o->hf3_index = last_index + 1;
+    return o->hf3_index;
+}
+
+BCORE_DEFINE_SPECT( bsym, bsym_net )
 "{"
     "bcore_spect_header_s header;"
-    "feature aware bsym_net : set_body = bsym_net_set_body__;"
     "feature aware bsym_net : trace_to_sink = bsym_net_trace_to_sink__;"
+    "feature aware bsym_net : get_name = bsym_net_get_name__;"
+    "feature aware bsym_net : set_body = bsym_net_set_body__;"
+    "feature aware bsym_net : trace_compute_hf3 = bsym_net_trace_compute_hf3__;"
+    "feature aware bsym_net : trace_reset_hf3 = bsym_net_trace_reset_hf3__;"
+    "feature aware bsym_net : trace_set_hf3_index = bsym_net_trace_set_hf3_index__;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: bsym_sem
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_sem_links_s )
-"aware bcore_array"
-"{"
-    "bsym_net_link_s [];"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( bsym_sem_node_s )
+BCORE_DEFINE_OBJECT_INST_P( bsym_sem_graph_s )
 "aware bsym_sem"
 "{"
     "tp_t name;"
     "sz_t args_in;"
     "sz_t args_out;"
     "bsym_net_body_s body;"
-    "bsym_sem_node_base_s => node_base;"
-    "hidden bcore_hmap_name_s -> hmap_name;"
+    "bsym_sem_graph_base_s => graph_base;"
+    "hidden bcore_arr_st_s -> arr_symbol_op2;"
+    "bsym_source_info_s source_info;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( bsym_sem_node_base_s )
+BCORE_DEFINE_OBJECT_INST_P( bsym_sem_graph_base_s )
 "aware bcore_array"
 "{"
-    "private bsym_sem_node_base_s -> parent;"
+    "private bsym_sem_graph_base_s -> parent;"
     "aware bsym_sem=> [];"
 "}";
 
@@ -396,7 +428,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 3611820443 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 3770103759 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -419,66 +451,91 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_OBJECT( badapt_guide_char_encode_s );
             BCORE_REGISTER_TRAIT( badapt_dev_problem_objects, bcore_inst );
             BCORE_REGISTER_TRAIT( badapt_dev_ern, bcore_inst );
-            BCORE_REGISTER_OBJECT( badapt_dev_lstm_layer_s );
-            BCORE_REGISTER_OBJECT( badapt_dev_lstm_arr_layer_s );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_get_in_size, badapt_dev_lstm_s_get_in_size );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_get_out_size, badapt_dev_lstm_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_get_dynamics_std, badapt_dev_lstm_s_get_dynamics_std );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_set_dynamics_std, badapt_dev_lstm_s_set_dynamics_std );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_arc_to_sink, badapt_dev_lstm_s_arc_to_sink );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_minfer, badapt_dev_lstm_s_minfer );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_bgrad_adapt, badapt_dev_lstm_s_bgrad_adapt );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_reset, badapt_dev_lstm_s_reset );
-            BCORE_REGISTER_FFUNC( badapt_adaptive_get_weights_min_max, badapt_dev_lstm_s_get_weights_min_max );
-            BCORE_REGISTER_OBJECT( badapt_dev_lstm_s );
-            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, badapt_dev_lstm_builder_s_init_x );
-            BCORE_REGISTER_FFUNC( badapt_builder_get_in_size, badapt_dev_lstm_builder_s_get_in_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_set_in_size, badapt_dev_lstm_builder_s_set_in_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_get_out_size, badapt_dev_lstm_builder_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_set_out_size, badapt_dev_lstm_builder_s_set_out_size );
-            BCORE_REGISTER_FFUNC( badapt_builder_build, badapt_dev_lstm_builder_s_build );
-            BCORE_REGISTER_OBJECT( badapt_dev_lstm_builder_s );
-            BCORE_REGISTER_TRAIT( badapt_dev_lstm, bcore_inst );
-            BCORE_REGISTER_OBJECT( bsym_op0_holor_s );
-            BCORE_REGISTER_OBJECT( bsym_op0_number_s );
-            BCORE_REGISTER_TRAIT( bsym_op0, bcore_inst );
-            BCORE_REGISTER_OBJECT( bsym_op1_linear_s );
-            BCORE_REGISTER_OBJECT( bsym_op1_tanh_s );
-            BCORE_REGISTER_OBJECT( bsym_op1_dimof_s );
-            BCORE_REGISTER_TRAIT( bsym_op1, bcore_inst );
-            BCORE_REGISTER_OBJECT( bsym_op2___mul_s );
-            BCORE_REGISTER_OBJECT( bsym_op2___hmul_s );
-            BCORE_REGISTER_OBJECT( bsym_op2___plus_s );
-            BCORE_REGISTER_OBJECT( bsym_op2___minus_s );
-            BCORE_REGISTER_TRAIT( bsym_op2, bcore_inst );
-            bcore_inst_s_get_typed( TYPEOF_bsym_op2___mul_s );
-            bcore_inst_s_get_typed( TYPEOF_bsym_op2___hmul_s );
-            bcore_inst_s_get_typed( TYPEOF_bsym_op2___plus_s );
-            bcore_inst_s_get_typed( TYPEOF_bsym_op2___minus_s );
-            BCORE_REGISTER_FEATURE( bsym_net_set_body );
-            BCORE_REGISTER_FFUNC( bsym_net_set_body, bsym_net_set_body__ );
+            BCORE_REGISTER_OBJECT( bsym_source_info_s );
+            BCORE_REGISTER_TRAIT( bsym, bcore_inst );
+            BCORE_REGISTER_FEATURE( bsym_op_trace_to_sink );
+            BCORE_REGISTER_FFUNC( bsym_op_trace_to_sink, bsym_op_trace_to_sink__ );
+            BCORE_REGISTER_SPECT( bsym_op );
+            BCORE_REGISTER_NAME( adaptive );
+            BCORE_REGISTER_NAME( buffer );
+            BCORE_REGISTER_NAME( const );
+            BCORE_REGISTER_FEATURE( bsym_op_ar0_compute_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_op_trace_to_sink, bsym_op_ar0_holor_s_trace_to_sink );
+            BCORE_REGISTER_FFUNC( bsym_op_ar0_compute_hf3, bsym_op_ar0_holor_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar0_holor_s );
+            BCORE_REGISTER_SPECT( bsym_op_ar0 );
+            BCORE_REGISTER_FEATURE( bsym_op_ar1_get_symbol );
+            BCORE_REGISTER_FEATURE( bsym_op_ar1_compute_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_op_ar1_get_symbol, bsym_op_ar1_linear_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bsym_op_ar1_compute_hf3, bsym_op_ar1_linear_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar1_linear_s );
+            BCORE_REGISTER_FFUNC( bsym_op_ar1_get_symbol, bsym_op_ar1_tanh_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bsym_op_ar1_compute_hf3, bsym_op_ar1_tanh_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar1_tanh_s );
+            BCORE_REGISTER_FFUNC( bsym_op_ar1_get_symbol, bsym_op_ar1_dimof_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bsym_op_ar1_compute_hf3, bsym_op_ar1_dimof_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar1_dimof_s );
+            BCORE_REGISTER_SPECT( bsym_op_ar1 );
+            bcore_inst_s_get_typed( TYPEOF_bsym_op_ar1_linear_s );
+            bcore_inst_s_get_typed( TYPEOF_bsym_op_ar1_tanh_s );
+            bcore_inst_s_get_typed( TYPEOF_bsym_op_ar1_dimof_s );
+            BCORE_REGISTER_FEATURE( bsym_op_ar2_get_symbol );
+            BCORE_REGISTER_FEATURE( bsym_op_ar2_compute_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_get_symbol, bsym_op_ar2_mul_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_compute_hf3, bsym_op_ar2_mul_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar2_mul_s );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_get_symbol, bsym_op_ar2_hmul_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_compute_hf3, bsym_op_ar2_hmul_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar2_hmul_s );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_get_symbol, bsym_op_ar2_plus_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_compute_hf3, bsym_op_ar2_plus_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar2_plus_s );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_get_symbol, bsym_op_ar2_minus_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bsym_op_ar2_compute_hf3, bsym_op_ar2_minus_s_compute_hf3 );
+            BCORE_REGISTER_OBJECT( bsym_op_ar2_minus_s );
+            BCORE_REGISTER_SPECT( bsym_op_ar2 );
+            bcore_inst_s_get_typed( TYPEOF_bsym_op_ar2_mul_s );
+            bcore_inst_s_get_typed( TYPEOF_bsym_op_ar2_hmul_s );
+            bcore_inst_s_get_typed( TYPEOF_bsym_op_ar2_plus_s );
+            bcore_inst_s_get_typed( TYPEOF_bsym_op_ar2_minus_s );
             BCORE_REGISTER_FEATURE( bsym_net_trace_to_sink );
             BCORE_REGISTER_FFUNC( bsym_net_trace_to_sink, bsym_net_trace_to_sink__ );
+            BCORE_REGISTER_FEATURE( bsym_net_get_name );
+            BCORE_REGISTER_FFUNC( bsym_net_get_name, bsym_net_get_name__ );
+            BCORE_REGISTER_FEATURE( bsym_net_set_body );
+            BCORE_REGISTER_FFUNC( bsym_net_set_body, bsym_net_set_body__ );
+            BCORE_REGISTER_FEATURE( bsym_net_trace_compute_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_compute_hf3, bsym_net_trace_compute_hf3__ );
+            BCORE_REGISTER_FEATURE( bsym_net_trace_reset_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_reset_hf3, bsym_net_trace_reset_hf3__ );
+            BCORE_REGISTER_FEATURE( bsym_net_trace_set_hf3_index );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_set_hf3_index, bsym_net_trace_set_hf3_index__ );
             BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, bsym_net_body_s_copy_x );
             BCORE_REGISTER_OBJECT( bsym_net_body_s );
             BCORE_REGISTER_FFUNC( bsym_net_trace_to_sink, bsym_net_address_s_trace_to_sink );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_compute_hf3, bsym_net_address_s_trace_compute_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_reset_hf3, bsym_net_address_s_trace_reset_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_set_hf3_index, bsym_net_address_s_trace_set_hf3_index );
             BCORE_REGISTER_OBJECT( bsym_net_address_s );
+            BCORE_REGISTER_FFUNC( bsym_net_get_name, bsym_net_link_s_get_name );
             BCORE_REGISTER_FFUNC( bsym_net_set_body, bsym_net_link_s_set_body );
             BCORE_REGISTER_FFUNC( bsym_net_trace_to_sink, bsym_net_link_s_trace_to_sink );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_compute_hf3, bsym_net_link_s_trace_compute_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_reset_hf3, bsym_net_link_s_trace_reset_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_set_hf3_index, bsym_net_link_s_trace_set_hf3_index );
             BCORE_REGISTER_OBJECT( bsym_net_link_s );
+            BCORE_REGISTER_FFUNC( bsym_net_get_name, bsym_net_node_s_get_name );
             BCORE_REGISTER_FFUNC( bsym_net_set_body, bsym_net_node_s_set_body );
             BCORE_REGISTER_FFUNC( bsym_net_trace_to_sink, bsym_net_node_s_trace_to_sink );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_compute_hf3, bsym_net_node_s_trace_compute_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_reset_hf3, bsym_net_node_s_trace_reset_hf3 );
+            BCORE_REGISTER_FFUNC( bsym_net_trace_set_hf3_index, bsym_net_node_s_trace_set_hf3_index );
             BCORE_REGISTER_OBJECT( bsym_net_node_s );
-            BCORE_REGISTER_NAME( adaptive );
-            BCORE_REGISTER_NAME( buffer );
-            BCORE_REGISTER_FFUNC( bsym_net_trace_to_sink, bsym_net_holor_s_trace_to_sink );
-            BCORE_REGISTER_OBJECT( bsym_net_holor_s );
             BCORE_REGISTER_SPECT( bsym_net );
-            BCORE_REGISTER_OBJECT( bsym_sem_links_s );
-            BCORE_REGISTER_OBJECT( bsym_sem_node_s );
-            BCORE_REGISTER_OBJECT( bsym_sem_node_base_s );
+            BCORE_REGISTER_OBJECT( bsym_sem_graph_s );
+            BCORE_REGISTER_OBJECT( bsym_sem_graph_base_s );
             BCORE_REGISTER_OBJECT( bsym_sem_stack_flag_s );
-            BCORE_REGISTER_TRAIT( bsym_sem, bcore_inst );
+            BCORE_REGISTER_TRAIT( bsym_sem, bsym );
         }
         break;
         default: break;

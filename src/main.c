@@ -36,6 +36,8 @@ int main( int argc, char** argv )
         return ret;
     }
 
+//    bcore_get_traits_of_ancestor_to_sink( typeof( "bsym_op1" ), BCORE_STDOUT );
+
     bsym_test();
 
 //    bcore_quicktypes_to_stdout( NULL );
