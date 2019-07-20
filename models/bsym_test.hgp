@@ -1,36 +1,27 @@
-
-graph plus( y ) => ( a, b )
-{
-    y -> a + b;
-};
-
-graph newplus( y ) => ( a, b )
-{
-    y -> a <plus> b;
-};
-
 // multilayer perceptron
-graph mlp( y ) => ( x )
+graph main( y ) => ( x )
 {
 	graph layer( y ) => ( dim_y, x )
 	{
         holor adaptive w = [ dim_y ][ dimof( x ) ]#;
         holor adaptive b = [ dim_y ]#;
+
         y ->  b + ( w * x );
     };
 
 	graph mid_layer = tanh : layer;
+
 	graph out_layer = tanh : layer( 1 );
 
-	link m -> mid_layer( 9 ) : mid_layer( 99 ) : mid_layer( 999 ) : x;
+	link m -> mid_layer( 9 ) : mid_layer( 99 ) : mid_layer( 999, x );
 
-	y -> out_layer : m;
+	y -> out_layer( m );
 };
 
-holor buffer input = [ 100 ]#;
+holor buffer input = [ 4 ]#;
 graph root( output ) => ( x -> input )
 {
-	output -> mlp : x;
+	output -> main : x;
 };
 
-? root;
+? !( 1 + (2 * 3) + 7 - (8 * 2) );

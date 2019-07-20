@@ -16,24 +16,19 @@
 /*
     ========================================
 
-    given globals:
-    variables: g_in, g_out
-    various literals (numbers, activation functions, operators)
-
-    ========================================
     MLP
 
-    node layer = ( y ) => ( dim_y, x )
+    graph layer( y ) => ( dim_y, x )
     {
-        mutor adaptive w = [ dim_y ][ dimof( x ) ]#, b = [ dim_y ]#;
+        holor adaptive w = [ dim_y ][ dimof( x ) ]#, b = [ dim_y ]#;
         y -> ( w * x ) + b;
     };
 
-    node mlp = ( y ) => ( x )
+    graph mlp( y ) => ( x )
     {
-        node l1 = layer( dim -> 10, x -> x    );
-        node l2 = layer( dim -> 20, x -> act_relu( l1.y ) );
-        node l3 = layer( dim ->  1, x -> act_relu( l2.y ) );
+        graph l1 = layer( dim -> 10, x -> x    );
+        graph l2 = layer( dim -> 20, x -> act_relu( l1.y ) );
+        graph l3 = layer( dim ->  1, x -> act_relu( l2.y ) );
         y -> act_tanh( l3.y );
     };
 
@@ -42,7 +37,7 @@
     ========================================
     LSTM
 
-    node layer =  ( co, ho ) => ( dim_h, x, ci, hi )
+    graph layer( co, ho ) => ( dim_h, x, ci, hi )
     {
         // = type def
         holor w_fx = [ dim_h ][ dimof( x ) ]#, w_fh = [ dim_h ][ dimof( x ) ]#, b_f = [ dim_h ]#;
@@ -60,12 +55,12 @@
         ho  -> ( v_o <*> v_d );
     };
 
-    node lstm = ( y ) => ( dim_h, x )
+    graph lstm( y ) => ( dim_h, x )
     {
         holor adaptive w_r = [ dim_h ][ dimof( x ) ]#, b_r = [ dim_h ]#;
         holor recurrent c = [ dim_h ]#, h = [ dim_h ]#;
 
-        node l1 = layer( dim_h -> dim_h, x -> x, ci -> c, hi -> h );
+        graph l1 = layer( dim_h -> dim_h, x -> x, ci -> c, hi -> h );
 
         h -> l1.ho;
         c -> l1.co;
@@ -75,12 +70,11 @@
 
     g_out -> lstm( dim_h -> 200, x -> g_in ).y;
 
-    - parse into graph (parse into node)
-    - graph: mesh of nodes
-    - node: inputs, outputs, body
-    - a graph is also a node
+    - parse into graph
+    - graph: mesh of graph
+    - graph: inputs, outputs, body
     - definition: stand-alone node with identifier
-    - operation: node embedded in a graph
+    - operation: graph embedded in a graph
     - once a graph is complete, data types can be finalized
 
 */
@@ -94,11 +88,23 @@
  *  Inside objects may not be referenced directly by outside objects.
  *  A graph adhering to this concept is called 'cell'
  *  An construction of a new graph must conclude with converting it to a cell.
- *  Cells can be used as objects for constricting new graphs.
+ *  Cells can be used as objects for constructing new graphs.
  *
  *  Static Links:
  *  Defined links of an input channel of a semantic graph are never changed or freed again.
  *  Different use cases of a graph are achieved by creating graph-copies and assigning links of those copies differently.
+ *
+ *  Binary operators:
+ *  Binary operators have a priority-level. Higher priority is resolved before lower priority.
+ *
+ *  Available binary operators
+ *  Symbol  Priority  Type
+ *   +          8     (elementwise) addition
+ *   -          8     (elementwise) subtraction
+ *  <*>         9     (elementwise) multiplication (hadamard product)
+ *   *          9     generic holor-product
+ *  <name>     10     Custom operator (defined by a graph with two free inputs and one output)
+ *
  */
 
 #ifndef BSYM_H
@@ -130,15 +136,21 @@ group :op =
 {
     feature 'a' void trace_to_sink( const, sz_t indent, bcore_sink* sink ) = {};
 
+    /// operator priority; -1 means: use default priority of node
+    feature 'a' sz_t get_priority( const ) = { return -1; };
+
     /// nullary operator (arity 0)
     group :ar0 =
     {
         /// holor types
         name adaptive;
         name buffer;
-        name const;  // for literals
+        name literal;
 
-        feature strict 'a' bl_t compute_hf3( const, bmath_hf3_s* r );
+        feature strict 'a' bl_t compute_hf3(          const,       bmath_hf3_s* r );
+        feature 'a' bmath_hf3_vm* create_vm_operator( const, const bmath_hf3_s* r ) = { return NULL; };
+
+        feature 'a' tp_t get_hf3_type( const );
 
         stamp :holor  = aware :
         {
@@ -148,12 +160,17 @@ group :op =
             func :: : trace_to_sink =
             {
                 bcore_sink_a_push_fa( sink, "(#<sc_t>)", ifnameof( o->type ) );
-                bmath_hf3_s_trace_to_sink( &o->hf3, indent, sink );
+                bmath_hf3_s_to_sink( &o->hf3, sink );
             };
 
             func : : compute_hf3 =
             {
                 bmath_hf3_s_copy( r, &o->hf3 ); return true;
+            };
+
+            func : : get_hf3_type =
+            {
+                return o->type;
             };
         };
     };
@@ -164,7 +181,8 @@ group :op =
     group :ar1 = retrievable
     {
         feature strict 'a' sc_t get_symbol( const );
-        feature 'a' bl_t compute_hf3( const, const bmath_hf3_s* a, bmath_hf3_s* r );
+        feature 'a' bl_t          compute_hf3(        const, const bmath_hf3_s* a,       bmath_hf3_s* r );
+        feature 'a' bmath_hf3_vm* create_vm_operator( const, const bmath_hf3_s* a, const bmath_hf3_s* r ) = { return NULL; };
 
         stamp :linear = aware :
         {
@@ -186,6 +204,8 @@ group :op =
                 }
                 return true;
             };
+
+            func : : create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_tanh_s_create(); };
         };
 
         stamp :dimof  = aware :
@@ -216,30 +236,40 @@ group :op =
     group :ar2 = retrievable
     {
         feature strict 'a' sc_t get_symbol( const );
-        feature 'a' bl_t compute_hf3( const, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r );
+        feature 'a' bl_t                 compute_hf3( const, const bmath_hf3_s* a, const bmath_hf3_s* b,       bmath_hf3_s* r );
+        feature 'a' bmath_hf3_vm* create_vm_operator( const, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ) = { return NULL; };
 
         stamp :mul   = aware :
         {
-            func : :get_symbol  = { return "*"; };
+            func : :get_symbol = { return "*"; };
+            func :: :get_priority = { return 9; };
             func : :compute_hf3;
+            func : :create_vm_operator;
+
         };
 
         stamp :hmul   = aware :
         {
-            func : :get_symbol  = { return "<*>"; };
+            func : :get_symbol = { return "<*>"; };
+            func :: :get_priority = { return 9; };
             func : :compute_hf3;
+            func : :create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_hmul_s_create(); };
         };
 
         stamp :plus   = aware :
         {
-            func : :get_symbol  = { return "+"; };
+            func : :get_symbol = { return "+"; };
+            func :: :get_priority = { return  8; };
             func : :compute_hf3;
+            func : :create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_add_s_create(); };
         };
 
         stamp :minus   = aware :
         {
             func : :get_symbol  = { return "-"; };
+            func :: :get_priority = { return  8; };
             func : :compute_hf3;
+            func : :create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_sub_s_create(); };
         };
     };
 
@@ -252,6 +282,19 @@ group :op =
 /// graph objects
 group :net =
 {
+    /** hresult represents the holor result after the analysis of a sub-graph terminated by a node
+     *  It represents a holor with at at least all dimensions determined.
+     *  It may also represent holor data.
+     *  It contains information to build a virtual machine
+     */
+    stamp :hresult = aware :
+    {
+        bmath_hf3_s => hf3; // final holor
+        tp_t name;
+        tp_t type;          // type of holor
+        sz_t vm_index = -1; // holor index (used for virtual machine construction)
+    };
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /// Visualization / Debugging
@@ -263,14 +306,17 @@ group :net =
     /// Used during cell construction
     feature 'a' void set_body( mutable, :body_s* body ) = {};
 
-    /// (traceback) computes hf3 on nodes
-    feature 'a' bmath_hf3_s* trace_compute_hf3( mutable ) = { return NULL; };
+    /// returns next node in trace-line; returns NULL if trace-line is open
+    feature 'a' :node_s* trace_get_node( mutable ) = { return NULL; };
 
-    /// (traceback) resets hf3 computation
-    feature 'a' void trace_reset_hf3( mutable ) = {};
+    /// (traceback) computes hresult and returns reference; returns NULL in case it could not be computed
+    feature 'a' :hresult_s* trace_compute_hresult( mutable, bl_t force ) = { return NULL; };
 
-    /// (traceback) sets hf3 index; returns highest index specified so far; a new index value must be >= start_index
-    feature 'a' sz_t trace_set_hf3_index( mutable, sz_t start_index ) = { return -1; };
+    /// (traceback) removes hresult
+    feature 'a' void trace_clear_hresult( mutable ) = {};
+
+    /// (traceback) builds virtual machine
+    feature 'a' void trace_build_vm_proc( mutable, bmath_hf3_vm_frame_s* vmf, tp_t proc_name ) = {};
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -293,28 +339,35 @@ group :net =
     {
         sz_t index; // index of this link in body (note that 0 may be a valid index)
         hidden vd_t body;  // pointer to :body_s; null indicates that the address is not set
+
+        func : : trace_get_node =
+        {
+            ::net* net = :address_s_get_net( o );
+            return net ? :a_trace_get_node( net ) : NULL;
+        };
+
         func : : trace_to_sink =
         {
-            ::net* net = :address_s_get_net( o );
-            if( net ) :a_trace_to_sink( net, indent, sink );
+            :node_s* node = :address_s_trace_get_node( ( :address_s* )o );
+            if( node ) :node_s_trace_to_sink( node, indent, sink );
         };
 
-        func : : trace_compute_hf3 =
+        func : : trace_compute_hresult =
         {
             ::net* net = :address_s_get_net( o );
-            return net ? :a_trace_compute_hf3( net ) : NULL;
+            return net ? :a_trace_compute_hresult( net, force ) : NULL;
         };
 
-        func : : trace_reset_hf3 =
+        func : : trace_clear_hresult =
         {
             ::net* net = :address_s_get_net( o );
-            if( net ) :a_trace_reset_hf3( net );
+            if( net ) :a_trace_clear_hresult( net );
         };
 
-        func : : trace_set_hf3_index =
+        func : : trace_build_vm_proc =
         {
             ::net* net = :address_s_get_net( o );
-            return net ? :a_trace_set_hf3_index( net, start_index ) : -1;
+            if( net ) :a_trace_build_vm_proc( net, vmf, proc_name );
         };
     };
 
@@ -339,18 +392,23 @@ group :net =
             o->root.body = body;
         };
 
+        func : : trace_get_node = { return :address_s_trace_get_node( &o->target ); };
+
         func : : trace_to_sink =
         {
-            bcore_sink_a_push_fa( sink, "(#<sc_t>) --> ", :link_s_get_name_sc( o ) );
+            bcore_sink_a_push_fa( sink, "(#<sc_t>) -> ", ::ifnameof( o->name ) );
             :address_s_trace_to_sink( &o->target, indent, sink );
         };
 
-        func : : trace_compute_hf3   = { return :address_s_trace_compute_hf3(   &o->target ); };
-        func : : trace_reset_hf3     = {        :address_s_trace_reset_hf3(     &o->target ); };
-        func : : trace_set_hf3_index = { return :address_s_trace_set_hf3_index( &o->target, start_index ); };
+        func : : trace_compute_hresult = { return :address_s_trace_compute_hresult( &o->target, force ); };
+        func : : trace_clear_hresult   = {        :address_s_trace_clear_hresult(   &o->target ); };
+        func : : trace_build_vm_proc   = {        :address_s_trace_build_vm_proc(   &o->target, vmf, proc_name ); };
     };
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /// Procedure names
+    name infer;
 
     stamp :node = aware bcore_array
     {
@@ -358,18 +416,17 @@ group :net =
         :address_s [] targets;
         :address_s root;
 
+
+        /// (operator) payload of node
         aware ::op* op;
 
         ::source_info_s source_info;
 
-        /// holor adata
-
-        bmath_hf3_s => hf3;  // output holor (constructed during tracing)
-        sz_t hf3_index = -1; // holor index (used for virtual machine construction)
+        :hresult_s => hresult;
 
         private :address_s -> new_root; // only used during embedding
 
-        /// functions
+        // .....................................................................
 
         func : : get_name = { return o->name; };
 
@@ -386,25 +443,17 @@ group :net =
             o->root.body = body;
         };
 
+        func : : trace_get_node = { return o; };
+
         func : : trace_to_sink;
-        func : : trace_compute_hf3;
-        func : : trace_reset_hf3 =
+        func : : trace_compute_hresult;
+        func : : trace_clear_hresult =
         {
-            bmath_hf3_s_detach( &o->hf3 );
-            for( sz_t i = 0; i < o->targets_size; i++ ) :address_s_trace_reset_hf3( &o->targets_data[ i ] );
+            bsym_net_hresult_s_detach( &o->hresult );
+            for( sz_t i = 0; i < o->targets_size; i++ ) :address_s_trace_clear_hresult( &o->targets_data[ i ] );
         };
 
-        func : : trace_set_hf3_index =
-        {
-            if( o->hf3_index >= 0 ) return o->hf3_index;
-            sz_t last_index = start_index - 1;
-            for( sz_t i = 0; i < o->targets_size; i++ )
-            {
-                last_index = sz_max( last_index, :address_s_trace_set_hf3_index( &o->targets_data[ i ], last_index + 1 ) );
-            }
-            o->hf3_index = last_index + 1;
-            return o->hf3_index;
-        };
+        func : : trace_build_vm_proc;
     };
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -424,6 +473,10 @@ group :sem =
         :graph_base_s => graph_base;
         hidden bcore_arr_st_s -> arr_symbol_op2;
         ::source_info_s source_info;
+
+        /// operator-priority (higher value means earlier evaluation; e.g. binary evaluation)
+        sz_t priority = 10;
+
     };
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -446,6 +499,10 @@ group :sem =
 #endif // TYPEOF_bsym
 
 /**********************************************************************************************************************/
+
+/// name manager
+sc_t bsym_ifnameof( tp_t name );
+tp_t bsym_entypeof( sc_t name );
 
 bsym_net* bsym_net_address_s_get_net( const bsym_net_address_s* o );
 sc_t      bsym_net_link_s_get_name_sc( const bsym_net_link_s* o );

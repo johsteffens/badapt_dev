@@ -18,6 +18,9 @@
 #include "bmath_plot.h"
 #include "bsym.h"
 
+/**********************************************************************************************************************/
+//bsym
+
 /// prototypes
 bsym_net_link_s* bsym_sem_graph_s_get_arg_out( bsym_sem_graph_s* o, sz_t index );
 void bsym_sem_graph_s_check_consistency( const bsym_sem_graph_s* o );
@@ -32,21 +35,46 @@ bsym_sem_graph_s*   bsym_sem_graph_s_evaluate_graph_stack(   bsym_sem_graph_s* o
 
 void bsym_sem_graph_s_parse( bsym_sem_graph_s* o, bsym_sem_graph_s* parent, bcore_source* source );
 
-void bmath_hf3_s_trace_to_sink( const bmath_hf3_s* o, sz_t indent, bcore_sink* sink )
-{
-    for( sz_t i = o->d_size - 1; i >= 0; i-- ) bcore_sink_a_push_fa( sink, "[#<sz_t>]", o->d_data[ i ] );
-    bcore_sink_a_push_fa( sink, "##" );
-    if( o->d_size == 0 && o->v_size == 1 )
-    {
-        bcore_sink_a_push_fa( sink, "(#<f3_t>)", *o->v_data );
-    }
-}
-
 /// globals
 static bcore_hmap_name_s* hmap_name_g = NULL;
 
-/**********************************************************************************************************************/
-//bsym
+// ---------------------------------------------------------------------------------------------------------------------
+
+sc_t bsym_ifnameof( tp_t name )
+{
+    sc_t sc = bcore_hmap_name_s_get_sc( hmap_name_g, name );
+    return sc ? sc : "";
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+tp_t bsym_entypeof( sc_t name )
+{
+    return bcore_hmap_name_s_set_sc( hmap_name_g, name );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+tp_t bsym_entypeof_fv( sc_t format, va_list args )
+{
+    st_s* s = st_s_create_fv( format, args );
+    tp_t tp = bsym_entypeof( s->sc );
+    st_s_discard( s );
+    return tp;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+tp_t bsym_entypeof_fa( sc_t format, ... )
+{
+    va_list args;
+    va_start( args, format );
+    tp_t tp = bsym_entypeof_fv( format, args );
+    va_end( args );
+    return tp;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 //bsym_source_info_s
@@ -126,7 +154,7 @@ bl_t bsym_op_ar2_mul_s_compute_hf3( const bsym_op_ar2_mul_s* o, const bmath_hf3_
         sz_t ref = b->d_data[ b->d_size - 1 ];
         sz_t prd = 1;
         sz_t k = 0;
-        for( sz_t k = 0; k < a->d_size; k++ )
+        for( k = 0; k < a->d_size; k++ )
         {
             prd *= a->d_data[ k ];
             if( prd >= ref ) break;
@@ -148,6 +176,45 @@ bl_t bsym_op_ar2_mul_s_compute_hf3( const bsym_op_ar2_mul_s* o, const bmath_hf3_
     }
 
     return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bmath_hf3_vm* bsym_op_ar2_mul_s_create_vm_operator( const bsym_op_ar2_mul_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r )
+{
+    sz_t k_a = 0;
+    if( a->d_size == 0 )
+    {
+        k_a = 0;
+    }
+    else if( b->d_size == 0 )
+    {
+        k_a = a->d_size;
+    }
+    else if( a->d_data[ 0 ] >= b->d_data[ b->d_size - 1 ] )
+    {
+        k_a = 1;
+    }
+    else
+    {
+        sz_t ref = b->d_data[ b->d_size - 1 ];
+        sz_t prd = 1;
+        sz_t k = 0;
+        for( k = 0; k < a->d_size; k++ )
+        {
+            prd *= a->d_data[ k ];
+            if( prd >= ref ) break;
+        }
+        if( prd != ref ) return false;
+
+        k_a = k + 1;
+    }
+
+
+    bmath_hf3_vm_op_kmul_s* op = bmath_hf3_vm_op_kmul_s_create();
+    op->k = k_a;
+
+    return ( bmath_hf3_vm* ) op;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -247,20 +314,33 @@ bsym_net_node_s* bsym_net_body_s_clone_node( bsym_net_body_s* o, const bsym_net_
     }
     node->name = src->name;
     node->op = bsym_op_a_clone( src->op );
-    node->hf3 = bmath_hf3_s_clone( src->hf3 );
+    node->hresult = bsym_net_hresult_s_clone( src->hresult );
     bsym_source_info_s_copy( &node->source_info, &src->source_info );
     return node;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bsym_net_node_s* bsym_net_body_s_push_number( bsym_net_body_s* o, f3_t val )
+bsym_net_node_s* bsym_net_body_s_push_literal_scalar( bsym_net_body_s* o, f3_t val )
 {
     bsym_net_node_s* node = bsym_net_body_s_push_node( o );
     bsym_op_ar0_holor_s* holor = bsym_op_ar0_holor_s_create();
-    holor->type = TYPEOF_const;
+    holor->type = TYPEOF_literal;
     bmath_hf3_s_fit_v_size( &holor->hf3 );
     holor->hf3.v_data[ 0 ] = val;
+    node->op = ( bsym_op* )holor;
+    return node;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bsym_net_node_s* bsym_net_body_s_push_literal_holor( bsym_net_body_s* o, const bmath_hf3_s* hf3 )
+{
+    ASSERT( hf3->v_data );
+    bsym_net_node_s* node = bsym_net_body_s_push_node( o );
+    bsym_op_ar0_holor_s* holor = bsym_op_ar0_holor_s_create();
+    holor->type = TYPEOF_literal;
+    bmath_hf3_s_copy( &holor->hf3, hf3 );
     node->op = ( bsym_op* )holor;
     return node;
 }
@@ -311,24 +391,8 @@ bsym_net* bsym_net_address_s_get_net( const bsym_net_address_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-sc_t bsym_net_link_s_get_name_sc( const bsym_net_link_s* o )
-{
-    st_s* s = bcore_hmap_name_s_get( hmap_name_g, o->name );
-    return s ? s->sc : "";
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 /**********************************************************************************************************************/
 //bsym_net_node_s
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-sc_t bsym_net_node_s_get_name_sc( const bsym_net_node_s* o )
-{
-    st_s* s = bcore_hmap_name_s_get( hmap_name_g, o->name );
-    return s ? s->sc : "";
-}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -342,73 +406,119 @@ bsym_net* bsym_net_node_s_get_target_net( const bsym_net_node_s* o, sz_t index )
 
 void bsym_net_node_s_trace_to_sink( const bsym_net_node_s* o, sz_t indent, bcore_sink* sink )
 {
-    bcore_sink_a_push_fa( sink, "<#<sc_t>>", bsym_net_node_s_get_name_sc( o ) );
-    if( o->hf3 )
+    bl_t details = true;
+
+    if( o->hresult )
     {
-        if( o->hf3_index >= 0 ) bcore_sink_a_push_fa( sink, "(i#pl3'0'{#<sz_t>})", o->hf3_index );
-        bmath_hf3_s_trace_to_sink( o->hf3, indent, sink );
-    }
-    else if( o->op )
-    {
-         bsym_op_a_trace_to_sink( o->op, indent, sink );
+        if( o->hresult->hf3->v_size > 0 )
+        {
+            bmath_hf3_s_to_sink( o->hresult->hf3, sink );
+            details = false;
+        }
     }
 
-    indent += 4;
-    for( sz_t i = 0; i < o->targets_size; i++ )
+    if( details )
     {
-        bcore_sink_a_push_fa( sink, "\n#rn{ } |-> ", indent );
-        bsym_net_address_s_trace_to_sink( &o->targets_data[ i ], indent, sink );
+        if( o->hresult )
+        {
+            bmath_hf3_s_to_sink( o->hresult->hf3, sink );
+            if( o->hresult->vm_index >= 0 ) bcore_sink_a_push_fa( sink, "(i#pl3'0'{#<sz_t>})", o->hresult->vm_index );
+            if( o->hresult->type != TYPEOF_buffer ) bcore_sink_a_push_fa( sink, "(#<sc_t>)", ifnameof( o->hresult->type ) );
+        }
+        else
+        {
+            bsym_op_a_trace_to_sink( o->op, indent, sink );
+        }
+        bcore_sink_a_push_fa( sink, "<#<sc_t>>", bsym_ifnameof( o->name ) );
+        if( o->op )
+        {
+            indent += 4;
+            for( sz_t i = 0; i < o->targets_size; i++ )
+            {
+                bcore_sink_a_push_fa( sink, "\n#rn{ } |-> ", indent );
+                bsym_net_address_s_trace_to_sink( &o->targets_data[ i ], indent, sink );
+            }
+        }
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// Returns a fully determined hf3 or NULL
-bmath_hf3_s* bsym_net_node_s_trace_compute_hf3( bsym_net_node_s* o )
+bsym_net_hresult_s* bsym_net_node_s_trace_compute_hresult( bsym_net_node_s* o, bl_t force )
 {
-    if( o->hf3 ) return o->hf3;
+    if( o->hresult ) return o->hresult;
+
+    bmath_hf3_s* hf3 = NULL;
+    tp_t type = TYPEOF_buffer;
+
     if( o->op )
     {
         if( bsym_op_ar0_a_is_trait_of( o->op ) )
         {
             bsym_op_ar0* op0 = ( bsym_op_ar0* )o->op;
-            o->hf3 = bmath_hf3_s_create();
-            if( bsym_op_ar0_a_compute_hf3( op0, o->hf3 ) )
+            hf3 = bmath_hf3_s_create();
+            type = bsym_op_ar0_a_get_hf3_type( op0 );
+            if( bsym_op_ar0_a_compute_hf3( op0, hf3 ) )
             {
-                if( bmath_hf3_s_d_product( o->hf3 ) == 0 )
+                if( bmath_hf3_s_d_product( hf3 ) == 0 )
                 {
-                    ASSERT( o->targets_size == o->hf3->d_size );
-                    for( sz_t i = 0; i < o->hf3->d_size; i++ )
+                    ASSERT( o->targets_size == hf3->d_size );
+                    for( sz_t i = 0; i < hf3->d_size; i++ )
                     {
-                        if( o->hf3->d_data[ i ] == 0 )
+                        if( hf3->d_data[ i ] == 0 )
                         {
-                            bsym_net_address_s* address = &o->targets_data[ o->hf3->d_size - i - 1 ];
-                            bmath_hf3_s* target_hf3 = bsym_net_address_s_trace_compute_hf3( address );
-                            if( target_hf3 && target_hf3->v_size == 1 )
+                            bsym_net_address_s* address = &o->targets_data[ hf3->d_size - i - 1 ];
+                            bsym_net_hresult_s* hresult = bsym_net_address_s_trace_compute_hresult( address, force );
+                            if( hresult && hresult->hf3->v_size == 1 )
                             {
-                                o->hf3->d_data[ i ] = target_hf3->v_data[ 0 ];
+                                hf3->d_data[ i ] = hresult->hf3->v_data[ 0 ];
+                            }
+                            else
+                            {
+                                if( force )
+                                {
+                                    bsym_source_info_s_parse_err_fa( &o->source_info, "Scalar type needed for dimension assignment." );
+                                }
+                                hf3->d_data[ i ] = 0;
                             }
                         }
                     }
 
-                    if( bmath_hf3_s_d_product( o->hf3 ) > 0 ) bsym_net_node_s_clear( o ); // remove all input addresses
+                    if( hf3 && bmath_hf3_s_d_product( hf3 ) > 0 ) bsym_net_node_s_clear( o ); // remove all input addresses
                 }
-                if( bmath_hf3_s_d_product( o->hf3 ) == 0 ) bmath_hf3_s_detach( &o->hf3 );
+                if( bmath_hf3_s_d_product( hf3 ) == 0 )
+                {
+                    if( force )
+                    {
+                        bsym_source_info_s_parse_err_fa( &o->source_info, "Holor dimensions assignment cannot be fully traced to scalar literals." );
+                    }
+                    else
+                    {
+                        bmath_hf3_s_detach( &hf3 );
+                    }
+                }
             }
             else
             {
-                bmath_hf3_s_detach( &o->hf3 );
+                if( force )
+                {
+                    bsym_source_info_s_parse_err_fa( &o->source_info, "Nullary operator did not yield a holor." );
+                }
+                else
+                {
+                    bmath_hf3_s_detach( &hf3 );
+                }
             }
         }
         else if( bsym_op_ar1_a_is_trait_of( o->op ) )
         {
             ASSERT( o->targets_size == 1 );
-            const bmath_hf3_s* src_hf3 = bsym_net_address_s_trace_compute_hf3( &o->targets_data[ 0 ] );
-            bsym_op_ar1* op1 = ( bsym_op_ar1* )o->op;
-            if( src_hf3 )
+            const bsym_net_hresult_s* hresult = bsym_net_address_s_trace_compute_hresult( &o->targets_data[ 0 ], force );
+            if( hresult )
             {
-                o->hf3 = bmath_hf3_s_create();
-                if( !bsym_op_ar1_a_compute_hf3( op1, src_hf3, o->hf3 ) )
+                bsym_op_ar1* op1 = ( bsym_op_ar1* )o->op;
+                hf3 = bmath_hf3_s_create();
+                if( !bsym_op_ar1_a_compute_hf3( op1, hresult->hf3, hf3 ) )
                 {
                     bsym_source_info_s_parse_err_fa( &o->source_info, "Could not resolve operation '<#sc_t>'.", bsym_op_ar1_a_get_symbol( op1 ) );
                 }
@@ -417,18 +527,18 @@ bmath_hf3_s* bsym_net_node_s_trace_compute_hf3( bsym_net_node_s* o )
         else if( bsym_op_ar2_a_is_trait_of( o->op ) )
         {
             ASSERT( o->targets_size == 2 );
-            const bmath_hf3_s* src1_hf3 = bsym_net_address_s_trace_compute_hf3( &o->targets_data[ 0 ] );
-            const bmath_hf3_s* src2_hf3 = bsym_net_address_s_trace_compute_hf3( &o->targets_data[ 1 ] );
-            bsym_op_ar2* op2 = ( bsym_op_ar2* )o->op;
-            if( src1_hf3 && src2_hf3 )
+            const bsym_net_hresult_s* hresult1 = bsym_net_address_s_trace_compute_hresult( &o->targets_data[ 0 ], force );
+            const bsym_net_hresult_s* hresult2 = bsym_net_address_s_trace_compute_hresult( &o->targets_data[ 1 ], force );
+            if( hresult1 && hresult2 )
             {
-                o->hf3 = bmath_hf3_s_create();
-                if( !bsym_op_ar2_a_compute_hf3( op2, src1_hf3, src2_hf3, o->hf3 ) )
+                bsym_op_ar2* op2 = ( bsym_op_ar2* )o->op;
+                hf3 = bmath_hf3_s_create();
+                if( !bsym_op_ar2_a_compute_hf3( op2, hresult1->hf3, hresult2->hf3, hf3 ) )
                 {
                     st_s* st_src1 = st_s_create();
                     st_s* st_src2 = st_s_create();
-                    bmath_hf3_s_trace_to_sink( src1_hf3, 0, ( bcore_sink* )st_src1 );
-                    bmath_hf3_s_trace_to_sink( src2_hf3, 0, ( bcore_sink* )st_src2 );
+                    bmath_hf3_s_to_sink( hresult1->hf3, ( bcore_sink* )st_src1 );
+                    bmath_hf3_s_to_sink( hresult2->hf3, ( bcore_sink* )st_src2 );
                     bsym_source_info_s_parse_err_fa( &o->source_info, "Could not resolve operation '#<sc_t> #<sc_t> #<sc_t>'.", st_src1->sc, bsym_op_ar2_a_get_symbol( op2 ), st_src2->sc );
                 }
             }
@@ -438,8 +548,127 @@ bmath_hf3_s* bsym_net_node_s_trace_compute_hf3( bsym_net_node_s* o )
             bsym_source_info_s_parse_err_fa( &o->source_info, "Invalid operator." );
         }
     }
-    return o->hf3;
+
+    if( hf3 )
+    {
+        o->hresult = bsym_net_hresult_s_create();
+        o->hresult->hf3 = hf3;
+        o->hresult->type = type;
+    }
+    else
+    {
+        if( force )
+        {
+            bsym_source_info_s_parse_err_fa( &o->source_info, "Solving operation failed." );
+        }
+    }
+
+    return o->hresult;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bsym_net_node_s_trace_build_vm_proc( bsym_net_node_s* o, bmath_hf3_vm_frame_s* vmf, tp_t proc_name )
+{
+    if( proc_name == TYPEOF_infer )
+    {
+        if( !o->hresult ) ERR_fa( "hresult missing." );
+        if( o->hresult->vm_index >= 0 ) return; // vm_holor exists; nothing to do
+        if( !o->op ) ERR_fa( "operator missing." );
+
+        bmath_hf3_vm_holor_s* vm_holor = bmath_hf3_vm_arr_holor_s_push( &vmf->arr_holor );
+        o->hresult->vm_index = vmf->arr_holor.size - 1;
+
+        if( !bcore_hmap_tpuz_s_exists( &vmf->map_proc, proc_name ) )
+        {
+            bmath_hf3_vm_arr_proc_s_push( &vmf->arr_proc );
+            bcore_hmap_tpuz_s_set( &vmf->map_proc, proc_name, vmf->arr_proc.size - 1 );
+        }
+
+        bmath_hf3_vm_proc_s* vm_proc = &vmf->arr_proc.data[ *bcore_hmap_tpuz_s_get( &vmf->map_proc, proc_name ) ];
+        vm_holor->name = o->hresult->name;
+        vm_holor->type = o->hresult->type;
+        bmath_hf3_s_copy( &vm_holor->hf3, o->hresult->hf3 );
+
+        if( vm_holor->name )
+        {
+            bcore_hmap_name_s_set_sc( &vmf->map_name, bsym_ifnameof( vm_holor->name ) );
+            bcore_hmap_tpuz_s_set( &vmf->map_holor, vm_holor->name, vmf->arr_holor.size -1 );
+        }
+
+        if( bsym_op_ar0_a_is_trait_of( o->op ) )
+        {
+            bsym_op_ar0* op_ar0 = ( bsym_op_ar0* )o->op;
+            bmath_hf3_vm* vm_op = bsym_op_ar0_a_create_vm_operator( op_ar0, &vm_holor->hf3 );
+            if( vm_op )
+            {
+                bmath_hf3_vm_a_set_arg( vm_op, 'a', o->hresult->vm_index );
+                bmath_hf3_vm_proc_s_push_op_d( vm_proc, vm_op );
+            }
+        }
+        else if( bsym_op_ar1_a_is_trait_of( o->op ) )
+        {
+            ASSERT( o->targets_size == 1 );
+            bsym_op_ar1* op_ar1 = ( bsym_op_ar1* )o->op;
+            bsym_net_address_s* arg1 = &o->targets_data[ 0 ];
+            bsym_net_address_s_trace_build_vm_proc( arg1, vmf, proc_name );
+            bsym_net_node_s* node1 = bsym_net_address_s_trace_get_node( arg1 );
+            ASSERT( node1 && node1->hresult && node1->hresult->vm_index >= 0 );
+            sz_t idx1 = node1->hresult->vm_index;
+            ASSERT( idx1 >= 0 && idx1 < vmf->arr_holor.size );
+            bmath_hf3_vm* vm_op = bsym_op_ar1_a_create_vm_operator( op_ar1, node1->hresult->hf3, &vm_holor->hf3 );
+            if( vm_op )
+            {
+                bmath_hf3_vm_a_set_arg( vm_op, 'a', idx1 );
+                bmath_hf3_vm_a_set_arg( vm_op, 'b', o->hresult->vm_index );
+                bmath_hf3_vm_proc_s_push_op_d( vm_proc, vm_op );
+            }
+            else
+            {
+                bsym_source_info_s_parse_err_fa( &o->source_info, "Node has no operator." );
+            }
+        }
+        else if( bsym_op_ar2_a_is_trait_of( o->op ) )
+        {
+            ASSERT( o->targets_size == 2 );
+            bsym_op_ar2* op_ar2 = ( bsym_op_ar2* )o->op;
+            bsym_net_address_s* arg1 = &o->targets_data[ 0 ];
+            bsym_net_address_s* arg2 = &o->targets_data[ 1 ];
+            bsym_net_address_s_trace_build_vm_proc( arg1, vmf, proc_name );
+            bsym_net_address_s_trace_build_vm_proc( arg2, vmf, proc_name );
+            bsym_net_node_s* node1 = bsym_net_address_s_trace_get_node( arg1 );
+            bsym_net_node_s* node2 = bsym_net_address_s_trace_get_node( arg2 );
+            ASSERT( node1 && node1->hresult && node1->hresult->vm_index >= 0 );
+            ASSERT( node2 && node2->hresult && node2->hresult->vm_index >= 0 );
+            sz_t idx1 = node1->hresult->vm_index;
+            sz_t idx2 = node2->hresult->vm_index;
+            ASSERT( idx1 >= 0 && idx1 < vmf->arr_holor.size );
+            ASSERT( idx2 >= 0 && idx2 < vmf->arr_holor.size );
+            bmath_hf3_vm* vm_op = bsym_op_ar2_a_create_vm_operator( op_ar2, node1->hresult->hf3, node2->hresult->hf3, &vm_holor->hf3 );
+            if( vm_op )
+            {
+                bmath_hf3_vm_a_set_arg( vm_op, 'a', idx1 );
+                bmath_hf3_vm_a_set_arg( vm_op, 'b', idx2 );
+                bmath_hf3_vm_a_set_arg( vm_op, 'c', o->hresult->vm_index );
+                bmath_hf3_vm_proc_s_push_op_d( vm_proc, vm_op );
+            }
+            else
+            {
+                bsym_source_info_s_parse_err_fa( &o->source_info, "Node has no operator." );
+            }
+        }
+        else
+        {
+            bsym_source_info_s_parse_err_fa( &o->source_info, "Invalid operator." );
+        }
+    }
+    else
+    {
+        ERR_fa( "Unknown procedure name '#<sc_t>'.", ifnameof( proc_name ) );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 //bsym_sem_graph_s
@@ -462,6 +691,7 @@ void bsym_sem_graph_s_copy_graph( bsym_sem_graph_s* o, const bsym_sem_graph_s* s
     o->args_out = src->args_out;
     bsym_source_info_s_copy( &o->source_info, &src->source_info );
     bsym_net_body_s_copy( &o->body, &src->body );
+    o->priority = src->priority;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -472,21 +702,6 @@ bsym_sem_graph_s* bsym_sem_graph_s_clone_graph( bsym_sem_graph_s* o, const bsym_
     bsym_sem_graph_s_copy_graph( graph, src );
     graph->name = 0; // we have to reset the name to avoid this graph to be re-selected on another expression
     return graph;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-tp_t bsym_sem_graph_s_entypeof( const bsym_sem_graph_s* o, sc_t name )
-{
-    return bcore_hmap_name_s_set_sc( hmap_name_g, name );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-sc_t bsym_sem_graph_s_get_name_sc( const bsym_sem_graph_s* o, tp_t tp_name )
-{
-    st_s* name = bcore_hmap_name_s_get( hmap_name_g, tp_name );
-    return name ? name->sc : NULL;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -627,7 +842,7 @@ void bsym_sem_graph_s_trace_out_to_sink( const bsym_sem_graph_s* o, sz_t out_ind
 
     ASSERT( link->target.body == &o->body );
 
-    bcore_sink_a_push_fa( sink, "Tracing node '#<sc_t>.#<sc_t>':\n", bsym_sem_graph_s_get_name_sc( o, o->name ), bsym_net_link_s_get_name_sc( link ) );
+    bcore_sink_a_push_fa( sink, "Tracing node '#<sc_t>.#<sc_t>':\n", bsym_ifnameof( o->name ), bsym_ifnameof( link->name ) );
     bsym_net_link_s_trace_to_sink( bsym_sem_graph_s_get_arg_out( ( bsym_sem_graph_s* )o, out_index ), 0, sink );
     bcore_sink_a_push_fa( sink, "\n" );
 }
@@ -641,10 +856,21 @@ bsym_net_link_s* bsym_sem_graph_s_push_link( bsym_sem_graph_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bsym_net_link_s* bsym_sem_graph_s_push_number( bsym_sem_graph_s* o, f3_t val )
+bsym_net_link_s* bsym_sem_graph_s_push_literal_scalar( bsym_sem_graph_s* o, f3_t val )
 {
-    bsym_net_node_s* node = bsym_net_body_s_push_number( &o->body, val );
-    node->name = bsym_sem_graph_s_entypeof( o, "number" );
+    bsym_net_node_s* node = bsym_net_body_s_push_literal_scalar( &o->body, val );
+    node->name = bsym_entypeof( "literal" );
+    bsym_net_link_s* link = bsym_sem_graph_s_push_link( o );
+    bsym_net_address_s_copy( &link->target, &node->root );
+    return link;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bsym_net_link_s* bsym_sem_graph_s_push_literal_holor( bsym_sem_graph_s* o, const bmath_hf3_s* holor )
+{
+    bsym_net_node_s* node = bsym_net_body_s_push_literal_holor( &o->body, holor );
+    node->name = bsym_entypeof( "literal" );
     bsym_net_link_s* link = bsym_sem_graph_s_push_link( o );
     bsym_net_address_s_copy( &link->target, &node->root );
     return link;
@@ -665,7 +891,7 @@ bl_t bsym_sem_graph_s_trace_build_cell( bsym_sem_graph_s* o, bsym_net_address_s*
 {
     if( !addr->body )
     {
-        if( err_msg ) st_s_push_fa( err_msg, "Node #<sc_t>: Trace ends in open link.", bcore_hmap_name_s_get_sc( hmap_name_g, o->name ) );
+        if( err_msg ) st_s_push_fa( err_msg, "Node #<sc_t>: Trace ends in open link.", bsym_ifnameof( o->name ) );
         return false;
     }
 
@@ -710,7 +936,7 @@ bl_t bsym_sem_graph_s_trace_build_cell( bsym_sem_graph_s* o, bsym_net_address_s*
 /// converts all sub-nodes into a graph held by o->body
 bl_t bsym_sem_graph_s_build_cell( bsym_sem_graph_s* o, st_s* err_msg )
 {
-    sc_t sc_name = bsym_sem_graph_s_get_name_sc( o, o->name );
+    sc_t sc_name = bsym_ifnameof( o->name );
 
     // set flag
     for( sz_t i = 0; i < o->args_in;  i++ ) bsym_sem_graph_s_get_arg_in( o, i )->flag = true;
@@ -723,7 +949,7 @@ bl_t bsym_sem_graph_s_build_cell( bsym_sem_graph_s* o, st_s* err_msg )
             if( err_msg )
             {
                 st_s* msg = st_s_create();
-                st_s_push_fa( msg, "Backtracing output channel #<sc_t>.#<sc_t>:\n", sc_name, bsym_sem_graph_s_get_name_sc( o, link->name ) );
+                st_s_push_fa( msg, "Backtracing output channel #<sc_t>.#<sc_t>:\n", sc_name, bsym_ifnameof( link->name ) );
                 st_s_push_fa( msg, "#<sc_t>\n", err_msg->sc );
                 st_s_copy( err_msg, msg );
                 st_s_discard( msg );
@@ -743,7 +969,7 @@ bl_t bsym_sem_graph_s_build_cell( bsym_sem_graph_s* o, st_s* err_msg )
     for( sz_t i = 0; i < o->args_out; i++ )
     {
         bsym_net_link_s* link = bsym_sem_graph_s_get_arg_out( o, i );
-        bsym_net_link_s_trace_compute_hf3( link );
+        bsym_net_link_s_trace_compute_hresult( link, false );
     }
 
     return true;
@@ -831,10 +1057,11 @@ bsym_sem_graph_s* bsym_sem_graph_s_cat_graph( bsym_sem_graph_s* o, bsym_sem_grap
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bsym_net_node_s* bsym_sem_graph_s_push_op( bsym_sem_graph_s* o, sz_t args, tp_t name )
+bsym_net_node_s* bsym_sem_graph_s_push_op( bsym_sem_graph_s* o, sz_t args, sz_t priority, tp_t name )
 {
     bsym_sem_graph_s* graph = bsym_sem_graph_s_push_graph( o );
     graph->name = name;
+    graph->priority = priority < 0 ? graph->priority : priority;
     bsym_sem_graph_s_set_args( graph, args, 1 );
     bsym_net_node_s* node = bsym_sem_graph_s_push_node( graph, args );
     node->name = name;
@@ -850,32 +1077,13 @@ bsym_net_node_s* bsym_sem_graph_s_push_op( bsym_sem_graph_s* o, sz_t args, tp_t 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bsym_sem_graph_s_push_op1_sc( bsym_sem_graph_s* o, sc_t name )
-{
-    tp_t tp_name = bsym_sem_graph_s_entypeof( o, name );
-    bsym_net_node_s* node = bsym_sem_graph_s_push_op( o, 1, tp_name );
-    tp_t type = entypeof_fa( "bsym_op_ar1_#<sc_t>_s", name );
-    node->op = bsym_op_t_create( type );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 void bsym_sem_graph_s_push_op1_d( bsym_sem_graph_s* o, bsym_op_ar1* op )
 {
     sc_t symbol = bsym_op_ar1_a_get_symbol( op );
-    tp_t tp_name = bsym_sem_graph_s_entypeof( o, symbol );
-    bsym_net_node_s* node = bsym_sem_graph_s_push_op( o, 1, tp_name );
+    sz_t priority = bsym_op_a_get_priority( ( bsym_op* )op );
+    tp_t tp_name = bsym_entypeof( symbol );
+    bsym_net_node_s* node = bsym_sem_graph_s_push_op( o, 1, priority, tp_name );
     node->op = ( bsym_op* )op;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void bsym_sem_graph_s_push_op2_sc( bsym_sem_graph_s* o, sc_t name )
-{
-    tp_t tp_name = bsym_sem_graph_s_entypeof( o, name );
-    bsym_net_node_s* node = bsym_sem_graph_s_push_op( o, 2, tp_name );
-    tp_t type = entypeof_fa( "bsym_op_ar2_#<sc_t>_s", name );
-    node->op = bsym_op_t_create( type );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -883,8 +1091,9 @@ void bsym_sem_graph_s_push_op2_sc( bsym_sem_graph_s* o, sc_t name )
 void bsym_sem_graph_s_push_op2_d( bsym_sem_graph_s* o, bsym_op_ar2* op )
 {
     sc_t symbol = bsym_op_ar2_a_get_symbol( op );
-    tp_t tp_name = bsym_sem_graph_s_entypeof( o, symbol );
-    bsym_net_node_s* node = bsym_sem_graph_s_push_op( o, 2, tp_name );
+    sz_t priority = bsym_op_a_get_priority( ( bsym_op* )op );
+    tp_t tp_name = bsym_entypeof( symbol );
+    bsym_net_node_s* node = bsym_sem_graph_s_push_op( o, 2, priority, tp_name );
     node->op = ( bsym_op* )op;
 }
 
@@ -902,7 +1111,7 @@ tp_t bsym_sem_graph_s_parse_name( bsym_sem_graph_s* o, bcore_source* source )
     st_s* name = st_s_create();
     bcore_source_a_parse_fa( source, " #name", name );
     if( name->size == 0 ) bcore_source_a_parse_err_fa( source, "Name expected." );
-    tp_t tp_name = bsym_sem_graph_s_entypeof( o, name->sc );
+    tp_t tp_name = bsym_entypeof( name->sc );
     st_s_discard( name );
     return tp_name;
 }
@@ -915,7 +1124,7 @@ void bsym_sem_graph_s_assert_identifier_not_defined( const bsym_sem_graph_s* o, 
     {
         if( bsym_net_a_get_name( o->body.data[ i ] ) == name )
         {
-            bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' already exists.", bcore_hmap_name_s_get_sc( hmap_name_g, name ) );
+            bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' already exists.", bsym_ifnameof( name ) );
         }
     }
 }
@@ -989,12 +1198,12 @@ void bsym_sem_graph_s_evaluate_set_args_in( bsym_sem_graph_s* o, bsym_sem_graph_
                 bsym_net_link_s* link = bsym_sem_graph_s_get_arg_in_by_name( o, typeof( name->sc ) );
                 if( !link )
                 {
-                    bcore_source_a_parse_err_fa( source, "'#<sc_t>' specifies no input channel of graph '#<sc_t>'.", name->sc, bsym_sem_graph_s_get_name_sc( o, o->name ) );
+                    bcore_source_a_parse_err_fa( source, "'#<sc_t>' specifies no input channel of graph '#<sc_t>'.", name->sc, bsym_ifnameof( o->name ) );
                 }
 
                 if( link->target.body )
                 {
-                    bcore_source_a_parse_err_fa( source, "Channel '#<sc_t>' of graph '#<sc_t>' has already been set.", name->sc, bsym_sem_graph_s_get_name_sc( o, o->name ) );
+                    bcore_source_a_parse_err_fa( source, "Channel '#<sc_t>' of graph '#<sc_t>' has already been set.", name->sc, bsym_ifnameof( o->name ) );
                 }
 
                 bsym_net_address_s_copy( &link->target, bsym_sem_graph_s_evaluate_address( parent, source ) );
@@ -1012,7 +1221,7 @@ void bsym_sem_graph_s_evaluate_set_args_in( bsym_sem_graph_s* o, bsym_sem_graph_
 
             if( !link )
             {
-                bcore_source_a_parse_err_fa( source, "Node '#<sc_t>': Assigning more links than available.", bsym_sem_graph_s_get_name_sc( o, o->name ) );
+                bcore_source_a_parse_err_fa( source, "Node '#<sc_t>': Assigning more links than available.", bsym_ifnameof( o->name ) );
             }
 
             bsym_net_address_s* addr = bsym_sem_graph_s_evaluate_address_stack( parent, stack, source );
@@ -1061,14 +1270,68 @@ sc_t bsym_sem_graph_s_parse_op2_symbol( bsym_sem_graph_s* o, bcore_source* sourc
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+// returns false in case expression does not yield a literal, otherwise the result is attached to r
+bl_t bsym_sem_graph_s_evaluate_literal( bsym_sem_graph_s* o, bcore_source* source, bmath_hf3_s** r )
+{
+    // literal scalar
+    if( bcore_source_a_parse_bl_fa( source, " #?(([0]>='0'&&[0]<='9')||([0]=='-'&&([1]>='0'&&[1]<='9')))" ) )
+    {
+        f3_t val = 0;
+        bcore_source_a_parse_fa( source, " #<f3_t*>", &val );
+
+        bmath_hf3_s* hf3 = bmath_hf3_s_create();
+        bmath_hf3_s_fit_v_size( hf3 );
+        hf3->v_data[ 0 ] = val;
+
+        bmath_hf3_s_attach( r, hf3 );
+        return true;
+    }
+    // literal holor
+    else if( bcore_source_a_parse_bl_fa( source, " #?'{'" ) )
+    {
+        bmath_hf3_s* hf3 = bmath_hf3_s_create();
+        bmath_hf3_s* sub_hf3 = NULL;
+        while( !bcore_source_a_eos( source ) )
+        {
+            if( !bsym_sem_graph_s_evaluate_literal( o, source, &sub_hf3 ) ) bcore_source_a_parse_err_fa( source, "Literal expected." );
+            bmath_hf3_s_push( hf3, sub_hf3 );
+            if( bcore_source_a_parse_bl_fa( source, " #?'}'" ) ) break;
+        }
+        bmath_hf3_s_detach( &sub_hf3 );
+        bmath_hf3_s_attach( r, hf3 );
+        return true;
+    }
+    // (n+1)-holor of n-holor
+    else if( bcore_source_a_parse_bl_fa( source, " #?'['" ) )
+    {
+        sz_t dim = 0;
+        bcore_source_a_parse_fa( source, " #<sz_t*>", &dim );
+        if( dim == 0 ) bcore_source_a_parse_err_fa( source, "Holor dimension > 0 expected." );
+        bcore_source_a_parse_bl_fa( source, " ]" );
+        bmath_hf3_s* hf3 = NULL;
+        if( !bsym_sem_graph_s_evaluate_literal( o, source, &hf3 ) ) bcore_source_a_parse_err_fa( source, "Sub-Holor literal expected." );
+
+        bmath_hf3_s_inc_order( hf3, dim );
+        bmath_hf3_s_attach( r, hf3 );
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
     BCORE_LIFE_INIT();
     BCORE_LIFE_CREATE( st_s, name );
-    BCORE_LIFE_CREATE( bsym_sem_stack_flag_s, bin_op_completion );
+    BCORE_LIFE_CREATE( bsym_sem_stack_flag_s, bin_op_flag );
     BCORE_LIFE_CREATE( bsym_sem_stack_flag_s, catenation );
 
     sc_t op2_symbol = NULL;
+    bmath_hf3_s* literal = NULL;
 
     while( !bcore_source_a_eos( source ) )
     {
@@ -1128,12 +1391,10 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
             }
         }
 
-        // scalar literal
-        else if( bcore_source_a_parse_bl_fa( source, "#?(([0]>='0'&&[0]<='9')||([0]=='-'&&([1]>='0'&&[1]<='9')))" ) )
+        // literal (including holors without data)
+        else if( bsym_sem_graph_s_evaluate_literal( o, source, &literal ) )
         {
-            f3_t val = 0;
-            bcore_source_a_parse_fa( source, " #<f3_t*>", &val );
-            bsym_net_link_s* link = bsym_sem_graph_s_push_number( o, val );
+            bsym_net_link_s* link = bsym_sem_graph_s_push_literal_holor( o, literal );
             bcore_arr_vd_s_push( stack, &link->root );
         }
 
@@ -1147,84 +1408,25 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
         // binary operator from predefined symbols
         else if( ( op2_symbol = bsym_sem_graph_s_parse_op2_symbol( o, source ) ) )
         {
+            if( stack->size == 0 ) bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", op2_symbol );
             bsym_sem_graph_s* graph = bsym_sem_graph_s_get_graph_by_name( o, typeof( op2_symbol ) );
             if( !graph ) bcore_source_a_parse_err_fa( source, "Syntax error." );
-
             graph = bsym_sem_graph_s_clone_graph( o, graph );
-            bsym_source_info_s_set( &graph->source_info, source );
-
-
             bsym_sem_graph_s_set_source_info( graph, source );
-
-            ASSERT( bsym_sem_graph_s_get_free_args_in( graph ) == 2 );
-
-            bsym_net_link_s* op_link = bsym_sem_graph_s_get_next_free_arg_in( graph );
-            vd_t l_item = bcore_arr_vd_s_pop( stack );
-
-            if( *(aware_t*)l_item == TYPEOF_bsym_sem_graph_s )
-            {
-                bsym_sem_graph_s* l_graph = l_item;
-                if( l_graph->args_out != 1 ) bcore_source_a_parse_err_fa( source, "Left operand needs exactly one output channel." );
-                bsym_net_link_s* l_out_link = bsym_sem_graph_s_get_arg_out( l_graph, 0 );
-                bsym_net_address_s_copy( &op_link->target, &l_out_link->root );
-            }
-            else if( *(aware_t*)l_item == TYPEOF_bsym_net_address_s )
-            {
-                bsym_net_address_s* l_address = l_item;
-                bsym_net_address_s_copy( &op_link->target, l_address );
-            }
-            else
-            {
-                bcore_source_a_parse_err_fa( source, "Invalid left operand '#<sc_t>'.", ifnameof( *(aware_t*)l_item ) );
-            }
-
-            bcore_arr_vd_s_push( stack, bin_op_completion );
+            bcore_arr_vd_s_push( stack, bin_op_flag );
             bcore_arr_vd_s_push( stack, graph );
         }
 
         // custom binary operator
         else if( bcore_source_a_parse_bl_fa( source, " #?'<'" ) )
         {
-            if( stack->size == 0 ) bcore_source_a_parse_err_fa( source, "Operator '#<char>': Left operand missing.", bcore_source_a_get_u0( source ) );
-
-            bsym_sem_graph_s* graph = NULL;
-
             bcore_source_a_parse_fa( source, "#until'>'>", name );
-            graph = bsym_sem_graph_s_get_graph_by_name( o, typeof( name->sc ) );
-            if( !graph ) bcore_source_a_parse_err_fa( source, "Node '#<sc_t>' not found.", name->sc );
-
-            if( !graph ) bcore_source_a_parse_err_fa( source, "Syntax error." );
-
-            sz_t free_args = bsym_sem_graph_s_get_free_args_in( graph );
-            sc_t sc_node_name = bsym_sem_graph_s_get_name_sc( o, graph->name );
-
-            if( free_args != 2 )      bcore_source_a_parse_err_fa( source, "Node '#<sc_t>' has #<sz_t> free input channels.", sc_node_name, free_args );
-            if( graph->args_out != 1 ) bcore_source_a_parse_err_fa( source, "Node '#<sc_t>' has #<sz_t> output channels.", sc_node_name, graph->args_out );
-
+            if( stack->size == 0 ) bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", name->sc );
+            bsym_sem_graph_s* graph = bsym_sem_graph_s_get_graph_by_name( o, typeof( name->sc ) );
+            if( !graph ) bcore_source_a_parse_err_fa( source, "Graph '#<sc_t>' not found.", name->sc );
             graph = bsym_sem_graph_s_clone_graph( o, graph );
-            bsym_source_info_s_set( &graph->source_info, source );
-
-            bsym_net_link_s* op_link = bsym_sem_graph_s_get_next_free_arg_in( graph );
-
-            vd_t l_item = bcore_arr_vd_s_pop( stack );
-            if( *(aware_t*)l_item == TYPEOF_bsym_sem_graph_s )
-            {
-                bsym_sem_graph_s* l_node = l_item;
-                if( l_node->args_out != 1 ) bcore_source_a_parse_err_fa( source, "Left operand needs exactly one output channel." );
-                bsym_net_link_s* l_out_link = bsym_sem_graph_s_get_arg_out( l_node, 0 );
-                bsym_net_address_s_copy( &op_link->target, &l_out_link->root );
-            }
-            else if( *(aware_t*)l_item == TYPEOF_bsym_net_address_s )
-            {
-                bsym_net_address_s* l_address = l_item;
-                bsym_net_address_s_copy( &op_link->target, l_address );
-            }
-            else
-            {
-                bcore_source_a_parse_err_fa( source, "Invalid left operand '#<sc_t>'.", ifnameof( *(aware_t*)l_item ) );
-            }
-
-            bcore_arr_vd_s_push( stack, bin_op_completion );
+            bsym_sem_graph_s_set_source_info( graph, source );
+            bcore_arr_vd_s_push( stack, bin_op_flag );
             bcore_arr_vd_s_push( stack, graph );
         }
 
@@ -1241,7 +1443,7 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
 
             bsym_sem_graph_s* graph = bcore_arr_vd_s_pop( stack );
             sz_t free_args = bsym_sem_graph_s_get_free_args_in( graph );
-            sc_t sc_node_name = bsym_sem_graph_s_get_name_sc( graph, graph->name );
+            sc_t sc_node_name = bsym_ifnameof( graph->name );
 
             if( free_args > 0 )
             {
@@ -1270,6 +1472,14 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
             }
         }
 
+        // compute holors
+        else if( bcore_source_a_parse_bl_fa( source, " #?'!'" ) )
+        {
+            bsym_net* net = bsym_sem_graph_s_evaluate_net( o, source );
+            bsym_net_a_trace_compute_hresult( net, true );
+            bcore_arr_vd_s_push( stack, net );
+        }
+
         // terminator
         else if( bcore_source_a_parse_bl_fa( source, " #?([0]==')'||[0]==']'||[0]==','||[0]==';')" ) )
         {
@@ -1281,22 +1491,58 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
             bcore_source_a_parse_err_fa( source, "Syntax error." );
         }
 
-        /// resolving stack...
+        /// priority stack processing ...
 
-        // bin_op_completion
-        if( stack->size >= 3 && stack->data[ stack->size - 3 ] == bin_op_completion )
+        // <left arg> <flag> <bin-operator>  error checks, left operand conversion, output generation
+        if( stack->size >= 3 && stack->data[ stack->size - 2 ] == bin_op_flag )
         {
-            bsym_net_address_s* addr = cast_a( TYPEOF_bsym_net_address_s, bcore_arr_vd_s_pop( stack ), source );
-            bsym_sem_graph_s*  graph = cast_a( TYPEOF_bsym_sem_graph_s,    bcore_arr_vd_s_pop( stack ), source );
-            ASSERT( bcore_arr_vd_s_pop( stack ) == bin_op_completion );
+            bsym_sem_graph_s* graph = cast_a( TYPEOF_bsym_sem_graph_s, bcore_arr_vd_s_pop( stack ), source );
+            ASSERT( bin_op_flag == bcore_arr_vd_s_pop( stack ) );
+            bsym_net* arg1 = bcore_arr_vd_s_pop( stack );
+
+            if( *(aware_t*)arg1 == TYPEOF_bsym_sem_graph_s )
+            {
+                bsym_sem_graph_s* graph1 = ( bsym_sem_graph_s* )arg1;
+                if( graph1->args_out != 1 )
+                {
+                    bsym_source_info_s_parse_err_fa
+                    (
+                        &graph1->source_info,
+                        "Binary operator '#<sc_t>': Left operant '#<sc_t>' has #<sz_t> output channels. Expected exactly one.",
+                        bsym_ifnameof( graph->name ),
+                        bsym_ifnameof( graph1->name ),
+                        graph->args_out
+                    );
+                }
+                arg1 = ( bsym_net* )&bsym_sem_graph_s_get_arg_out( graph1, 0 )->root;
+            }
 
             sz_t free_args = bsym_sem_graph_s_get_free_args_in( graph );
-            ASSERT( free_args == 1 );
+            if( free_args != 2 )
+            {
+                bsym_source_info_s_parse_err_fa
+                (
+                    &graph->source_info,
+                    "Binary operator '#<sc_t>' has #<sz_t> free input channels. Expected exactly two.",
+                    bsym_ifnameof( graph->name ),
+                    free_args
+                );
+            }
 
-            bsym_net_link_s* l_link = bsym_sem_graph_s_get_next_free_arg_in( graph );
-            bsym_net_address_s_copy( &l_link->target, addr );
+            if( graph->args_out != 1 )
+            {
+                bsym_source_info_s_parse_err_fa
+                (
+                    &graph->source_info,
+                    "Binary operator '#<sc_t>' has #<sz_t> output channels. Expected exactly one.",
+                    bsym_ifnameof( graph->name ),
+                    graph->args_out
+                );
+            }
 
-            ASSERT( graph->args_out == 1 );
+            bcore_arr_vd_s_push( stack, arg1 );
+            bcore_arr_vd_s_push( stack, bin_op_flag );
+            bcore_arr_vd_s_push( stack, graph );
             bcore_arr_vd_s_push( stack, &bsym_sem_graph_s_get_arg_out( graph, 0 )->root );
         }
 
@@ -1339,6 +1585,63 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
         }
     }
 
+    /// remaining stack processing ...
+    bl_t resolve_stack = true;
+    while( resolve_stack )
+    {
+        // <left address> <flag> <bin-operator> <output> <left address>
+        if( stack->size >= 5 && stack->data[ stack->size - 4 ] == bin_op_flag )
+        {
+            bsym_net_address_s* addr2 = cast_a( TYPEOF_bsym_net_address_s, bcore_arr_vd_s_pop( stack ), source );
+            bsym_net_address_s* out   = cast_a( TYPEOF_bsym_net_address_s, bcore_arr_vd_s_pop( stack ), source );
+            bsym_sem_graph_s*  graph  = cast_a( TYPEOF_bsym_sem_graph_s,   bcore_arr_vd_s_pop( stack ), source );
+            ASSERT( bin_op_flag == bcore_arr_vd_s_pop( stack ) );
+            bsym_net_address_s* addr1 = cast_a( TYPEOF_bsym_net_address_s, bcore_arr_vd_s_pop( stack ), source );
+
+            if( stack->size >= 4 && stack->data[ stack->size - 3 ] == bin_op_flag ) // merge with prior operation considering priority
+            {
+                bsym_net_address_s* prior_out   = cast_a( TYPEOF_bsym_net_address_s, bcore_arr_vd_s_pop( stack ), source );
+                bsym_sem_graph_s*  prior_graph  = cast_a( TYPEOF_bsym_sem_graph_s,   bcore_arr_vd_s_pop( stack ), source );
+                ASSERT( bin_op_flag == bcore_arr_vd_s_pop( stack ) );
+                bsym_net_address_s* prior_addr1 = cast_a( TYPEOF_bsym_net_address_s, bcore_arr_vd_s_pop( stack ), source );
+
+                if( prior_graph->priority >= graph->priority )
+                {
+                    bsym_net_address_s_copy( &bsym_sem_graph_s_get_next_free_arg_in( graph )->target, prior_out );
+                    bsym_net_address_s_copy( &bsym_sem_graph_s_get_next_free_arg_in( graph )->target, addr2 );
+
+                    bcore_arr_vd_s_push( stack, prior_addr1 );
+                    bcore_arr_vd_s_push( stack, bin_op_flag );
+                    bcore_arr_vd_s_push( stack, prior_graph );
+                    bcore_arr_vd_s_push( stack, out );
+                    bcore_arr_vd_s_push( stack, addr1 );
+                }
+                else
+                {
+                    bsym_net_address_s_copy( &bsym_sem_graph_s_get_next_free_arg_in( graph )->target, addr1 );
+                    bsym_net_address_s_copy( &bsym_sem_graph_s_get_next_free_arg_in( graph )->target, addr2 );
+
+                    bcore_arr_vd_s_push( stack, prior_addr1 );
+                    bcore_arr_vd_s_push( stack, bin_op_flag );
+                    bcore_arr_vd_s_push( stack, prior_graph );
+                    bcore_arr_vd_s_push( stack, prior_out );
+                    bcore_arr_vd_s_push( stack, out );           // out becomes right argument for prior_graph
+                }
+            }
+            else // fully resolve operation
+            {
+                bsym_net_address_s_copy( &bsym_sem_graph_s_get_next_free_arg_in( graph )->target, addr1 );
+                bsym_net_address_s_copy( &bsym_sem_graph_s_get_next_free_arg_in( graph )->target, addr2 );
+                bcore_arr_vd_s_push( stack, out );
+            }
+        }
+        else
+        {
+            resolve_stack = false;
+        }
+    }
+
+    bmath_hf3_s_detach( &literal );
     BCORE_LIFE_DOWN();
 }
 
@@ -1347,7 +1650,7 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
 bsym_net* bsym_sem_graph_s_evaluate_net_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
     bsym_sem_graph_s_evaluate_stack( o, stack, source );
-    ASSERT( stack->size == 1 );
+    if( stack->size != 1 ) bcore_source_a_parse_err_fa( source, "Expression syntax error." );
     vd_t ret = bcore_arr_vd_s_pop( stack );
     return ret;
 }
@@ -1497,10 +1800,10 @@ void bsym_sem_graph_s_parse_body( bsym_sem_graph_s* o, bcore_source* source )
                     bcore_source_a_parse_fa( source, " [" );
                     bsym_net_address_s* address = bsym_net_node_s_push( net_node );
                     bsym_net_address_s_copy( address, bsym_sem_graph_s_evaluate_address( o, source ) );
-                    bmath_hf3_s* link_hf3 = bsym_net_address_s_trace_compute_hf3( address );
-                    if( link_hf3 && link_hf3->v_size == 1 )
+                    bsym_net_hresult_s* hresult = bsym_net_address_s_trace_compute_hresult( address, false );
+                    if( hresult && hresult->hf3->v_size == 1 )
                     {
-                        bcore_arr_sz_s_push( arr_sz, *link_hf3->v_data );
+                        bcore_arr_sz_s_push( arr_sz, *hresult->hf3->v_data );
                         bsym_net_address_s_clear( address );
                     }
                     else
@@ -1523,6 +1826,14 @@ void bsym_sem_graph_s_parse_body( bsym_sem_graph_s* o, bcore_source* source )
                 first = false;
                 bcore_arr_sz_s_discard( arr_sz );
             }
+        }
+        else if( bcore_source_a_parse_bl_fa( source, " #?'?'" ) )
+        {
+            bsym_net_address_s* address = bsym_sem_graph_s_evaluate_address( o, source );
+            bsym_net_address_s_trace_to_sink( address, 0, BCORE_STDOUT );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "\n" );
+
+            bcore_source_a_parse_fa( source, " ;" );
         }
         else
         {
@@ -1558,7 +1869,7 @@ void bsym_sem_graph_s_parse_body( bsym_sem_graph_s* o, bcore_source* source )
             {
                 if( link->target.body )
                 {
-                    bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' of graph '#<sc_t>' has already been set.", name->sc, bsym_sem_graph_s_get_name_sc( o, o->name ) );
+                    bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' of graph '#<sc_t>' has already been set.", name->sc, bsym_ifnameof( o->name ) );
                 }
 
                 bcore_source_a_parse_fa( source, " ->" );
@@ -1575,7 +1886,6 @@ void bsym_sem_graph_s_parse_body( bsym_sem_graph_s* o, bcore_source* source )
             st_s_discard( name );
         }
 
-        // remove all whitespaces
         bcore_source_a_parse_fa( source, " " );
     }
 }
@@ -1615,7 +1925,7 @@ void bsym_sem_graph_s_parse( bsym_sem_graph_s* o, bsym_sem_graph_s* parent, bcor
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bsym_sem_graph_s_setup_frame( bsym_sem_graph_s* o )
+void bsym_sem_graph_s_frame_setup( bsym_sem_graph_s* o )
 {
     BCORE_LIFE_INIT();
     o->graph_base = bsym_sem_graph_base_s_create();
@@ -1642,6 +1952,51 @@ void bsym_sem_graph_s_setup_frame( bsym_sem_graph_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+void bsym_sem_graph_s_frame_compile( bsym_sem_graph_s* o, bcore_source* source )
+{
+    bsym_sem_graph_s_parse_body( o, source );
+    bsym_sem_graph_s* root = bsym_sem_graph_s_get_graph_by_name( o, typeof( "root" ) );
+    if( !root ) bsym_source_info_s_parse_err_fa( &o->source_info, "Root was not defined." );
+    for( sz_t i = 0; i < root->args_out; i++ )
+    {
+        bsym_net_link_s* link = bsym_sem_graph_s_get_arg_out( root, i );
+        if( link->name == 0 )
+        {
+            bsym_source_info_s_parse_err_fa( &o->source_info, "Output link without name." );
+        }
+        bsym_net_hresult_s* hresult = bsym_net_link_s_trace_compute_hresult( link, true );
+        if( !hresult )
+        {
+            bsym_source_info_s_parse_err_fa( &o->source_info, "Cannot resolve output channel '#<sc_t>'.", bsym_ifnameof( link->name ) );
+        }
+        hresult->name = link->name;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bsym_sem_graph_s_build_vm( bsym_sem_graph_s* o, bmath_hf3_vm_frame_s* vm_frame )
+{
+    bsym_sem_graph_s* root = bsym_sem_graph_s_get_graph_by_name( o, typeof( "root" ) );
+    if( !root ) bsym_source_info_s_parse_err_fa( &o->source_info, "Root was not defined." );
+    for( sz_t i = 0; i < root->args_in; i++ )
+    {
+        bsym_net_link_s* link = bsym_sem_graph_s_get_arg_in( root, i );
+        bsym_net_hresult_s* hresult = bsym_net_link_s_trace_compute_hresult( link, true );
+        hresult->name = bsym_entypeof_fa( "root_in#<sz_t>", i );
+    }
+
+    for( sz_t i = 0; i < root->args_out; i++ )
+    {
+        bsym_net_link_s* link = bsym_sem_graph_s_get_arg_out( root, i );
+        bsym_net_hresult_s* hresult = bsym_net_link_s_trace_compute_hresult( link, true );
+        hresult->name = bsym_entypeof_fa( "root_out#<sz_t>", i );
+        bsym_net_link_s_trace_build_vm_proc( link, vm_frame, TYPEOF_infer );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 /**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1649,21 +2004,18 @@ void bsym_sem_graph_s_setup_frame( bsym_sem_graph_s* o )
 void bsym_test( void )
 {
     BCORE_LIFE_INIT();
-    BCORE_LIFE_CREATE( bsym_sem_graph_s, graph );
-    bsym_sem_graph_s_setup_frame( graph );
+    BCORE_LIFE_CREATE( bsym_sem_graph_s,    sem_frame );
+    BCORE_LIFE_CREATE( bmath_hf3_vm_frame_s, vm_frame );
+    bsym_sem_graph_s_frame_setup( sem_frame );
 
-    bcore_source* source = bcore_file_open_source( "models/bsym_mlp.hgp" );
-    BCORE_LIFE_A_PUSH( source );
+//    bcore_source* source = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bsym_mlp.hgp" ) );
+    bcore_source* source = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bsym_test.hgp" ) );
 
-    bsym_sem_graph_s_parse_body( graph, ( bcore_source* )source );
 
-    bsym_sem_graph_s* root = bsym_sem_graph_s_get_graph_by_name( graph, typeof( "root" ) );
-    if( !root ) ERR_fa( "root was not defined." );
+    bsym_sem_graph_s_frame_compile( sem_frame, source );
+    bsym_sem_graph_s_build_vm( sem_frame, vm_frame );
 
-    bsym_net_link_s_trace_compute_hf3( bsym_sem_graph_s_get_arg_out( root, 0 ) );
-    bsym_net_link_s_trace_set_hf3_index( bsym_sem_graph_s_get_arg_out( root, 0 ), 0 );
-    bsym_net_link_s_trace_to_sink( bsym_sem_graph_s_get_arg_out( root, 0 ), 0, BCORE_STDOUT );
-    bcore_msg_fa( "\n" );
+//    bcore_txt_ml_a_to_stdout( vm_frame );
 
     BCORE_LIFE_DOWN();
 }
