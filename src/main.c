@@ -72,6 +72,8 @@ int main( int argc, char** argv )
     //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "badapt_mlp" ), NULL ) );
     //CPU_TIME_TO_STDOUT( bcore_run_signal_selftest( typeof( "bmath_adaptive_mlp" ), NULL ) );
 
+    // bcore_run_signal_selftest( typeof( "bmath_hf3" ), NULL );
+
     //snn_selftest2();
     BCORE_LIFE_DOWN();
 

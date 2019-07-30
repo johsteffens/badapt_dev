@@ -101,8 +101,12 @@
  *  Symbol  Priority  Type
  *   +          8     (elementwise) addition
  *   -          8     (elementwise) subtraction
- *  <*>         9     (elementwise) multiplication (hadamard product)
- *   *          9     generic holor-product
+ *   *          9     (elementwise) multiplication (hadamard product); multiplication of holor with scalar
+ *  <*>,
+ *  <*t>,
+ *  <t*>,
+ *  <t*t>       9     holor-product for holors up to order 2; 'T' indicates which side is considered transposed
+
  *  <name>     10     Custom operator (defined by a graph with two free inputs and one output)
  *
  */
@@ -116,10 +120,24 @@
 #include "badapt_dev_planted.h"
 
 /**********************************************************************************************************************/
+/// prototypes
+
+void bmath_hf3_s_trace_to_sink( const bmath_hf3_s* o, sz_t indent, bcore_sink* sink );
+
+/// name manager
+sc_t bsym_ifnameof( tp_t name );
+tp_t bsym_entypeof( sc_t name );
+
+/**********************************************************************************************************************/
 
 #ifdef TYPEOF_bsym
 PLANT_GROUP( bsym, bcore_inst )
 #ifdef PLANT_SECTION
+
+/// control types
+name link;
+name holor;
+name graph;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -136,6 +154,9 @@ group :op =
 {
     feature 'a' void trace_to_sink( const, sz_t indent, bcore_sink* sink ) = {};
 
+    /// operator arity (number of input channels)
+    feature strict 'a' sz_t get_arity( const );
+
     /// operator priority; -1 means: use default priority of node
     feature 'a' sz_t get_priority( const ) = { return -1; };
 
@@ -147,28 +168,30 @@ group :op =
         name buffer;
         name literal;
 
-        feature strict 'a' bl_t compute_hf3(          const,       bmath_hf3_s* r );
-        feature 'a' bmath_hf3_vm* create_vm_operator( const, const bmath_hf3_s* r ) = { return NULL; };
+        feature strict 'a' bl_t compute_hf3( const,  bmath_hf3_s* r );
+        feature 'a' bmath_hf3_vm_op* create_vm_operator( const, const bmath_hf3_s* r ) = { return NULL; };
 
         feature 'a' tp_t get_hf3_type( const );
 
-        stamp :holor  = aware :
+        stamp :holor = aware :
         {
             tp_t type;
             bmath_hf3_s hf3;
 
-            func :: : trace_to_sink =
+            func :: :get_arity = { return 0; };
+
+            func :: :trace_to_sink =
             {
                 bcore_sink_a_push_fa( sink, "(#<sc_t>)", ifnameof( o->type ) );
                 bmath_hf3_s_to_sink( &o->hf3, sink );
             };
 
-            func : : compute_hf3 =
+            func : :compute_hf3 =
             {
                 bmath_hf3_s_copy( r, &o->hf3 ); return true;
             };
 
-            func : : get_hf3_type =
+            func : :get_hf3_type =
             {
                 return o->type;
             };
@@ -181,18 +204,20 @@ group :op =
     group :ar1 = retrievable
     {
         feature strict 'a' sc_t get_symbol( const );
-        feature 'a' bl_t          compute_hf3(        const, const bmath_hf3_s* a,       bmath_hf3_s* r );
-        feature 'a' bmath_hf3_vm* create_vm_operator( const, const bmath_hf3_s* a, const bmath_hf3_s* r ) = { return NULL; };
+        feature 'a' bl_t             compute_hf3(        const, const bmath_hf3_s* a,       bmath_hf3_s* r );
+        feature 'a' bmath_hf3_vm_op* create_vm_operator( const, const bmath_hf3_s* a, const bmath_hf3_s* r ) = { return NULL; };
 
         stamp :linear = aware :
         {
-            func : :get_symbol = { return "linear"; };
-            func : :compute_hf3 = { bmath_hf3_s_copy( r, a ); return true; };
+            func :: :get_arity  = { return 1; };
+            func  : :get_symbol = { return "linear"; };
+            func  : :compute_hf3 = { bmath_hf3_s_copy( r, a ); return true; };
         };
 
-        stamp :tanh   = aware :
+        stamp :tanh = aware :
         {
-            func : :get_symbol = { return "tanh"  ; };
+            func :: :get_arity  = { return 1; };
+            func  : :get_symbol = { return "tanh"  ; };
 
             func : :compute_hf3 =
             {
@@ -205,12 +230,13 @@ group :op =
                 return true;
             };
 
-            func : : create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_tanh_s_create(); };
+            func : : create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_tanh_s_create(); };
         };
 
-        stamp :dimof  = aware :
+        stamp :dimof = aware :
         {
-            func : :get_symbol = { return "dimof" ; };
+            func :: :get_arity  = { return 1; };
+            func  : :get_symbol = { return "dimof" ; };
 
             func : :compute_hf3 =
             {
@@ -236,45 +262,74 @@ group :op =
     group :ar2 = retrievable
     {
         feature strict 'a' sc_t get_symbol( const );
-        feature 'a' bl_t                 compute_hf3( const, const bmath_hf3_s* a, const bmath_hf3_s* b,       bmath_hf3_s* r );
-        feature 'a' bmath_hf3_vm* create_vm_operator( const, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ) = { return NULL; };
+        feature 'a' bl_t                    compute_hf3( const, const bmath_hf3_s* a, const bmath_hf3_s* b,       bmath_hf3_s* r );
+        feature 'a' bmath_hf3_vm_op* create_vm_operator( const, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ) = { return NULL; };
 
-        stamp :mul   = aware :
+        stamp :bmul = aware :
         {
-            func : :get_symbol = { return "*"; };
+            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 9; };
-            func : :compute_hf3;
-            func : :create_vm_operator;
-
+            func :  :get_symbol   = { return "<*>"; };
+            func :  :compute_hf3;
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_bmul_s_create(); };
         };
 
-        stamp :hmul   = aware :
+        stamp :bmul_htp = aware :
         {
-            func : :get_symbol = { return "<*>"; };
+            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 9; };
-            func : :compute_hf3;
-            func : :create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_hmul_s_create(); };
+            func :  :get_symbol   = { return "<*t>"; };
+            func :  :compute_hf3;
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_bmul_htp_s_create(); };
         };
 
-        stamp :plus   = aware :
+        stamp :htp_bmul = aware :
         {
-            func : :get_symbol = { return "+"; };
-            func :: :get_priority = { return  8; };
-            func : :compute_hf3;
-            func : :create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_add_s_create(); };
+            func :: :get_arity    = { return 2; };
+            func :: :get_priority = { return 9; };
+            func :  :get_symbol   = { return "<t*>"; };
+            func :  :compute_hf3;
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_htp_bmul_s_create(); };
         };
 
-        stamp :minus   = aware :
+        stamp :htp_bmul_htp = aware :
         {
-            func : :get_symbol  = { return "-"; };
-            func :: :get_priority = { return  8; };
-            func : :compute_hf3;
-            func : :create_vm_operator = { return ( bmath_hf3_vm* )bmath_hf3_vm_op_sub_s_create(); };
+            func :: :get_arity    = { return 2; };
+            func :: :get_priority = { return 9; };
+            func :  :get_symbol   = { return "<t*t>"; };
+            func :  :compute_hf3;
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_htp_bmul_htp_s_create(); };
+        };
+
+        stamp :mul = aware :
+        {
+            func :: :get_arity    = { return 2; };
+            func :: :get_priority = { return 9; };
+            func :  :get_symbol   = { return "*"; };
+            func :  :compute_hf3;
+            func :  :create_vm_operator;
+        };
+
+        stamp :plus = aware :
+        {
+            func :: :get_arity    = { return 2; };
+            func :: :get_priority = { return 8; };
+            func :  :get_symbol   = { return "+"; };
+            func :  :compute_hf3;
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_add_s_create(); };
+        };
+
+        stamp :minus = aware :
+        {
+            func :: :get_arity    = { return 2; };
+            func :: :get_priority = { return 8; };
+            func :  :get_symbol   = { return "-"; };
+            func :  :compute_hf3;
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_sub_s_create(); };
         };
     };
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -294,6 +349,10 @@ group :net =
         tp_t type;          // type of holor
         sz_t vm_index = -1; // holor index (used for virtual machine construction)
     };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    signature bsym_net* get_net( const );
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -369,6 +428,8 @@ group :net =
             ::net* net = :address_s_get_net( o );
             if( net ) :a_trace_build_vm_proc( net, vmf, proc_name );
         };
+
+        func : : get_net;
     };
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -464,6 +525,9 @@ group :net =
 /// semantic objects
 group :sem =
 {
+//    signature void :build(      mutable, bcore_source* source );
+//    signature void :compile_vm( mutable, )
+
     stamp :graph = aware :
     {
         tp_t name;
@@ -476,7 +540,6 @@ group :sem =
 
         /// operator-priority (higher value means earlier evaluation; e.g. binary evaluation)
         sz_t priority = 10;
-
     };
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -495,18 +558,83 @@ group :sem =
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 };
 
+/// virtual machine
+group :vm =
+{
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :adaptive = aware badapt_adaptive
+    {
+
+        // === architecture parameters ================================
+
+        st_s                   holograph_file; // path to holograph used by builder (here just for reference)
+        bmath_hf3_vm_frame_s   vm; // virtual machine
+        badapt_dynamics_std_s  dynamics;
+        sz_t                   in_size;  // input vector size
+        sz_t                   out_size; // output vector size
+        sz_t                   in_index; // index into vm-holor array
+        sz_t                  out_index; // index into vm-holor array
+
+        // ==============================================================
+
+        // === adaptive functions =======================================
+        func ^ : get_in_size  = { return o->in_size;  };
+        func ^ : get_out_size = { return o->out_size; };
+        func ^ : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
+        func ^ : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
+
+//        func ^ : arc_to_sink;
+        func ^ : minfer;
+
+//        func ^ : bgrad;
+        func ^ : bgrad_adapt = {};
+        // ==============================================================
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :builder = aware badapt_builder
+    {
+        /**
+         *  Holograph's frame is
+         *  ( <name_out_holor> ) => ( <name_out_size>, <name_in_holor> )
+         *  using settings below.
+         */
+        st_s holograph_file; // path to holograph
+
+        st_s name_out_holor = "output";
+        st_s name_out_size  = "out_size";
+        st_s name_in_holor  = "input";
+
+        sz_t in_size;        // input vector size
+        sz_t out_size;       // output vector size
+        badapt_dynamics_std_s dynamics;
+
+        // === builder functions =======================================
+
+        /// input vector size
+        func ^ : get_in_size = { return o->in_size; };
+        func ^ : set_in_size = { o->in_size = size; };
+
+        /// output vector size
+        func ^ : get_out_size = { return o->out_size; };
+        func ^ : set_out_size = { o->out_size = size; };
+
+        /// builds adaptive ready to be trained; passes ownership
+        func ^ : build;
+
+        // ==============================================================
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+};
+
 #endif // PLANT_SECTION
 #endif // TYPEOF_bsym
 
 /**********************************************************************************************************************/
 
-/// name manager
-sc_t bsym_ifnameof( tp_t name );
-tp_t bsym_entypeof( sc_t name );
-
-bsym_net* bsym_net_address_s_get_net( const bsym_net_address_s* o );
-sc_t      bsym_net_link_s_get_name_sc( const bsym_net_link_s* o );
-void      bmath_hf3_s_trace_to_sink( const bmath_hf3_s* o, sz_t indent, bcore_sink* sink );
 
 void bsym_test( void );
 
