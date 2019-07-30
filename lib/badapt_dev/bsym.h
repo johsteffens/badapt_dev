@@ -609,6 +609,7 @@ group :vm =
 
         sz_t in_size;        // input vector size
         sz_t out_size;       // output vector size
+        u2_t rseed = 1234;   // randomizer seed
         badapt_dynamics_std_s dynamics;
 
         // === builder functions =======================================

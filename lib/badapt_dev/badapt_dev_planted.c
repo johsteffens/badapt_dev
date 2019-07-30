@@ -516,6 +516,7 @@ BCORE_DEFINE_OBJECT_INST_P( bsym_vm_builder_s )
     "st_s name_in_holor = \"input\";"
     "sz_t in_size;"
     "sz_t out_size;"
+    "u2_t rseed = 1234;"
     "badapt_dynamics_std_s dynamics;"
     "func ^:get_in_size;"
     "func ^:set_in_size;"
@@ -533,7 +534,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 2919334743 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 2702908698 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );

@@ -545,7 +545,7 @@
 #define TYPEOF_bsym_vm_builder_s 1381296970
 #define BETH_EXPAND_ITEM_bsym_vm_builder_s \
   BCORE_DECLARE_OBJECT( bsym_vm_builder_s ) \
-    {aware_t _;st_s holograph_file;st_s name_out_holor;st_s name_out_size;st_s name_in_holor;sz_t in_size;sz_t out_size;badapt_dynamics_std_s dynamics;}; \
+    {aware_t _;st_s holograph_file;st_s name_out_holor;st_s name_out_size;st_s name_in_holor;sz_t in_size;sz_t out_size;u2_t rseed;badapt_dynamics_std_s dynamics;}; \
   static inline sz_t bsym_vm_builder_s_get_in_size( const bsym_vm_builder_s* o ){ return o->in_size; } \
   static inline void bsym_vm_builder_s_set_in_size( bsym_vm_builder_s* o, sz_t size ){ o->in_size = size; } \
   static inline sz_t bsym_vm_builder_s_get_out_size( const bsym_vm_builder_s* o ){ return o->out_size; } \

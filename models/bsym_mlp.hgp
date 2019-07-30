@@ -5,17 +5,16 @@ graph mlp( y ) => ( out_dim, x )
 	{
         holor adaptive w = [ dim_y ][ dimof( x ) ]#;
         holor adaptive b = [ dim_y ]#;
-        y ->  b + ( w <*> x );
+
+        y -> w <*> x + b;
     };
 
-	graph mid_layer = tanh : layer();
+	graph hid_layer = tanh : layer();
 	graph out_layer = tanh : layer( out_dim );
 
-	link m -> mid_layer( 9 ) : mid_layer( 99 ) : mid_layer( 999 ) : x;
-
-	y -> out_layer : m;
+	y -> out_layer : hid_layer( 50 ) : hid_layer( 100 ) : x;
 };
 
 output -> mlp( out_size ) : input;
 
-? !output;
+//? !output;
