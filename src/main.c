@@ -7,6 +7,7 @@
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
 #include "bsym.h"
+#include "bhgp.h"
 
 int main( int argc, char** argv )
 {
@@ -38,7 +39,8 @@ int main( int argc, char** argv )
 
 //    bcore_get_traits_of_ancestor_to_sink( typeof( "bsym_op1" ), BCORE_STDOUT );
 
-    bsym_test();
+//    bsym_test();
+    bhgp_test();
 
 //    bcore_quicktypes_to_stdout( NULL );
 //    return 0;

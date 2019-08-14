@@ -477,7 +477,6 @@ group :net =
         :address_s [] targets;
         :address_s root;
 
-
         /// (operator) payload of node
         aware ::op* op;
 

@@ -526,6 +526,555 @@ BCORE_DEFINE_OBJECT_INST_P( bsym_vm_builder_s )
 "}";
 
 /**********************************************************************************************************************/
+// source: bhgp
+#include "bhgp.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_context_s )
+"aware bhgp"
+"{"
+    "bcore_hmap_name_s hmap_name;"
+    "bcore_arr_st_s arr_symbol_op2;"
+    "bhgp_sem_cell_s cell;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp_op
+
+BCORE_DEFINE_SPECT( bhgp, bhgp_op )
+"{"
+    "bcore_spect_header_s header;"
+    "feature strict aware bhgp_op : get_arity;"
+    "feature aware bhgp_op : get_priority = bhgp_op_get_priority__;"
+    "feature aware bhgp_op : get_symbol = bhgp_op_get_symbol__;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp_op_ar0
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar0_holor_s )
+"aware bhgp_op_ar0"
+"{"
+    "bmath_hf3_s h;"
+    "func bhgp_op:get_arity;"
+    "func ^:apply;"
+"}";
+
+bl_t bhgp_op_ar0_holor_s_apply( const bhgp_op_ar0_holor_s* o, bmath_hf3_s* r )
+{
+    bmath_hf3_s_copy_size( r, &o->h );
+    if( o->h.v_size ) bmath_hf3_s_cpy( &o->h, r );
+    return true;
+}
+
+BCORE_DEFINE_SPECT( bhgp_op, bhgp_op_ar0 )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware bhgp_op_ar0 : apply;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp_op_ar1
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_linear_s )
+"aware bhgp_op_ar1"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+"}";
+
+bl_t bhgp_op_ar1_linear_s_apply( const bhgp_op_ar1_linear_s* o, const bmath_hf3_s* a, bmath_hf3_s* r )
+{
+    bmath_hf3_s_copy_size( r, a );
+    if( a->v_size ) bmath_hf3_s_cpy( a, r );
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_tanh_s )
+"aware bhgp_op_ar1"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:create_vm_op;"
+    "func ^:apply;"
+"}";
+
+bl_t bhgp_op_ar1_tanh_s_apply( const bhgp_op_ar1_tanh_s* o, const bmath_hf3_s* a, bmath_hf3_s* r )
+{
+    bmath_hf3_s_copy_size( r, a );
+    if( a->v_size ) bmath_hf3_s_tanh( a, r );
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_dimof_s )
+"aware bhgp_op_ar1"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+"}";
+
+bl_t bhgp_op_ar1_dimof_s_apply( const bhgp_op_ar1_dimof_s* o, const bmath_hf3_s* a, bmath_hf3_s* r )
+{
+    bmath_hf3_s_set_scalar_f3( r, a->d_size ? a->d_data[ a->d_size - 1 ] : 1 );
+    return true;
+}
+
+BCORE_DEFINE_SPECT( bhgp_op, bhgp_op_ar1 )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware bhgp_op_ar1 : create_vm_op = bhgp_op_ar1_create_vm_op__;"
+    "feature aware bhgp_op_ar1 : apply;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp_op_ar2
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_bmul_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+    "func ^:create_vm_op;"
+"}";
+
+bl_t bhgp_op_ar2_bmul_s_apply( const bhgp_op_ar2_bmul_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( !bmath_hf3_s_set_d_bmul( a, b, r ) ) return false;
+    if( a->v_data && b->v_data )
+    {
+        bmath_hf3_s_fit_v_size( r );
+        bmath_hf3_s_bmul( a, b, r );
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_bmul_htp_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+    "func ^:create_vm_op;"
+"}";
+
+bl_t bhgp_op_ar2_bmul_htp_s_apply( const bhgp_op_ar2_bmul_htp_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( !bmath_hf3_s_set_d_bmul_htp( a, b, r ) ) return false;
+    if( a->v_data && b->v_data )
+    {
+        bmath_hf3_s_fit_v_size( r );
+        bmath_hf3_s_bmul_htp( a, b, r );
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_htp_bmul_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+    "func ^:create_vm_op;"
+"}";
+
+bl_t bhgp_op_ar2_htp_bmul_s_apply( const bhgp_op_ar2_htp_bmul_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( !bmath_hf3_s_set_d_htp_bmul( a, b, r ) ) return false;
+    if( a->v_data && b->v_data )
+    {
+        bmath_hf3_s_fit_v_size( r );
+        bmath_hf3_s_htp_bmul( a, b, r );
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_htp_bmul_htp_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+    "func ^:create_vm_op;"
+"}";
+
+bl_t bhgp_op_ar2_htp_bmul_htp_s_apply( const bhgp_op_ar2_htp_bmul_htp_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( !bmath_hf3_s_set_d_htp_bmul_htp( a, b, r ) ) return false;
+    if( a->v_data && b->v_data )
+    {
+        bmath_hf3_s_fit_v_size( r );
+        bmath_hf3_s_htp_bmul_htp( a, b, r );
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_mul_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+    "func ^:create_vm_op;"
+"}";
+
+bl_t bhgp_op_ar2_mul_s_apply( const bhgp_op_ar2_mul_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( a->d_size == 0 )
+    {
+        bmath_hf3_s_copy_d_data( r, b );
+        if( ( a->v_size > 0 ) && ( b->v_size > 0 ) )
+        {
+            bmath_hf3_s_fit_v_size( r );
+            bmath_hf3_s_mul_scl( b, a->v_data, r );
+        }
+    }
+    else if( b->d_size == 0 )
+    {
+        bmath_hf3_s_copy_d_data( r, a );
+        if( ( a->v_size > 0 ) && ( b->v_size > 0 ) )
+        {
+            bmath_hf3_s_fit_v_size( r );
+            bmath_hf3_s_mul_scl( a, b->v_data, r );
+        }
+    }
+    else
+    {
+        if( a->d_size != b->d_size ) return false;
+        if( bmath_hf3_s_d_product( a ) != bmath_hf3_s_d_product( b ) ) return false;
+        bmath_hf3_s_copy_d_data( r, a );
+        if( ( a->v_size > 0 ) && ( b->v_size > 0 ) )
+        {
+            bmath_hf3_s_fit_v_size( r );
+            bmath_hf3_s_hmul( a, b, r );
+        }
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_plus_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+    "func ^:create_vm_op;"
+"}";
+
+bl_t bhgp_op_ar2_plus_s_apply( const bhgp_op_ar2_plus_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( a->d_size != b->d_size ) return false;
+    if( bmath_hf3_s_d_product( a ) != bmath_hf3_s_d_product( b ) ) return false;
+    bmath_hf3_s_copy_d_data( r, a );
+    if( ( a->v_size > 0 ) && ( b->v_size > 0 ) )
+    {
+        bmath_hf3_s_fit_v_size( r );
+        bmath_hf3_s_add( a, b, r );
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_minus_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_symbol;"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+    "func ^:create_vm_op;"
+"}";
+
+bl_t bhgp_op_ar2_minus_s_apply( const bhgp_op_ar2_minus_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( a->d_size != b->d_size ) return false;
+    if( bmath_hf3_s_d_product( a ) != bmath_hf3_s_d_product( b ) ) return false;
+    bmath_hf3_s_copy_d_data( r, a );
+    if( ( a->v_size > 0 ) && ( b->v_size > 0 ) )
+    {
+        bmath_hf3_s_fit_v_size( r );
+        bmath_hf3_s_sub( a, b, r );
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_index_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+"}";
+
+bl_t bhgp_op_ar2_index_s_apply( const bhgp_op_ar2_index_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( b->v_size != 1 ) return false;
+    sz_t index = b->v_data[ 0 ];
+    if( a->d_size == 0 ) return false;
+    if( index < 0 || index >= a->d_data[ a->d_size - 1 ] ) return false;
+    bmath_hf3_s_clear( r );
+    bmath_hf3_s_set_d_data( r, a->d_data, a->d_size -1 );
+    if( a->v_data )
+    {
+        r->v_size = bmath_hf3_s_d_product( r );
+        r->v_data = a->v_data + index * r->v_size;
+        r->v_space = 0;
+    }
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar2_inc_order_s )
+"aware bhgp_op_ar2"
+"{"
+    "func bhgp_op:get_arity;"
+    "func bhgp_op:get_priority;"
+    "func ^:apply;"
+"}";
+
+bl_t bhgp_op_ar2_inc_order_s_apply( const bhgp_op_ar2_inc_order_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, bmath_hf3_s* r )
+{
+    if( a->v_size != 1 ) return false;
+    sz_t dim = b->v_data[ 0 ];
+    if( dim <= 0 ) return false;
+    bmath_hf3_s_copy( r, b );
+    bmath_hf3_s_inc_order( r, dim );
+    return true;
+}
+
+BCORE_DEFINE_SPECT( bhgp_op, bhgp_op_ar2 )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware bhgp_op_ar2 : create_vm_op = bhgp_op_ar2_create_vm_op__;"
+    "feature aware bhgp_op_ar2 : apply;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp_sem
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_sem_link_s )
+"aware bhgp_sem"
+"{"
+    "tp_t name;"
+    "private bhgp_sem_link_s -> up;"
+    "private bhgp_sem_link_s -> dn;"
+    "private vd_t cell;"
+    "bl_t exit;"
+    "func ^:get_name;"
+"}";
+
+tp_t bhgp_sem_link_s_get_name( const bhgp_sem_link_s* o )
+{ return o->name; }
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_sem_links_s )
+"aware bcore_array"
+"{"
+    "bhgp_sem_link_s => [];"
+    "func bhgp_sem:name_exists;"
+    "func bhgp_sem:get_link_by_name;"
+    "func bhgp_sem:get_link_by_open;"
+    "func bhgp_sem:count_open;"
+"}";
+
+bl_t bhgp_sem_links_s_name_exists( const bhgp_sem_links_s* o, tp_t name )
+{
+    for( sz_t i = 0; i < o->size; i++ ) if( o->data[ i ]->name == name ) return true;
+    return false;
+}
+
+bhgp_sem_link_s* bhgp_sem_links_s_get_link_by_name( bhgp_sem_links_s* o, tp_t name )
+{
+    for( sz_t i = 0; i < o->size; i++ ) if( o->data[ i ]->name == name ) return o->data[ i ];
+    return NULL;
+}
+
+bhgp_sem_link_s* bhgp_sem_links_s_get_link_by_open( bhgp_sem_links_s* o )
+{
+    for( sz_t i = 0; i < o->size; i++ ) if( o->data[ i ]->up == NULL ) return o->data[ i ];
+    return NULL;
+}
+
+sz_t bhgp_sem_links_s_count_open( const bhgp_sem_links_s* o )
+{
+    sz_t count = 0;
+    for( sz_t i = 0; i < o->size; i++ ) count += ( o->data[ i ]->up == NULL );
+    return count;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_sem_body_s )
+"aware bcore_array"
+"{"
+    "aware bhgp_sem=> [];"
+    "func bhgp_sem:name_exists;"
+    "func bhgp_sem:get_sem_by_name;"
+"}";
+
+bl_t bhgp_sem_body_s_name_exists( const bhgp_sem_body_s* o, tp_t name )
+{
+    for( sz_t i = 0; i < o->size; i++ ) if( bhgp_sem_a_get_name( o->data[ i ] ) == name ) return true;
+    return false;
+}
+
+bhgp_sem* bhgp_sem_body_s_get_sem_by_name( bhgp_sem_body_s* o, tp_t name )
+{
+    for( sz_t i = 0; i < o->size; i++ ) if( bhgp_sem_a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+    return NULL;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_sem_cell_s )
+"aware bhgp_sem"
+"{"
+    "tp_t name;"
+    "bhgp_sem_links_s encs;"
+    "bhgp_sem_links_s excs;"
+    "bhgp_sem_body_s => body;"
+    "aware bhgp_op -> op;"
+    "private bhgp_sem_cell_s* parent;"
+    "hidden bcore_source_point_s source_point;"
+    "func ^:get_name;"
+    "func ^:get_arity;"
+    "func ^:get_enc_by_name;"
+    "func ^:get_enc_by_open;"
+    "func ^:get_exc_by_name;"
+    "func ^:get_priority;"
+    "func ^:get_cell_by_name;"
+"}";
+
+tp_t bhgp_sem_cell_s_get_name( const bhgp_sem_cell_s* o )
+{ return o->name; }
+
+bhgp_sem_cell_s* bhgp_sem_cell_s_get_cell_by_name( bhgp_sem_cell_s* o, tp_t name )
+{
+    bhgp_sem* sem = o->body ? bhgp_sem_body_s_get_sem_by_name( o->body, name ) : NULL;
+    if( sem && *(aware_t*)sem == TYPEOF_bhgp_sem_cell_s ) return ( bhgp_sem_cell_s* )sem;
+    if( o->parent ) return bhgp_sem_cell_s_get_cell_by_name( o->parent, name );
+    return NULL;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_sem_stack_flag_s )
+"aware bhgp_sem"
+"{"
+"}";
+
+BCORE_DEFINE_SPECT( bhgp, bhgp_sem )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware bhgp_sem : get_name = bhgp_sem_get_name__;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp_ctr
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_ctr_node_s )
+"aware bcore_array"
+"{"
+    "sz_t id = -1;"
+    "private bhgp_sem_cell_s -> cell;"
+    "private bhgp_ctr_node_s -> parent;"
+    "bhgp_ctr_node_s => [];"
+    "func bhgp_ctr:cell_enter;"
+    "func bhgp_ctr:cell_exit;"
+"}";
+
+bhgp_ctr_node_s* bhgp_ctr_node_s_cell_enter( bhgp_ctr_node_s* o, bhgp_sem_cell_s* cell )
+{
+    for( sz_t i = 0; i < o->size; i++ ) if( o->data[ i ]->cell == cell ) return o->data[ i ];
+    bhgp_ctr_node_s* node = bhgp_ctr_node_s_push_d( o, bhgp_ctr_node_s_create() );
+    node->cell = cell;
+    node->parent = o;
+    return node;
+}
+
+bhgp_ctr_node_s* bhgp_ctr_node_s_cell_exit( bhgp_ctr_node_s* o, bhgp_sem_cell_s* cell )
+{
+    bhgp_ctr_node_s* node = o;
+    while( node && node->cell != cell ) node = o->parent;
+    return node;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_ctr_tree_s )
+"aware bhgp_ctr"
+"{"
+    "sz_t id_base = 0;"
+    "bhgp_ctr_node_s => root;"
+    "private bhgp_ctr_node_s -> node;"
+    "func ^:cell_enter;"
+    "func ^:cell_exit;"
+"}";
+
+bhgp_ctr_node_s* bhgp_ctr_tree_s_cell_enter( bhgp_ctr_tree_s* o, bhgp_sem_cell_s* cell )
+{
+    if( !o->root )
+    {
+        o->root = bhgp_ctr_node_s_create();
+        o->root->id = o->id_base++;
+        o->root->cell = cell;
+        o->node = o->root;
+    }
+    else
+    {
+        o->node = bhgp_ctr_node_s_cell_enter( o->node ? o->node : o->root, cell );
+        if( o->node->id < 0 ) o->node->id = o->id_base++;
+    }
+    return o->node;
+}
+
+bhgp_ctr_node_s* bhgp_ctr_tree_s_cell_exit( bhgp_ctr_tree_s* o, bhgp_sem_cell_s* cell )
+{
+    if( !o->node ) return NULL;
+    bhgp_ctr_node_s* node = bhgp_ctr_node_s_cell_exit( o->node, cell );
+    if( node ) o->node = node->parent;
+    return node;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: bhgp_net
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_net_link_s )
+"aware bhgp_net"
+"{"
+    "vd_t tg;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_net_links_s )
+"aware bcore_array"
+"{"
+    "bhgp_net_link_s => [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_net_node_s )
+"aware bhgp_net"
+"{"
+    "bhgp_net_links_s upls;"
+    "bhgp_net_links_s dnls;"
+    "aware bhgp_op -> op;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_net_nodes_s )
+"aware bcore_array"
+"{"
+    "bhgp_net_node_s => [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( bhgp_net_frame_s )
+"aware bhgp_net"
+"{"
+    "bhgp_ctr_tree_s tree;"
+    "bhgp_net_nodes_s nodes;"
+"}";
+
+/**********************************************************************************************************************/
 
 vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
 {
@@ -534,7 +1083,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 2702908698 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 4203346400 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -716,6 +1265,143 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_builder_build, bsym_vm_builder_s_build );
             BCORE_REGISTER_OBJECT( bsym_vm_builder_s );
             BCORE_REGISTER_TRAIT( bsym_vm, bsym );
+            BCORE_REGISTER_NAME( link );
+            BCORE_REGISTER_NAME( holor );
+            BCORE_REGISTER_NAME( cell );
+            BCORE_REGISTER_OBJECT( bhgp_context_s );
+            BCORE_REGISTER_TRAIT( bhgp, bcore_inst );
+            BCORE_REGISTER_FEATURE( bhgp_op_get_arity );
+            BCORE_REGISTER_FEATURE( bhgp_op_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_get_priority__ );
+            BCORE_REGISTER_FEATURE( bhgp_op_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_get_symbol__ );
+            BCORE_REGISTER_SPECT( bhgp_op );
+            BCORE_REGISTER_FEATURE( bhgp_op_ar0_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar0_holor_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar0_apply, bhgp_op_ar0_holor_s_apply );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar0_holor_s );
+            BCORE_REGISTER_SPECT( bhgp_op_ar0 );
+            BCORE_REGISTER_FEATURE( bhgp_op_ar1_create_vm_op );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar1_create_vm_op, bhgp_op_ar1_create_vm_op__ );
+            BCORE_REGISTER_FEATURE( bhgp_op_ar1_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar1_linear_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar1_linear_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar1_linear_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar1_apply, bhgp_op_ar1_linear_s_apply );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar1_linear_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar1_tanh_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar1_tanh_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar1_tanh_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar1_create_vm_op, bhgp_op_ar1_tanh_s_create_vm_op );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar1_apply, bhgp_op_ar1_tanh_s_apply );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar1_tanh_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar1_dimof_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar1_dimof_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar1_dimof_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar1_apply, bhgp_op_ar1_dimof_s_apply );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar1_dimof_s );
+            BCORE_REGISTER_SPECT( bhgp_op_ar1 );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar1_linear_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar1_tanh_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar1_dimof_s );
+            BCORE_REGISTER_FEATURE( bhgp_op_ar2_create_vm_op );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_create_vm_op__ );
+            BCORE_REGISTER_FEATURE( bhgp_op_ar2_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar2_bmul_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_bmul_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_bmul_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_bmul_s_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_bmul_s_create_vm_op );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_bmul_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar2_bmul_htp_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_bmul_htp_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_bmul_htp_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_bmul_htp_s_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_bmul_htp_s_create_vm_op );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_bmul_htp_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar2_htp_bmul_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_htp_bmul_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_htp_bmul_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_htp_bmul_s_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_htp_bmul_s_create_vm_op );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_htp_bmul_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar2_htp_bmul_htp_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_htp_bmul_htp_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_htp_bmul_htp_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_htp_bmul_htp_s_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_htp_bmul_htp_s_create_vm_op );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_htp_bmul_htp_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar2_mul_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_mul_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_mul_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_mul_s_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_mul_s_create_vm_op );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_mul_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar2_plus_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_plus_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_plus_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_plus_s_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_plus_s_create_vm_op );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_plus_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_symbol, bhgp_op_ar2_minus_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_minus_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_minus_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_minus_s_apply );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_create_vm_op, bhgp_op_ar2_minus_s_create_vm_op );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_minus_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_index_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_index_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_index_s_apply );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_index_s );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar2_inc_order_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar2_inc_order_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_op_ar2_apply, bhgp_op_ar2_inc_order_s_apply );
+            BCORE_REGISTER_OBJECT( bhgp_op_ar2_inc_order_s );
+            BCORE_REGISTER_SPECT( bhgp_op_ar2 );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_bmul_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_bmul_htp_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_htp_bmul_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_htp_bmul_htp_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_mul_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_plus_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_minus_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_index_s );
+            bcore_inst_s_get_typed( TYPEOF_bhgp_op_ar2_inc_order_s );
+            BCORE_REGISTER_FEATURE( bhgp_sem_get_name );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_name, bhgp_sem_get_name__ );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_name, bhgp_sem_link_s_get_name );
+            BCORE_REGISTER_OBJECT( bhgp_sem_link_s );
+            BCORE_REGISTER_FFUNC( bhgp_sem_name_exists, bhgp_sem_links_s_name_exists );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_link_by_name, bhgp_sem_links_s_get_link_by_name );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_link_by_open, bhgp_sem_links_s_get_link_by_open );
+            BCORE_REGISTER_FFUNC( bhgp_sem_count_open, bhgp_sem_links_s_count_open );
+            BCORE_REGISTER_OBJECT( bhgp_sem_links_s );
+            BCORE_REGISTER_FFUNC( bhgp_sem_name_exists, bhgp_sem_body_s_name_exists );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_sem_by_name, bhgp_sem_body_s_get_sem_by_name );
+            BCORE_REGISTER_OBJECT( bhgp_sem_body_s );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_name, bhgp_sem_cell_s_get_name );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_arity, bhgp_sem_cell_s_get_arity );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_enc_by_name, bhgp_sem_cell_s_get_enc_by_name );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_enc_by_open, bhgp_sem_cell_s_get_enc_by_open );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_exc_by_name, bhgp_sem_cell_s_get_exc_by_name );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_priority, bhgp_sem_cell_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhgp_sem_get_cell_by_name, bhgp_sem_cell_s_get_cell_by_name );
+            BCORE_REGISTER_OBJECT( bhgp_sem_cell_s );
+            BCORE_REGISTER_OBJECT( bhgp_sem_stack_flag_s );
+            BCORE_REGISTER_SPECT( bhgp_sem );
+            BCORE_REGISTER_FFUNC( bhgp_ctr_cell_enter, bhgp_ctr_node_s_cell_enter );
+            BCORE_REGISTER_FFUNC( bhgp_ctr_cell_exit, bhgp_ctr_node_s_cell_exit );
+            BCORE_REGISTER_OBJECT( bhgp_ctr_node_s );
+            BCORE_REGISTER_FFUNC( bhgp_ctr_cell_enter, bhgp_ctr_tree_s_cell_enter );
+            BCORE_REGISTER_FFUNC( bhgp_ctr_cell_exit, bhgp_ctr_tree_s_cell_exit );
+            BCORE_REGISTER_OBJECT( bhgp_ctr_tree_s );
+            BCORE_REGISTER_TRAIT( bhgp_ctr, bhgp );
+            BCORE_REGISTER_OBJECT( bhgp_net_link_s );
+            BCORE_REGISTER_OBJECT( bhgp_net_links_s );
+            BCORE_REGISTER_OBJECT( bhgp_net_node_s );
+            BCORE_REGISTER_OBJECT( bhgp_net_nodes_s );
+            BCORE_REGISTER_OBJECT( bhgp_net_frame_s );
+            BCORE_REGISTER_TRAIT( bhgp_net, bhgp );
         }
         break;
         default: break;

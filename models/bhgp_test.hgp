@@ -1,0 +1,20 @@
+// multilayer perceptron
+main( y ) => ( x )
+{
+	cell layer( y ) => ( dim_y, x )
+	{
+        link w -> [ dim_y ][ dimof( x ) ]0;
+        link b -> [ dim_y ]0;
+
+        y ->  b + ( w <*> x );
+    };
+
+    cell mid_layer = tanh : layer;
+
+    cell out_layer = tanh : layer( 1 );
+
+    link m -> mid_layer( 9 ) : mid_layer( 99 ) :  mid_layer( 999, x );
+
+    y -> out_layer( m );
+};
+

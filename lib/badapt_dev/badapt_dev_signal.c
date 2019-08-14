@@ -19,6 +19,7 @@
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
 #include "bsym.h"
+#include "bhgp.h"
 
 vd_t badapt_dev_signal_handler( const bcore_signal_s* o )
 {
@@ -41,6 +42,7 @@ vd_t badapt_dev_signal_handler( const bcore_signal_s* o )
             badapt_dev_ern_signal_handler,
             badapt_dev_lstm_signal_handler,
             bsym_signal_handler,
+            bhgp_signal_handler,
         };
 
         ret = bcore_signal_s_broadcast( o, arr, sizeof( arr ) / sizeof( bcore_fp_signal_handler ) );
