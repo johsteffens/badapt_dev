@@ -1393,6 +1393,7 @@ bhgp_net_node_s* bhgp_net_node_s_solve( bhgp_net_node_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+/// Outputs the graph structure in text form to sink
 void bhgp_net_node_s_graph_to_sink( bhgp_net_node_s* o, bcore_sink* sink )
 {
     bhgp_net_node_s_trace_to_sink( o, 0, sink );
@@ -1401,7 +1402,262 @@ void bhgp_net_node_s_graph_to_sink( bhgp_net_node_s* o, bcore_sink* sink )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/** Recursively building a network cell from a semantic cell using membrane technique.
+/** Recursively sets downlinks for all non-flagged uplinks.
+ *  Assumes initial state was normal.
+ */
+void bhgp_net_node_s_set_downlinks( bhgp_net_node_s* o )
+{
+    if( o->flag ) return;
+    o->flag = true;
+    BFOR_EACH( &o->upls, i )
+    {
+        bhgp_net_node_s* node = o->upls.data[ i ]->node;
+        bhgp_net_links_s_push( &node->dnls )->node = o;
+        bhgp_net_node_s_set_downlinks( node );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Recursively skips identities.
+ *  Assumes initial state was normal and downlinks not set
+ */
+void bhgp_net_node_s_skip_identities( bhgp_net_node_s* o )
+{
+    if( o->flag ) return;
+    o->flag = true;
+    BFOR_EACH( &o->upls, i )
+    {
+        bhgp_net_node_s* node = o->upls.data[ i ]->node;
+        while( node && node->op && node->op->_ == TYPEOF_bhgp_op_ar1_identity_s ) node = node->upls.data[ i ]->node;
+        ASSERT( node );
+        o->upls.data[ i ]->node = node;
+        bhgp_net_node_s_skip_identities( node );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Recursively sets flags for all nodes reachable via uplink.
+ *  Assumes initial state was normal.
+ */
+void bhgp_net_node_s_set_flags( bhgp_net_node_s* o )
+{
+    if( o->flag ) return;
+    o->flag = true;
+    BFOR_EACH( &o->upls, i ) bhgp_net_node_s_set_flags( o->upls.data[ i ]->node );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_net_cell_s_clear_flags( bhgp_net_cell_s* o )
+{
+    BFOR_EACH( &o->body, i ) o->body.data[ i ]->flag = false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Normalizes network structure to the following result:
+ *  Body references all nodes (including entry and exit nodes)
+ *  Entry and exit references are forked accordingly.
+ *  Node id is identical to body-index.
+ */
+static s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 ) { return ( *( vd_t* )v2 > *( vd_t* )v1 ) ? 1 : ( *( vd_t* )v2 < *( vd_t* )v1 ) ? -1 : 0; }
+void bhgp_net_cell_s_normalize( bhgp_net_cell_s* o )
+{
+    bcore_arr_vd_s* arr = bcore_arr_vd_s_create();
+    BFOR_EACH( &o->body, i ) bcore_arr_vd_s_push( arr, o->body.data[ i ] );
+    BFOR_EACH( &o->encs, i ) bcore_arr_vd_s_push( arr, o->encs.data[ i ] );
+    BFOR_EACH( &o->excs, i ) bcore_arr_vd_s_push( arr, o->excs.data[ i ] );
+
+    // sort references descending (to move zeros to the end)
+    bcore_array_a_sort_f( ( bcore_array* )arr, 0, -1, ( bcore_cmp_f ){ .f = cmp_vd, .o = NULL }, -1 );
+
+    // remove zeros
+    if( arr->size > 0 )
+    {
+        BFOR_EACH( arr, i )
+        {
+            if( arr->data[ i ] == NULL )
+            {
+                for( sz_t j = i + 1; j < arr->size; j++ ) ASSERT( arr->data[ j ] == NULL );
+                arr->size = i;
+                break;
+            }
+        }
+    }
+
+    // remove duplicates
+    if( arr->size > 1 )
+    {
+        sz_t d = 1;
+        for( sz_t i = 1; i < arr->size; i++ ) if( arr->data[ i - 1 ] != arr->data[ i ] ) arr->data[ d++ ] = arr->data[ i ];
+        arr->size = d;
+    }
+
+    // fork references
+    BFOR_EACH( arr, i ) arr->data[ i ] = bcore_fork( arr->data[ i ] );
+
+    // new body
+    bhgp_net_nodes_s_set_size( &o->body, 0 );
+    for( sz_t i = 0; i < arr->size; i++ )
+    {
+        bhgp_net_node_s* node = bhgp_net_nodes_s_push_d( &o->body, arr->data[ i ] );
+        assert( node == arr->data[ i ] );
+        node->id = i;
+        node->flag = false;
+    }
+
+    bcore_arr_vd_s_discard( arr );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/// Checks consistency of a normalized cell
+bl_t bhgp_net_cell_s_is_consistent( const bhgp_net_cell_s* o )
+{
+    BFOR_EACH( &o->body, i )
+    {
+        const bhgp_net_node_s* node = o->body.data[ i ];
+        if( node->flag ) return false;
+        if( node->id != i ) return false;
+        BFOR_EACH( &node->upls, i )
+        {
+            const bhgp_net_node_s* node2 = node->upls.data[ i ]->node;
+            if( node2->id < 0 ) return false;
+            if( node2->id >= o->body.size ) return false;
+            if( node2 != o->body.data[ node2->id ] ) return false;
+        }
+
+        BFOR_EACH( &node->dnls, i )
+        {
+            const bhgp_net_node_s* node2 = node->dnls.data[ i ]->node;
+            if( node2->id < 0 ) return false;
+            if( node2->id >= o->body.size ) return false;
+            if( node2 != o->body.data[ node2->id ] ) return false;
+        }
+    }
+
+    BFOR_EACH( &o->encs, i )
+    {
+        const bhgp_net_node_s* node2 = o->encs.data[ i ];
+        if( node2->id < 0 ) return false;
+        if( node2->id >= o->body.size ) return false;
+        if( node2 != o->body.data[ node2->id ] ) return false;
+    }
+
+    BFOR_EACH( &o->excs, i )
+    {
+        const bhgp_net_node_s* node2 = o->excs.data[ i ];
+        if( node2->id < 0 ) return false;
+        if( node2->id >= o->body.size ) return false;
+        if( node2 != o->body.data[ node2->id ] ) return false;
+    }
+
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_net_cell_s_copy_x( bhgp_net_cell_s* o )
+{
+    BFOR_EACH( &o->body, i )
+    {
+        const bhgp_net_node_s* node = o->body.data[ i ];
+        ASSERT( node->id == i );
+        BFOR_EACH( &node->upls, i )
+        {
+            const bhgp_net_node_s* node2 = node->upls.data[ i ]->node;
+            ASSERT( node2->id >= 0 );
+            ASSERT( node2->id < o->body.size );
+            node->upls.data[ i ]->node = o->body.data[ node2->id ];
+        }
+        BFOR_EACH( &node->dnls, i )
+        {
+            const bhgp_net_node_s* node2 = node->dnls.data[ i ]->node;
+            ASSERT( node2->id >= 0 );
+            ASSERT( node2->id < o->body.size );
+            node->dnls.data[ i ]->node = o->body.data[ node2->id ];
+        }
+    }
+
+    BFOR_EACH( &o->encs, i )
+    {
+        sz_t id = o->encs.data[ i ]->id;
+        ASSERT( id >= 0 );
+        ASSERT( id < o->body.size );
+        bhgp_net_node_s_detach( &o->encs.data[ i ] );
+        o->encs.data[ i ] = bcore_fork( o->body.data[ id ] );
+    }
+
+    BFOR_EACH( &o->excs, i )
+    {
+        sz_t id = o->excs.data[ i ]->id;
+        ASSERT( id >= 0 );
+        ASSERT( id < o->body.size );
+        bhgp_net_node_s_detach( &o->excs.data[ i ] );
+        o->excs.data[ i ] = bcore_fork( o->body.data[ id ] );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_net_cell_s_clear_downlinks( bhgp_net_cell_s* o )
+{
+    BFOR_EACH( &o->body, i ) bhgp_net_links_s_clear( &o->body.data[ i ]->dnls );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_net_cell_s_set_downlinks( bhgp_net_cell_s* o )
+{
+    bhgp_net_cell_s_clear_flags( o );
+    bhgp_net_cell_s_clear_downlinks( o );
+    BFOR_EACH( &o->excs, i ) bhgp_net_node_s_set_downlinks( o->excs.data[ i ] );
+    bhgp_net_cell_s_clear_flags( o );
+    assert( bhgp_net_cell_s_is_consistent( o ) );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Removes all body-nodes not reachable via uplink from exit channels
+ *  Creates an warning in case an entry channel is unreachable.
+ */
+void bhgp_net_cell_s_remove_unreachable_nodes( bhgp_net_cell_s* o )
+{
+    bhgp_net_cell_s_clear_flags( o );
+    BFOR_EACH( &o->excs, i ) bhgp_net_node_s_set_flags( o->excs.data[ i ] );
+    BFOR_EACH( &o->encs, i )
+    {
+        bhgp_net_node_s* node = o->encs.data[ i ];
+        if( !node->flag ) bcore_source_point_s_parse_msg_to_sink_fa( node->source_point, BCORE_STDERR, "Warning: Entry channel has no effect." );
+        node->flag = true;
+    }
+
+    BFOR_EACH( &o->body, i ) if( !o->body.data[ i ]->flag ) bhgp_net_node_s_detach( &o->body.data[ i ] );
+    bhgp_net_cell_s_normalize( o );
+
+    assert( bhgp_net_cell_s_is_consistent( o ) );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Removes all body-nodes containing an identity operator and relinks remaining nodes accordingly
+ *  Clears all downlinks;
+ */
+void bhgp_net_cell_s_remove_identities( bhgp_net_cell_s* o )
+{
+    bhgp_net_cell_s_clear_downlinks( o );
+    bhgp_net_cell_s_clear_flags( o );
+    BFOR_EACH( &o->excs, i ) bhgp_net_node_s_skip_identities( o->excs.data[ i ] );
+    bhgp_net_cell_s_clear_flags( o );
+    bhgp_net_cell_s_remove_unreachable_nodes( o );
+    assert( bhgp_net_cell_s_is_consistent( o ) );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Recursively building a network cell from a semantic cell using membrane-technique.
  *  Exits when the enter membrane of the root cell is reached.
  *  This function does not set downlinks.
  */
@@ -1607,10 +1863,12 @@ static void net_cell_s_from_sem( bhgp_net_cell_s* o, bhgp_sem_cell_s* sem_cell, 
         bhgp_sem_link_s* sem_link = sem_cell->excs.data[ i ];
         net_cell_s_from_sem_recursive( o, sem_link, tree, NULL, net_node, 0, BCORE_STDOUT );
         bhgp_net_node_s_solve( net_node );
-        bhgp_net_node_s_graph_to_sink( net_node, BCORE_STDOUT );
     }
 
     bhgp_ctr_tree_s_discard( tree );
+
+    bhgp_net_cell_s_normalize( o );
+    assert( bhgp_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1621,6 +1879,14 @@ static bhgp_net_cell_s* net_cell_s_create_build( bhgp_sem_cell_s* sem_cell, bmat
     bhgp_net_cell_s* net_cell = bhgp_net_cell_s_create();
     net_cell_s_from_sem( net_cell, sem_cell, input_holors );
     return net_cell;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/// outputs graph to sink
+static void bhgp_net_cell_s_graph_to_sink( bhgp_net_cell_s* o, bcore_sink* sink )
+{
+    BFOR_EACH( &o->excs, i ) bhgp_net_node_s_graph_to_sink( o->excs.data[ i ], sink );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1647,6 +1913,18 @@ void bhgp_test( void )
     bcore_msg_fa( "net_cell encs size = #<sz_t>\n", net_cell->encs.size );
     bcore_msg_fa( "net_cell body size = #<sz_t>\n", net_cell->body.size );
     bcore_msg_fa( "net_cell excs size = #<sz_t>\n", net_cell->excs.size );
+
+    bhgp_net_cell_s_remove_identities( net_cell );
+    bhgp_net_cell_s_set_downlinks( net_cell );
+    ASSERT( bhgp_net_cell_s_is_consistent( net_cell ) );
+
+    bhgp_net_cell_s_graph_to_sink( net_cell, BCORE_STDOUT );
+
+    // test copying of net_cell
+    {
+        bhgp_net_cell_s* cloned_cell = BCORE_LIFE_A_PUSH( bhgp_net_cell_s_clone( net_cell ) );
+        ASSERT( bhgp_net_cell_s_is_consistent( cloned_cell ) );
+    }
 
 //    bcore_txt_ml_a_to_stdout( net_cell );
 

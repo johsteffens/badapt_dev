@@ -1105,7 +1105,7 @@
 #define TYPEOF_bhgp_net_node_s 257682039
 #define BETH_EXPAND_ITEM_bhgp_net_node_s \
   BCORE_DECLARE_OBJECT( bhgp_net_node_s ) \
-    {aware_t _;bhgp_net_links_s upls;bhgp_net_links_s dnls;sz_t id;bhgp_op* op;bmath_hf3_s* h;bcore_source_point_s* source_point;}; \
+    {aware_t _;bhgp_net_links_s upls;bhgp_net_links_s dnls;sz_t id;bl_t flag;bhgp_op* op;bmath_hf3_s* h;bcore_source_point_s* source_point;}; \
   bhgp_net_node_s* bhgp_net_node_s_solve( bhgp_net_node_s* o );
 #define TYPEOF_bhgp_net_nodes_s 479725708
 #define BETH_EXPAND_ITEM_bhgp_net_nodes_s \
@@ -1125,7 +1125,12 @@
 #define TYPEOF_bhgp_net_cell_s 4037555599
 #define BETH_EXPAND_ITEM_bhgp_net_cell_s \
   BCORE_DECLARE_OBJECT( bhgp_net_cell_s ) \
-    {aware_t _;sz_t max_depth;bhgp_net_nodes_s body;bhgp_net_nodes_s encs;bhgp_net_nodes_s excs;};
+    {aware_t _;sz_t max_depth;bhgp_net_nodes_s body;bhgp_net_nodes_s encs;bhgp_net_nodes_s excs;}; \
+  void bhgp_net_cell_s_normalize( bhgp_net_cell_s* o ); \
+  void bhgp_net_cell_s_clear_flags( bhgp_net_cell_s* o ); \
+  bl_t bhgp_net_cell_s_is_consistent( const bhgp_net_cell_s* o ); \
+  void bhgp_net_cell_s_copy_x( bhgp_net_cell_s* o ); \
+  static inline void bhgp_net_cell_s_mutated( bhgp_net_cell_s* o ){ ERR_fa( "Cannot reconstitute after via-mutation." ); }
 #define BETH_EXPAND_GROUP_bhgp_net \
   BCORE_FORWARD_OBJECT( bhgp_net ); \
   BCORE_FORWARD_OBJECT( bhgp_net_link_s ); \

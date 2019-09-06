@@ -1,5 +1,5 @@
 // recursive multilayer perceptron
-hgp_main( y => x )
+hgp_main( y => a )
 {
     y =	cell mlp( y => dim_y, red_factor, a )
 	{
@@ -9,6 +9,6 @@ hgp_main( y => x )
         y = if( dim_y < 2 )
             then tanh( q )
             else mlp( dim_y * red_factor, red_factor, lrelu( q ) );
-    } ( 100, 0.5, x );
+    } ( 100, 0.5, a );
 };
 

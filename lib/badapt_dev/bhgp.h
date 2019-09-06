@@ -914,7 +914,7 @@ group :net =
 {
     stamp :link = aware :
     {
-        private vd_t /* :node_s* */ node; // (!) target is a node
+        hidden vd_t /* :node_s* */ node; // (!) target is a node
     };
 
     stamp :links = aware bcore_array { :link_s => []; };
@@ -926,6 +926,7 @@ group :net =
         :links_s upls; // uplinks
         :links_s dnls; // downlinks
         sz_t id;
+        bl_t flag = false; // multi purpose flag used to iterate through network (normal state: false)
         aware ::op -> op;
         bmath_hf3_s-> h; // holor after solving
 
@@ -945,12 +946,23 @@ group :net =
         };
     };
 
+    signature void normalize( mutable );
+    signature void clear_flags( mutable );
+    signature bl_t is_consistent( const );
+
     stamp :cell = aware :
     {
-        sz_t max_depth = 65536; // maximum recursion depth for build_trace
+        sz_t max_depth = 65536; // maximum recursion depth
         :nodes_s body;
         :nodes_s encs; // entry channels
         :nodes_s excs; // exit channels
+
+        func : :normalize; // re-entrant
+        func : :clear_flags; // re-entrant; assumes normal state except for flags
+        func : :is_consistent;
+
+        func bcore_inst_call : copy_x; // cell is copyable
+        func bcore_via_call  : mutated = { ERR_fa( "Cannot reconstitute after via-mutation." ); }; // cell is not transferable
     };
 };
 
