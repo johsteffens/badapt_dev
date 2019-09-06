@@ -1,0 +1,14 @@
+// recursive multilayer perceptron
+hgp_main( y => x )
+{
+    y =	cell mlp( y => dim_y, red_factor, a )
+	{
+        w = adapt : /*rand :*/ ( [ dim_y ][ dimof( a ) ]# );
+        b = adapt : ( [ dim_y ]0 );
+        q = b + w ** a;
+        y = if( dim_y < 2 )
+            then tanh( q )
+            else mlp( dim_y * red_factor, red_factor, lrelu( q ) );
+    } ( 100, 0.5, x );
+};
+

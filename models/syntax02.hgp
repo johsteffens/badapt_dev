@@ -1,2 +1,13 @@
-/// Holor arithmetic
+( y => )
+{
+
+    cell faculty( f => n )
+    {
+        f = if( n > 1 ) then n * faculty( n - 1 ) else 1;
+    };
+
+    //y = 3;
+    y = faculty( 5 );
+
+}
 

@@ -1,20 +1,13 @@
-// multilayer perceptron
-graph mlp( y ) => ( out_dim, x )
+// recursive multilayer perceptron
+hgp_main( y => x )
 {
-	graph layer( y ) => ( dim_y, x )
+	cell mlp( y => dim_y, red_factor, x )
 	{
-        holor adaptive w = [ dim_y ][ dimof( x ) ]#;
-        holor adaptive b = [ dim_y ]#;
-
-        y -> w <*> x + b;
+        w = adapt : rand : ( [ dim_y ][ dimof( x ) ]# );
+        b = adapt        : ( [ dim_y ]0 );
+        q = b + w ** x;
+        y = if ( dim_y >= 2 ) then tanh( q ) else tanh( mlp( dim_y * red_factor, red_factor, x ) );
     };
-
-	graph hid_layer = tanh : layer();
-	graph out_layer = tanh : layer( out_dim );
-
-	y -> out_layer : hid_layer( 50 ) : hid_layer( 100 ) : x;
+    y = mlp( 10, 0.5, x );
 };
 
-output -> mlp( out_size ) : input;
-
-//? !output;
