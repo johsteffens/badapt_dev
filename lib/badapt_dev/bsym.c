@@ -2284,7 +2284,7 @@ badapt_adaptive* bsym_vm_builder_s_build( const bsym_vm_builder_s* o )
     /// run setup
     bmath_hf3_vm_frame_s_run_proc( vmf, typeof( "setup" ) );
 
-    BCORE_LIFE_RETURN( ( badapt_adaptive* )adaptive );
+    BCORE_LIFE_RETURNV( badapt_adaptive*, ( badapt_adaptive* )adaptive );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

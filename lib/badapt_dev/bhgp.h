@@ -102,12 +102,12 @@
  *   +          8     (elementwise) addition
  *   -          8     (elementwise) subtraction
  *   *          9     (elementwise) multiplication (hadamard product); multiplication of holor with scalar
- *  <*>,
- *  <*t>,
- *  <t*>,
- *  <t*t>       9     holor-product for holors up to order 2; 'T' indicates which side is considered transposed
-
- *  <name>     10     Custom operator (defined by a graph with two free inputs and one output)
+ *  **,
+ *  *^,
+ *  ^*,
+ *  ^*^         9     holor-product for holors up to order 2; '^' indicates which side is considered transposed
+ *  ***         9     convolution?
+ *
  *
  *  Possible name ?
  *     holocell
@@ -125,7 +125,12 @@
 #include "badapt_dev_planted.h"
 
 /**********************************************************************************************************************/
+/// f3-operators
+
+/**********************************************************************************************************************/
 /// prototypes
+
+s2_t bhgp_op_ar1_solve_unary( bmath_hf3_s** r, bmath_hf3_s** a, bmath_fp_f3_unary unary );
 
 /**********************************************************************************************************************/
 
@@ -159,15 +164,23 @@ group :op =
       *
       * Return:
       *   0: A valid result could be computed
-      *   1: output is settled for given operation
+      *   1: Output is settled for given operation (graph spanned by operation can be discarded)
       *   Negative values indicate errors
-      *   -1: Incorrect operands for the given operation (A valid result cannot be computed)
+      *   -1: Incorrect operands for the given operation (syntax error)
       */
     feature 'a' s2_t solve( const, bmath_hf3_s** r, bmath_hf3_s** a );
+
+    feature 'a' ::op* create_final( const, bmath_hf3_s* h ) =
+    {
+        :ar0_holor_s* final = :ar0_holor_s_create();
+        final->h = bcore_fork( h );
+        return (::op*)final;
+    };
 
     /// nullary operator (arity 0)
     group :ar0 =
     {
+        /// used for literals
         stamp :holor = aware :
         {
             bmath_hf3_s -> h;
@@ -182,6 +195,18 @@ group :op =
 
         /// formal input (used for resolving the network; not part of syntax)
         stamp :input = aware :
+        {
+            bmath_hf3_s -> h;
+            func :: :get_arity = { return 0; };
+            func :: :solve    =
+            {
+                bmath_hf3_s_attach( r, bcore_fork( o->h ) );
+                return ( *r && (*r)->v_size ) ? 1 : 0;
+            };
+        };
+
+        /// nullary adaptive operator
+        stamp :adapt = aware :
         {
             bmath_hf3_s -> h;
             func :: :get_arity = { return 0; };
@@ -210,6 +235,44 @@ group :op =
                 bmath_hf3_s_attach( r, bcore_fork( a[0] ) );
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
+        };
+
+        /// ==== using unary functions =====
+
+        stamp :floor = aware :
+        {
+            func :: :get_symbol   = { return "floor"; };
+            func :: :get_arity    = { return 1; };
+            func :: :get_priority = { return 8; };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( floor ); };
+            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, floor ); };
+        };
+
+        stamp :ceil = aware :
+        {
+            func :: :get_symbol   = { return "ceil"; };
+            func :: :get_arity    = { return 1; };
+            func :: :get_priority = { return 8; };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( ceil ); };
+            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, ceil ); };
+        };
+
+        stamp :tanh = aware :
+        {
+            func :: :get_symbol   = { return "tanh"; };
+            func :: :get_arity    = { return 1; };
+            func :: :get_priority = { return 8; };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( tanh ); };
+            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, tanh ); };
+        };
+
+        stamp :exp = aware :
+        {
+            func :: :get_symbol   = { return "exp"; };
+            func :: :get_arity    = { return 1; };
+            func :: :get_priority = { return 8; };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( exp ); };
+            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, exp ); };
         };
 
         stamp :relu = aware :
@@ -248,43 +311,10 @@ group :op =
             };
         };
 
-        stamp :tanh = aware :
-        {
-            func :: :get_symbol   = { return "tanh"  ; };
-            func :: :get_arity    = { return 1; };
-            func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_tanh_s_create(); };
-            func :: :solve        =
-            {
-                bmath_hf3_s_attach( r, a[0] ? bmath_hf3_s_create() : NULL );
-                if( a[0] )
-                {
-                    bmath_hf3_s_copy_size( *r, a[0] );
-                    if( a[0]->v_size ) bmath_hf3_s_tanh( a[0], *r );
-                }
-                return ( *r && (*r)->v_size ) ? 1 : 0;
-            };
-        };
-
-        stamp :exp = aware :
-        {
-            func :: :get_symbol   = { return "exp"  ; };
-            func :: :get_arity    = { return 1; };
-            func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_tanh_s_create(); };
-            func :: :solve        =
-            {
-                bmath_hf3_s_attach( r, a[0] ? bmath_hf3_s_create() : NULL );
-                if( a[0] )
-                {
-                    bmath_hf3_s_copy_size( *r, a[0] );
-                    if( a[0]->v_size ) bmath_hf3_s_exp( a[0], *r );
-                }
-                return ( *r && (*r)->v_size ) ? 1 : 0;
-            };
-        };
-
-        /// marks a holor to be adaptive
+        /** marks a holor to be adaptive
+         *  Operation is settled when at least a vacant holor can be computed.
+         *  If the holor is vacant, it is initialized in the virtual machine.
+         */
         stamp :adapt = aware :
         {
             func :: :get_symbol   = { return "adapt"; };
@@ -293,7 +323,14 @@ group :op =
             func :: :solve        =
             {
                 bmath_hf3_s_attach( r, bcore_fork( a[0] ) );
-                return ( *r && (*r)->v_size ) ? 1 : 0;
+                return ( *r ) ? 1 : 0; // (!) settles on vacant
+            };
+
+            func :: :create_final =
+            {
+                ::ar0_adapt_s* final = ::ar0_adapt_s_create();
+                final->h = bcore_fork( h );
+                return (:::op*)final;
             };
         };
 
@@ -722,7 +759,7 @@ group :op =
         };
     };
 
-    ///  tenary operator (arity 3)
+    ///  ternary operator (arity 3)
     group :ar3 = retrievable
     {
         stamp :branch = aware : // arg[0] scalar condition, arg[1] ( cond > 0 ), arg[2] ( cond <= 0 )
@@ -919,14 +956,15 @@ group :net =
 
     stamp :links = aware bcore_array { :link_s => []; };
 
-    signature :node_s* solve( mutable );
+    signature void solve( mutable );
 
     stamp :node = aware :
     {
         :links_s upls; // uplinks
         :links_s dnls; // downlinks
         sz_t id;
-        bl_t flag = false; // multi purpose flag used to iterate through network (normal state: false)
+        bl_t flag = false; // tracing-flag for functions tracing the network to ensure every node is visited only once (normal state: false)
+        tp_t name;
         aware ::op -> op;
         bmath_hf3_s-> h; // holor after solving
 
@@ -949,6 +987,8 @@ group :net =
     signature void normalize( mutable );
     signature void clear_flags( mutable );
     signature bl_t is_consistent( const );
+    signature void clear_downlinks( mutable );
+    signature void set_downlinks( mutable );
 
     stamp :cell = aware :
     {
@@ -957,13 +997,96 @@ group :net =
         :nodes_s encs; // entry channels
         :nodes_s excs; // exit channels
 
-        func : :normalize; // re-entrant
-        func : :clear_flags; // re-entrant; assumes normal state except for flags
         func : :is_consistent;
+        func : :normalize; // re-entrant
+
+        func : :clear_flags =
+        {
+            BFOR_EACH( &o->body, i ) o->body.data[ i ]->flag = false;
+        };
+
+        func : :solve =
+        {
+            BFOR_EACH( &o->excs, i ) bhgp_net_node_s_solve( o->excs.data[ i ] );
+        };
+
+        func : :clear_downlinks =
+        {
+            BFOR_EACH( &o->body, i ) bhgp_net_links_s_clear( &o->body.data[ i ]->dnls );
+        };
+
+        func : :set_downlinks;
 
         func bcore_inst_call : copy_x; // cell is copyable
         func bcore_via_call  : mutated = { ERR_fa( "Cannot reconstitute after via-mutation." ); }; // cell is not transferable
     };
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// virtual machine
+group :vm =
+{
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :adaptive = aware badapt_adaptive
+    {
+
+        // === architecture parameters ================================
+
+        st_s                   frame; // frame signature
+        st_s                   src; // path to holograph used by builder (here just for reference)
+        bmath_hf3_vm_frame_s   vm; // virtual machine
+        badapt_dynamics_std_s  dynamics;
+        sz_t                   in_size;  // input vector size
+        sz_t                   out_size; // output vector size
+        sz_t                   in_index; // index into vm-holor array
+        sz_t                  out_index; // index into vm-holor array
+
+        // ==============================================================
+
+        // === adaptive functions =======================================
+        func ^ : get_in_size  = { return o->in_size;  };
+        func ^ : get_out_size = { return o->out_size; };
+        func ^ : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
+        func ^ : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
+
+//        func ^ : arc_to_sink;
+        func ^ : minfer;
+
+//        func ^ : bgrad;
+        func ^ : bgrad_adapt = {};
+        // ==============================================================
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stamp :builder = aware badapt_builder
+    {
+        st_s frame = "( y => a )"; // frame signature
+        st_s src; // path to source file
+
+        sz_t in_size;  // input vector size
+        sz_t out_size; // output vector size
+        badapt_dynamics_std_s dynamics;
+
+        // === builder functions =======================================
+
+        /// input vector size
+        func ^ : get_in_size = { return o->in_size; };
+        func ^ : set_in_size = { o->in_size = size; };
+
+        /// output vector size
+        func ^ : get_out_size = { return o->out_size; };
+        func ^ : set_out_size = { o->out_size = size; };
+
+        /// builds adaptive ready to be trained; passes ownership
+        func ^ : build;
+
+        // ==============================================================
+    };
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -974,7 +1097,7 @@ stamp :context = aware :
     bcore_hmap_name_s hmap_name;
     bcore_arr_st_s    arr_symbol_op2;
     :sem_cell_s       cell; // frame of a cell structure
-    bcore_arr_tp_s    control_types; // types reserved for control and not suitable for identifiers
+    bcore_arr_tp_s    control_types; // types reserved for control (not suitable for identifiers)
 };
 
 #endif // PLANT_SECTION

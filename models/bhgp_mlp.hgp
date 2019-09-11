@@ -1,14 +1,14 @@
 // recursive multilayer perceptron
-hgp_main( y => a )
+
+verify_signature ( y => a );
+
+y =	cell mlp( y => hidden_nodes, reduction_factor, a )
 {
-    y =	cell mlp( y => dim_y, red_factor, a )
-	{
-        w = adapt : /*rand :*/ ( [ dim_y ][ dimof( a ) ]# );
-        b = adapt : ( [ dim_y ]0 );
-        q = b + w ** a;
-        y = if( dim_y < 2 )
-            then tanh( q )
-            else mlp( dim_y * red_factor, red_factor, lrelu( q ) );
-    } ( 100, 0.5, a );
-};
+    w = adapt : /*rand :*/ ( [ hidden_nodes ][ dimof( a ) ]# );
+    b = adapt : ( [ hidden_nodes ]0 );
+    q = b + w ** a;
+    y = if( floor( hidden_nodes ) == 1 )
+        then tanh( q )
+        else mlp( hidden_nodes * reduction_factor, reduction_factor, lrelu( q ) );
+} ( 10, 0.5, a );
 

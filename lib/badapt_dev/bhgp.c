@@ -42,6 +42,8 @@ bhgp_sem_link_s* bhgp_sem_cell_s_evaluate_link_stack( bhgp_sem_cell_s* o, bcore_
 bhgp_sem_cell_s* bhgp_sem_cell_s_push_cell_op_d(      bhgp_sem_cell_s* o, bhgp_op* op );
 void             bhgp_sem_cell_s_set_channels(        bhgp_sem_cell_s* o, sz_t excs, sz_t encs );
 
+bhgp_net_cell_s* bhgp_net_cell_s_create_from_sem_link( bhgp_sem_link_s* sem_link );
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
@@ -300,6 +302,21 @@ static bhgp_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source*
 /**********************************************************************************************************************/
 /// bhgp_op_ar2
 
+s2_t bhgp_op_ar1_solve_unary( bmath_hf3_s** r, bmath_hf3_s** a, bmath_fp_f3_unary unary )
+{
+    bmath_hf3_s_attach( r, a[0] ? bmath_hf3_s_create() : NULL );
+    if( a[0] )
+    {
+        bmath_hf3_s_copy_size( *r, a[0] );
+        if( a[0]->v_size ) bmath_hf3_s_unary( a[0], unary, *r );
+    }
+    return ( *r && (*r)->v_size ) ? 1 : 0;
+}
+
+
+/**********************************************************************************************************************/
+/// bhgp_op_ar2
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 bmath_hf3_vm_op* bhgp_op_ar2_mul_s_create_vm_op( const bhgp_op_ar2_mul_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r )
@@ -339,11 +356,28 @@ bhgp_sem_link_s* bhgp_sem_link_s_create_setup( tp_t name, bhgp_sem_link_s* up, b
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-// Traces link to next cell (of which the link is part of the membrane); returns NULL in case trace ends in open link
+// Traces link to next membrane; returns NULL in case trace ends in open link
 bhgp_sem_link_s* bhgp_sem_link_s_trace_to_cell_membrane( bhgp_sem_link_s* o )
 {
     if( !o || o->cell ) return o;
     return bhgp_sem_link_s_trace_to_cell_membrane( o->up );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+// Traces link to next cell; returns NULL in case trace ends in open link
+bhgp_sem_cell_s* bhgp_sem_link_s_trace_to_cell( bhgp_sem_link_s* o )
+{
+    bhgp_sem_link_s* link = bhgp_sem_link_s_trace_to_cell_membrane( o );
+    if( link )
+    {
+        if( link->cell ) assert( *(aware_t*)link->cell == TYPEOF_bhgp_sem_cell_s );
+        return link->cell;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -485,26 +519,70 @@ void bhgp_sem_cell_s_assert_identifier_not_yet_defined( const bhgp_sem_cell_s* o
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static bhgp_sem_cell_s* sem_cell_s_create_parse( bcore_source* source )
+static bhgp_sem_cell_s* sem_cell_s_create_frame()
 {
     if( !context_g ) bhgp_context_setup();
     bhgp_sem_cell_s* o = bhgp_sem_cell_s_create();
     o->parent = &context_g->cell;
+    return o;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+/*
+static bhgp_sem_cell_s* sem_cell_s_create_frame_parse( bcore_source* source )
+{
+    bhgp_sem_cell_s* o = sem_cell_s_create_root();
     bcore_source_point_s_set( &o->source_point, source );
     bhgp_sem_cell_s_parse( o, source );
+    return o;
+}
+*/
+// ---------------------------------------------------------------------------------------------------------------------
+
+static bhgp_sem_cell_s* sem_cell_s_create_frame_parse_body( bcore_source* source )
+{
+    bhgp_sem_cell_s* o = sem_cell_s_create_frame();
+    bcore_source_point_s_set( &o->source_point, source );
+    bhgp_sem_cell_s_parse_body( o, source );
     return o;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhgp_sem_cell_s* bhgp_sem_cell_s_create_parse_body( bcore_source* source )
+/// parses ( ... => ... )
+void bhgp_sem_cell_s_parse_signature( bhgp_sem_cell_s* o, bcore_source* source )
 {
-    if( !context_g ) bhgp_context_setup();
-    bhgp_sem_cell_s* o = bhgp_sem_cell_s_create();
-    o->parent = &context_g->cell;
-    bcore_source_point_s_set( &o->source_point, source );
-    bhgp_sem_cell_s_parse_body( o, source );
-    return o;
+    bcore_source_a_parse_fa( source, " (" );
+
+    // parse excs
+    {
+        ASSERT( o->excs.size == 0 );
+        bl_t first = true;
+        while( !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
+        {
+            if( !first ) bcore_source_a_parse_fa( source, " ," );
+            bhgp_sem_link_s* link = bhgp_sem_link_s_create_setup( bhgp_parse_name( source ), NULL, NULL, o, true );
+            bhgp_sem_links_s_push_d( &o->excs, link );
+            first = false;
+        }
+    }
+
+    // parse encs
+    {
+        ASSERT( o->encs.size == 0 );
+        bl_t first = true;
+        while( !bcore_source_a_parse_bl_fa( source, " #?')'" ) )
+        {
+            if( !first ) bcore_source_a_parse_fa( source, " ," );
+            bhgp_sem_link_s* link = bhgp_sem_link_s_create_setup( bhgp_parse_name( source ), NULL, NULL, o, false );
+            if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
+            {
+                link->up = bhgp_sem_cell_s_evaluate_link( o->parent, source );
+            }
+            bhgp_sem_links_s_push_d( &o->encs, link );
+            first = false;
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -513,7 +591,7 @@ void bhgp_sem_cell_s_parse( bhgp_sem_cell_s* o, bcore_source* source )
 {
     bhgp_sem_cell_s* frame = o->parent;
 
-    // cell without name is allowed
+    // cell signature without name is allowed
     if( !bcore_source_a_parse_bl_fa( source, " #=?'('" ) )
     {
         tp_t tp_cell_name = bhgp_parse_name( source );
@@ -524,49 +602,84 @@ void bhgp_sem_cell_s_parse( bhgp_sem_cell_s* o, bcore_source* source )
     bcore_source_point_s_set( &o->source_point, source );
 
     //  ( <args_out> => <args_in> ) { <body> }
-    if( bcore_source_a_parse_bl_fa( source, " #?'('" ) )
+    if( bcore_source_a_parse_bl_fa( source, " #=?'('" ) )
     {
-        // parse excs
-        {
-            ASSERT( o->excs.size == 0 );
-            bl_t first = true;
-            while( !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
-            {
-                if( !first ) bcore_source_a_parse_fa( source, " ," );
-                bhgp_sem_link_s* link = bhgp_sem_link_s_create_setup( bhgp_parse_name( source ), NULL, NULL, o, true );
-                bhgp_sem_links_s_push_d( &o->excs, link );
-                first = false;
-            }
-        }
-
-        // parse encs
-        {
-            ASSERT( o->encs.size == 0 );
-            bl_t first = true;
-            while( !bcore_source_a_parse_bl_fa( source, " #?')'" ) )
-            {
-                if( !first ) bcore_source_a_parse_fa( source, " ," );
-                bhgp_sem_link_s* link = bhgp_sem_link_s_create_setup( bhgp_parse_name( source ), NULL, NULL, o, false );
-                if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
-                {
-                    link->up = bhgp_sem_cell_s_evaluate_link( o->parent, source );
-                }
-                bhgp_sem_links_s_push_d( &o->encs, link );
-                first = false;
-            }
-        }
-
+        bhgp_sem_cell_s_parse_signature( o, source );
         bcore_source_a_parse_fa( source, " {" );
         bhgp_sem_cell_s_parse_body( o, source );
         bcore_source_a_parse_fa( source, " }" );
     }
-
-    // = expression yielding a cell
-    else
+    else // = 'expression yielding a cell'
     {
         bcore_source_a_parse_fa( source, " = " );
         bhgp_sem_cell_s* cell = bhgp_sem_cell_s_evaluate_cell( frame, source );
         bhgp_sem_cell_s_wrap_cell( o, cell );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+st_s* bhgp_sem_cell_s_create_signature( const bhgp_sem_cell_s* o )
+{
+    st_s* s = st_s_create();
+    st_s_push_fa( s, "(" );
+    BFOR_EACH( &o->excs, i ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", bhgp_ifnameof( o->excs.data[ i ]->name ) );
+    st_s_push_fa( s, "=>" );
+    BFOR_EACH( &o->encs, i ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", bhgp_ifnameof( o->encs.data[ i ]->name ) );
+    st_s_push_fa( s, ")" );
+    return s;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_sem_cell_s_parse_verify_signature( const bhgp_sem_cell_s* o, bcore_source* source )
+{
+    bcore_source_a_parse_fa( source, " (" );
+
+    // parse excs
+    {
+        bl_t first = true;
+        sz_t index= 0;
+        bl_t err = false;
+        while( !err && !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
+        {
+            if( !first ) bcore_source_a_parse_fa( source, " ," );
+            tp_t name = bhgp_parse_name( source );
+            if( !err ) err = ( index >= o->excs.size );
+            if( !err ) err = o->excs.data[ index ]->name != name;
+            first = false;
+            index++;
+        }
+        if( !err ) err = index != o->excs.size;
+        if( err )
+        {
+            st_s* sig = bhgp_sem_cell_s_create_signature( o );
+            bcore_source_a_parse_err_fa( source, "Cell signature is '#<sc_t>'", sig->sc );
+            st_s_discard( sig );
+        }
+    }
+
+    // parse encs
+    {
+        bl_t first = true;
+        sz_t index= 0;
+        bl_t err = false;
+        while( !err && !bcore_source_a_parse_bl_fa( source, " #?')'" ) )
+        {
+            if( !first ) bcore_source_a_parse_fa( source, " ," );
+            tp_t name = bhgp_parse_name( source );
+            if( !err ) err = ( index >= o->encs.size );
+            if( !err ) err = o->encs.data[ index ]->name != name;
+            first = false;
+            index++;
+        }
+        if( !err ) err = index != o->encs.size;
+        if( err )
+        {
+            st_s* sig = bhgp_sem_cell_s_create_signature( o );
+            bcore_source_a_parse_err_fa( source, "Cell signature is '#<sc_t>'", sig->sc );
+            st_s_discard( sig );
+        }
     }
 }
 
@@ -580,6 +693,10 @@ void bhgp_sem_cell_s_parse_body( bhgp_sem_cell_s* o, bcore_source* source )
         if( bcore_source_a_parse_bl_fa( source, " #?'cell'" ) )
         {
             bhgp_sem_cell_s_parse( bhgp_sem_cell_s_push_cell( o ), source );
+        }
+        if( bcore_source_a_parse_bl_fa( source, " #?'verify_signature'" ) )
+        {
+            bhgp_sem_cell_s_parse_verify_signature( o, source );
         }
         else
         {
@@ -1285,7 +1402,6 @@ void bhgp_net_node_s_trace_to_sink( bhgp_net_node_s* o, sz_t indent, bcore_sink*
     if( o->h )
     {
         bmath_hf3_s_brief_to_sink( o->h, sink );
-        if( o->h->v_size ) return; // literal
     }
 
     sc_t symbol = "";
@@ -1332,10 +1448,13 @@ void bhgp_net_node_s_err_fa( bhgp_net_node_s* o, sc_t format, ... )
  *  solve executes operator->solve to compute a holor.
  *  If a holor can be computed (vacant or determined), the solve-route is considered finished
  *  and will not be processed again. A detached result (o->h == NULL) causes a route to be reentered.
+ *  If operator->solve returns 1, the operation is considered settled, in which case all uplinks
+ *  are removed and the operator is switched to a final arity0 version via bhgp_op_a_create_final.
+ *  After settling, the graph can be run through an optimizer minimizing its structure.
  */
-bhgp_net_node_s* bhgp_net_node_s_solve( bhgp_net_node_s* o )
+void bhgp_net_node_s_solve( bhgp_net_node_s* o )
 {
-    if( o->h ) return o;
+    if( o->h ) return;
 
     if( o->op )
     {
@@ -1352,7 +1471,11 @@ bhgp_net_node_s* bhgp_net_node_s_solve( bhgp_net_node_s* o )
         for( sz_t i = 0; i < arity; i++ )
         {
             bhgp_net_node_s* arg_n = o->upls.data[ i ]->node;
-            arg_h[ i ] = arg_n ? bhgp_net_node_s_solve( arg_n )->h : NULL;
+            if( arg_n )
+            {
+                bhgp_net_node_s_solve( arg_n );
+                arg_h[ i ] = arg_n->h;
+            }
         }
 
         sz_t result = bhgp_op_a_solve( o->op, &o->h, arg_h );
@@ -1383,12 +1506,11 @@ bhgp_net_node_s* bhgp_net_node_s_solve( bhgp_net_node_s* o )
         // operation is settled and can be removed
         if( result == 1 )
         {
-            bhgp_op_a_detach( &o->op );
+//            bhgp_op_a_detach( &o->op );
+            bhgp_op_a_attach( &o->op, bhgp_op_a_create_final( o->op, o->h ) );
             bhgp_net_links_s_clear( &o->upls );
         }
     }
-
-    return o;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1446,13 +1568,6 @@ void bhgp_net_node_s_set_flags( bhgp_net_node_s* o )
     if( o->flag ) return;
     o->flag = true;
     BFOR_EACH( &o->upls, i ) bhgp_net_node_s_set_flags( o->upls.data[ i ]->node );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void bhgp_net_cell_s_clear_flags( bhgp_net_cell_s* o )
-{
-    BFOR_EACH( &o->body, i ) o->body.data[ i ]->flag = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1598,13 +1713,6 @@ void bhgp_net_cell_s_copy_x( bhgp_net_cell_s* o )
         bhgp_net_node_s_detach( &o->excs.data[ i ] );
         o->excs.data[ i ] = bcore_fork( o->body.data[ id ] );
     }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void bhgp_net_cell_s_clear_downlinks( bhgp_net_cell_s* o )
-{
-    BFOR_EACH( &o->body, i ) bhgp_net_links_s_clear( &o->body.data[ i ]->dnls );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1833,52 +1941,43 @@ static void net_cell_s_from_sem_recursive
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// builds a net cell from a semantic cell
-static void net_cell_s_from_sem( bhgp_net_cell_s* o, bhgp_sem_cell_s* sem_cell, bmath_hf3_adl_s* input_holors )
+void bhgp_net_cell_s_from_sem_cell
+(
+    bhgp_net_cell_s* o,
+    bhgp_sem_cell_s* sem_cell,
+    bhgp_op* (*input_op_create)( vd_t arg, sz_t in_idx, tp_t in_name ),
+    vd_t arg
+)
 {
     ASSERT( sem_cell );
     bhgp_ctr_tree_s* tree = bhgp_ctr_tree_s_create();
     for( sz_t i = 0; i < sem_cell->encs.size; i++ )
     {
+        bhgp_sem_link_s* sem_link = sem_cell->encs.data[ i ];
         bhgp_net_node_s* net_node = bhgp_net_nodes_s_push( &o->encs );
+        net_node->name = sem_link->name;
         net_node->id   = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
-
-        bhgp_op_ar0_input_s* op_ar0_input = bhgp_op_ar0_input_s_create();
-
-        if( input_holors && i < input_holors->size )
-        {
-            op_ar0_input->h = bcore_fork( input_holors->data[ i ] );
-        }
-
-        net_node->op = ( bhgp_op* )op_ar0_input;
+        net_node->op = input_op_create ? input_op_create( arg, i, sem_link->name ) : NULL;
     }
 
     for( sz_t i = 0; i < sem_cell->excs.size; i++ )
     {
+        bhgp_sem_link_s* sem_link = sem_cell->excs.data[ i ];
         bhgp_net_node_s* net_node = bhgp_net_nodes_s_push( &o->excs );
+        net_node->name = sem_link->name;
         net_node->id = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
         bhgp_op_ar1_output_s* op_ar1_output = bhgp_op_ar1_output_s_create();
         net_node->op = ( bhgp_op* )op_ar1_output;
-        bhgp_sem_link_s* sem_link = sem_cell->excs.data[ i ];
         net_cell_s_from_sem_recursive( o, sem_link, tree, NULL, net_node, 0, BCORE_STDOUT );
-        bhgp_net_node_s_solve( net_node );
+        //bhgp_net_node_s_solve( net_node );
     }
 
     bhgp_ctr_tree_s_discard( tree );
 
     bhgp_net_cell_s_normalize( o );
     assert( bhgp_net_cell_s_is_consistent( o ) );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/// builds a net cell from a semantic cell
-static bhgp_net_cell_s* net_cell_s_create_build( bhgp_sem_cell_s* sem_cell, bmath_hf3_adl_s* input_holors )
-{
-    bhgp_net_cell_s* net_cell = bhgp_net_cell_s_create();
-    net_cell_s_from_sem( net_cell, sem_cell, input_holors );
-    return net_cell;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1892,27 +1991,73 @@ static void bhgp_net_cell_s_graph_to_sink( bhgp_net_cell_s* o, bcore_sink* sink 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+/// VIRTUAL MACHINE
+/**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhgp_test( void )
+void bhgp_vm_adaptive_s_minfer( bhgp_vm_adaptive_s* o, const bmath_vf3_s* v_in, bmath_vf3_s* v_out )
 {
+    ASSERT( o->in_index  < o->vm.arr_holor.size );
+    ASSERT( o->out_index < o->vm.arr_holor.size );
+    bmath_hf3_s* h_in  = &o->vm.arr_holor.data[ o->in_index  ].hf3;
+    bmath_hf3_s* h_out = &o->vm.arr_holor.data[ o->out_index ].hf3;
+
+    ASSERT( v_in ->size == h_in ->v_size );
+    ASSERT( v_out->size == h_out->v_size );
+
+    bmath_hf3_s_copy_v_data_from_vf3( h_in, v_in );
+    bmath_hf3_vm_frame_s_run_proc( &o->vm, TYPEOF_infer );
+    bmath_hf3_s_copy_v_data_to_vf3( h_out, v_out );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+badapt_adaptive* bhgp_vm_builder_s_build( const bhgp_vm_builder_s* o )
+{
+    bhgp_vm_adaptive_s* adaptive = bhgp_vm_adaptive_s_create();
+    st_s_copy( &adaptive->src, &o->src );
+    adaptive->in_size = o->in_size;
+    adaptive->out_size = o->out_size;
+    badapt_dynamics_std_s_copy( &adaptive->dynamics, &o->dynamics );
+
     BCORE_LIFE_INIT();
 
+    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( o->src.sc ) );
+    bhgp_sem_cell_s* sem_cell = BCORE_LIFE_A_PUSH( sem_cell_s_create_frame_parse_body( source ) );
+    if( sem_cell->encs.size != 2 )
+    {
+        bcore_source_point_s_parse_err_fa( &sem_cell->source_point, "Root cell has #<sz_t> entry channels. Required are two ( scalar: output size, holor input )", sem_cell->encs.size );
+    }
+    if( sem_cell->excs.size != 1 )
+    {
+        bcore_source_point_s_parse_err_fa( &sem_cell->source_point, "Root cell has #<sz_t> exit channels. Required is one.", sem_cell->excs.size );
+    }
+
     BCORE_LIFE_CREATE( bmath_hf3_adl_s, input_adl );
-    bmath_hf3_s_set_d_data_na( bmath_hf3_adl_s_push( input_adl ), 1, 1 );
-    bmath_hf3_s_set_d_data_na( bmath_hf3_adl_s_push( input_adl ), 1, 1 );
-    bmath_hf3_s_set_d_data_na( bmath_hf3_adl_s_push( input_adl ), 1, 1 );
+    bmath_hf3_s_set_scalar_f3( bmath_hf3_adl_s_push( input_adl ), o->out_size );
+    bmath_hf3_s_set_d_data_na( bmath_hf3_adl_s_push( input_adl ), 1, o->in_size );
 
-//    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bhgp_test.hgp" ) );
-    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bhgp_mlp.hgp" ) );
-//    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/syntax02.hgp" ) );
-    bhgp_sem_cell_s* sem_cell = BCORE_LIFE_A_PUSH( sem_cell_s_create_parse( source ) );
-    bhgp_net_cell_s* net_cell = BCORE_LIFE_A_PUSH( net_cell_s_create_build( sem_cell, input_adl ) );
+    bhgp_net_cell_s* net_cell = NULL;// = BCORE_LIFE_A_PUSH( bhgp_net_cell_s_create_from_sem_cell( sem_cell ) );
 
-    bcore_msg_fa( "net_cell encs size = #<sz_t>\n", net_cell->encs.size );
-    bcore_msg_fa( "net_cell body size = #<sz_t>\n", net_cell->body.size );
-    bcore_msg_fa( "net_cell excs size = #<sz_t>\n", net_cell->excs.size );
+    bhgp_net_cell_s_solve( net_cell );
+    if( net_cell->excs.size != 1 )
+    {
+        bcore_source_a_parse_err_fa( source, "Could not solve root cell. Incomplete connections." );
+    }
+
+    bhgp_net_node_s* node_exit = net_cell->excs.data[ 0 ];
+
+    if( bmath_hf3_s_d_product( node_exit->h ) != o->out_size )
+    {
+        bcore_source_point_s_parse_err_fa
+        (
+            node_exit->source_point,
+            "Output channel size is '#<sz_t>' but '#<sz_t>' was required.",
+            bmath_hf3_s_d_product( node_exit->h ),
+            o->out_size
+        );
+    }
 
     bhgp_net_cell_s_remove_identities( net_cell );
     bhgp_net_cell_s_set_downlinks( net_cell );
@@ -1920,9 +2065,113 @@ void bhgp_test( void )
 
     bhgp_net_cell_s_graph_to_sink( net_cell, BCORE_STDOUT );
 
+    bcore_msg_fa( "net_cell encs size = #<sz_t>\n", net_cell->encs.size );
+    bcore_msg_fa( "net_cell body size = #<sz_t>\n", net_cell->body.size );
+    bcore_msg_fa( "net_cell excs size = #<sz_t>\n", net_cell->excs.size );
+/*
+    bhgp_net_cell_s_build_vm_proc( link_g_out_holor, &adaptive->vm, TYPEOF_infer );
+    adaptive->in_index  = bmath_hf3_vm_frame_s_get_holor_index( &adaptive->vm, tp_name_in_holor );
+    adaptive->out_index = bmath_hf3_vm_frame_s_get_holor_index( &adaptive->vm, tp_name_out_holor );
+
+    bmath_hf3_vm_frame_s* vmf = &adaptive->vm;
+
+    // procedure 'setup'
+    {
+        tp_t tp_setup = bmath_hf3_vm_frame_s_entypeof( vmf, "setup" );
+        const bmath_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
+        for( sz_t i = 0; i < arr_holor->size; i++ )
+        {
+            const bmath_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
+            switch( holor->type )
+            {
+                case TYPEOF_buffer:
+                {
+                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_determine_s_csetup( NULL, i ) );
+                }
+                break;
+
+                case TYPEOF_adaptive:
+                {
+                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_determine_s_csetup( NULL, i ) );
+                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_randomize_s_csetup_randomize( NULL, i, o->rseed ) );
+                }
+                break;
+
+                default: break;
+            }
+        }
+        vmf->proc_setup = tp_setup;
+    }
+
+    // procedure 'shelve'
+    {
+        tp_t tp_shelve = bmath_hf3_vm_frame_s_entypeof( vmf, "shelve" );
+        const bmath_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
+        for( sz_t i = 0; i < arr_holor->size; i++ )
+        {
+            const bmath_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
+            switch( holor->type )
+            {
+                case TYPEOF_buffer: bmath_hf3_vm_frame_s_push_op_d( vmf, tp_shelve, bmath_hf3_vm_op_vacate_s_csetup( NULL, i ) ); break;
+                default:              break;
+            }
+        }
+        vmf->proc_shelve = tp_shelve;
+    }
+    /// run setup
+    bmath_hf3_vm_frame_s_run_proc( vmf, typeof( "setup" ) );
+*/
+
+    BCORE_LIFE_RETURNV( badapt_adaptive*, ( badapt_adaptive* )adaptive );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bhgp_op* bhgp_test_input_op_create( vd_t arg, sz_t in_idx, tp_t in_name )
+{
+    bhgp_op_ar0_input_s* input = bhgp_op_ar0_input_s_create();
+    input->h = bmath_hf3_s_create();
+    bmath_hf3_s_set_d_data_na( input->h, 1, 100 );
+    return ( bhgp_op* )input;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_test( void )
+{
+    BCORE_LIFE_INIT();
+
+//    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bhgp_test.hgp" ) );
+    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bhgp_mlp.hgp" ) );
+//    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/syntax02.hgp" ) );
+
+    bhgp_sem_cell_s* sem_frame = BCORE_LIFE_A_PUSH( sem_cell_s_create_frame() );
+
+    bhgp_sem_cell_s_parse_signature( sem_frame, BCORE_LIFE_A_PUSH( bcore_source_string_s_create_sc( "( y => a )" ) ) );
+    bcore_source_point_s_set( &sem_frame->source_point, source );
+    bhgp_sem_cell_s_parse_body( sem_frame, source );
+
+    bhgp_net_cell_s* net_frame = BCORE_LIFE_A_PUSH( bhgp_net_cell_s_create() );
+    bhgp_net_cell_s_from_sem_cell( net_frame, sem_frame, bhgp_test_input_op_create, NULL );
+
+    bhgp_net_cell_s_solve( net_frame );
+    bhgp_net_cell_s_remove_identities( net_frame );
+    bhgp_net_cell_s_set_downlinks( net_frame );
+    ASSERT( bhgp_net_cell_s_is_consistent( net_frame ) );
+
+    bhgp_net_cell_s_graph_to_sink( net_frame, BCORE_STDOUT );
+
+    bcore_msg_fa( "net_cell encs size = #<sz_t>\n", net_frame->encs.size );
+    bcore_msg_fa( "net_cell body size = #<sz_t>\n", net_frame->body.size );
+    bcore_msg_fa( "net_cell excs size = #<sz_t>\n", net_frame->excs.size );
+
     // test copying of net_cell
     {
-        bhgp_net_cell_s* cloned_cell = BCORE_LIFE_A_PUSH( bhgp_net_cell_s_clone( net_cell ) );
+        bhgp_net_cell_s* cloned_cell = BCORE_LIFE_A_PUSH( bhgp_net_cell_s_clone( net_frame ) );
         ASSERT( bhgp_net_cell_s_is_consistent( cloned_cell ) );
     }
 
