@@ -62,7 +62,7 @@ void bhgp_context_setup()
     if( context_g ) return;
     context_g = bhgp_context_s_create();
 
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_tp_s, arr_tp );
 
     bcore_push_traits_of_ancestor( TYPEOF_bhgp_op_ar1, arr_tp );
@@ -323,15 +323,15 @@ bmath_hf3_vm_op* bhgp_op_ar2_mul_s_create_vm_op( const bhgp_op_ar2_mul_s* o, con
 {
     if( a->d_size == 0 )
     {
-        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_scl_mul_s_create();
+        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_scl_mul_s_create();
     }
     else if( b->d_size == 0 )
     {
-        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_mul_scl_s_create();
+        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_mul_scl_s_create();
     }
     else
     {
-        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_hmul_s_create();
+        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_hmul_s_create();
     }
     return NULL;
 }
@@ -731,7 +731,7 @@ void bhgp_sem_cell_s_parse_body( bhgp_sem_cell_s* o, bcore_source* source )
 
 void bhgp_sem_cell_s_evaluate_set_encs( bhgp_sem_cell_s* o, bhgp_sem_cell_s* parent, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     BCORE_LIFE_CREATE( st_s, name );
 
@@ -835,7 +835,7 @@ bhgp_sem_cell_s* bhgp_sem_cell_s_cat_cell( bhgp_sem_cell_s* o, bhgp_sem_cell_s* 
 
 void bhgp_sem_cell_s_evaluate_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( st_s, name );
 
     BCORE_LIFE_CREATE( bhgp_sem_stack_flag_s, flag_bin_op    );
@@ -1214,7 +1214,7 @@ bhgp_sem* bhgp_sem_cell_s_evaluate_sem_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s
 
 bhgp_sem* bhgp_sem_cell_s_evaluate_sem( bhgp_sem_cell_s* o, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     vd_t ret = bhgp_sem_cell_s_evaluate_sem_stack( o, stack, source );
     BCORE_LIFE_DOWN();
@@ -1254,7 +1254,7 @@ bhgp_sem_link_s* bhgp_sem_cell_s_evaluate_link_stack( bhgp_sem_cell_s* o, bcore_
 
 bhgp_sem_link_s* bhgp_sem_cell_s_evaluate_link( bhgp_sem_cell_s* o, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     bhgp_sem_link_s* ret = bhgp_sem_cell_s_evaluate_link_stack( o, stack, source );
     BCORE_LIFE_DOWN();
@@ -1277,7 +1277,7 @@ bhgp_sem_cell_s* bhgp_sem_cell_s_evaluate_cell_stack( bhgp_sem_cell_s* o, bcore_
 
 bhgp_sem_cell_s* bhgp_sem_cell_s_evaluate_cell( bhgp_sem_cell_s* o, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     bhgp_sem_cell_s* ret = bhgp_sem_cell_s_evaluate_cell_stack( o, stack, source );
     BCORE_LIFE_DOWN();
@@ -1971,7 +1971,6 @@ void bhgp_net_cell_s_from_sem_cell
         bhgp_op_ar1_output_s* op_ar1_output = bhgp_op_ar1_output_s_create();
         net_node->op = ( bhgp_op* )op_ar1_output;
         net_cell_s_from_sem_recursive( o, sem_link, tree, NULL, net_node, 0, BCORE_STDOUT );
-        //bhgp_net_node_s_solve( net_node );
     }
 
     bhgp_ctr_tree_s_discard( tree );
@@ -2021,7 +2020,7 @@ badapt_adaptive* bhgp_vm_builder_s_build( const bhgp_vm_builder_s* o )
     adaptive->out_size = o->out_size;
     badapt_dynamics_std_s_copy( &adaptive->dynamics, &o->dynamics );
 
-    BCORE_LIFE_INIT();
+    BLM_INIT();
 
     bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( o->src.sc ) );
     bhgp_sem_cell_s* sem_cell = BCORE_LIFE_A_PUSH( sem_cell_s_create_frame_parse_body( source ) );
@@ -2093,7 +2092,7 @@ badapt_adaptive* bhgp_vm_builder_s_build( const bhgp_vm_builder_s* o )
                 case TYPEOF_adaptive:
                 {
                     bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_determine_s_csetup( NULL, i ) );
-                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_randomize_s_csetup_randomize( NULL, i, o->rseed ) );
+                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, o->rseed ) );
                 }
                 break;
 
@@ -2112,7 +2111,7 @@ badapt_adaptive* bhgp_vm_builder_s_build( const bhgp_vm_builder_s* o )
             const bmath_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
             switch( holor->type )
             {
-                case TYPEOF_buffer: bmath_hf3_vm_frame_s_push_op_d( vmf, tp_shelve, bmath_hf3_vm_op_vacate_s_csetup( NULL, i ) ); break;
+                case TYPEOF_buffer: bmath_hf3_vm_frame_s_push_op_d( vmf, tp_shelve, bmath_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) ); break;
                 default:              break;
             }
         }
@@ -2143,7 +2142,7 @@ bhgp_op* bhgp_test_input_op_create( vd_t arg, sz_t in_idx, tp_t in_name )
 
 void bhgp_test( void )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
 
 //    bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bhgp_test.hgp" ) );
     bcore_source* source  = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bhgp_mlp.hgp" ) );

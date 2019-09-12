@@ -230,7 +230,7 @@ group :op =
                 return true;
             };
 
-            func : : create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_tanh_s_create(); };
+            func : : create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_tanh_s_create(); };
         };
 
         stamp :dimof = aware :
@@ -271,7 +271,7 @@ group :op =
             func :: :get_priority = { return 9; };
             func :  :get_symbol   = { return "<*>"; };
             func :  :compute_hf3;
-            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_bmul_s_create(); };
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_s_create(); };
         };
 
         stamp :bmul_htp = aware :
@@ -280,7 +280,7 @@ group :op =
             func :: :get_priority = { return 9; };
             func :  :get_symbol   = { return "<*t>"; };
             func :  :compute_hf3;
-            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_bmul_htp_s_create(); };
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_htp_s_create(); };
         };
 
         stamp :htp_bmul = aware :
@@ -289,7 +289,7 @@ group :op =
             func :: :get_priority = { return 9; };
             func :  :get_symbol   = { return "<t*>"; };
             func :  :compute_hf3;
-            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_htp_bmul_s_create(); };
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_s_create(); };
         };
 
         stamp :htp_bmul_htp = aware :
@@ -298,7 +298,7 @@ group :op =
             func :: :get_priority = { return 9; };
             func :  :get_symbol   = { return "<t*t>"; };
             func :  :compute_hf3;
-            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_htp_bmul_htp_s_create(); };
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_htp_s_create(); };
         };
 
         stamp :mul = aware :
@@ -316,7 +316,7 @@ group :op =
             func :: :get_priority = { return 8; };
             func :  :get_symbol   = { return "+"; };
             func :  :compute_hf3;
-            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_add_s_create(); };
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_add_s_create(); };
         };
 
         stamp :minus = aware :
@@ -325,7 +325,7 @@ group :op =
             func :: :get_priority = { return 8; };
             func :  :get_symbol   = { return "-"; };
             func :  :compute_hf3;
-            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_sub_s_create(); };
+            func :  :create_vm_operator = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_sub_s_create(); };
         };
     };
 

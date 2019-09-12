@@ -24,7 +24,7 @@
 
 void badapt_dev_ern_s_run_training( badapt_supplier* problem, badapt_builder* builder, const badapt_trainer_batch_s* trainer )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     badapt_training_state* state = BCORE_LIFE_A_PUSH( badapt_trainer_batch_s_create_state( trainer ) );
     badapt_supplier_a_setup_builder( problem, builder );
     badapt_training_state_a_set_adaptive( state, BCORE_LIFE_A_PUSH( badapt_builder_a_build( builder ) ) );
@@ -39,7 +39,7 @@ void badapt_dev_ern_s_run_training( badapt_supplier* problem, badapt_builder* bu
 
 void badapt_ern_test_recurrent_abc()
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( badapt_problem_recurrent_abc_s, problem );
     BCORE_LIFE_CREATE( badapt_ern_builder_s,           builder );
     BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );
@@ -67,7 +67,7 @@ void badapt_ern_test_recurrent_abc()
 
 void badapt_ern_test_recurrent_kjv()
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( badapt_problem_recurrent_kjv_s, problem );
     BCORE_LIFE_CREATE( badapt_ern_builder_s,           builder );
     BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );

@@ -220,15 +220,15 @@ bmath_hf3_vm_op* bsym_op_ar2_mul_s_create_vm_operator( const bsym_op_ar2_mul_s* 
 {
     if( a->d_size == 0 )
     {
-        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_scl_mul_s_create();
+        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_scl_mul_s_create();
     }
     else if( b->d_size == 0 )
     {
-        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_mul_scl_s_create();
+        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_mul_scl_s_create();
     }
     else
     {
-        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_hmul_s_create();
+        return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_hmul_s_create();
     }
     return NULL;
 }
@@ -1182,7 +1182,7 @@ void bsym_sem_graph_s_create_args_in( bsym_sem_graph_s* o, bsym_sem_graph_s* par
 
 void bsym_sem_graph_s_evaluate_set_args_in( bsym_sem_graph_s* o, bsym_sem_graph_s* parent, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     BCORE_LIFE_CREATE( st_s, name );
 
@@ -1368,7 +1368,7 @@ bl_t bsym_sem_graph_s_evaluate_literal( bsym_sem_graph_s* o, bcore_source* sourc
 
 void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( st_s, name );
     BCORE_LIFE_CREATE( bsym_sem_stack_flag_s, bin_op_flag );
     BCORE_LIFE_CREATE( bsym_sem_stack_flag_s, catenation );
@@ -1791,7 +1791,7 @@ bsym_sem_graph_s* bsym_sem_graph_s_evaluate_graph_stack( bsym_sem_graph_s* o, bc
 
 bsym_net* bsym_sem_graph_s_evaluate_net( bsym_sem_graph_s* o, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     vd_t ret = bsym_sem_graph_s_evaluate_net_stack( o, stack, source );
     BCORE_LIFE_DOWN();
@@ -1802,7 +1802,7 @@ bsym_net* bsym_sem_graph_s_evaluate_net( bsym_sem_graph_s* o, bcore_source* sour
 
 bsym_net_address_s* bsym_sem_graph_s_evaluate_address( bsym_sem_graph_s* o, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     vd_t ret = bsym_sem_graph_s_evaluate_address_stack( o, stack, source );
     BCORE_LIFE_DOWN();
@@ -1850,7 +1850,7 @@ f3_t bsym_sem_graph_s_evaluate_f3( bsym_sem_graph_s* o, bcore_source* source )
 
 bsym_sem_graph_s* bsym_sem_graph_s_evaluate_graph( bsym_sem_graph_s* o, bcore_source* source )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     vd_t ret = bsym_sem_graph_s_evaluate_graph_stack( o, stack, source );
     BCORE_LIFE_DOWN();
@@ -2073,7 +2073,7 @@ void bsym_sem_graph_s_parse( bsym_sem_graph_s* o, bsym_sem_graph_s* parent, bcor
 
 void bsym_sem_graph_s_frame_setup( bsym_sem_graph_s* o )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     o->graph_base = bsym_sem_graph_base_s_create();
     o->arr_symbol_op2 = bcore_arr_st_s_create();
 
@@ -2182,7 +2182,7 @@ badapt_adaptive* bsym_vm_builder_s_build( const bsym_vm_builder_s* o )
     tp_t tp_name_in_holor  = bsym_entypeof( o->name_in_holor.sc  );
     tp_t tp_name_out_holor = bsym_entypeof( o->name_out_holor.sc );
 
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bsym_sem_graph_s, graph );
     BCORE_LIFE_CREATE( bmath_hf3_s, h_in_holor );
     BCORE_LIFE_CREATE( bmath_hf3_s, h_out_size );
@@ -2248,14 +2248,14 @@ badapt_adaptive* bsym_vm_builder_s_build( const bsym_vm_builder_s* o )
             {
                 case TYPEOF_buffer:
                 {
-                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_determine_s_csetup( NULL, i ) );
+                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
                 }
                 break;
 
                 case TYPEOF_adaptive:
                 {
-                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_determine_s_csetup( NULL, i ) );
-                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_randomize_s_csetup_randomize( NULL, i, o->rseed ) );
+                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+                    bmath_hf3_vm_frame_s_push_op_d( vmf, tp_setup, bmath_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, o->rseed ) );
                 }
                 break;
 
@@ -2274,7 +2274,7 @@ badapt_adaptive* bsym_vm_builder_s_build( const bsym_vm_builder_s* o )
             const bmath_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
             switch( holor->type )
             {
-                case TYPEOF_buffer: bmath_hf3_vm_frame_s_push_op_d( vmf, tp_shelve, bmath_hf3_vm_op_vacate_s_csetup( NULL, i ) ); break;
+                case TYPEOF_buffer: bmath_hf3_vm_frame_s_push_op_d( vmf, tp_shelve, bmath_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) ); break;
                 default:              break;
             }
         }
@@ -2295,7 +2295,7 @@ badapt_adaptive* bsym_vm_builder_s_build( const bsym_vm_builder_s* o )
 
 void bsym_test( void )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     BCORE_LIFE_CREATE( bsym_vm_builder_s, builder );
     st_s_copy_sc( &builder->holograph_file, "models/bsym_mlp.hgp" );
     builder->in_size = 2;

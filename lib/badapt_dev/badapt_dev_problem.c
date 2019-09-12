@@ -223,7 +223,7 @@ void badapt_problem_recurrent_text_s_fetch_sample_vio( badapt_problem_recurrent_
 
 bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, badapt_training_state* state )
 {
-    BCORE_LIFE_INIT();
+    BLM_INIT();
     badapt_adaptive* adaptive = BCORE_LIFE_A_PUSH( badapt_adaptive_a_clone( badapt_training_state_a_get_adaptive( state ) ) );
     if( badapt_adaptive_a_defines_reset( adaptive ) ) badapt_adaptive_a_reset( adaptive );
     sz_t vec_size = bcore_strlen( encode_charset );

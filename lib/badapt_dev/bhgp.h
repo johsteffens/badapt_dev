@@ -180,11 +180,12 @@ group :op =
     /// nullary operator (arity 0)
     group :ar0 =
     {
+        func :: :get_arity = { return 0; };
+
         /// used for literals
         stamp :holor = aware :
         {
             bmath_hf3_s -> h;
-            func :: :get_arity = { return 0; };
             func :: :solve    =
             {
                 bmath_hf3_s_attach( r, bcore_fork( o->h ) );
@@ -197,7 +198,6 @@ group :op =
         stamp :input = aware :
         {
             bmath_hf3_s -> h;
-            func :: :get_arity = { return 0; };
             func :: :solve    =
             {
                 bmath_hf3_s_attach( r, bcore_fork( o->h ) );
@@ -209,7 +209,6 @@ group :op =
         stamp :adapt = aware :
         {
             bmath_hf3_s -> h;
-            func :: :get_arity = { return 0; };
             func :: :solve    =
             {
                 bmath_hf3_s_attach( r, bcore_fork( o->h ) );
@@ -224,11 +223,11 @@ group :op =
     group :ar1 = retrievable
     {
         feature 'a' bmath_hf3_vm_op* create_vm_op( const, const bmath_hf3_s* a, const bmath_hf3_s* r ) = { return NULL; };
+        func :: :get_arity = { return 1; };
 
         stamp :linear = aware :
         {
             func :: :get_symbol   = { return "linear"; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
             func :: :solve        =
             {
@@ -242,43 +241,38 @@ group :op =
         stamp :floor = aware :
         {
             func :: :get_symbol   = { return "floor"; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( floor ); };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( floor ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, floor ); };
         };
 
         stamp :ceil = aware :
         {
             func :: :get_symbol   = { return "ceil"; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( ceil ); };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, ceil ); };
         };
 
         stamp :tanh = aware :
         {
             func :: :get_symbol   = { return "tanh"; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( tanh ); };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( tanh ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, tanh ); };
         };
 
         stamp :exp = aware :
         {
             func :: :get_symbol   = { return "exp"; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_unary_s_create_unary( exp ); };
+            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( exp ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, exp ); };
         };
 
         stamp :relu = aware :
         {
             func :: :get_symbol   = { return "relu"  ; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
             //func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_relu_s_create(); };
             func :: :solve        =
@@ -296,7 +290,6 @@ group :op =
         stamp :lrelu = aware :
         {
             func :: :get_symbol   = { return "lrelu"  ; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
             //func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_lrelu_s_create(); };
             func :: :solve        =
@@ -318,7 +311,6 @@ group :op =
         stamp :adapt = aware :
         {
             func :: :get_symbol   = { return "adapt"; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
             func :: :solve        =
             {
@@ -336,7 +328,6 @@ group :op =
 
         stamp :identity = aware :
         {
-            func :: :get_arity    = { return 1; };
             func :: :solve        =
             {
                 bmath_hf3_s_attach( r, bcore_fork( a[0] ) );
@@ -347,7 +338,6 @@ group :op =
         /// formal output (used for resolving the network; not part of syntax)
         stamp :output = aware :
         {
-            func :: :get_arity    = { return 1; };
             func :: :solve        =
             {
                 bmath_hf3_s_attach( r, bcore_fork( a[0] ) );
@@ -358,7 +348,6 @@ group :op =
         stamp :dimof = aware :
         {
             func :: :get_symbol   = { return "dimof" ; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
             func :: :solve        =
             {
@@ -374,7 +363,6 @@ group :op =
         stamp :rand = aware :
         {
             func :: :get_symbol   = { return "rand" ; };
-            func :: :get_arity    = { return 1; };
             func :: :get_priority = { return 8; };
             func :: :solve        =
             {
@@ -403,11 +391,11 @@ group :op =
     group :ar2 = retrievable
     {
         feature 'a' bmath_hf3_vm_op* create_vm_op( const, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ) = { return NULL; };
+        func :: :get_arity = { return 2; };
 
         stamp :bmul = aware :
         {
             func :: :get_symbol   = { return "**"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 9; };
             func :: :solve =
             {
@@ -424,13 +412,12 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_bmul_s_create(); };
+            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_s_create(); };
         };
 
         stamp :bmul_htp = aware :
         {
             func :: :get_symbol   = { return "*^"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 9; };
             func :: :solve =
             {
@@ -447,13 +434,12 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_bmul_htp_s_create(); };
+            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_htp_s_create(); };
         };
 
         stamp :htp_bmul = aware :
         {
             func :: :get_symbol   = { return "^*"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 9; };
             func :: :solve =
             {
@@ -470,13 +456,12 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_htp_bmul_s_create(); };
+            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_s_create(); };
         };
 
         stamp :htp_bmul_htp = aware :
         {
             func :: :get_symbol   = { return "^*^"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 9; };
             func :: :solve =
             {
@@ -493,13 +478,12 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_htp_bmul_htp_s_create(); };
+            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_htp_s_create(); };
         };
 
         stamp :mul = aware :
         {
             func :: :get_symbol   = { return "*"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 9; };
             func :: :solve =
             {
@@ -545,7 +529,6 @@ group :op =
         stamp :plus = aware :
         {
             func :: :get_symbol   = { return "+"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 8; };
             func :: :solve =
             {
@@ -564,13 +547,12 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_add_s_create(); };
+            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_add_s_create(); };
         };
 
         stamp :minus = aware :
         {
             func :: :get_symbol   = { return "-"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 8; };
             func :: :solve =
             {
@@ -589,13 +571,12 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_sub_s_create(); };
+            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_sub_s_create(); };
         };
 
         stamp :equal = aware :
         {
             func :: :get_symbol   = { return "=="; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 6; };
             func :: :solve =
             {
@@ -608,7 +589,6 @@ group :op =
         stamp :larger = aware :
         {
             func :: :get_symbol   = { return ">"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 6; };
             func :: :solve =
             {
@@ -626,7 +606,6 @@ group :op =
         stamp :smaller = aware :
         {
             func :: :get_symbol   = { return "<"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 6; };
             func :: :solve =
             {
@@ -644,7 +623,6 @@ group :op =
         stamp :larger_equal = aware :
         {
             func :: :get_symbol   = { return ">="; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 6; };
             func :: :solve =
             {
@@ -662,7 +640,6 @@ group :op =
         stamp :smaller_equal = aware :
         {
             func :: :get_symbol   = { return "<="; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 6; };
             func :: :solve =
             {
@@ -680,7 +657,6 @@ group :op =
         stamp :logic_and = aware :
         {
             func :: :get_symbol   = { return "&"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 6; };
             func :: :solve =
             {
@@ -698,7 +674,6 @@ group :op =
         stamp :logic_or = aware :
         {
             func :: :get_symbol   = { return "|"; };
-            func :: :get_arity    = { return 2; };
             func :: :get_priority = { return 6; };
             func :: :solve =
             {
@@ -715,7 +690,6 @@ group :op =
 
         stamp :index = aware : // r-value is (scalar) index
         {
-            func :: :get_arity    = { return  2; };
             func :: :get_priority = { return 20; };
             func :: :solve = // r->v_data will be weak
             {
@@ -741,7 +715,6 @@ group :op =
 
         stamp :inc_order = aware : // l-value is (scalar) increment
         {
-            func :: :get_arity    = { return  2; };
             func :: :get_priority = { return 20; };
             func :: :solve =
             {
@@ -762,9 +735,10 @@ group :op =
     ///  ternary operator (arity 3)
     group :ar3 = retrievable
     {
+        func :: :get_arity = { return  3; };
+
         stamp :branch = aware : // arg[0] scalar condition, arg[1] ( cond > 0 ), arg[2] ( cond <= 0 )
         {
-            func :: :get_arity    = { return  3; };
             func :: :get_priority = { return  5; };
             func :: :solve =
             {

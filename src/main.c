@@ -25,7 +25,7 @@ int main( int argc, char** argv )
         }
     }
 
-    BCORE_LIFE_INIT();
+    BLM_INIT();
 
     s2_t ret = 0;
     BCORE_LIFE_CREATE( bcore_main_frame_s, main_frame );
