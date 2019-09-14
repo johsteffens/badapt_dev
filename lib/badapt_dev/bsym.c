@@ -597,7 +597,7 @@ void bsym_net_node_s_trace_build_vm_proc( bsym_net_node_s* o, bmath_hf3_vm_frame
             bcore_hmap_tpuz_s_set( &vmf->map_proc, proc_name, vmf->library.size - 1 );
         }
 
-        bmath_hf3_vm_proc_s* vm_proc = &vmf->library.data[ *bcore_hmap_tpuz_s_get( &vmf->map_proc, proc_name ) ];
+        bmath_hf3_vm_proc_s* vm_proc = vmf->library.data[ *bcore_hmap_tpuz_s_get( &vmf->map_proc, proc_name ) ];
         vm_holor->name = o->hresult->name;
         vm_holor->type = o->hresult->type;
         bmath_hf3_s_copy( &vm_holor->hf3, o->hresult->hf3 );
@@ -2164,7 +2164,7 @@ void bsym_vm_adaptive_s_minfer( bsym_vm_adaptive_s* o, const bmath_vf3_s* v_in, 
     ASSERT( v_out->size == h_out->v_size );
 
     bmath_hf3_s_copy_v_data_from_vf3( h_in, v_in );
-    bmath_hf3_vm_frame_s_run_proc( &o->vm, TYPEOF_infer );
+    bmath_hf3_vm_frame_s_proc_run( &o->vm, TYPEOF_infer );
     bmath_hf3_s_copy_v_data_to_vf3( h_out, v_out );
 }
 
@@ -2282,7 +2282,7 @@ badapt_adaptive* bsym_vm_builder_s_build( const bsym_vm_builder_s* o )
     }
 
     /// run setup
-    bmath_hf3_vm_frame_s_run_proc( vmf, typeof( "setup" ) );
+    bmath_hf3_vm_frame_s_proc_run( vmf, typeof( "setup" ) );
 
     BCORE_LIFE_RETURNV( badapt_adaptive*, ( badapt_adaptive* )adaptive );
 }

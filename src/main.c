@@ -15,6 +15,9 @@ int main( int argc, char** argv )
     bcore_register_signal_handler( badapt_signal_handler );
     bcore_register_signal_handler( badapt_dev_signal_handler );
 
+    // bmath_quicktypes_to_stdout( NULL ); return 0;
+
+
     // plant
     if( argc > 1 && sc_t_equal( argv[ 1 ], "-p" ) )
     {

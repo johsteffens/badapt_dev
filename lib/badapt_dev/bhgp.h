@@ -130,7 +130,7 @@
 /**********************************************************************************************************************/
 /// prototypes
 
-s2_t bhgp_op_ar1_solve_unary( bmath_hf3_s** r, bmath_hf3_s** a, bmath_fp_f3_unary unary );
+s2_t bhgp_op_ar1_solve_unary( bmath_hf3_s** r, bmath_hf3_s** a, bmath_fp_f3_ar1 unary );
 
 /**********************************************************************************************************************/
 
@@ -177,10 +177,16 @@ group :op =
         return (::op*)final;
     };
 
+    feature 'a' bmath_hf3_vm_op* create_vm_op( const, const bmath_hf3_s** a, const bmath_hf3_s* r ) = { return NULL; };
+
     /// nullary operator (arity 0)
     group :ar0 =
     {
+        feature 'a' bmath_hf3_vm_op* create_vm_op_ar0( const, const bmath_hf3_s* r ) = { return NULL; };
+
         func :: :get_arity = { return 0; };
+        func  : :create_vm_op_ar0 = { return NULL; };
+        func :: :create_vm_op     = { return @create_vm_op_ar0( o, r ); };
 
         /// used for literals
         stamp :holor = aware :
@@ -222,8 +228,10 @@ group :op =
     /// unary operator (arity 1)
     group :ar1 = retrievable
     {
-        feature 'a' bmath_hf3_vm_op* create_vm_op( const, const bmath_hf3_s* a, const bmath_hf3_s* r ) = { return NULL; };
+        feature 'a' bmath_hf3_vm_op* create_vm_op_ar1( const, const bmath_hf3_s* a, const bmath_hf3_s* r ) = { return NULL; };
         func :: :get_arity = { return 1; };
+        func  : :create_vm_op_ar1 = { return NULL; };
+        func :: :create_vm_op     = { return @create_vm_op_ar1( o, a[0], r ); };
 
         stamp :linear = aware :
         {
@@ -242,7 +250,7 @@ group :op =
         {
             func :: :get_symbol   = { return "floor"; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( floor ); };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( floor ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, floor ); };
         };
 
@@ -250,7 +258,7 @@ group :op =
         {
             func :: :get_symbol   = { return "ceil"; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil ); };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, ceil ); };
         };
 
@@ -258,7 +266,7 @@ group :op =
         {
             func :: :get_symbol   = { return "tanh"; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( tanh ); };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( tanh ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, tanh ); };
         };
 
@@ -266,7 +274,7 @@ group :op =
         {
             func :: :get_symbol   = { return "exp"; };
             func :: :get_priority = { return 8; };
-            func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( exp ); };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( exp ); };
             func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, exp ); };
         };
 
@@ -274,7 +282,7 @@ group :op =
         {
             func :: :get_symbol   = { return "relu"  ; };
             func :: :get_priority = { return 8; };
-            //func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_relu_s_create(); };
+            //func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_relu_s_create(); };
             func :: :solve        =
             {
                 bmath_hf3_s_attach( r, a[0] ? bmath_hf3_s_create() : NULL );
@@ -291,7 +299,7 @@ group :op =
         {
             func :: :get_symbol   = { return "lrelu"  ; };
             func :: :get_priority = { return 8; };
-            //func  : :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_lrelu_s_create(); };
+            //func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_lrelu_s_create(); };
             func :: :solve        =
             {
                 bmath_hf3_s_attach( r, a[0] ? bmath_hf3_s_create() : NULL );
@@ -390,8 +398,11 @@ group :op =
     /// binary operator (arity 2)
     group :ar2 = retrievable
     {
-        feature 'a' bmath_hf3_vm_op* create_vm_op( const, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ) = { return NULL; };
+        feature 'a' bmath_hf3_vm_op* create_vm_op_ar2( const, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ) = { return NULL; };
         func :: :get_arity = { return 2; };
+
+        func  : :create_vm_op_ar2 = { return NULL; };
+        func :: :create_vm_op     = { return @create_vm_op_ar2( o, a[0], a[1], r ); };
 
         stamp :bmul = aware :
         {
@@ -412,7 +423,7 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_s_create(); };
+            func :  :create_vm_op_ar2 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_s_create(); };
         };
 
         stamp :bmul_htp = aware :
@@ -434,7 +445,7 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_htp_s_create(); };
+            func :  :create_vm_op_ar2 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_bmul_htp_s_create(); };
         };
 
         stamp :htp_bmul = aware :
@@ -456,7 +467,7 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_s_create(); };
+            func :  :create_vm_op_ar2 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_s_create(); };
         };
 
         stamp :htp_bmul_htp = aware :
@@ -478,7 +489,7 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_htp_s_create(); };
+            func :  :create_vm_op_ar2 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_htp_bmul_htp_s_create(); };
         };
 
         stamp :mul = aware :
@@ -523,7 +534,7 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op;
+            func :  :create_vm_op_ar2;
         };
 
         stamp :plus = aware :
@@ -547,7 +558,7 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_add_s_create(); };
+            func :  :create_vm_op_ar2 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_add_s_create(); };
         };
 
         stamp :minus = aware :
@@ -571,7 +582,7 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
 
-            func :  :create_vm_op = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_sub_s_create(); };
+            func :  :create_vm_op_ar2 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_sub_s_create(); };
         };
 
         stamp :equal = aware :
@@ -735,7 +746,10 @@ group :op =
     ///  ternary operator (arity 3)
     group :ar3 = retrievable
     {
+        feature 'a' bmath_hf3_vm_op* create_vm_op_ar3( const, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* c, const bmath_hf3_s* r ) = { return NULL; };
         func :: :get_arity = { return  3; };
+        func  : :create_vm_op_ar3 = { return NULL; };
+        func :: :create_vm_op     = { return @create_vm_op_ar3( o, a[0], a[1], a[2], r ); };
 
         stamp :branch = aware : // arg[0] scalar condition, arg[1] ( cond > 0 ), arg[2] ( cond <= 0 )
         {
@@ -1003,14 +1017,22 @@ group :vm =
 {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    // procedure names
+    name infer;
+
+    // holor types
+    name data;       // any type of data holder
+    name adaptive;
+    name depletable; // holor can be set to vacant before shelving
+
     stamp :adaptive = aware badapt_adaptive
     {
 
         // === architecture parameters ================================
 
         st_s                   frame; // frame signature
-        st_s                   src; // path to holograph used by builder (here just for reference)
-        bmath_hf3_vm_frame_s   vm; // virtual machine
+        st_s                   src;   // path to holograph used by builder (here just for reference)
+        bmath_hf3_vm_frame_s   vm;    // virtual machine
         badapt_dynamics_std_s  dynamics;
         sz_t                   in_size;  // input vector size
         sz_t                   out_size; // output vector size
@@ -1037,12 +1059,14 @@ group :vm =
 
     stamp :builder = aware badapt_builder
     {
-        st_s frame = "( y => a )"; // frame signature
+        st_s frame = "( y => dim_y, a )"; // frame signature
         st_s src; // path to source file
 
         sz_t in_size;  // input vector size
         sz_t out_size; // output vector size
         badapt_dynamics_std_s dynamics;
+
+        u2_t rseed = 1234; /* seed for adaptive randomizer */
 
         // === builder functions =======================================
 
