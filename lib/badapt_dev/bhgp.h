@@ -112,8 +112,11 @@
  *  Possible name ?
  *     holocell
  *     holorcell  (unused)
+ *     holorframe (unused, term does not yet exist)
  *     holograph
  *     holorgraph
+ *     holornova
+ *
  */
 
 #ifndef BHGP_H
@@ -148,7 +151,7 @@ name if;
 name then;
 name else;
 
-/// operator scope
+/// operator group
 group :op =
 {
     feature strict 'a' ::get_sz get_arity;
@@ -229,87 +232,58 @@ group :op =
     group :ar1 = retrievable
     {
         feature 'a' bmath_hf3_vm_op* create_vm_op_ar1( const, const bmath_hf3_s* a, const bmath_hf3_s* r ) = { return NULL; };
-        func :: :get_arity = { return 1; };
+        func :: :get_arity        = { return 1; };
         func  : :create_vm_op_ar1 = { return NULL; };
         func :: :create_vm_op     = { return @create_vm_op_ar1( o, a[0], r ); };
-
-        stamp :linear = aware :
-        {
-            func :: :get_symbol   = { return "linear"; };
-            func :: :get_priority = { return 8; };
-            func :: :solve        =
-            {
-                bmath_hf3_s_attach( r, bcore_fork( a[0] ) );
-                return ( *r && (*r)->v_size ) ? 1 : 0;
-            };
-        };
 
         /// ==== using unary functions =====
 
         stamp :floor = aware :
         {
-            func :: :get_symbol   = { return "floor"; };
-            func :: :get_priority = { return 8; };
+            func :: :get_symbol       = { return "floor"; };
+            func :: :get_priority     = { return 8; };
+            func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, floor ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( floor ); };
-            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, floor ); };
         };
 
         stamp :ceil = aware :
         {
-            func :: :get_symbol   = { return "ceil"; };
-            func :: :get_priority = { return 8; };
+            func :: :get_symbol       = { return "ceil"; };
+            func :: :get_priority     = { return 8; };
+            func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, ceil ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil ); };
-            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, ceil ); };
         };
 
         stamp :tanh = aware :
         {
-            func :: :get_symbol   = { return "tanh"; };
-            func :: :get_priority = { return 8; };
+            func :: :get_symbol       = { return "tanh"; };
+            func :: :get_priority     = { return 8; };
+            func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, tanh ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( tanh ); };
-            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, tanh ); };
         };
 
         stamp :exp = aware :
         {
-            func :: :get_symbol   = { return "exp"; };
-            func :: :get_priority = { return 8; };
+            func :: :get_symbol       = { return "exp"; };
+            func :: :get_priority     = { return 8; };
+            func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, exp ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( exp ); };
-            func :: :solve        = { return bhgp_op_ar1_solve_unary( r, a, exp ); };
         };
 
         stamp :relu = aware :
         {
-            func :: :get_symbol   = { return "relu"  ; };
-            func :: :get_priority = { return 8; };
-            //func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_relu_s_create(); };
-            func :: :solve        =
-            {
-                bmath_hf3_s_attach( r, a[0] ? bmath_hf3_s_create() : NULL );
-                if( a[0] )
-                {
-                    bmath_hf3_s_copy_size( *r, a[0] );
-                    if( a[0]->v_size ) bmath_hf3_s_relu( a[0], *r );
-                }
-                return ( *r && (*r)->v_size ) ? 1 : 0;
-            };
+            func :: :get_symbol       = { return "relu"  ; };
+            func :: :get_priority     = { return 8; };
+            func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_s_fx ); };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_relu_s_fx ); };
         };
 
         stamp :lrelu = aware :
         {
             func :: :get_symbol   = { return "lrelu"  ; };
             func :: :get_priority = { return 8; };
-            //func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_lrelu_s_create(); };
-            func :: :solve        =
-            {
-                bmath_hf3_s_attach( r, a[0] ? bmath_hf3_s_create() : NULL );
-                if( a[0] )
-                {
-                    bmath_hf3_s_copy_size( *r, a[0] );
-                    if( a[0]->v_size ) bmath_hf3_s_lrelu( a[0], *r );
-                }
-                return ( *r && (*r)->v_size ) ? 1 : 0;
-            };
+            func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_leaky_s_fx ); };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_relu_leaky_s_fx ); };
         };
 
         /** marks a holor to be adaptive
@@ -336,21 +310,23 @@ group :op =
 
         stamp :identity = aware :
         {
-            func :: :solve        =
+            func :: :solve =
             {
                 bmath_hf3_s_attach( r, bcore_fork( a[0] ) );
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_cpy_s_create(); };
         };
 
         /// formal output (used for resolving the network; not part of syntax)
         stamp :output = aware :
         {
-            func :: :solve        =
+            func :: :solve =
             {
                 bmath_hf3_s_attach( r, bcore_fork( a[0] ) );
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_cpy_s_create(); };
         };
 
         stamp :dimof = aware :
@@ -1006,7 +982,7 @@ group :net =
         func : :set_downlinks;
 
         func bcore_inst_call : copy_x; // cell is copyable
-        func bcore_via_call  : mutated = { ERR_fa( "Cannot reconstitute after via-mutation." ); }; // cell is not transferable
+        func bcore_via_call  : mutated = { ERR_fa( "Cannot reconstitute." ); }; // cell is not transferable
     };
 };
 
@@ -1089,21 +1065,52 @@ group :vm =
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// evaluation
+group :eval =
+{
+    /// runs test, returns 0 on success.
+    feature 'a' s2_t run( const );
+
+    /// end to end test for a cell on a virtual machine
+    stamp :e2e = aware :
+    {
+        st_s sig = "(y=>a)";      // frame signature
+        st_s src;                 // source file
+        bmath_hf3_adl_s => in;  // input holors
+        bmath_hf3_adl_s => out; // expected output holors (if NULL, output is sent to log)
+        s2_t verbosity  = 10;   // verbosity
+        f3_t max_dev    = 1E-8; // if output deviation exceeds this value an error is generated
+        hidden aware bcore_sink -> log;
+
+        // constructor
+        func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
+
+        func : :run;
+    };
+
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // global context
 stamp :context = aware :
 {
     bcore_hmap_name_s hmap_name;
     bcore_arr_st_s    arr_symbol_op2;
     :sem_cell_s       cell; // frame of a cell structure
-    bcore_arr_tp_s    control_types; // types reserved for control (not suitable for identifiers)
+    bcore_arr_tp_s    control_types; // types reserved for control and not allowed for identifiers
 };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // PLANT_SECTION
 #endif // TYPEOF_bhgp
 
 /**********************************************************************************************************************/
 
-void bhgp_test( void );
+void bhgp_simple_test( void );
+void bhgp_simple_eval( void );
+void bhgp_adaptive_test( void );
 
 /**********************************************************************************************************************/
 

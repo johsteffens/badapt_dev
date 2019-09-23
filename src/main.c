@@ -35,7 +35,7 @@ int main( int argc, char** argv )
     ret = bcore_main_frame_s_main( main_frame, argc, argv );
     if( ret >= 0 )
     {
-        BCORE_LIFE_DOWN();
+        BLM_DOWN();
         bcore_down( true );
         return ret;
     }
@@ -43,7 +43,9 @@ int main( int argc, char** argv )
 //    bcore_get_traits_of_ancestor_to_sink( typeof( "bsym_op1" ), BCORE_STDOUT );
 
 //    bsym_test();
-    bhgp_test();
+//    bhgp_test();
+//    bhgp_adaptive_test();
+      bhgp_simple_eval();
 
 //    bcore_quicktypes_to_stdout( NULL );
 //    return 0;
@@ -80,7 +82,7 @@ int main( int argc, char** argv )
     // bcore_run_signal_selftest( typeof( "bmath_hf3" ), NULL );
 
     //snn_selftest2();
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
 
     bcore_down( true );
 

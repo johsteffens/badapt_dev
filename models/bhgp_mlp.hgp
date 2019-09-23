@@ -2,7 +2,7 @@
 
 verify_signature ( y => a );
 
-y =	cell mlp( y => hidden_nodes, reduction_factor, a )
+cell mlp( y => hidden_nodes, reduction_factor, a )
 {
     w = adapt : /*rand :*/ ( [ hidden_nodes ][ dimof( a ) ]# );
     b = adapt : ( [ hidden_nodes ]0 );
@@ -10,5 +10,6 @@ y =	cell mlp( y => hidden_nodes, reduction_factor, a )
     y = if( floor( hidden_nodes ) == 1 )
         then tanh( q )
         else mlp( hidden_nodes * reduction_factor, reduction_factor, lrelu( q ) );
-} ( 10, 0.5, a );
+};
 
+y =	mlp( 10, 0.5, a );

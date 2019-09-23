@@ -25,11 +25,11 @@
 void badapt_dev_ern_s_run_training( badapt_supplier* problem, badapt_builder* builder, const badapt_trainer_batch_s* trainer )
 {
     BLM_INIT();
-    badapt_training_state* state = BCORE_LIFE_A_PUSH( badapt_trainer_batch_s_create_state( trainer ) );
+    badapt_training_state* state = BLM_A_PUSH( badapt_trainer_batch_s_create_state( trainer ) );
     badapt_supplier_a_setup_builder( problem, builder );
-    badapt_training_state_a_set_adaptive( state, BCORE_LIFE_A_PUSH( badapt_builder_a_build( builder ) ) );
+    badapt_training_state_a_set_adaptive( state, BLM_A_PUSH( badapt_builder_a_build( builder ) ) );
     badapt_training_state_a_set_supplier( state, problem );
-    badapt_training_state_a_set_guide( state, ( badapt_guide* )BCORE_LIFE_A_PUSH( badapt_guide_char_encode_s_create() ) );
+    badapt_training_state_a_set_guide( state, ( badapt_guide* )BLM_A_PUSH( badapt_guide_char_encode_s_create() ) );
     badapt_adaptive_a_arc_to_sink( badapt_training_state_a_get_adaptive( state ), BCORE_STDOUT );
     badapt_trainer_batch_s_run( trainer, ( badapt_training_state* )state );
     BCORE_LIFE_RETURN();

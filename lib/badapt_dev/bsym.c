@@ -600,7 +600,7 @@ void bsym_net_node_s_trace_build_vm_proc( bsym_net_node_s* o, bmath_hf3_vm_frame
         bmath_hf3_vm_proc_s* vm_proc = vmf->library.data[ *bcore_hmap_tpuz_s_get( &vmf->map_proc, proc_name ) ];
         vm_holor->name = o->hresult->name;
         vm_holor->type = o->hresult->type;
-        bmath_hf3_s_copy( &vm_holor->hf3, o->hresult->hf3 );
+        bmath_hf3_s_copy( &vm_holor->h, o->hresult->hf3 );
 
         if( vm_holor->name )
         {
@@ -611,7 +611,7 @@ void bsym_net_node_s_trace_build_vm_proc( bsym_net_node_s* o, bmath_hf3_vm_frame
         if( arity == 0 )
         {
             bsym_op_ar0* op_ar0 = ( bsym_op_ar0* )o->op;
-            bmath_hf3_vm_op* vm_op = bsym_op_ar0_a_create_vm_operator( op_ar0, &vm_holor->hf3 );
+            bmath_hf3_vm_op* vm_op = bsym_op_ar0_a_create_vm_operator( op_ar0, &vm_holor->h );
 
             if( vm_op )
             {
@@ -629,7 +629,7 @@ void bsym_net_node_s_trace_build_vm_proc( bsym_net_node_s* o, bmath_hf3_vm_frame
             ASSERT( node1 && node1->hresult && node1->hresult->vm_index >= 0 );
             sz_t idx1 = node1->hresult->vm_index;
             ASSERT( idx1 >= 0 && idx1 < vmf->arr_holor.size );
-            bmath_hf3_vm_op* vm_op = bsym_op_ar1_a_create_vm_operator( op_ar1, node1->hresult->hf3, &vm_holor->hf3 );
+            bmath_hf3_vm_op* vm_op = bsym_op_ar1_a_create_vm_operator( op_ar1, node1->hresult->hf3, &vm_holor->h );
             if( vm_op )
             {
                 bmath_hf3_vm_op_ar1_a_set_args( (vd_t)vm_op, idx1, o->hresult->vm_index );
@@ -654,7 +654,7 @@ void bsym_net_node_s_trace_build_vm_proc( bsym_net_node_s* o, bmath_hf3_vm_frame
             sz_t idx2 = node2->hresult->vm_index;
             ASSERT( idx1 >= 0 && idx1 < vmf->arr_holor.size );
             ASSERT( idx2 >= 0 && idx2 < vmf->arr_holor.size );
-            bmath_hf3_vm_op* vm_op = bsym_op_ar2_a_create_vm_operator( op_ar2, node1->hresult->hf3, node2->hresult->hf3, &vm_holor->hf3 );
+            bmath_hf3_vm_op* vm_op = bsym_op_ar2_a_create_vm_operator( op_ar2, node1->hresult->hf3, node2->hresult->hf3, &vm_holor->h );
             if( vm_op )
             {
                 bmath_hf3_vm_op_ar2_a_set_args( (vd_t)vm_op, idx1, idx2, o->hresult->vm_index );
@@ -1235,7 +1235,7 @@ void bsym_sem_graph_s_evaluate_set_args_in( bsym_sem_graph_s* o, bsym_sem_graph_
         first = false;
     }
 
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1733,7 +1733,7 @@ void bsym_sem_graph_s_evaluate_stack( bsym_sem_graph_s* o, bcore_arr_vd_s* stack
     }
 
     bmath_hf3_s_detach( &literal );
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1794,7 +1794,7 @@ bsym_net* bsym_sem_graph_s_evaluate_net( bsym_sem_graph_s* o, bcore_source* sour
     BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     vd_t ret = bsym_sem_graph_s_evaluate_net_stack( o, stack, source );
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
     return ret;
 }
 
@@ -1805,7 +1805,7 @@ bsym_net_address_s* bsym_sem_graph_s_evaluate_address( bsym_sem_graph_s* o, bcor
     BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     vd_t ret = bsym_sem_graph_s_evaluate_address_stack( o, stack, source );
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
     return ret;
 }
 
@@ -1853,7 +1853,7 @@ bsym_sem_graph_s* bsym_sem_graph_s_evaluate_graph( bsym_sem_graph_s* o, bcore_so
     BLM_INIT();
     BCORE_LIFE_CREATE( bcore_arr_vd_s, stack );
     vd_t ret = bsym_sem_graph_s_evaluate_graph_stack( o, stack, source );
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
     return ret;
 }
 
@@ -2093,7 +2093,7 @@ void bsym_sem_graph_s_frame_setup( bsym_sem_graph_s* o )
         bcore_arr_st_s_push_sc( o->arr_symbol_op2, bsym_op_ar2_a_get_symbol( op2 ) );
     }
 
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2157,8 +2157,8 @@ void bsym_vm_adaptive_s_minfer( bsym_vm_adaptive_s* o, const bmath_vf3_s* v_in, 
 {
     ASSERT( o->in_index  < o->vm.arr_holor.size );
     ASSERT( o->out_index < o->vm.arr_holor.size );
-    bmath_hf3_s* h_in  = &o->vm.arr_holor.data[ o->in_index  ].hf3;
-    bmath_hf3_s* h_out = &o->vm.arr_holor.data[ o->out_index ].hf3;
+    bmath_hf3_s* h_in  = &o->vm.arr_holor.data[ o->in_index  ].h;
+    bmath_hf3_s* h_out = &o->vm.arr_holor.data[ o->out_index ].h;
 
     ASSERT( v_in ->size == h_in ->v_size );
     ASSERT( v_out->size == h_out->v_size );
@@ -2229,8 +2229,8 @@ badapt_adaptive* bsym_vm_builder_s_build( const bsym_vm_builder_s* o )
 
         bsym_net_link_s_trace_build_vm_proc( link_g_out_holor, &adaptive->vm, TYPEOF_infer );
 
-        adaptive->in_index  = bmath_hf3_vm_frame_s_get_holor_index( &adaptive->vm, tp_name_in_holor );
-        adaptive->out_index = bmath_hf3_vm_frame_s_get_holor_index( &adaptive->vm, tp_name_out_holor );
+        adaptive->in_index  = bmath_hf3_vm_frame_s_holors_get_index_by_name( &adaptive->vm, tp_name_in_holor );
+        adaptive->out_index = bmath_hf3_vm_frame_s_holors_get_index_by_name( &adaptive->vm, tp_name_out_holor );
 
         bcore_source_a_detach( &source );
     }
@@ -2326,11 +2326,11 @@ void bsym_test( void )
     BCORE_LIFE_CREATE( bmath_hf3_vm_frame_s, vm_frame );
     bsym_sem_graph_s_frame_setup( sem_frame );
 
-//    bcore_source* source = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bsym_mlp.hgp" ) );
-//    bcore_source* source = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bsym_test.hgp" ) );
-//    bcore_source* source = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/bsym_mul_test.hgp" ) );
-//    bcore_source* source = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/syntax01.hog" ) );
-    bcore_source* source = BCORE_LIFE_A_PUSH( bcore_file_open_source( "models/syntax02.hog" ) );
+//    bcore_source* source = BLM_A_PUSH( bcore_file_open_source( "models/bsym_mlp.hgp" ) );
+//    bcore_source* source = BLM_A_PUSH( bcore_file_open_source( "models/bsym_test.hgp" ) );
+//    bcore_source* source = BLM_A_PUSH( bcore_file_open_source( "models/bsym_mul_test.hgp" ) );
+//    bcore_source* source = BLM_A_PUSH( bcore_file_open_source( "models/syntax01.hog" ) );
+    bcore_source* source = BLM_A_PUSH( bcore_file_open_source( "models/syntax02.hog" ) );
 
 
     bsym_sem_graph_s_frame_compile( sem_frame, source );
@@ -2339,7 +2339,7 @@ void bsym_test( void )
 //    bcore_txt_ml_a_to_stdout( vm_frame );
 */
 
-    BCORE_LIFE_DOWN();
+    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

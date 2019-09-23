@@ -1,0 +1,12 @@
+verify_signature ( y => dim_y, a );
+
+cell c( y => dim_y, a )
+{
+    w = [ dim_y ][ dimof( a ) ] 1;
+    b = [ dim_y ] 1;
+    y = w ** a + b;
+};
+
+y = c( dim_y, a );
+
+
