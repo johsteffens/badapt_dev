@@ -956,7 +956,7 @@ group :net =
 
     stamp :cell = aware :
     {
-        sz_t max_depth = 65536; // maximum recursion depth
+        sz_t max_depth = 32768; // maximum recursion depth
         :nodes_s body;
         :nodes_s encs; // entry channels
         :nodes_s excs; // exit channels
@@ -1070,12 +1070,13 @@ group :eval =
 {
     /// runs test, returns 0 on success.
     feature 'a' s2_t run( const );
+    func bcore_main : main = { return @run( o ); };
 
     /// end to end test for a cell on a virtual machine
     stamp :e2e = aware :
     {
-        st_s sig = "(y=>a)";      // frame signature
-        st_s src;                 // source file
+        st_s sig = "(y=>a)";    // frame signature
+        bcore_file_path_s src;  // source file
         bmath_hf3_adl_s => in;  // input holors
         bmath_hf3_adl_s => out; // expected output holors (if NULL, output is sent to log)
         s2_t verbosity  = 10;   // verbosity
@@ -1084,10 +1085,8 @@ group :eval =
 
         // constructor
         func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
-
-        func : :run;
+        func               : : run;
     };
-
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

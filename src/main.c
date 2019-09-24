@@ -6,7 +6,6 @@
 #include "badapt_dev_signal.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
-#include "bsym.h"
 #include "bhgp.h"
 
 int main( int argc, char** argv )
@@ -31,7 +30,8 @@ int main( int argc, char** argv )
     BLM_INIT();
 
     s2_t ret = 0;
-    BCORE_LIFE_CREATE( bcore_main_frame_s, main_frame );
+    bcore_main_frame_s* main_frame = BLM_CREATE( bcore_main_frame_s );
+    main_frame->use_first_argument = true;
     ret = bcore_main_frame_s_main( main_frame, argc, argv );
     if( ret >= 0 )
     {

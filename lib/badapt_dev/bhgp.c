@@ -178,9 +178,10 @@ tp_t bhgp_parse_op2_symbol( bcore_source* source )
     st_s* format = st_s_create();
     tp_t ret = 0;
 
+    bcore_source_a_parse_fa( source, " " );
     for( sz_t i = 0; i < arr->size; i++ )
     {
-        st_s_copy_fa( format, " ##?'#<sc_t>'", arr->data[ i ]->sc );
+        st_s_copy_fa( format, "##?'#<sc_t>'", arr->data[ i ]->sc );
         if( bcore_source_a_parse_bl_fa( source, format->sc ) )
         {
             ret = typeof( arr->data[ i ]->sc );
@@ -712,9 +713,8 @@ void bhgp_sem_cell_s_parse_body( bhgp_sem_cell_s* o, bcore_source* source )
         if( bcore_source_a_parse_bl_fa( source, " #?'cell'" ) )
         {
             bhgp_sem_cell_s_parse( bhgp_sem_cell_s_push_cell( o ), source );
-            bcore_source_a_parse_fa( source, " ; " );
         }
-        if( bcore_source_a_parse_bl_fa( source, " #?'verify_signature'" ) )
+        else if( bcore_source_a_parse_bl_fa( source, " #?'verify_signature'" ) )
         {
             bhgp_sem_cell_s_parse_verify_signature( o, source );
         }
@@ -2023,7 +2023,7 @@ static void bhgp_net_cell_s_graph_to_sink( bhgp_net_cell_s* o, bcore_sink* sink 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhgp_net_node_s_build_vm_frame_proc( bhgp_net_node_s* o, bmath_hf3_vm_frame_s* vm_frame, tp_t proc_name )
+void bhgp_net_node_s_vm_build_main( bhgp_net_node_s* o, bmath_hf3_vm_frame_s* vm_frame, tp_t proc_name )
 {
     ASSERT( o );
     if( o->flag ) return;
@@ -2036,7 +2036,7 @@ void bhgp_net_node_s_build_vm_frame_proc( bhgp_net_node_s* o, bmath_hf3_vm_frame
     BFOR_EACH( &o->upls, i )
     {
         bhgp_net_node_s* node = o->upls.data[ i ]->node;
-        bhgp_net_node_s_build_vm_frame_proc( node, vm_frame, proc_name );
+        bhgp_net_node_s_vm_build_main( node, vm_frame, proc_name );
         bcore_arr_vd_s_push( arr_holor, node->h );
         bcore_arr_sz_s_push( arr_index, node->id );
     }
@@ -2089,8 +2089,9 @@ void bhgp_net_node_s_build_vm_frame_proc( bhgp_net_node_s* o, bmath_hf3_vm_frame
 void bhgp_net_cell_s_vm_build_main( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf, tp_t proc_name )
 {
     if( !proc_name ) proc_name = bmath_hf3_vm_frame_s_entypeof( vmf, "main" );
-
     bmath_hf3_vm_frame_s_clear( vmf );
+
+    bmath_hf3_vm_frame_s_proc_reset( vmf, proc_name );
     ASSERT( bhgp_net_cell_s_is_consistent( o ) );
 
     bmath_hf3_vm_arr_holor_s_set_size( &vmf->arr_holor, o->body.size );
@@ -2099,7 +2100,7 @@ void bhgp_net_cell_s_vm_build_main( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vm
     {
         bhgp_net_node_s* node = o->excs.data[ i ];
         if( !node->h ) ERR_fa( "Unsolved node '#<sc_t>'\n", bhgp_ifnameof( node->name ) );
-        bhgp_net_node_s_build_vm_frame_proc( node, vmf, proc_name );
+        bhgp_net_node_s_vm_build_main( node, vmf, proc_name );
     }
 
     bhgp_net_cell_s_clear_flags( o );
@@ -2112,6 +2113,7 @@ void bhgp_net_cell_s_vm_build_main( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vm
 void bhgp_net_cell_s_vm_build_setup( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf, tp_t proc_name )
 {
     if( !proc_name ) proc_name = bmath_hf3_vm_frame_s_entypeof( vmf, "setup" );
+    bmath_hf3_vm_frame_s_proc_reset( vmf, proc_name );
 
     const bmath_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
@@ -2121,7 +2123,7 @@ void bhgp_net_cell_s_vm_build_setup( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* v
         {
             case TYPEOF_depletable:
             {
-                bmath_hf3_vm_frame_s_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+                bmath_hf3_vm_frame_s_proc_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
             }
             break;
 
@@ -2129,8 +2131,8 @@ void bhgp_net_cell_s_vm_build_setup( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* v
             {
                 if( holor->h.v_size == 0 )
                 {
-                    bmath_hf3_vm_frame_s_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
-                    bmath_hf3_vm_frame_s_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, 1234 /*o->rseed*/ ) );
+                    bmath_hf3_vm_frame_s_proc_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+                    bmath_hf3_vm_frame_s_proc_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, 1234 /*o->rseed*/ ) );
                 }
             }
             break;
@@ -2147,6 +2149,7 @@ void bhgp_net_cell_s_vm_build_setup( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* v
 void bhgp_net_cell_s_vm_build_shelve( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf, tp_t proc_name )
 {
     if( !proc_name ) proc_name = bmath_hf3_vm_frame_s_entypeof( vmf, "shelve" );
+    bmath_hf3_vm_frame_s_proc_reset( vmf, proc_name );
 
     const bmath_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
@@ -2156,7 +2159,7 @@ void bhgp_net_cell_s_vm_build_shelve( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* 
         {
             case TYPEOF_depletable:
             {
-                bmath_hf3_vm_frame_s_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
+                bmath_hf3_vm_frame_s_proc_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
             }
             break;
 
@@ -2164,6 +2167,30 @@ void bhgp_net_cell_s_vm_build_shelve( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* 
         }
     }
     vmf->proc_shelve = proc_name;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_net_cell_s_vm_set_input( const bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf )
+{
+    bcore_arr_sz_s_clear( &vmf->input );
+    for( sz_t i = 0; i < o->encs.size; i++ )
+    {
+        const bhgp_net_node_s* node = o->encs.data[ i ];
+        bmath_hf3_vm_frame_s_input_push( vmf, node->id );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void bhgp_net_cell_s_vm_set_output( const bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf )
+{
+    bcore_arr_sz_s_clear( &vmf->output );
+    for( sz_t i = 0; i < o->excs.size; i++ )
+    {
+        const bhgp_net_node_s* node = o->excs.data[ i ];
+        bmath_hf3_vm_frame_s_output_push( vmf, node->id );
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2338,7 +2365,7 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
 {
     BLM_INIT();
 
-    bcore_source* source  = BLM_A_PUSH( bcore_file_open_source( o->src.sc ) );
+    bcore_source* source  = BLM_A_PUSH( bcore_file_open_source_path( &o->src ) );
 
     /// semantic graph
     bhgp_sem_cell_s* sem_frame = BLM_A_PUSH( sem_cell_s_create_frame() );
@@ -2348,17 +2375,17 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
 
     /// network graph
     bhgp_net_cell_s* net_frame = BLM_CREATE( bhgp_net_cell_s );
-    bhgp_net_cell_s_from_sem_cell( net_frame, sem_frame, bhgp_eval_e2e_s_input_op_create, ( vd_t )o, o->log );
+    bhgp_net_cell_s_from_sem_cell( net_frame, sem_frame, bhgp_eval_e2e_s_input_op_create, ( vd_t )o, o->verbosity > 5 ? o->log : NULL );
     bhgp_net_cell_s_finalize( net_frame );
 
-    if( o->log )
+    if( o->log && o->verbosity >= 1 )
     {
         bcore_sink_a_push_fa( o->log, "Network Cell:\n" );
         bcore_sink_a_push_fa( o->log, "  Entry channels . #<sz_t>\n", net_frame->encs.size );
         bcore_sink_a_push_fa( o->log, "  Body size ...... #<sz_t>\n", net_frame->body.size );
         bcore_sink_a_push_fa( o->log, "  Exit channels .. #<sz_t>\n", net_frame->excs.size );
 
-        if( o->verbosity > 2 && net_frame->body.size < 1000 )
+        if( o->verbosity >= 2 && net_frame->body.size < 1000 )
         {
             bcore_sink_a_push_fa( o->log, "Network Graph Structure:\n" );
             bhgp_net_cell_s_graph_to_sink( net_frame, o->log );
@@ -2375,19 +2402,17 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
     bhgp_net_cell_s_vm_build_main(   net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "main"   ) );
     bhgp_net_cell_s_vm_build_setup(  net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "setup"  ) );
     bhgp_net_cell_s_vm_build_shelve( net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "shelve" ) );
+    bhgp_net_cell_s_vm_set_input(    net_frame, vm_frame );
+    bhgp_net_cell_s_vm_set_output(   net_frame, vm_frame );
+    bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "setup" ) );
 
-    if( o->in && o->in->size > 0 )
+    for( sz_t i = 0; i < net_frame->encs.size; i++ )
     {
-        for( sz_t i = 0; i < net_frame->encs.size; i++ )
-        {
-            bmath_hf3_s* h_vm = &bmath_hf3_vm_frame_s_holors_get_by_name( vm_frame, net_frame->encs.data[ i ]->name )->h;
-            bmath_hf3_s_copy_v_data( h_vm, o->in->data[ i ] );
-        }
+        bmath_hf3_s_copy_v_data( &bmath_hf3_vm_frame_s_input_get_holor( vm_frame, i )->h, o->in->data[ i ] );
     }
 
     bmath_hf3_vm_frame_s_check_integrity( vm_frame );
 
-    bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "setup" ) );
     bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "main" ) );
 
     bl_t success = true;
@@ -2395,14 +2420,14 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
     for( sz_t i = 0; i < net_frame->excs.size; i++ )
     {
         tp_t name = net_frame->excs.data[ i ]->name;
-        bmath_hf3_s* h_vm = &bmath_hf3_vm_frame_s_holors_get_by_name( vm_frame, name )->h;
+        bmath_hf3_s* h_vm = &bmath_hf3_vm_frame_s_output_get_holor( vm_frame, i )->h;
         if( o->out && i < o->out->size )
         {
             bmath_hf3_s* h_out = o->out->data[ i ];
             f3_t dev = bmath_hf3_s_fdev_equ( h_vm, h_out );
             if( dev < o->max_dev )
             {
-                bcore_sink_a_push_fa( o->log, "Output '#<sc_t>' deviates by #<f3_t>.\n", bhgp_ifnameof( name ), dev );
+                bcore_sink_a_push_fa( o->log, "Output '#<sc_t>' deviation: #<f3_t>.\n", bhgp_ifnameof( name ), dev );
                 success = false;
             }
         }
@@ -2439,15 +2464,17 @@ void bhgp_simple_eval( void )
 
     bhgp_eval_e2e_s* e2e = BLM_CREATE( bhgp_eval_e2e_s );
     st_s_copy_sc( &e2e->sig, "(y=>a)" );
-    st_s_copy_sc( &e2e->src, "models/bhgp_eval_01.hgp" );
+    st_s_copy_sc( &e2e->src.name, "models/bhgp_eval_01.hgp" );
 
     bmath_hf3_s* h = bmath_hf3_adl_s_push( ( e2e->in = bmath_hf3_adl_s_create() ) );
     bmath_hf3_s_set_d_data_na( h, 1, 2 );
-    bmath_hf3_s_set_v_data_na( h, 2,   1, 2 );
-    e2e->verbosity = 10;
+    bmath_hf3_s_set_v_data_na( h, 2,   1, 1 );
+    e2e->verbosity = 1;
     e2e->max_dev   = 1E-8;
 
     bhgp_eval_e2e_s_run( e2e );
+
+    bcore_txt_ml_a_to_stdout( e2e );
 
     BLM_DOWN();
 }
