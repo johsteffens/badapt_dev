@@ -158,6 +158,9 @@ group :op =
     feature        'a' ::get_sz get_priority = { return 10; };
     feature        'a' ::get_sc get_symbol   = { return NULL; };
 
+    /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
+    feature        'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_get_arity( o ) == n ) ? :a_clone( o ) : NULL; };
+
     /** Solve computes the result 'r' from an array of arguments 'a'.
       * 'a' represents an array of pointers. The array size is equal to arity.
       * Solve can produced three valid states:
@@ -237,6 +240,20 @@ group :op =
         func :: :create_vm_op     = { return @create_vm_op_ar1( o, a[0], r ); };
 
         /// ==== using unary functions =====
+
+        stamp :neg = aware :
+        {
+            func :: :get_symbol       = { return "neg"; };
+            func :: :get_priority     = { return 8; };
+            func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx ); };
+            func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_neg_s_fx ); };
+            func :: :create_op_of_arn =
+            {
+                return ( n == 2 ) ? (::*)::ar2_minus_s_create()
+                     : ( n == 1 ) ? (::*)@clone( o )
+                     : NULL;
+            };
+        };
 
         stamp :floor = aware :
         {
@@ -559,6 +576,13 @@ group :op =
             };
 
             func :  :create_vm_op_ar2 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_sub_s_create(); };
+
+            func :: :create_op_of_arn =
+            {
+                return ( n == 2 ) ? (::*)@clone( o )
+                     : ( n == 1 ) ? (::*)::ar1_neg_s_create()
+                     : NULL;
+            };
         };
 
         stamp :equal = aware :
@@ -713,6 +737,25 @@ group :op =
                     if( dim <= 0 ) return -1;
                     bmath_hf3_s_copy( *r, a[1] );
                     bmath_hf3_s_inc_order( *r, dim );
+                }
+                return ( *r && (*r)->v_size ) ? 1 : 0;
+            };
+        };
+
+        stamp :cat = aware : // catenates two holors according to catenation rule defined in bmath_hf3_s_set_d_cat
+        {
+            func :: :get_priority = { return 6; };
+            func :: :solve =
+            {
+                bmath_hf3_s_attach( r, ( a[0] && a[1] ) ? bmath_hf3_s_create() : NULL );
+                if( *r )
+                {
+                    if( !bmath_hf3_s_set_d_cat( a[0], a[1], *r ) ) return -1;
+                    if( a[0]->v_data && a[1]->v_data )
+                    {
+                        bmath_hf3_s_fit_v_size( *r );
+                        bmath_hf3_s_cat( a[0], a[1], *r );
+                    }
                 }
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };

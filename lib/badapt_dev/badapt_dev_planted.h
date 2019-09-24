@@ -6,7 +6,6 @@
  *    badapt_dev_problem.h
  *    badapt_dev_ern.h
  *    badapt_dev_lstm.h
- *    bsym.h
  *    bhgp.h
  *
  */
@@ -83,10 +82,6 @@
 // source: badapt_dev_lstm.h
 
 /**********************************************************************************************************************/
-// source: bsym.h
-
-
-/**********************************************************************************************************************/
 // source: bhgp.h
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -133,6 +128,7 @@
   typedef sz_t (*bhgp_op_get_arity)( const bhgp_op* o ); \
   typedef sz_t (*bhgp_op_get_priority)( const bhgp_op* o ); \
   typedef sc_t (*bhgp_op_get_symbol)( const bhgp_op* o ); \
+  typedef bhgp_op* (*bhgp_op_create_op_of_arn)( const bhgp_op* o, sz_t n ); \
   typedef s2_t (*bhgp_op_solve)( const bhgp_op* o, bmath_hf3_s** r, bmath_hf3_s** a ); \
   typedef bhgp_op* (*bhgp_op_create_final)( const bhgp_op* o, bmath_hf3_s* h ); \
   typedef bmath_hf3_vm_op* (*bhgp_op_create_vm_op)( const bhgp_op* o, const bmath_hf3_s** a, const bmath_hf3_s* r ); \
@@ -142,6 +138,7 @@
       bhgp_op_get_arity get_arity; \
       bhgp_op_get_priority get_priority; \
       bhgp_op_get_symbol get_symbol; \
+      bhgp_op_create_op_of_arn create_op_of_arn; \
       bhgp_op_solve solve; \
       bhgp_op_create_final create_final; \
       bhgp_op_create_vm_op create_vm_op; \
@@ -158,6 +155,9 @@
   static inline sc_t bhgp_op_a_get_symbol( const bhgp_op* o ) { const bhgp_op_s* p = bhgp_op_s_get_aware( o ); assert( p->get_symbol ); return p->get_symbol( o ); } \
   static inline bl_t bhgp_op_a_defines_get_symbol( const bhgp_op* o ) { return true; } \
   static inline sc_t bhgp_op_get_symbol__( const bhgp_op* o ) { return NULL; } \
+  static inline bhgp_op* bhgp_op_a_create_op_of_arn( const bhgp_op* o, sz_t n ) { const bhgp_op_s* p = bhgp_op_s_get_aware( o ); assert( p->create_op_of_arn ); return p->create_op_of_arn( o, n ); } \
+  static inline bl_t bhgp_op_a_defines_create_op_of_arn( const bhgp_op* o ) { return true; } \
+  static inline bhgp_op* bhgp_op_create_op_of_arn__( const bhgp_op* o, sz_t n ) { return ( bhgp_op_a_get_arity( o ) == n ) ? bhgp_op_a_clone( o ) : NULL; } \
   static inline s2_t bhgp_op_a_solve( const bhgp_op* o, bmath_hf3_s** r, bmath_hf3_s** a ) { const bhgp_op_s* p = bhgp_op_s_get_aware( o ); assert( p->solve ); return p->solve( o, r, a ); } \
   static inline bl_t bhgp_op_a_defines_solve( const bhgp_op* o ) { return bhgp_op_s_get_aware( o )->solve != NULL; } \
   static inline bhgp_op* bhgp_op_a_create_final( const bhgp_op* o, bmath_hf3_s* h ) { const bhgp_op_s* p = bhgp_op_s_get_aware( o ); assert( p->create_final ); return p->create_final( o, h ); } \
@@ -227,6 +227,17 @@
 
 #define TYPEOF_bhgp_op_ar1 3001659491
 #define TYPEOF_bhgp_op_ar1_s 2605528325
+#define TYPEOF_bhgp_op_ar1_neg_s 3353528316
+#define BETH_EXPAND_ITEM_bhgp_op_ar1_neg_s \
+  BCORE_DECLARE_OBJECT( bhgp_op_ar1_neg_s ) \
+    {aware_t _;}; \
+  static inline sc_t bhgp_op_ar1_neg_s_get_symbol( const bhgp_op_ar1_neg_s* o ){ return "neg"; } \
+  static inline sz_t bhgp_op_ar1_neg_s_get_priority( const bhgp_op_ar1_neg_s* o ){ return 8; } \
+  static inline s2_t bhgp_op_ar1_neg_s_solve( const bhgp_op_ar1_neg_s* o, bmath_hf3_s** r, bmath_hf3_s** a ){ return bhgp_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx ); } \
+  static inline bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_vm_op_ar1( const bhgp_op_ar1_neg_s* o, const bmath_hf3_s* a, const bmath_hf3_s* r ){ return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_neg_s_fx ); } \
+  bhgp_op* bhgp_op_ar1_neg_s_create_op_of_arn( const bhgp_op_ar1_neg_s* o, sz_t n ); \
+  static inline sz_t bhgp_op_ar1_neg_s_get_arity( const bhgp_op_ar1_neg_s* o ){ return 1; } \
+  static inline bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_vm_op( const bhgp_op_ar1_neg_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar1_neg_s_create_vm_op_ar1( o, a[0], r ); }
 #define TYPEOF_bhgp_op_ar1_floor_s 70512908
 #define BETH_EXPAND_ITEM_bhgp_op_ar1_floor_s \
   BCORE_DECLARE_OBJECT( bhgp_op_ar1_floor_s ) \
@@ -336,6 +347,7 @@
   static inline bmath_hf3_vm_op* bhgp_op_ar1_rand_s_create_vm_op( const bhgp_op_ar1_rand_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar1_rand_s_create_vm_op_ar1( o, a[0], r ); }
 #define BETH_EXPAND_GROUP_bhgp_op_ar1 \
   BCORE_FORWARD_OBJECT( bhgp_op_ar1 ); \
+  BCORE_FORWARD_OBJECT( bhgp_op_ar1_neg_s ); \
   BCORE_FORWARD_OBJECT( bhgp_op_ar1_floor_s ); \
   BCORE_FORWARD_OBJECT( bhgp_op_ar1_ceil_s ); \
   BCORE_FORWARD_OBJECT( bhgp_op_ar1_tanh_s ); \
@@ -360,6 +372,7 @@
   static inline bmath_hf3_vm_op* bhgp_op_ar1_a_create_vm_op_ar1( const bhgp_op_ar1* o, const bmath_hf3_s* a, const bmath_hf3_s* r ) { const bhgp_op_ar1_s* p = bhgp_op_ar1_s_get_aware( o ); assert( p->create_vm_op_ar1 ); return p->create_vm_op_ar1( o, a, r ); } \
   static inline bl_t bhgp_op_ar1_a_defines_create_vm_op_ar1( const bhgp_op_ar1* o ) { return true; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_create_vm_op_ar1__( const bhgp_op_ar1* o, const bmath_hf3_s* a, const bmath_hf3_s* r ) { return NULL; } \
+  BETH_EXPAND_ITEM_bhgp_op_ar1_neg_s \
   BETH_EXPAND_ITEM_bhgp_op_ar1_floor_s \
   BETH_EXPAND_ITEM_bhgp_op_ar1_ceil_s \
   BETH_EXPAND_ITEM_bhgp_op_ar1_tanh_s \
@@ -445,6 +458,7 @@
   static inline sz_t bhgp_op_ar2_minus_s_get_priority( const bhgp_op_ar2_minus_s* o ){ return 8; } \
   s2_t bhgp_op_ar2_minus_s_solve( const bhgp_op_ar2_minus_s* o, bmath_hf3_s** r, bmath_hf3_s** a ); \
   static inline bmath_hf3_vm_op* bhgp_op_ar2_minus_s_create_vm_op_ar2( const bhgp_op_ar2_minus_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ){ return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_sub_s_create(); } \
+  bhgp_op* bhgp_op_ar2_minus_s_create_op_of_arn( const bhgp_op_ar2_minus_s* o, sz_t n ); \
   static inline sz_t bhgp_op_ar2_minus_s_get_arity( const bhgp_op_ar2_minus_s* o ){ return 2; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar2_minus_s_create_vm_op( const bhgp_op_ar2_minus_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar2_minus_s_create_vm_op_ar2( o, a[0], a[1], r ); }
 #define TYPEOF_bhgp_op_ar2_equal_s 741032411
@@ -535,6 +549,15 @@
   static inline sz_t bhgp_op_ar2_inc_order_s_get_arity( const bhgp_op_ar2_inc_order_s* o ){ return 2; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar2_inc_order_s_create_vm_op_ar2( const bhgp_op_ar2_inc_order_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ){ return NULL; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar2_inc_order_s_create_vm_op( const bhgp_op_ar2_inc_order_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar2_inc_order_s_create_vm_op_ar2( o, a[0], a[1], r ); }
+#define TYPEOF_bhgp_op_ar2_cat_s 3814488687
+#define BETH_EXPAND_ITEM_bhgp_op_ar2_cat_s \
+  BCORE_DECLARE_OBJECT( bhgp_op_ar2_cat_s ) \
+    {aware_t _;}; \
+  static inline sz_t bhgp_op_ar2_cat_s_get_priority( const bhgp_op_ar2_cat_s* o ){ return 6; } \
+  s2_t bhgp_op_ar2_cat_s_solve( const bhgp_op_ar2_cat_s* o, bmath_hf3_s** r, bmath_hf3_s** a ); \
+  static inline sz_t bhgp_op_ar2_cat_s_get_arity( const bhgp_op_ar2_cat_s* o ){ return 2; } \
+  static inline bmath_hf3_vm_op* bhgp_op_ar2_cat_s_create_vm_op_ar2( const bhgp_op_ar2_cat_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ){ return NULL; } \
+  static inline bmath_hf3_vm_op* bhgp_op_ar2_cat_s_create_vm_op( const bhgp_op_ar2_cat_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar2_cat_s_create_vm_op_ar2( o, a[0], a[1], r ); }
 #define BETH_EXPAND_GROUP_bhgp_op_ar2 \
   BCORE_FORWARD_OBJECT( bhgp_op_ar2 ); \
   BCORE_FORWARD_OBJECT( bhgp_op_ar2_bmul_s ); \
@@ -553,6 +576,7 @@
   BCORE_FORWARD_OBJECT( bhgp_op_ar2_logic_or_s ); \
   BCORE_FORWARD_OBJECT( bhgp_op_ar2_index_s ); \
   BCORE_FORWARD_OBJECT( bhgp_op_ar2_inc_order_s ); \
+  BCORE_FORWARD_OBJECT( bhgp_op_ar2_cat_s ); \
   typedef bmath_hf3_vm_op* (*bhgp_op_ar2_create_vm_op_ar2)( const bhgp_op_ar2* o, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r ); \
   BCORE_DECLARE_SPECT( bhgp_op_ar2 ) \
   { \
@@ -581,7 +605,8 @@
   BETH_EXPAND_ITEM_bhgp_op_ar2_logic_and_s \
   BETH_EXPAND_ITEM_bhgp_op_ar2_logic_or_s \
   BETH_EXPAND_ITEM_bhgp_op_ar2_index_s \
-  BETH_EXPAND_ITEM_bhgp_op_ar2_inc_order_s
+  BETH_EXPAND_ITEM_bhgp_op_ar2_inc_order_s \
+  BETH_EXPAND_ITEM_bhgp_op_ar2_cat_s
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: bhgp_op_ar3

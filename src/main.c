@@ -16,9 +16,8 @@ int main( int argc, char** argv )
 
     // bmath_quicktypes_to_stdout( NULL ); return 0;
 
-
     // plant
-    if( argc > 1 && sc_t_equal( argv[ 1 ], "-p" ) )
+    //if( argc > 1 && sc_t_equal( argv[ 1 ], "-p" ) )
     {
         if( bcore_plant_run_globally() )
         {

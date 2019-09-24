@@ -469,8 +469,8 @@ bhgp_sem_cell_s* bhgp_sem_cell_s_push_cell_op_d( bhgp_sem_cell_s* o, bhgp_op* op
     sc_t symbol = bhgp_op_a_get_symbol( op );
     if( symbol ) cell->name = bhgp_entypeof( symbol );
     cell->op = op;
-    cell->priority = bhgp_op_a_get_priority( op );
 
+    cell->priority = bhgp_op_a_get_priority( op );
     cell->excs.data[ 0 ]->name = bhgp_entypeof( "y" );
 
     for( sz_t i = 0; i < cell->encs.size; i++ )
@@ -545,27 +545,6 @@ static bhgp_sem_cell_s* sem_cell_s_create_frame()
     o->parent = &context_g->cell;
     return o;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-/*
-static bhgp_sem_cell_s* sem_cell_s_create_frame_parse( bcore_source* source )
-{
-    bhgp_sem_cell_s* o = sem_cell_s_create_root();
-    bcore_source_point_s_set( &o->source_point, source );
-    bhgp_sem_cell_s_parse( o, source );
-    return o;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-static bhgp_sem_cell_s* sem_cell_s_create_frame_parse_body( bcore_source* source )
-{
-    bhgp_sem_cell_s* o = sem_cell_s_create_frame();
-    bcore_source_point_s_set( &o->source_point, source );
-    bhgp_sem_cell_s_parse_body( o, source );
-    return o;
-}
-*/
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -859,6 +838,7 @@ void bhgp_sem_cell_s_evaluate_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s* stack, 
     st_s* name = BLM_CREATE( st_s );
 
     bhgp_sem_stack_flag_s* flag_bin_op    = BLM_CREATE( bhgp_sem_stack_flag_s );
+    bhgp_sem_stack_flag_s* flag_una_op    = BLM_CREATE( bhgp_sem_stack_flag_s );
     bhgp_sem_stack_flag_s* flag_cell_cat  = BLM_CREATE( bhgp_sem_stack_flag_s );
     bhgp_sem_stack_flag_s* flag_inc_order = BLM_CREATE( bhgp_sem_stack_flag_s );
 
@@ -935,8 +915,9 @@ void bhgp_sem_cell_s_evaluate_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
         }
 
-        // literal scalar
-        else if( bcore_source_a_parse_bl_fa( source, " #?(([0]>='0'&&[0]<='9')||([0]=='-'&&([1]>='0'&&[1]<='9')))" ) )
+        //else if( bcore_source_a_parse_bl_fa( source, " #?(([0]>='0'&&[0]<='9')||([0]=='-'&&([1]>='0'&&[1]<='9')))" ) )
+        // literal scalar (negative numbers are created via neg operator)
+        else if( bcore_source_a_parse_bl_fa( source, " #?([0]>='0'&&[0]<='9')" ) )
         {
             f3_t val = 0;
             bcore_source_a_parse_fa( source, " #<f3_t*>", &val );
@@ -968,18 +949,47 @@ void bhgp_sem_cell_s_evaluate_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 stack_push( stack, bhgp_sem_cell_s_evaluate_sem( o, source ) );
                 bcore_source_a_parse_fa( source, " )" );
             }
-
         }
 
         // binary operator from predefined symbols
         else if( ( op2_symbol = bhgp_parse_op2_symbol( source ) ) )
         {
-            if( stack->size == 0 ) bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", op2_symbol );
-            bhgp_sem_cell_s* cell = bhgp_sem_cell_s_get_cell_by_name( o, op2_symbol );
-            if( !cell ) bcore_source_a_parse_err_fa( source, "Syntax error." );
-            cell = bhgp_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
-            stack_push( stack, flag_bin_op );
-            stack_push( stack, cell );
+            if
+            (
+                stack->size == 0 ||
+               ( stack->size >= 1 && stack_of_value( stack, 1, flag_una_op ) ) ||
+               ( stack->size >= 3 && stack_of_value( stack, 3, flag_bin_op ) )
+            )
+            {
+                // binary op not applicable, try unary
+                bhgp_sem_cell_s* cell = bhgp_sem_cell_s_get_cell_by_name( o, op2_symbol );
+                bhgp_op* op_unary = bhgp_op_a_create_op_of_arn( cell->op, 1 );
+                if( op_unary )
+                {
+                    bhgp_sem_cell_s* cell = bhgp_sem_cell_s_push_cell_op_d_set_source( o, op_unary, source );
+                    stack_push( stack, cell );
+                    stack_push( stack, flag_una_op ); // flag after cell to avoid incorrect stack evaluation
+                }
+                else
+                {
+                    if( stack->size == 0 )
+                    {
+                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", bhgp_ifnameof( op2_symbol ) );
+                    }
+                    else
+                    {
+                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Successive binary operator. Right operand expected.", bhgp_ifnameof( op2_symbol ) );
+                    }
+                }
+            }
+            else
+            {
+                bhgp_sem_cell_s* cell = bhgp_sem_cell_s_get_cell_by_name( o, op2_symbol );
+                if( !cell ) bcore_source_a_parse_err_fa( source, "Syntax error." );
+                cell = bhgp_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
+                stack_push( stack, flag_bin_op );
+                stack_push( stack, cell );
+            }
         }
 
         // custom binary operator
@@ -1063,7 +1073,17 @@ void bhgp_sem_cell_s_evaluate_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s* stack, 
 
         /// priority stack processing ...
 
-        // <left arg> <flag> <bin-operator>  error checks, left operand conversion, output generation
+        // unary operator: right operand
+        while( stack->size >= 3 && stack_of_value( stack, 2, flag_una_op ) && stack_of_type( stack, 1, TYPEOF_bhgp_sem_link_s ) )
+        {
+            bhgp_sem_link_s* link = stack_pop_link( stack, source );
+            stack_pop_of_value( stack, flag_una_op, source );
+            bhgp_sem_cell_s* cell = stack_pop_cell( stack, source );
+            ASSERT( cell->encs.size == 1 );
+            cell->encs.data[ 0 ]->up = link;
+            stack_push( stack, cell->excs.data[ 0 ] );
+        }
+
         if( stack->size >= 3 && stack_of_value( stack, 2, flag_bin_op ) )
         {
             bhgp_sem_cell_s* cell = stack_pop_of_type( stack, TYPEOF_bhgp_sem_cell_s, source );
@@ -1154,62 +1174,66 @@ void bhgp_sem_cell_s_evaluate_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s* stack, 
     }
 
     /// remaining stack processing ...
-    bl_t resolve_stack = true;
-    while( resolve_stack )
+
+    /// Binary operators
+    while( stack->size >= 5 && stack_of_value( stack, 4, flag_bin_op ) ) // <left arg> <flag> <bin-operator> <output> <right arg>
     {
-        // <left arg> <flag> <bin-operator> <output> <right arg>
-        if( stack->size >= 5 && stack_of_value( stack, 4, flag_bin_op ) )
+        bhgp_sem_link_s* link2 = stack_pop_link_or_exit( stack, source );
+        bhgp_sem_link_s* out   = stack_pop_link( stack, source );
+        bhgp_sem_cell_s* cell  = stack_pop_cell( stack, source );
+        stack_pop_of_value( stack, flag_bin_op, source );
+        bhgp_sem_link_s* link1 = stack_pop_link_or_exit( stack, source );
+
+        if( stack->size >= 4 && stack_of_value( stack, 3, flag_bin_op ) ) // merge with prior operation considering priority
         {
-            bhgp_sem_link_s* link2 = stack_pop_link_or_exit( stack, source );
-            bhgp_sem_link_s* out   = stack_pop_link( stack, source );
-            bhgp_sem_cell_s* cell  = stack_pop_cell( stack, source );
+            bhgp_sem_link_s* prior_out   = stack_pop_link( stack, source );
+            bhgp_sem_cell_s* prior_cell  = stack_pop_cell( stack, source );
             stack_pop_of_value( stack, flag_bin_op, source );
-            bhgp_sem_link_s* link1 = stack_pop_link_or_exit( stack, source );
+            bhgp_sem_link_s* prior_link1 = stack_pop_link_or_exit( stack, source );
 
-            if( stack->size >= 4 && stack_of_value( stack, 3, flag_bin_op ) ) // merge with prior operation considering priority
+            sz_t prior_priority = bhgp_sem_cell_s_get_priority( prior_cell );
+            sz_t cell_priority  = bhgp_sem_cell_s_get_priority( cell );
+
+            if( prior_priority >= cell_priority  )
             {
-                bhgp_sem_link_s* prior_out   = stack_pop_link( stack, source );
-                bhgp_sem_cell_s* prior_cell  = stack_pop_cell( stack, source );
-                stack_pop_of_value( stack, flag_bin_op, source );
-                bhgp_sem_link_s* prior_link1 = stack_pop_link_or_exit( stack, source );
+                bhgp_sem_cell_s_get_enc_by_open( cell )->up = prior_out;
+                bhgp_sem_cell_s_get_enc_by_open( cell )->up = link2;
 
-                sz_t prior_priority = bhgp_sem_cell_s_get_priority( prior_cell );
-                sz_t cell_priority  = bhgp_sem_cell_s_get_priority( cell );
-
-                if( prior_priority >= cell_priority  )
-                {
-                    bhgp_sem_cell_s_get_enc_by_open( cell )->up = prior_out;
-                    bhgp_sem_cell_s_get_enc_by_open( cell )->up = link2;
-
-                    stack_push( stack, prior_link1 );
-                    stack_push( stack, flag_bin_op );
-                    stack_push( stack, prior_cell );
-                    stack_push( stack, out );
-                    stack_push( stack, link1 );
-                }
-                else
-                {
-                    bhgp_sem_cell_s_get_enc_by_open( cell )->up = link1;
-                    bhgp_sem_cell_s_get_enc_by_open( cell )->up = link2;
-
-                    stack_push( stack, prior_link1 );
-                    stack_push( stack, flag_bin_op );
-                    stack_push( stack, prior_cell );
-                    stack_push( stack, prior_out );
-                    stack_push( stack, out );           // out becomes right argument for prior_cell
-                }
+                stack_push( stack, prior_link1 );
+                stack_push( stack, flag_bin_op );
+                stack_push( stack, prior_cell );
+                stack_push( stack, out );
+                stack_push( stack, link1 );
             }
-            else // fully resolve operation
+            else
             {
                 bhgp_sem_cell_s_get_enc_by_open( cell )->up = link1;
                 bhgp_sem_cell_s_get_enc_by_open( cell )->up = link2;
-                stack_push( stack, out );
+
+                stack_push( stack, prior_link1 );
+                stack_push( stack, flag_bin_op );
+                stack_push( stack, prior_cell );
+                stack_push( stack, prior_out );
+                stack_push( stack, out );           // out becomes right argument for prior_cell
             }
         }
-        else
+        else // fully resolve operation
         {
-            resolve_stack = false;
+            bhgp_sem_cell_s_get_enc_by_open( cell )->up = link1;
+            bhgp_sem_cell_s_get_enc_by_open( cell )->up = link2;
+            stack_push( stack, out );
         }
+    }
+
+    /// Adjacent holors
+    while( stack->size >= 2 && stack_of_type( stack, 1, TYPEOF_bhgp_sem_link_s ) && stack_of_type( stack, 2, TYPEOF_bhgp_sem_link_s ) )
+    {
+        bhgp_sem_link_s* link2 = stack_pop_link( stack, source );
+        bhgp_sem_link_s* link1 = stack_pop_link( stack, source );
+        bhgp_sem_cell_s* cell = bhgp_sem_cell_s_push_cell_op_d_set_source( o, ( bhgp_op* )bhgp_op_ar2_cat_s_create(), source );
+        cell->encs.data[ 0 ]->up = link1;
+        cell->encs.data[ 1 ]->up = link2;
+        stack_push( stack, cell->excs.data[ 0 ] );
     }
 
     bmath_hf3_s_detach( &literal );
@@ -1459,7 +1483,7 @@ void bhgp_net_node_s_err_fa( bhgp_net_node_s* o, sc_t format, ... )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**
- *  solve executes operator->solve to compute a holor.
+ *  Function 'solve' executes operator->solve to compute a holor.
  *  If a holor can be computed (vacant or determined), the solve-route is considered finished
  *  and will not be processed again. A detached result (o->h == NULL) causes a route to be reentered.
  *  If operator->solve returns 1, the operation is considered settled, in which case all uplinks
@@ -2367,16 +2391,20 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
 
     bcore_source* source  = BLM_A_PUSH( bcore_file_open_source_path( &o->src ) );
 
+    f3_t time_parse_sem = 0;
+    f3_t time_build_net = 0;
+    f3_t time_final_net = 0;
+
     /// semantic graph
     bhgp_sem_cell_s* sem_frame = BLM_A_PUSH( sem_cell_s_create_frame() );
     bhgp_sem_cell_s_parse_signature( sem_frame, BLM_A_PUSH( bcore_source_string_s_create_from_string( &o->sig ) ) );
     bcore_source_point_s_set( &sem_frame->source_point, source );
-    bhgp_sem_cell_s_parse_body( sem_frame, source );
+    CPU_TIME_OF( bhgp_sem_cell_s_parse_body( sem_frame, source ), time_parse_sem );
 
     /// network graph
     bhgp_net_cell_s* net_frame = BLM_CREATE( bhgp_net_cell_s );
-    bhgp_net_cell_s_from_sem_cell( net_frame, sem_frame, bhgp_eval_e2e_s_input_op_create, ( vd_t )o, o->verbosity > 5 ? o->log : NULL );
-    bhgp_net_cell_s_finalize( net_frame );
+    CPU_TIME_OF( bhgp_net_cell_s_from_sem_cell( net_frame, sem_frame, bhgp_eval_e2e_s_input_op_create, ( vd_t )o, o->verbosity > 5 ? o->log : NULL ), time_build_net );
+    CPU_TIME_OF( bhgp_net_cell_s_finalize( net_frame ), time_final_net );
 
     if( o->log && o->verbosity >= 1 )
     {
@@ -2398,13 +2426,20 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
         ASSERT( bhgp_net_cell_s_is_consistent( cloned_cell ) );
     }
 
+    f3_t time_vm_build_main   = 0;
+    f3_t time_vm_build_setup  = 0;
+    f3_t time_vm_build_shelve = 0;
+    f3_t time_vm_run_setup = 0;
+    f3_t time_vm_run_main = 0;
+
     bmath_hf3_vm_frame_s* vm_frame = BLM_CREATE( bmath_hf3_vm_frame_s );
-    bhgp_net_cell_s_vm_build_main(   net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "main"   ) );
-    bhgp_net_cell_s_vm_build_setup(  net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "setup"  ) );
-    bhgp_net_cell_s_vm_build_shelve( net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "shelve" ) );
+    CPU_TIME_OF( bhgp_net_cell_s_vm_build_main(   net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "main"   ) ), time_vm_build_main  );
+    CPU_TIME_OF( bhgp_net_cell_s_vm_build_setup(  net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "setup"  ) ), time_vm_build_setup  );
+    CPU_TIME_OF( bhgp_net_cell_s_vm_build_shelve( net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "shelve" ) ), time_vm_build_shelve );
     bhgp_net_cell_s_vm_set_input(    net_frame, vm_frame );
     bhgp_net_cell_s_vm_set_output(   net_frame, vm_frame );
-    bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "setup" ) );
+    CPU_TIME_OF( bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "setup" ) ), time_vm_run_setup );
+    CPU_TIME_OF( bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "setup" ) ), time_vm_run_main );
 
     for( sz_t i = 0; i < net_frame->encs.size; i++ )
     {
@@ -2416,6 +2451,19 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
     bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "main" ) );
 
     bl_t success = true;
+
+    if( o->verbosity >= 1 )
+    {
+        bcore_sink_a_push_fa( o->log, "Timing (ms):\n" );
+        bcore_sink_a_push_fa( o->log, "  Parsing ............... #<f3_t>\n", 1000 * time_parse_sem );
+        bcore_sink_a_push_fa( o->log, "  Building network ...... #<f3_t>\n", 1000 * time_build_net );
+        bcore_sink_a_push_fa( o->log, "  Finalizing network .... #<f3_t>\n", 1000 * time_final_net );
+        bcore_sink_a_push_fa( o->log, "  VM: Building 'main' ... #<f3_t>\n", 1000 * time_vm_build_main );
+        bcore_sink_a_push_fa( o->log, "  VM: Building 'setup' .. #<f3_t>\n", 1000 * time_vm_build_setup );
+        bcore_sink_a_push_fa( o->log, "  VM: Building 'shelve' . #<f3_t>\n", 1000 * time_vm_build_shelve );
+        bcore_sink_a_push_fa( o->log, "  VM: Running  'setup' .. #<f3_t>\n", 1000 * time_vm_run_setup );
+        bcore_sink_a_push_fa( o->log, "  VM: Running  'main' ... #<f3_t>\n", 1000 * time_vm_run_main );
+    }
 
     for( sz_t i = 0; i < net_frame->excs.size; i++ )
     {

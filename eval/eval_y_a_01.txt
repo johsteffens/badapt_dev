@@ -4,7 +4,7 @@
     src:<bcore_file_path_s> name:<st_s>"bhgp_eval_01.hgp"</> </>
 
     in:<bmath_hf3_adl_s>
-        <bmath_hf3_s> 
+        <bmath_hf3_s>
             d:<2037637019> <sz_t>2</> </>
             v:<3882127946> <f3_t>1</> <f3_t>1</> </>
         </>
@@ -12,7 +12,7 @@
 
     out:<bmath_hf3_adl_s>NULL</>
 
-    verbosity:<s2_t>1</>
+    verbosity:<s2_t>10</>
 
     max_dev:<f3_t>1e-08</>
 </>
