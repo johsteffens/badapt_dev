@@ -22,8 +22,8 @@ cell ack( y => n, m )
       else                   ack( n - 1, ack( n, m - 1 ) );
 };
 
-//y = x( 1000 ) : ( a );
+y = x( 1000 ) : ( a );
 
-y = ack( 1, 1 );
+//y = ack( 3, 2 );
 
 //y = --1;

@@ -136,6 +136,8 @@ BCORE_DEFINE_SPECT( bhgp, bhgp_op )
     "feature aware bhgp_op : solve;"
     "feature aware bhgp_op : create_final = bhgp_op_create_final__;"
     "feature aware bhgp_op : create_vm_op = bhgp_op_create_vm_op__;"
+    "feature aware bhgp_op : create_axonpass = bhgp_op_create_axonpass__;"
+    "feature aware bhgp_op : create_dendpass = bhgp_op_create_dendpass__;"
 "}";
 
 
@@ -212,10 +214,32 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_neg_s )
     "func bhgp_op:get_priority;"
     "func bhgp_op:solve;"
     "func ^:create_vm_op_ar1;"
+    "func bhgp_op:create_axonpass;"
+    "func bhgp_op:create_dendpass;"
     "func bhgp_op:create_op_of_arn;"
     "func bhgp_op:get_arity;"
     "func bhgp_op:create_vm_op;"
 "}";
+
+bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_axonpass( const bhgp_op_ar1_neg_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx )
+{
+    ASSERT( arr_idx->size == 2 );
+    bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_neg_s_fx );
+    op->a = arr_idx->data[ 0 ];
+    op->b = arr_idx->data[ 1 ];
+    return ( bmath_hf3_vm_op* )op;
+}
+
+bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_dendpass( const bhgp_op_ar1_neg_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx )
+{
+    ASSERT( arr_idx->size == 4 );
+    ASSERT( ch_idx        == 0 );
+    bmath_hf3_vm_op_ar2_sub_s* op = bmath_hf3_vm_op_ar2_sub_s_create();
+    op->a = arr_idx->data[ 2 ];
+    op->b = arr_idx->data[ 3 ];
+    op->c = arr_idx->data[ 2 ];
+    return ( bmath_hf3_vm_op* )op;
+}
 
 bhgp_op* bhgp_op_ar1_neg_s_create_op_of_arn( const bhgp_op_ar1_neg_s* o, sz_t n )
 {
@@ -231,9 +255,29 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_floor_s )
     "func bhgp_op:get_priority;"
     "func bhgp_op:solve;"
     "func ^:create_vm_op_ar1;"
+    "func bhgp_op:create_axonpass;"
+    "func bhgp_op:create_dendpass;"
     "func bhgp_op:get_arity;"
     "func bhgp_op:create_vm_op;"
 "}";
+
+bmath_hf3_vm_op* bhgp_op_ar1_floor_s_create_axonpass( const bhgp_op_ar1_floor_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx )
+{
+    ASSERT( arr_idx->size == 2 );
+    bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( floor );
+    op->a = arr_idx->data[ 0 ];
+    op->b = arr_idx->data[ 1 ];
+    return ( bmath_hf3_vm_op* )op;
+}
+
+bmath_hf3_vm_op* bhgp_op_ar1_floor_s_create_dendpass( const bhgp_op_ar1_floor_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx )
+{
+    ASSERT( arr_idx->size == 4 );
+    ASSERT( ch_idx        == 0 );
+    bmath_hf3_vm_op_ar0_nul_s* op = bmath_hf3_vm_op_ar0_nul_s_create();
+    op->a = arr_idx->data[ 2 ];
+    return ( bmath_hf3_vm_op* )op;
+}
 
 BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_ceil_s )
 "aware bhgp_op_ar1"
@@ -242,9 +286,29 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_ceil_s )
     "func bhgp_op:get_priority;"
     "func bhgp_op:solve;"
     "func ^:create_vm_op_ar1;"
+    "func bhgp_op:create_axonpass;"
+    "func bhgp_op:create_dendpass;"
     "func bhgp_op:get_arity;"
     "func bhgp_op:create_vm_op;"
 "}";
+
+bmath_hf3_vm_op* bhgp_op_ar1_ceil_s_create_axonpass( const bhgp_op_ar1_ceil_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx )
+{
+    ASSERT( arr_idx->size == 2 );
+    bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil );
+    op->a = arr_idx->data[ 0 ];
+    op->b = arr_idx->data[ 1 ];
+    return ( bmath_hf3_vm_op* )op;
+}
+
+bmath_hf3_vm_op* bhgp_op_ar1_ceil_s_create_dendpass( const bhgp_op_ar1_ceil_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx )
+{
+    ASSERT( arr_idx->size == 4 );
+    ASSERT( ch_idx        == 0 );
+    bmath_hf3_vm_op_ar0_nul_s* op = bmath_hf3_vm_op_ar0_nul_s_create();
+    op->a = arr_idx->data[ 2 ];
+    return ( bmath_hf3_vm_op* )op;
+}
 
 BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_tanh_s )
 "aware bhgp_op_ar1"
@@ -253,9 +317,19 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_tanh_s )
     "func bhgp_op:get_priority;"
     "func bhgp_op:solve;"
     "func ^:create_vm_op_ar1;"
+    "func bhgp_op:create_axonpass;"
     "func bhgp_op:get_arity;"
     "func bhgp_op:create_vm_op;"
 "}";
+
+bmath_hf3_vm_op* bhgp_op_ar1_tanh_s_create_axonpass( const bhgp_op_ar1_tanh_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx )
+{
+    ASSERT( arr_idx->size == 2 );
+    bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_tanh_s_fx );
+    op->a = arr_idx->data[ 0 ];
+    op->b = arr_idx->data[ 1 ];
+    return ( bmath_hf3_vm_op* )op;
+}
 
 BCORE_DEFINE_OBJECT_INST_P( bhgp_op_ar1_exp_s )
 "aware bhgp_op_ar1"
@@ -931,38 +1005,38 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_sem_links_s )
 
 bhgp_sem_link_s* bhgp_sem_links_s_get_link_by_name( bhgp_sem_links_s* o, tp_t name )
 {
-    BFOR_EACH( o, i ) if( o->data[ i ]->name == name ) return o->data[ i ];
+    BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return o->data[ i ];
     return NULL;
 }
 
 bl_t bhgp_sem_links_s_name_exists( const bhgp_sem_links_s* o, tp_t name )
 {
-    BFOR_EACH( o, i ) if( o->data[ i ]->name == name ) return true;
+    BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return true;
     return false;
 }
 
 bhgp_sem_link_s* bhgp_sem_links_s_get_link_by_up( bhgp_sem_links_s* o, bhgp_sem_link_s* up )
 {
-    BFOR_EACH( o, i ) if( o->data[ i ]->up == up ) return o->data[ i ];
+    BFOR_EACH( i, o ) if( o->data[ i ]->up == up ) return o->data[ i ];
     return NULL;
 }
 
 bhgp_sem_link_s* bhgp_sem_links_s_get_link_by_dn( bhgp_sem_links_s* o, bhgp_sem_link_s* dn )
 {
-    BFOR_EACH( o, i ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
+    BFOR_EACH( i, o ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
     return NULL;
 }
 
 sz_t bhgp_sem_links_s_get_index_by_link( bhgp_sem_links_s* o, bhgp_sem_link_s* link )
 {
-    BFOR_EACH( o, i ) if( o->data[ i ] == link ) return i;
+    BFOR_EACH( i, o ) if( o->data[ i ] == link ) return i;
     return -1;
 }
 
 sz_t bhgp_sem_links_s_count_open( const bhgp_sem_links_s* o )
 {
     sz_t count = 0;
-    BFOR_EACH( o, i ) count += ( o->data[ i ]->up == NULL );
+    BFOR_EACH( i, o ) count += ( o->data[ i ]->up == NULL );
     return count;
 }
 
@@ -976,13 +1050,13 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_sem_body_s )
 
 bl_t bhgp_sem_body_s_name_exists( const bhgp_sem_body_s* o, tp_t name )
 {
-    BFOR_EACH( o, i ) if( bhgp_sem_a_get_name( o->data[ i ] ) == name ) return true;
+    BFOR_EACH( i, o ) if( bhgp_sem_a_get_name( o->data[ i ] ) == name ) return true;
     return false;
 }
 
 bhgp_sem* bhgp_sem_body_s_get_sem_by_name( bhgp_sem_body_s* o, tp_t name )
 {
-    BFOR_EACH( o, i ) if( bhgp_sem_a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+    BFOR_EACH( i, o ) if( bhgp_sem_a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
     return NULL;
 }
 
@@ -1068,8 +1142,9 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_net_node_s )
 "{"
     "bhgp_net_links_s upls;"
     "bhgp_net_links_s dnls;"
-    "sz_t id;"
     "bl_t flag = false;"
+    "sz_t id;"
+    "sz_t gid = -1;"
     "tp_t name;"
     "aware bhgp_op -> op;"
     "bmath_hf3_s-> h;"
@@ -1086,7 +1161,7 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_net_nodes_s )
 
 bhgp_net_node_s* bhgp_net_nodes_s_get_by_id( bhgp_net_nodes_s* o, sz_t id )
 {
-    BFOR_EACH( o, i ) if( o->data[ i ]->id == id ) return o->data[ i ];
+    BFOR_EACH( i, o ) if( o->data[ i ]->id == id ) return o->data[ i ];
     return NULL;
 }
 
@@ -1109,17 +1184,17 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_net_cell_s )
 
 void bhgp_net_cell_s_clear_flags( bhgp_net_cell_s* o )
 {
-    BFOR_EACH( &o->body, i ) o->body.data[ i ]->flag = false;
+    BFOR_EACH( i, &o->body ) o->body.data[ i ]->flag = false;
 }
 
 void bhgp_net_cell_s_solve( bhgp_net_cell_s* o )
 {
-    BFOR_EACH( &o->excs, i ) bhgp_net_node_s_solve( o->excs.data[ i ] );
+    BFOR_EACH( i, &o->excs ) bhgp_net_node_s_solve( o->excs.data[ i ] );
 }
 
 void bhgp_net_cell_s_clear_downlinks( bhgp_net_cell_s* o )
 {
-    BFOR_EACH( &o->body, i ) bhgp_net_links_s_clear( &o->body.data[ i ]->dnls );
+    BFOR_EACH( i, &o->body ) bhgp_net_links_s_clear( &o->body.data[ i ]->dnls );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1193,7 +1268,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 2157039440 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 597967666 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -1234,6 +1309,10 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhgp_op_create_final, bhgp_op_create_final__ );
             BCORE_REGISTER_FEATURE( bhgp_op_create_vm_op );
             BCORE_REGISTER_FFUNC( bhgp_op_create_vm_op, bhgp_op_create_vm_op__ );
+            BCORE_REGISTER_FEATURE( bhgp_op_create_axonpass );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_axonpass, bhgp_op_create_axonpass__ );
+            BCORE_REGISTER_FEATURE( bhgp_op_create_dendpass );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_dendpass, bhgp_op_create_dendpass__ );
             BCORE_REGISTER_SPECT( bhgp_op );
             BCORE_REGISTER_FEATURE( bhgp_op_ar0_create_vm_op_ar0 );
             BCORE_REGISTER_FFUNC( bhgp_op_ar0_create_vm_op_ar0, bhgp_op_ar0_create_vm_op_ar0__ );
@@ -1259,6 +1338,8 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar1_neg_s_get_priority );
             BCORE_REGISTER_FFUNC( bhgp_op_solve, bhgp_op_ar1_neg_s_solve );
             BCORE_REGISTER_FFUNC( bhgp_op_ar1_create_vm_op_ar1, bhgp_op_ar1_neg_s_create_vm_op_ar1 );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_axonpass, bhgp_op_ar1_neg_s_create_axonpass );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_dendpass, bhgp_op_ar1_neg_s_create_dendpass );
             BCORE_REGISTER_FFUNC( bhgp_op_create_op_of_arn, bhgp_op_ar1_neg_s_create_op_of_arn );
             BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar1_neg_s_get_arity );
             BCORE_REGISTER_FFUNC( bhgp_op_create_vm_op, bhgp_op_ar1_neg_s_create_vm_op );
@@ -1267,6 +1348,8 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar1_floor_s_get_priority );
             BCORE_REGISTER_FFUNC( bhgp_op_solve, bhgp_op_ar1_floor_s_solve );
             BCORE_REGISTER_FFUNC( bhgp_op_ar1_create_vm_op_ar1, bhgp_op_ar1_floor_s_create_vm_op_ar1 );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_axonpass, bhgp_op_ar1_floor_s_create_axonpass );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_dendpass, bhgp_op_ar1_floor_s_create_dendpass );
             BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar1_floor_s_get_arity );
             BCORE_REGISTER_FFUNC( bhgp_op_create_vm_op, bhgp_op_ar1_floor_s_create_vm_op );
             BCORE_REGISTER_OBJECT( bhgp_op_ar1_floor_s );
@@ -1274,6 +1357,8 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar1_ceil_s_get_priority );
             BCORE_REGISTER_FFUNC( bhgp_op_solve, bhgp_op_ar1_ceil_s_solve );
             BCORE_REGISTER_FFUNC( bhgp_op_ar1_create_vm_op_ar1, bhgp_op_ar1_ceil_s_create_vm_op_ar1 );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_axonpass, bhgp_op_ar1_ceil_s_create_axonpass );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_dendpass, bhgp_op_ar1_ceil_s_create_dendpass );
             BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar1_ceil_s_get_arity );
             BCORE_REGISTER_FFUNC( bhgp_op_create_vm_op, bhgp_op_ar1_ceil_s_create_vm_op );
             BCORE_REGISTER_OBJECT( bhgp_op_ar1_ceil_s );
@@ -1281,6 +1366,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhgp_op_get_priority, bhgp_op_ar1_tanh_s_get_priority );
             BCORE_REGISTER_FFUNC( bhgp_op_solve, bhgp_op_ar1_tanh_s_solve );
             BCORE_REGISTER_FFUNC( bhgp_op_ar1_create_vm_op_ar1, bhgp_op_ar1_tanh_s_create_vm_op_ar1 );
+            BCORE_REGISTER_FFUNC( bhgp_op_create_axonpass, bhgp_op_ar1_tanh_s_create_axonpass );
             BCORE_REGISTER_FFUNC( bhgp_op_get_arity, bhgp_op_ar1_tanh_s_get_arity );
             BCORE_REGISTER_FFUNC( bhgp_op_create_vm_op, bhgp_op_ar1_tanh_s_create_vm_op );
             BCORE_REGISTER_OBJECT( bhgp_op_ar1_tanh_s );

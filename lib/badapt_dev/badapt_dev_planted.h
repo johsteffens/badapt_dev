@@ -132,6 +132,8 @@
   typedef s2_t (*bhgp_op_solve)( const bhgp_op* o, bmath_hf3_s** r, bmath_hf3_s** a ); \
   typedef bhgp_op* (*bhgp_op_create_final)( const bhgp_op* o, bmath_hf3_s* h ); \
   typedef bmath_hf3_vm_op* (*bhgp_op_create_vm_op)( const bhgp_op* o, const bmath_hf3_s** a, const bmath_hf3_s* r ); \
+  typedef bmath_hf3_vm_op* (*bhgp_op_create_axonpass)( const bhgp_op* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx ); \
+  typedef bmath_hf3_vm_op* (*bhgp_op_create_dendpass)( const bhgp_op* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx ); \
   BCORE_DECLARE_SPECT( bhgp_op ) \
   { \
       bcore_spect_header_s header; \
@@ -142,6 +144,8 @@
       bhgp_op_solve solve; \
       bhgp_op_create_final create_final; \
       bhgp_op_create_vm_op create_vm_op; \
+      bhgp_op_create_axonpass create_axonpass; \
+      bhgp_op_create_dendpass create_dendpass; \
   }; \
   static inline bhgp_op* bhgp_op_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_bhgp_op, t ); return ( bhgp_op* )bcore_inst_t_create( t ); } \
   static inline bl_t bhgp_op_t_is_trait_of( tp_t t ) { return bcore_trait_is_of( t, TYPEOF_bhgp_op ); } \
@@ -166,6 +170,12 @@
   static inline bmath_hf3_vm_op* bhgp_op_a_create_vm_op( const bhgp_op* o, const bmath_hf3_s** a, const bmath_hf3_s* r ) { const bhgp_op_s* p = bhgp_op_s_get_aware( o ); assert( p->create_vm_op ); return p->create_vm_op( o, a, r ); } \
   static inline bl_t bhgp_op_a_defines_create_vm_op( const bhgp_op* o ) { return true; } \
   static inline bmath_hf3_vm_op* bhgp_op_create_vm_op__( const bhgp_op* o, const bmath_hf3_s** a, const bmath_hf3_s* r ) { return NULL; } \
+  static inline bmath_hf3_vm_op* bhgp_op_a_create_axonpass( const bhgp_op* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx ) { const bhgp_op_s* p = bhgp_op_s_get_aware( o ); assert( p->create_axonpass ); return p->create_axonpass( o, vmf, arr_idx ); } \
+  static inline bl_t bhgp_op_a_defines_create_axonpass( const bhgp_op* o ) { return true; } \
+  static inline bmath_hf3_vm_op* bhgp_op_create_axonpass__( const bhgp_op* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx ) { return NULL; } \
+  static inline bmath_hf3_vm_op* bhgp_op_a_create_dendpass( const bhgp_op* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx ) { const bhgp_op_s* p = bhgp_op_s_get_aware( o ); assert( p->create_dendpass ); return p->create_dendpass( o, vmf, arr_idx, ch_idx ); } \
+  static inline bl_t bhgp_op_a_defines_create_dendpass( const bhgp_op* o ) { return true; } \
+  static inline bmath_hf3_vm_op* bhgp_op_create_dendpass__( const bhgp_op* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx ) { return NULL; } \
   BETH_EXPAND_GROUP_bhgp_op_ar0 \
   BETH_EXPAND_GROUP_bhgp_op_ar1 \
   BETH_EXPAND_GROUP_bhgp_op_ar2 \
@@ -235,6 +245,8 @@
   static inline sz_t bhgp_op_ar1_neg_s_get_priority( const bhgp_op_ar1_neg_s* o ){ return 8; } \
   static inline s2_t bhgp_op_ar1_neg_s_solve( const bhgp_op_ar1_neg_s* o, bmath_hf3_s** r, bmath_hf3_s** a ){ return bhgp_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx ); } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_vm_op_ar1( const bhgp_op_ar1_neg_s* o, const bmath_hf3_s* a, const bmath_hf3_s* r ){ return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_neg_s_fx ); } \
+  bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_axonpass( const bhgp_op_ar1_neg_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx ); \
+  bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_dendpass( const bhgp_op_ar1_neg_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx ); \
   bhgp_op* bhgp_op_ar1_neg_s_create_op_of_arn( const bhgp_op_ar1_neg_s* o, sz_t n ); \
   static inline sz_t bhgp_op_ar1_neg_s_get_arity( const bhgp_op_ar1_neg_s* o ){ return 1; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_neg_s_create_vm_op( const bhgp_op_ar1_neg_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar1_neg_s_create_vm_op_ar1( o, a[0], r ); }
@@ -246,6 +258,8 @@
   static inline sz_t bhgp_op_ar1_floor_s_get_priority( const bhgp_op_ar1_floor_s* o ){ return 8; } \
   static inline s2_t bhgp_op_ar1_floor_s_solve( const bhgp_op_ar1_floor_s* o, bmath_hf3_s** r, bmath_hf3_s** a ){ return bhgp_op_ar1_solve_unary( r, a, floor ); } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_floor_s_create_vm_op_ar1( const bhgp_op_ar1_floor_s* o, const bmath_hf3_s* a, const bmath_hf3_s* r ){ return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( floor ); } \
+  bmath_hf3_vm_op* bhgp_op_ar1_floor_s_create_axonpass( const bhgp_op_ar1_floor_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx ); \
+  bmath_hf3_vm_op* bhgp_op_ar1_floor_s_create_dendpass( const bhgp_op_ar1_floor_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx ); \
   static inline sz_t bhgp_op_ar1_floor_s_get_arity( const bhgp_op_ar1_floor_s* o ){ return 1; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_floor_s_create_vm_op( const bhgp_op_ar1_floor_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar1_floor_s_create_vm_op_ar1( o, a[0], r ); }
 #define TYPEOF_bhgp_op_ar1_ceil_s 953341815
@@ -256,6 +270,8 @@
   static inline sz_t bhgp_op_ar1_ceil_s_get_priority( const bhgp_op_ar1_ceil_s* o ){ return 8; } \
   static inline s2_t bhgp_op_ar1_ceil_s_solve( const bhgp_op_ar1_ceil_s* o, bmath_hf3_s** r, bmath_hf3_s** a ){ return bhgp_op_ar1_solve_unary( r, a, ceil ); } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_ceil_s_create_vm_op_ar1( const bhgp_op_ar1_ceil_s* o, const bmath_hf3_s* a, const bmath_hf3_s* r ){ return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil ); } \
+  bmath_hf3_vm_op* bhgp_op_ar1_ceil_s_create_axonpass( const bhgp_op_ar1_ceil_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx ); \
+  bmath_hf3_vm_op* bhgp_op_ar1_ceil_s_create_dendpass( const bhgp_op_ar1_ceil_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx, sz_t ch_idx ); \
   static inline sz_t bhgp_op_ar1_ceil_s_get_arity( const bhgp_op_ar1_ceil_s* o ){ return 1; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_ceil_s_create_vm_op( const bhgp_op_ar1_ceil_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar1_ceil_s_create_vm_op_ar1( o, a[0], r ); }
 #define TYPEOF_bhgp_op_ar1_tanh_s 1042225039
@@ -266,6 +282,7 @@
   static inline sz_t bhgp_op_ar1_tanh_s_get_priority( const bhgp_op_ar1_tanh_s* o ){ return 8; } \
   static inline s2_t bhgp_op_ar1_tanh_s_solve( const bhgp_op_ar1_tanh_s* o, bmath_hf3_s** r, bmath_hf3_s** a ){ return bhgp_op_ar1_solve_unary( r, a, tanh ); } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_tanh_s_create_vm_op_ar1( const bhgp_op_ar1_tanh_s* o, const bmath_hf3_s* a, const bmath_hf3_s* r ){ return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( tanh ); } \
+  bmath_hf3_vm_op* bhgp_op_ar1_tanh_s_create_axonpass( const bhgp_op_ar1_tanh_s* o, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx ); \
   static inline sz_t bhgp_op_ar1_tanh_s_get_arity( const bhgp_op_ar1_tanh_s* o ){ return 1; } \
   static inline bmath_hf3_vm_op* bhgp_op_ar1_tanh_s_create_vm_op( const bhgp_op_ar1_tanh_s* o, const bmath_hf3_s** a, const bmath_hf3_s* r ){ return bhgp_op_ar1_tanh_s_create_vm_op_ar1( o, a[0], r ); }
 #define TYPEOF_bhgp_op_ar1_exp_s 515336869
@@ -785,7 +802,7 @@
 #define TYPEOF_bhgp_net_node_s 257682039
 #define BETH_EXPAND_ITEM_bhgp_net_node_s \
   BCORE_DECLARE_OBJECT( bhgp_net_node_s ) \
-    {aware_t _;bhgp_net_links_s upls;bhgp_net_links_s dnls;sz_t id;bl_t flag;tp_t name;bhgp_op* op;bmath_hf3_s* h;bcore_source_point_s* source_point;}; \
+    {aware_t _;bhgp_net_links_s upls;bhgp_net_links_s dnls;bl_t flag;sz_t id;sz_t gid;tp_t name;bhgp_op* op;bmath_hf3_s* h;bcore_source_point_s* source_point;}; \
   void bhgp_net_node_s_solve( bhgp_net_node_s* o );
 #define TYPEOF_bhgp_net_nodes_s 479725708
 #define BETH_EXPAND_ITEM_bhgp_net_nodes_s \

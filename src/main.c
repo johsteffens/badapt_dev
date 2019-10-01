@@ -28,10 +28,10 @@ int main( int argc, char** argv )
 
     BLM_INIT();
 
-    s2_t ret = 0;
+    s2_t ret = -1;
     bcore_main_frame_s* main_frame = BLM_CREATE( bcore_main_frame_s );
     main_frame->use_first_argument = true;
-    ret = bcore_main_frame_s_main( main_frame, argc, argv );
+    //ret = bcore_main_frame_s_main( main_frame, argc, argv );
     if( ret >= 0 )
     {
         BLM_DOWN();
@@ -43,8 +43,8 @@ int main( int argc, char** argv )
 
 //    bsym_test();
 //    bhgp_test();
-//    bhgp_adaptive_test();
-      bhgp_simple_eval();
+    bhgp_adaptive_test();
+//      bhgp_simple_eval();
 
 //    bcore_quicktypes_to_stdout( NULL );
 //    return 0;

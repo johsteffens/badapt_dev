@@ -117,6 +117,15 @@
  *     holorgraph
  *     holornova
  *
+ *  Dendpass-Algorithm:
+ *  specific method to compute the local gradient via automatic differentiation
+ *  using reverse accumulation to backpropagate gradients:
+ *  - Each node holds a gradient holor of same shape as its output holor
+ *  - The gradient holor represents the gradient with respect to the last input given the current state of the network.
+ *  - The backpass algorithm for a specific node computes the gradient through a specific node-channel and adds it to (accumulates)
+ *    the gradient of the node linked to the input channel. This step is done by s singe virtual operation.
+ *  - The backpass procedure is compiled by recursively passing each node starting from the adaptive node downward through
+ *    all downlinks.
  */
 
 #ifndef BHGP_H
@@ -161,6 +170,8 @@ group :op =
     /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
     feature        'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_get_arity( o ) == n ) ? :a_clone( o ) : NULL; };
 
+    signature bmath_hf3_vm_op* create_vm_op_pass( const, const bmath_hf3_vm_frame_s* vmf, const bcore_arr_sz_s* arr_idx );
+
     /** Solve computes the result 'r' from an array of arguments 'a'.
       * 'a' represents an array of pointers. The array size is equal to arity.
       * Solve can produced three valid states:
@@ -183,7 +194,21 @@ group :op =
         return (::op*)final;
     };
 
+    /// virtual machine operation for forward processing
     feature 'a' bmath_hf3_vm_op* create_vm_op( const, const bmath_hf3_s** a, const bmath_hf3_s* r ) = { return NULL; };
+
+    /** virtual machine operation for forward processing (towards axon).
+      * Index array: (channel 0, ..., n-1), output channel
+      * (n == arity)
+      */
+    feature 'a' :create_vm_op_pass create_axonpass = { return NULL; };
+
+    /** virtual machine operation backward gradient propagation (towards dendrite). (n = arity)
+      * Index array: channel [0, ...,n-1], output channel, grad-input-channel, grad-output-channel
+      * ch_idx: index of input channel for gradient propagation [0, ...,n-1]
+      * (n == arity)
+      */
+    feature 'a' :create_vm_op_pass create_dendpass( sz_t ch_idx ) = { return NULL; };
 
     /// nullary operator (arity 0)
     group :ar0 =
@@ -247,6 +272,28 @@ group :op =
             func :: :get_priority     = { return 8; };
             func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_neg_s_fx ); };
+
+            func :: :create_axonpass =
+            {
+                ASSERT( arr_idx->size == 2 );
+                bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_neg_s_fx );
+                op->a = arr_idx->data[ 0 ];
+                op->b = arr_idx->data[ 1 ];
+                return ( bmath_hf3_vm_op* )op;
+            };
+
+            // subtracts gradient
+            func :: :create_dendpass =
+            {
+                ASSERT( arr_idx->size == 4 );
+                ASSERT( ch_idx        == 0 );
+                bmath_hf3_vm_op_ar2_sub_s* op = bmath_hf3_vm_op_ar2_sub_s_create();
+                op->a = arr_idx->data[ 2 ];
+                op->b = arr_idx->data[ 3 ];
+                op->c = arr_idx->data[ 2 ];
+                return ( bmath_hf3_vm_op* )op;
+            };
+
             func :: :create_op_of_arn =
             {
                 return ( n == 2 ) ? (::*)::ar2_minus_s_create()
@@ -261,6 +308,25 @@ group :op =
             func :: :get_priority     = { return 8; };
             func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, floor ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( floor ); };
+
+            func :: :create_axonpass =
+            {
+                ASSERT( arr_idx->size == 2 );
+                bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( floor );
+                op->a = arr_idx->data[ 0 ];
+                op->b = arr_idx->data[ 1 ];
+                return ( bmath_hf3_vm_op* )op;
+            };
+
+            // gradient is zero -> nothing to do
+            func :: :create_dendpass =
+            {
+                ASSERT( arr_idx->size == 4 );
+                ASSERT( ch_idx        == 0 );
+                bmath_hf3_vm_op_ar0_nul_s* op = bmath_hf3_vm_op_ar0_nul_s_create();
+                op->a = arr_idx->data[ 2 ];
+                return ( bmath_hf3_vm_op* )op;
+            };
         };
 
         stamp :ceil = aware :
@@ -269,6 +335,25 @@ group :op =
             func :: :get_priority     = { return 8; };
             func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, ceil ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil ); };
+
+            func :: :create_axonpass =
+            {
+                ASSERT( arr_idx->size == 2 );
+                bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( ceil );
+                op->a = arr_idx->data[ 0 ];
+                op->b = arr_idx->data[ 1 ];
+                return ( bmath_hf3_vm_op* )op;
+            };
+
+            // gradient is zero -> nothing to do
+            func :: :create_dendpass =
+            {
+                ASSERT( arr_idx->size == 4 );
+                ASSERT( ch_idx        == 0 );
+                bmath_hf3_vm_op_ar0_nul_s* op = bmath_hf3_vm_op_ar0_nul_s_create();
+                op->a = arr_idx->data[ 2 ];
+                return ( bmath_hf3_vm_op* )op;
+            };
         };
 
         stamp :tanh = aware :
@@ -277,6 +362,16 @@ group :op =
             func :: :get_priority     = { return 8; };
             func :: :solve            = { return bhgp_op_ar1_solve_unary( r, a, tanh ); };
             func  : :create_vm_op_ar1 = { return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar1_unary_s_create_unary( tanh ); };
+
+            func :: :create_axonpass =
+            {
+                ASSERT( arr_idx->size == 2 );
+                bmath_hf3_vm_op_ar1_unary_s* op = bmath_hf3_vm_op_ar1_unary_s_create_unary( bmath_f3_op_ar1_tanh_s_fx );
+                op->a = arr_idx->data[ 0 ];
+                op->b = arr_idx->data[ 1 ];
+                return ( bmath_hf3_vm_op* )op;
+            };
+
         };
 
         stamp :exp = aware :
@@ -832,38 +927,38 @@ group :sem =
 
         func : :get_link_by_name =
         {
-            BFOR_EACH( o, i ) if( o->data[ i ]->name == name ) return o->data[ i ];
+            BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return o->data[ i ];
             return NULL;
         };
 
         func : :name_exists =
         {
-            BFOR_EACH( o, i ) if( o->data[ i ]->name == name ) return true;
+            BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return true;
             return false;
         };
 
         func : :get_link_by_up =
         {
-            BFOR_EACH( o, i ) if( o->data[ i ]->up == up ) return o->data[ i ];
+            BFOR_EACH( i, o ) if( o->data[ i ]->up == up ) return o->data[ i ];
             return NULL;
         };
 
         func : :get_link_by_dn =
         {
-            BFOR_EACH( o, i ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
+            BFOR_EACH( i, o ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
             return NULL;
         };
 
         func : :get_index_by_link =
         {
-            BFOR_EACH( o, i ) if( o->data[ i ] == link ) return i;
+            BFOR_EACH( i, o ) if( o->data[ i ] == link ) return i;
             return -1;
         };
 
         func : :count_open =
         {
             sz_t count = 0;
-            BFOR_EACH( o, i ) count += ( o->data[ i ]->up == NULL );
+            BFOR_EACH( i, o ) count += ( o->data[ i ]->up == NULL );
             return count;
         };
     };
@@ -874,13 +969,13 @@ group :sem =
 
         func : :name_exists =
         {
-            BFOR_EACH( o, i ) if( :a_get_name( o->data[ i ] ) == name ) return true;
+            BFOR_EACH( i, o ) if( :a_get_name( o->data[ i ] ) == name ) return true;
             return false;
         };
 
         func : :get_sem_by_name =
         {
-            BFOR_EACH( o, i ) if( :a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+            BFOR_EACH( i, o ) if( :a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
             return NULL;
         };
     };
@@ -969,11 +1064,29 @@ group :net =
     {
         :links_s upls; // uplinks
         :links_s dnls; // downlinks
+
+        /** Temporary flag used for various tracing routines.
+          * It is typically used to ensure a node is visited only once.
+          * Normalized state: false
+          */
+        bl_t flag = false;
+
+        /** Node ID.
+          * When the network cell is normalized, id is identical with the cell->body index.
+          * id is also used to address the holor in the virtual machine.
+          */
         sz_t id;
-        bl_t flag = false; // tracing-flag for functions tracing the network to ensure every node is visited only once (normal state: false)
+
+        /** Gradient ID.
+          * Indicates the location of the gradient holor for the node.
+          * -1 means: node needs no gradient.
+          */
+        sz_t gid = -1;
+
         tp_t name;
         aware ::op -> op;
-        bmath_hf3_s-> h; // holor after solving
+
+        bmath_hf3_s-> h; // holor after solving network
 
         bcore_source_point_s -> source_point;
 
@@ -986,7 +1099,7 @@ group :net =
         :node_s => [];
         func : :get_by_id =
         {
-            BFOR_EACH( o, i ) if( o->data[ i ]->id == id ) return o->data[ i ];
+            BFOR_EACH( i, o ) if( o->data[ i ]->id == id ) return o->data[ i ];
             return NULL;
         };
     };
@@ -1009,17 +1122,17 @@ group :net =
 
         func : :clear_flags =
         {
-            BFOR_EACH( &o->body, i ) o->body.data[ i ]->flag = false;
+            BFOR_EACH( i, &o->body ) o->body.data[ i ]->flag = false;
         };
 
         func : :solve =
         {
-            BFOR_EACH( &o->excs, i ) bhgp_net_node_s_solve( o->excs.data[ i ] );
+            BFOR_EACH( i, &o->excs ) bhgp_net_node_s_solve( o->excs.data[ i ] );
         };
 
         func : :clear_downlinks =
         {
-            BFOR_EACH( &o->body, i ) bhgp_net_links_s_clear( &o->body.data[ i ]->dnls );
+            BFOR_EACH( i, &o->body ) bhgp_net_links_s_clear( &o->body.data[ i ]->dnls );
         };
 
         func : :set_downlinks;
