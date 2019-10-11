@@ -1,0 +1,18 @@
+<bhgp_eval_e2e_s>
+    sig:<st_s> "( y, z => a )" </>
+
+    src:<bcore_file_path_s> name:<st_s>"bhgp_eval_adapt_01.hgp"</> </>
+
+    in: <bmath_hf3_adl_s> <st_s> "(( 1 2 3 )( -1 -2 -3 ))" </> </>
+
+    grad: <bhgp_eval_grad_s>
+        epsilon:<f3_t>0.00001</>
+        out:<bmath_hf3_adl_s> <st_s> "-3" </> <st_s> "0" </> </>
+        max_dev:<f3_t>1e-02</>
+    </>
+
+    verbosity:<s2_t>5</>
+
+    max_dev:<f3_t>1e-08</>
+</>
+

@@ -9,6 +9,6 @@ y =	cell mlp( y => dim_y, hidden_nodes, reduction_factor, a )
     q = b + w ** a;
     y = if( floor( hidden_nodes ) <= dim_y )
         then tanh( q )
-        else mlp( dim_y, hidden_nodes * reduction_factor, reduction_factor, lrelu( q ) );
+        else mlp( dim_y, hidden_nodes * reduction_factor, reduction_factor, relu_leaky( q ) );
 } ( dim_y, 10, 0.8, a );
 

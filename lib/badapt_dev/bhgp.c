@@ -320,8 +320,11 @@ s2_t bhgp_op_ar1_solve_unary( bmath_hf3_s** r, bmath_hf3_s** a, bmath_fp_f3_ar1 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bmath_hf3_vm_op* bhgp_op_ar2_mul_s_create_vm_op_ar2( const bhgp_op_ar2_mul_s* o, const bmath_hf3_s* a, const bmath_hf3_s* b, const bmath_hf3_s* r )
+bmath_hf3_vm_op* bhgp_op_ar2_mul_s_create_vm_op_ap( const bhgp_op_ar2_mul_s* o, const bmath_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx )
 {
+    ASSERT( arr_idx->size >= 2 );
+    const bmath_hf3_s* a = &bmath_hf3_vm_frame_s_holors_get_by_index( ( bmath_hf3_vm_frame_s* )vmf, arr_idx->data[ 0 ] )->h;
+    const bmath_hf3_s* b = &bmath_hf3_vm_frame_s_holors_get_by_index( ( bmath_hf3_vm_frame_s* )vmf, arr_idx->data[ 1 ] )->h;
     if( a->d_size == 0 )
     {
         return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_scl_mul_s_create();
@@ -334,6 +337,35 @@ bmath_hf3_vm_op* bhgp_op_ar2_mul_s_create_vm_op_ar2( const bhgp_op_ar2_mul_s* o,
     {
         return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_hmul_s_create();
     }
+    return NULL;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bmath_hf3_vm_op* bhgp_op_ar2_mul_s_create_vm_op_dp( const bhgp_op_ar2_mul_s* o, const bmath_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id )
+{
+    ASSERT( arr_idx->size >= 2 );
+    const bmath_hf3_s* a = &bmath_hf3_vm_frame_s_holors_get_by_index( ( bmath_hf3_vm_frame_s* )vmf, arr_idx->data[ 0 ] )->h;
+    const bmath_hf3_s* b = &bmath_hf3_vm_frame_s_holors_get_by_index( ( bmath_hf3_vm_frame_s* )vmf, arr_idx->data[ 1 ] )->h;
+
+    if( a->d_size == 0 )
+    {
+        if( ch_id == 'a' ) return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_dp_ca_scl_mul_s_create();
+        if( ch_id == 'b' ) return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_dp_cb_scl_mul_s_create();
+    }
+    else if( b->d_size == 0 )
+    {
+        if( ch_id == 'a' ) return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_dp_ca_mul_scl_s_create();
+        if( ch_id == 'b' ) return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_dp_cb_mul_scl_s_create();
+    }
+    else
+    {
+        if( ch_id == 'a' ) return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_dp_ca_hmul_s_create();
+        if( ch_id == 'b' ) return ( bmath_hf3_vm_op* )bmath_hf3_vm_op_ar2_dp_cb_hmul_s_create();
+    }
+
+    ERR_fa( "Invalid channel id '#<char>'", ch_id );
+
     return NULL;
 }
 
@@ -498,10 +530,10 @@ bhgp_sem_cell_s* bhgp_sem_cell_s_push_cell_op_d_set_source( bhgp_sem_cell_s* o, 
 /// v can be NULL pushing an undetermined scalar
 bhgp_sem_cell_s* bhgp_sem_cell_s_push_cell_scalar( bhgp_sem_cell_s* o, f3_t* v )
 {
-    bhgp_op_ar0_holor_s* holor = bhgp_op_ar0_holor_s_create();
-    holor->h = bmath_hf3_s_create();
-    bmath_hf3_s_set_scalar_pf3( holor->h, v );
-    return bhgp_sem_cell_s_push_cell_op_d( o, ( bhgp_op* )holor );
+    bhgp_op_ar0_literal_s* literal = bhgp_op_ar0_literal_s_create();
+    literal->h = bmath_hf3_s_create();
+    bmath_hf3_s_set_scalar_pf3( literal->h, v );
+    return bhgp_sem_cell_s_push_cell_op_d( o, ( bhgp_op* )literal );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -915,7 +947,6 @@ void bhgp_sem_cell_s_evaluate_stack( bhgp_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
         }
 
-        //else if( bcore_source_a_parse_bl_fa( source, " #?(([0]>='0'&&[0]<='9')||([0]=='-'&&([1]>='0'&&[1]<='9')))" ) )
         // literal scalar (negative numbers are created via neg operator)
         else if( bcore_source_a_parse_bl_fa( source, " #?([0]>='0'&&[0]<='9')" ) )
         {
@@ -1394,17 +1425,18 @@ s2_t bhgp_ctr_tree_s_tree_process( bhgp_ctr_tree_s* o, bhgp_sem_cell_s* cell, bl
             *node_out = node;
             return 0;
         }
-        else if( node_in )
+        else if( !node_in ) // we just entered the tree frame
+        {
+            *node_out = o->root;
+            return 0;
+        }
+        else
         {
             s2_t ret = bhgp_ctr_node_s_node_process( node_in, cell, enter, &node );
             if( ret ) return ret;
             if( node->id < 0 ) node->id = o->id_base++;
             *node_out = node;
             return 0;
-        }
-        else
-        {
-            return 2;
         }
     }
     else
@@ -1542,11 +1574,11 @@ void bhgp_net_node_s_solve( bhgp_net_node_s* o )
         }
 
         // operation is settled and can be removed
-        if( result == 1 )
+        if( result >= 1 )
         {
-//            bhgp_op_a_detach( &o->op );
             bhgp_op_a_attach( &o->op, bhgp_op_a_create_final( o->op, o->h ) );
             bhgp_net_links_s_clear( &o->upls );
+            if( result == 2 && o->h ) bmath_hf3_s_set_vacant( o->h );
         }
     }
 }
@@ -1618,36 +1650,40 @@ void bhgp_net_node_s_vm_build_main( bhgp_net_node_s* o, bmath_hf3_vm_frame_s* vm
     if( !o->h ) ERR_fa( "Holor is missing." );
 
     BLM_INIT();
-    bcore_arr_vd_s* arr_holor = BLM_CREATE( bcore_arr_vd_s );
     bcore_arr_sz_s* arr_index = BLM_CREATE( bcore_arr_sz_s );
+    st_s* arr_sig             = BLM_CREATE( st_s );
     BFOR_EACH( i, &o->upls )
     {
         bhgp_net_node_s* node = o->upls.data[ i ]->node;
         bhgp_net_node_s_vm_build_main( node, vm_frame, proc_name );
-        bcore_arr_vd_s_push( arr_holor, node->h );
         bcore_arr_sz_s_push( arr_index, node->id );
+        st_s_push_char( arr_sig, 'a' + i );
     }
     bcore_arr_sz_s_push( arr_index, o->id );
+    st_s_push_char( arr_sig, 'y' );
 
     ASSERT( o->id >= 0 && o->id < vm_frame->arr_holor.size );
     bmath_hf3_vm_holor_s* vm_holor = &vm_frame->arr_holor.data[ o->id ];
     vm_holor->name = o->name;
     bmath_hf3_s_copy( &vm_holor->h, o->h );
-    vm_holor->type = ( o->h->v_size == 0 ) ? TYPEOF_depletable : TYPEOF_data;
-    if( o->op && o->op->_ == TYPEOF_bhgp_op_ar0_adapt_s ) vm_holor->type = TYPEOF_adaptive;
-
-//    bcore_msg_fa( "===#<sc_t> : #<sc_t>\n", bhgp_ifnameof( vm_holor->name ), ifnameof( vm_holor->type ) );
+    if( o->op && o->op->_ == TYPEOF_bhgp_op_ar0_adapt_s )
+    {
+        bhgp_op_ar0_adapt_s* op_ar0_adapt = ( bhgp_op_ar0_adapt_s* )o->op;
+        vm_holor->type = TYPEOF_adaptive;
+        bmath_hf3_s_copy( &vm_holor->h, op_ar0_adapt->h );
+    }
+    else
+    {
+        vm_holor->type = ( o->h->v_size == 0 ) ? TYPEOF_depletable : TYPEOF_data;
+    }
 
     if( o->op )
     {
         ASSERT( bhgp_op_a_get_arity( o->op ) == o->upls.size );
-
-        bmath_hf3_vm_op* vm_op = bhgp_op_a_create_vm_op( o->op, ( const bmath_hf3_s** )arr_holor->data, &vm_holor->h );
+        bmath_hf3_vm_op* vm_op = bhgp_op_a_create_vm_op_ap_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
 
         if( vm_op )
         {
-            ASSERT( bmath_hf3_vm_op_a_get_arity( vm_op ) + 1 == arr_index->size );
-            bmath_hf3_vm_op_a_set_indices( vm_op, arr_index->data );
             bmath_hf3_vm_proc_s* vm_proc = bmath_hf3_vm_frame_s_proc_get_or_push( vm_frame, proc_name );
             bmath_hf3_vm_proc_s_push_op_d( vm_proc, vm_op );
         }
@@ -1655,7 +1691,7 @@ void bhgp_net_node_s_vm_build_main( bhgp_net_node_s* o, bmath_hf3_vm_frame_s* vm
         {
             if( o->upls.size > 0 )
             {
-                ERR_fa( "Could not create bmath_hf3_vm_op from #<sc_t>.", ifnameof( o->op->_ ) );
+                ERR_fa( "Could not create axon-pass from #<sc_t>.", ifnameof( o->op->_ ) );
             }
         }
     }
@@ -1678,53 +1714,92 @@ void bhgp_net_node_s_vm_build_bp_grad( bhgp_net_node_s* o, sz_t up_index, bmath_
     if( !o->h ) ERR_fa( "Holor is missing." );
 
     BLM_INIT();
-    bcore_arr_vd_s* arr_holor = BLM_CREATE( bcore_arr_vd_s );
-    bcore_arr_sz_s* arr_index = BLM_CREATE( bcore_arr_sz_s );
 
-    sz_t up_gid = -1;
-
-    BFOR_EACH( i, &o->upls )
-    {
-        bhgp_net_node_s* node = o->upls.data[ i ]->node;
-        ASSERT( node->h );
-        bcore_arr_vd_s_push( arr_holor, node->h );
-        bcore_arr_sz_s_push( arr_index, node->id );
-        if( i == up_index ) up_gid = node->gid;
-    }
-
-    ASSERT( up_gid >= 0 );
-
-    bcore_arr_vd_s_push( arr_holor, o->h );
-    bcore_arr_sz_s_push( arr_index, o->id );
-
-    if( !o->flag )
+    if( !o->flag ) // build gradient computation for this node
     {
         o->gid = vm_frame->arr_holor.size;
 
         bmath_hf3_vm_holor_s* vm_holor = bmath_hf3_vm_frame_s_holors_push( vm_frame );
         vm_holor->name = o->name;
         bmath_hf3_s_copy_d_data( &vm_holor->h, o->h );
-        vm_holor->type = TYPEOF_depletable;  // TODO: use TYPEOF_grad
 
+        if( o->op && o->op->_ == TYPEOF_bhgp_op_ar0_adapt_s )
+        {
+            vm_holor->type = TYPEOF_adaptive_grad;
+        }
+        else
+        {
+            vm_holor->type = TYPEOF_grad;
 
+            /// zero gradient
+            if( o->dnls.size > 0 )
+            {
+                bmath_hf3_vm_frame_s_proc_push_op_d( vm_frame, proc_name, bmath_hf3_vm_op_ar0_zro_s_csetup( NULL, o->gid ) );
+            }
+        }
 
-        //TODO: build local gradient
+        bmath_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->id  )->idx_paired = o->gid;
+        bmath_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->gid )->idx_paired = o->id;
+
+        BFOR_EACH( i, &o->dnls )
+        {
+            bhgp_net_node_s* node = o->dnls.data[ i ]->node;
+            ASSERT( node->h );
+            sz_t node_up_index = -1;
+            BFOR_EACH( j, &node->upls )
+            {
+                if( node->upls.data[ j ]->node == o )
+                {
+                    node_up_index = j;
+                    break;
+                }
+            }
+            ASSERT( node_up_index >= 0 );
+            bhgp_net_node_s_vm_build_bp_grad( node, node_up_index, vm_frame, proc_name );
+        }
+
         o->flag = true;
     }
 
-    ASSERT( o->op );
-
-    bmath_hf3_vm_op* vm_op = NULL; //bhgp_op_a_create_vm_op_backpass( o->op, up_index, ( const bmath_hf3_s** )arr_holor->data, arr_index->data, o->gid, up_gid );
-
-    if( vm_op )
+    if( up_index >= 0 ) // build gradient update for uplink channel
     {
-        ASSERT( bmath_hf3_vm_op_a_get_arity( vm_op ) + 1 == arr_index->size );
-        bmath_hf3_vm_proc_s* vm_proc = bmath_hf3_vm_frame_s_proc_get_or_push( vm_frame, proc_name );
-        bmath_hf3_vm_proc_s_push_op_d( vm_proc, vm_op );
-    }
-    else
-    {
-        ERR_fa( "Could not create bp_grad_vm_op from #<sc_t>.", ifnameof( o->op->_ ) );
+        bcore_arr_sz_s* arr_index = BLM_CREATE( bcore_arr_sz_s );
+        st_s* arr_sig             = BLM_CREATE( st_s );
+
+        sz_t up_gid = -1;
+
+        BFOR_EACH( i, &o->upls )
+        {
+            bhgp_net_node_s* node = o->upls.data[ i ]->node;
+            ASSERT( node->h );
+            bcore_arr_sz_s_push( arr_index, node->id );
+            st_s_push_char( arr_sig, 'a' + i );
+            if( i == up_index ) up_gid = node->gid;
+        }
+
+        ASSERT( up_gid >= 0 );
+
+        bcore_arr_sz_s_push( arr_index, o->id );
+        st_s_push_char( arr_sig, 'y' );
+
+        bcore_arr_sz_s_push( arr_index, up_gid );
+        st_s_push_char( arr_sig, 'u' );
+
+        bcore_arr_sz_s_push( arr_index, o->gid );
+        st_s_push_char( arr_sig, 'v' );
+
+        ASSERT( o->op );
+        bmath_hf3_vm_op* vm_op = bhgp_op_a_create_vm_op_dp_set_idx( o->op, vm_frame, arr_sig->sc, arr_index, 'a' + up_index );
+
+        if( vm_op )
+        {
+            bmath_hf3_vm_proc_s* vm_proc = bmath_hf3_vm_frame_s_proc_get_or_push( vm_frame, proc_name );
+            bmath_hf3_vm_proc_s_push_op_d( vm_proc, vm_op );
+        }
+        else
+        {
+            ERR_fa( "Could not create dendride-pass from #<sc_t>.", ifnameof( o->op->_ ) );
+        }
     }
 
     BLM_DOWN();
@@ -2150,7 +2225,7 @@ void bhgp_net_cell_s_from_sem_cell
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-// Finalization steps: Solves graph and optimizes it
+/// Finalization steps: Solves graph and optimizes it
 void bhgp_net_cell_s_finalize( bhgp_net_cell_s* o )
 {
     bhgp_net_cell_s_solve( o );
@@ -2173,7 +2248,6 @@ static void bhgp_net_cell_s_graph_to_sink( bhgp_net_cell_s* o, bcore_sink* sink 
 void bhgp_net_cell_s_vm_build_main( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf, tp_t proc_name )
 {
     if( !proc_name ) proc_name = bmath_hf3_vm_frame_s_entypeof( vmf, "main" );
-    bmath_hf3_vm_frame_s_clear( vmf );
 
     bmath_hf3_vm_frame_s_proc_reset( vmf, proc_name );
     ASSERT( bhgp_net_cell_s_is_consistent( o ) );
@@ -2188,7 +2262,23 @@ void bhgp_net_cell_s_vm_build_main( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vm
     }
 
     bhgp_net_cell_s_clear_flags( o );
-    bmath_hf3_vm_frame_s_holors_setup_name_map( vmf );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+// builds bp_grad vm procedure
+void bhgp_net_cell_s_vm_build_bp_grad( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf, tp_t proc_name )
+{
+    if( !proc_name ) proc_name = bmath_hf3_vm_frame_s_entypeof( vmf, "bp_grad" );
+    bmath_hf3_vm_frame_s_proc_reset( vmf, proc_name );
+    for( sz_t i = 0; i < o->body.size; i++ )
+    {
+        bhgp_net_node_s* node = o->body.data[ i ];
+        if( !node->op ) continue;
+        if( node->op->_ != TYPEOF_bhgp_op_ar0_adapt_s ) continue;
+        bhgp_net_node_s_vm_build_bp_grad( node, -1, vmf, proc_name );
+    }
+    bhgp_net_cell_s_clear_flags( o );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2206,6 +2296,8 @@ void bhgp_net_cell_s_vm_build_setup( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* v
         switch( holor->type )
         {
             case TYPEOF_depletable:
+            case TYPEOF_grad:
+            case TYPEOF_adaptive_grad:
             {
                 bmath_hf3_vm_frame_s_proc_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
             }
@@ -2251,6 +2343,31 @@ void bhgp_net_cell_s_vm_build_shelve( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* 
         }
     }
     vmf->proc_shelve = proc_name;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+// sets adaptive gradients to zero
+void bhgp_net_cell_s_vm_build_zero_adaptive_grad( bhgp_net_cell_s* o, bmath_hf3_vm_frame_s* vmf, tp_t proc_name )
+{
+    if( !proc_name ) proc_name = bmath_hf3_vm_frame_s_entypeof( vmf, "zero_adaptive_grad" );
+    bmath_hf3_vm_frame_s_proc_reset( vmf, proc_name );
+
+    const bmath_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
+    for( sz_t i = 0; i < arr_holor->size; i++ )
+    {
+        const bmath_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
+        switch( holor->type )
+        {
+            case TYPEOF_adaptive_grad:
+            {
+                bmath_hf3_vm_frame_s_proc_push_op_d( vmf, proc_name, bmath_hf3_vm_op_ar0_zro_s_csetup( NULL, i ) );
+            }
+            break;
+
+            default: break;
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2344,7 +2461,7 @@ badapt_adaptive* bhgp_vm_builder_s_build( const bhgp_vm_builder_s* o )
 
     BLM_INIT();
 
-    bcore_source*    source    = BLM_A_PUSH( bcore_file_open_source( o->src.sc ) );
+    bcore_source* source = BLM_A_PUSH( bcore_file_open_source( o->src.sc ) );
 
     /// semantic cell
     bhgp_sem_cell_s* sem_frame = BLM_A_PUSH( sem_cell_s_create_frame() );
@@ -2359,11 +2476,12 @@ badapt_adaptive* bhgp_vm_builder_s_build( const bhgp_vm_builder_s* o )
 
     bmath_hf3_vm_frame_s* vmf = &adaptive->vm;
 
-    bhgp_net_cell_s_vm_build_main(   net_frame, vmf, bmath_hf3_vm_frame_s_entypeof( vmf, "infer"  ) );
-    bhgp_net_cell_s_vm_build_setup(  net_frame, vmf, bmath_hf3_vm_frame_s_entypeof( vmf, "setup"  ) );
-    bhgp_net_cell_s_vm_build_shelve( net_frame, vmf, bmath_hf3_vm_frame_s_entypeof( vmf, "shelve" ) );
-    bhgp_net_cell_s_vm_set_input(    net_frame, vmf );
-    bhgp_net_cell_s_vm_set_output(   net_frame, vmf );
+    bhgp_net_cell_s_vm_build_main(      net_frame, vmf, bmath_hf3_vm_frame_s_entypeof( vmf, "infer"   ) );
+    bhgp_net_cell_s_vm_build_bp_grad(   net_frame, vmf, bmath_hf3_vm_frame_s_entypeof( vmf, "bp_grad" ) );
+    bhgp_net_cell_s_vm_build_setup(     net_frame, vmf, bmath_hf3_vm_frame_s_entypeof( vmf, "setup"   ) );
+    bhgp_net_cell_s_vm_build_shelve(    net_frame, vmf, bmath_hf3_vm_frame_s_entypeof( vmf, "shelve"  ) );
+    bhgp_net_cell_s_vm_set_input(       net_frame, vmf );
+    bhgp_net_cell_s_vm_set_output(      net_frame, vmf );
 
     ASSERT( vmf->input.size  == 2 );
     ASSERT( vmf->output.size == 1 );
@@ -2378,7 +2496,7 @@ badapt_adaptive* bhgp_vm_builder_s_build( const bhgp_vm_builder_s* o )
         ASSERT( adaptive->in_index  < vmf->arr_holor.size );
         ASSERT( adaptive->out_index < vmf->arr_holor.size );
 
-        bmath_hf3_s* h_in  = &vmf->arr_holor.data[ adaptive->in_index ].h;
+        bmath_hf3_s* h_in  = &vmf->arr_holor.data[ adaptive->in_index  ].h;
         bmath_hf3_s* h_out = &vmf->arr_holor.data[ adaptive->out_index ].h;
 
         if( h_in->d_size != 1 || h_in->d_data[ 0 ] != adaptive->in_size )
@@ -2425,11 +2543,175 @@ bhgp_op* bhgp_eval_e2e_s_input_op_create( vd_t arg, sz_t in_idx, tp_t in_name )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+s2_t bhgp_eval_grad_s_run( const bhgp_eval_grad_s* o )
+{
+    if( o->verbosity >= 2 ) bcore_sink_a_push_fa( o->log, "Gradient test:\n" );
+    BLM_INIT();
+    bmath_hf3_vm_frame_s* vmf = o->vmf;
+
+    bmath_hf3_adl_s* tgt  = BLM_CREATE( bmath_hf3_adl_s );
+    bmath_hf3_adl_s* out0 = BLM_CREATE( bmath_hf3_adl_s ); // default output
+    bmath_hf3_adl_s* out1 = BLM_CREATE( bmath_hf3_adl_s ); // varied output
+    bmath_hf3_adl_s* grad = BLM_CREATE( bmath_hf3_adl_s );
+
+    ASSERT( o->in );
+    ASSERT( o->out );
+    bmath_hf3_adl_s_copy( tgt, o->out );
+
+    // compute out0, e0
+    bmath_hf3_vm_frame_s_input_set_all( vmf, o->in );
+    bmath_hf3_vm_frame_s_proc_run( vmf, typeof( "main" ) );
+    bmath_hf3_vm_frame_s_output_get_all( vmf, out0 );
+
+    ASSERT( tgt->size == out0->size );
+
+    f3_t e0 = bmath_hf3_adl_s_f3_sub_sqr( tgt, out0 );
+
+    // compute gradients
+    bmath_hf3_adl_s_copy( grad, out0 );
+    bmath_hf3_adl_s_sub(  grad, tgt, grad );
+    bmath_hf3_adl_s_mul_scl_f3(  grad, 2.0, grad );
+    bmath_hf3_vm_frame_s_proc_run( vmf, typeof( "zero_adaptive_grad" ) );
+    bmath_hf3_vm_frame_s_output_set_paired_all( vmf, grad );
+    bmath_hf3_vm_frame_s_proc_run( vmf, typeof( "bp_grad" ) );
+
+    f3_t g_dev_sum = 0;
+    f3_t g_dev_wgt = 0;
+
+    ASSERT( o->max_dev > 0 );
+
+    /* Significance is the relative change of energy for a given variance.
+     * Tests below min_significance are not accurate enough to produce
+     * testable results
+     * If significance * max_dev < 1E-15 then the energy gradient cannot be resolved
+     * in f3_t. Such results are not counted as gradient deviation.
+     */
+    f3_t min_significance = 1E-15 / o->max_dev;
+
+    BFOR_EACH( i, &vmf->arr_holor )
+    {
+        if( vmf->arr_holor.data[ i ].type != TYPEOF_adaptive ) continue;
+
+        bmath_hf3_vm_holor_s* vm_ha = bmath_hf3_vm_frame_s_holors_get_by_index( vmf, i );
+        bmath_hf3_vm_holor_s* vm_hg = bmath_hf3_vm_frame_s_holors_get_by_index( vmf, vm_ha->idx_paired );
+
+        if( o->verbosity >= 5 )
+        {
+            bcore_sink_a_push_fa( o->log, "Holor #<sz_t> '", i );
+            bmath_hf3_s_brief_to_sink( &vm_ha->h, o->log );
+            bcore_sink_a_push_fa( o->log, "':\n", i );
+        }
+
+        bmath_hf3_s* ha = &vm_ha->h;
+        bmath_hf3_s* hg = &vm_hg->h;
+
+        ASSERT( ha->v_size == hg->v_size );
+
+        for( sz_t i = 0; i < ha->v_size; i++ )
+        {
+            f3_t v0 = ha->v_data[ i ];
+
+            // set variation
+            ha->v_data[ i ] = v0 + o->epsilon;
+            bmath_hf3_vm_frame_s_proc_run( vmf, typeof( "main" ) );
+            bmath_hf3_vm_frame_s_output_get_all( vmf, out1 );
+            f3_t e1 = bmath_hf3_adl_s_f3_sub_sqr( tgt, out1 );
+
+            f3_t d1 = e1 - e0;
+
+            f3_t max_e = f3_max( f3_abs( e0 ), f3_abs( e1 ) );
+            f3_t significance = f3_abs( d1 ) * ( ( max_e > 0 ) ? 1.0 / max_e : 0 );
+
+            f3_t g0 = hg->v_data[ i ];
+            f3_t g1 = d1 / o->epsilon;
+
+            f3_t g_dev = f3_abs( g1 - g0 );
+            f3_t g_max = f3_max( f3_abs( g1 ), f3_abs( g0 ) );
+            f3_t inv_g_max = ( g_max > 0 ) ? 1.0 / g_max : 0;
+            g_dev *= inv_g_max;
+
+            bl_t counted = ( significance >= min_significance );
+
+            if( counted )
+            {
+                g_dev_sum += g_dev;
+                g_dev_wgt += 1;
+            }
+
+            // reset variation
+            ha->v_data[ i ] = v0;
+
+            if( o->verbosity >= 5 )
+            {
+                sz_t n = 14;
+                if( i == 0 )
+                {
+                    bcore_sink_a_push_fa( o->log, "  " );
+                    bcore_sink_a_push_fa( o->log, "|#pn {index}", n );
+                    bcore_sink_a_push_fa( o->log, "|#pn { v0}", n );
+                    bcore_sink_a_push_fa( o->log, "|#pn { e1}", n );
+                    bcore_sink_a_push_fa( o->log, "|#pn { d1}", n );
+                    bcore_sink_a_push_fa( o->log, "|#pn { g0}", n );
+                    bcore_sink_a_push_fa( o->log, "|#pn { g1}", n );
+                    bcore_sink_a_push_fa( o->log, "|#pn { g_dev}", n );
+                    bcore_sink_a_push_fa( o->log, "|#pn {significance}", n );
+                    bcore_sink_a_push_fa( o->log, "\n" );
+                }
+                bcore_sink_a_push_fa( o->log, "  " );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<sz_t>}", n, i );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, v0 );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, e1 );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, d1 );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, g0 );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, g1 );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, g_dev );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, significance );
+                bcore_sink_a_push_fa( o->log, "|#pn {#<sc_t>}", n, counted ? "" : "(not counted)" );
+                bcore_sink_a_push_fa( o->log, "\n" );
+            }
+        }
+    }
+
+    f3_t g_dev = ( g_dev_wgt > 0 ) ? ( g_dev_sum / g_dev_wgt ) : 0;
+    bl_t success = ( g_dev <= o->max_dev );
+    if( !success || o->verbosity >= 2 ) bcore_sink_a_push_fa( o->log, "Gradient deviation: #<f3_t>.\n", g_dev );
+
+    BLM_RETURNV( s2_t, success ? 0 : 1 );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
 {
     BLM_INIT();
 
-    bcore_source* source  = BLM_A_PUSH( bcore_file_open_source_path( &o->src ) );
+    if( o->name.size > 0 && o->verbosity >= 2 )
+    {
+        bcore_sink_a_push_fa( o->log, "#<sc_t>:\n", o->name.sc );
+    }
+
+    bcore_source* source = NULL;
+    if( !o->src ) ERR_fa( "Source missing." );
+    switch( *(aware_t*)o->src )
+    {
+        case TYPEOF_bcore_file_path_s:
+        {
+            source = BLM_A_PUSH( bcore_file_open_source_path( ( const bcore_file_path_s* )o->src ) );
+        }
+        break;
+
+        case TYPEOF_st_s:
+        {
+            source = BLM_A_PUSH( bcore_source_string_s_create_from_string( ( const st_s* )o->src ) );
+        }
+        break;
+
+        default:
+        {
+            ERR_fa( "Invalid source type '#<sc_t>'.", ifnameof( *(aware_t*)o->src ) );
+        }
+        break;
+    }
 
     f3_t time_parse_sem = 0;
     f3_t time_build_net = 0;
@@ -2446,7 +2728,7 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
     CPU_TIME_OF( bhgp_net_cell_s_from_sem_cell( net_frame, sem_frame, bhgp_eval_e2e_s_input_op_create, ( vd_t )o, o->verbosity > 5 ? o->log : NULL ), time_build_net );
     CPU_TIME_OF( bhgp_net_cell_s_finalize( net_frame ), time_final_net );
 
-    if( o->log && o->verbosity >= 1 )
+    if( o->log && o->verbosity >= 2 )
     {
         bcore_sink_a_push_fa( o->log, "Network Cell:\n" );
         bcore_sink_a_push_fa( o->log, "  Entry channels . #<sz_t>\n", net_frame->encs.size );
@@ -2466,24 +2748,24 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
         ASSERT( bhgp_net_cell_s_is_consistent( cloned_cell ) );
     }
 
-    f3_t time_vm_build_main   = 0;
-    f3_t time_vm_build_setup  = 0;
-    f3_t time_vm_build_shelve = 0;
-    f3_t time_vm_run_setup = 0;
-    f3_t time_vm_run_main = 0;
+    f3_t time_vm_build_main      = 0;
+    f3_t time_vm_build_bp_grad   = 0;
+    f3_t time_vm_run_setup       = 0;
+    f3_t time_vm_run_main        = 0;
 
     bmath_hf3_vm_frame_s* vm_frame = BLM_CREATE( bmath_hf3_vm_frame_s );
-    CPU_TIME_OF( bhgp_net_cell_s_vm_build_main(   net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "main"   ) ), time_vm_build_main  );
-    CPU_TIME_OF( bhgp_net_cell_s_vm_build_setup(  net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "setup"  ) ), time_vm_build_setup  );
-    CPU_TIME_OF( bhgp_net_cell_s_vm_build_shelve( net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "shelve" ) ), time_vm_build_shelve );
-    bhgp_net_cell_s_vm_set_input(    net_frame, vm_frame );
-    bhgp_net_cell_s_vm_set_output(   net_frame, vm_frame );
+    CPU_TIME_OF( bhgp_net_cell_s_vm_build_main(      net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "main"    ) ), time_vm_build_main    );
+    CPU_TIME_OF( bhgp_net_cell_s_vm_build_bp_grad(   net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "bp_grad" ) ), time_vm_build_bp_grad );
+
+    bhgp_net_cell_s_vm_build_zero_adaptive_grad( net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "zero_adaptive_grad" ) );
+    bhgp_net_cell_s_vm_build_setup(              net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "setup"     ) );
+    bhgp_net_cell_s_vm_build_shelve(             net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "shelve"    ) );
+
+    bhgp_net_cell_s_vm_set_input(  net_frame, vm_frame );
+    bhgp_net_cell_s_vm_set_output( net_frame, vm_frame );
     CPU_TIME_OF( bmath_hf3_vm_frame_s_proc_run( vm_frame, typeof( "setup" ) ), time_vm_run_setup );
 
-    for( sz_t i = 0; i < net_frame->encs.size; i++ )
-    {
-        bmath_hf3_s_copy_v_data( &bmath_hf3_vm_frame_s_input_get_holor( vm_frame, i )->h, o->in->data[ i ] );
-    }
+    if( o->in ) bmath_hf3_vm_frame_s_input_set_all( vm_frame, o->in );
 
     bmath_hf3_vm_frame_s_check_integrity( vm_frame );
 
@@ -2491,17 +2773,25 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
 
     bl_t success = true;
 
-    if( o->verbosity >= 1 )
+    if( o->verbosity >= 3 )
     {
         bcore_sink_a_push_fa( o->log, "Timing (ms):\n" );
-        bcore_sink_a_push_fa( o->log, "  Parsing ............... #<f3_t>\n", 1000 * time_parse_sem );
-        bcore_sink_a_push_fa( o->log, "  Building network ...... #<f3_t>\n", 1000 * time_build_net );
-        bcore_sink_a_push_fa( o->log, "  Finalizing network .... #<f3_t>\n", 1000 * time_final_net );
-        bcore_sink_a_push_fa( o->log, "  VM: Building 'main' ... #<f3_t>\n", 1000 * time_vm_build_main );
-        bcore_sink_a_push_fa( o->log, "  VM: Building 'setup' .. #<f3_t>\n", 1000 * time_vm_build_setup );
-        bcore_sink_a_push_fa( o->log, "  VM: Building 'shelve' . #<f3_t>\n", 1000 * time_vm_build_shelve );
-        bcore_sink_a_push_fa( o->log, "  VM: Running  'setup' .. #<f3_t>\n", 1000 * time_vm_run_setup );
-        bcore_sink_a_push_fa( o->log, "  VM: Running  'main' ... #<f3_t>\n", 1000 * time_vm_run_main );
+        bcore_sink_a_push_fa( o->log, "  Parsing ................ #<f3_t>\n", 1000 * time_parse_sem );
+        bcore_sink_a_push_fa( o->log, "  Building network ....... #<f3_t>\n", 1000 * time_build_net );
+        bcore_sink_a_push_fa( o->log, "  Finalizing network ..... #<f3_t>\n", 1000 * time_final_net );
+        bcore_sink_a_push_fa( o->log, "  VM: Building 'main' .... #<f3_t>\n", 1000 * time_vm_build_main );
+        bcore_sink_a_push_fa( o->log, "  VM: Building 'bp_grad' . #<f3_t>\n", 1000 * time_vm_build_bp_grad );
+        bcore_sink_a_push_fa( o->log, "  VM: Running  'setup' ... #<f3_t>\n", 1000 * time_vm_run_setup );
+        bcore_sink_a_push_fa( o->log, "  VM: Running  'main' .... #<f3_t>\n", 1000 * time_vm_run_main );
+
+        bcore_sink_a_push_fa( o->log, "VM library:\n" );
+
+        BFOR_EACH( i, &vm_frame->library )
+        {
+            const bmath_hf3_vm_proc_s* proc = vm_frame->library.data[ i ];
+            sc_t name = bmath_hf3_vm_frame_s_ifnameof( vm_frame, proc->name );
+            bcore_sink_a_push_fa( o->log, "  #p20.{#<sc_t> } #<sz_t>\n", name, proc->size );
+        }
     }
 
     for( sz_t i = 0; i < net_frame->excs.size; i++ )
@@ -2511,16 +2801,33 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
         if( o->out && i < o->out->size )
         {
             bmath_hf3_s* h_out = o->out->data[ i ];
-            f3_t dev = bmath_hf3_s_fdev_equ( h_vm, h_out );
-            if( dev < o->max_dev )
+
+            if( !bmath_hf3_s_d_equal( h_vm, h_out ) )
             {
-                bcore_sink_a_push_fa( o->log, "Output '#<sc_t>' deviation: #<f3_t>.\n", bhgp_ifnameof( name ), dev );
+                bcore_sink_a_push_fa( o->log, "Output '#<sc_t>': Shape mismatch.\n", bhgp_ifnameof( name ) );
+                bcore_sink_a_push_fa( o->log, "Returned: ");
+                bmath_hf3_s_brief_to_sink( h_vm, o->log );
+                bcore_sink_a_push_fa( o->log, "\n");
+                bcore_sink_a_push_fa( o->log, "Expected: ");
+                bmath_hf3_s_brief_to_sink( h_out, o->log );
+                bcore_sink_a_push_fa( o->log, "\n");
                 success = false;
+            }
+            else
+            {
+                f3_t dev = bmath_hf3_s_fdev_equ( h_vm, h_out );
+                if( dev > o->max_dev )
+                {
+                    bcore_sink_a_push_fa( o->log, "Output '#<sc_t>':\n", bhgp_ifnameof( name ) );
+                    bmath_hf3_s_to_sink_nl( h_vm, o->log );
+                    bcore_sink_a_push_fa( o->log, "Deviation: #<f3_t>.\n", dev );
+                    success = false;
+                }
             }
         }
         else
         {
-            if( o->log )
+            if( o->log && o->verbosity >= 2 )
             {
                 bcore_sink_a_push_fa( o->log, "Output '#<sc_t>':\n", bhgp_ifnameof( name ) );
                 bmath_hf3_s_to_sink_nl( h_vm, o->log );
@@ -2528,8 +2835,64 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
         }
     }
 
+    if( o->grad )
+    {
+        bhgp_eval_grad_s* grad = BLM_A_PUSH( bhgp_eval_grad_s_clone( o->grad ) );
+        if( !grad->in  ) grad->in = bcore_fork( o->in );
+        if( !grad->out ) grad->in = bcore_fork( o->out );
+        bmath_hf3_vm_frame_s_attach( &grad->vmf, bcore_fork( vm_frame ) );
+        bcore_sink_a_attach( &grad->log, bcore_fork( o->log ) );
+        grad->verbosity = 0;
+        bhgp_eval_grad_s_run( grad ); // // run quietly
+        grad->verbosity = o->verbosity;
+        s2_t grad_result = bhgp_eval_grad_s_run( grad ); // second run to test reentrance
+        if( grad_result > 0 ) success = false;
+    }
+
+    if( o->verbosity >= 1 )
+    {
+        if( o->name.size > 0 ) bcore_sink_a_push_fa( o->log, "#p20 {#<sc_t>} : ", o->name.sc );
+        bcore_sink_a_push_fa( o->log, success ? "OK" : "FAIL" );
+        bcore_sink_a_push_fa( o->log, "\n" );
+    }
+
     BLM_RETURNV( s2_t, success ? 0 : 1 );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+s2_t bhgp_eval_e2e_set_s_run( const bhgp_eval_e2e_set_s* o )
+{
+    BLM_INIT();
+
+    if( o->set_name.size > 0 && o->verbosity > 0 )
+    {
+        bcore_sink_a_push_fa( o->log, "#<sc_t>:\n", o->set_name.sc );
+    }
+
+    s2_t ret_val = 0;
+
+    for( sz_t i = 0; i < o->arr.size; i++ )
+    {
+        bhgp_eval_e2e_s* e2e = bhgp_eval_e2e_s_clone( &o->arr.data[ i ] );
+        if( e2e->sig.size == 0 ) st_s_copy( &e2e->sig, &o->sig );
+        if( !e2e->in  ) e2e->in  = bcore_fork( o->in  );
+        if( !e2e->out ) e2e->out = bcore_fork( o->out );
+        if( o->verbosity >= 0 ) e2e->verbosity = o->verbosity;
+        if( o->max_dev   >= 0 ) e2e->max_dev   = o->max_dev;
+
+        bcore_sink_a_attach( &e2e->log, bcore_fork( o->log ) );
+
+        s2_t err_val = bhgp_eval_e2e_s_run( e2e );
+        ret_val = s2_max( err_val, ret_val );
+
+        bhgp_eval_e2e_s_discard( e2e );
+    }
+
+    BLM_RETURNV( s2_t, ret_val );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 
@@ -2551,11 +2914,14 @@ void bhgp_simple_eval( void )
 
     bhgp_eval_e2e_s* e2e = BLM_CREATE( bhgp_eval_e2e_s );
     st_s_copy_sc( &e2e->sig, "(y=>a)" );
-    st_s_copy_sc( &e2e->src.name, "models/bhgp_eval_01.hgp" );
+
+    e2e->src = bcore_file_path_s_create_sc( "models/bhgp_eval_01.hgp" );
+
+//    st_s_copy_sc( &e2e->src.name, "models/bhgp_eval_01.hgp" );
 
     bmath_hf3_s* h = bmath_hf3_adl_s_push( ( e2e->in = bmath_hf3_adl_s_create() ) );
     bmath_hf3_s_set_d_data_na( h, 1, 2 );
-    bmath_hf3_s_set_v_data_na( h, 2,   1, 1 );
+    bmath_hf3_s_set_v_data_na( h, 2, 1, 1 );
     e2e->verbosity = 1;
     e2e->max_dev   = 1E-8;
 

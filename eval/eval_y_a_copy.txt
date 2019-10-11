@@ -1,7 +1,7 @@
 <bhgp_eval_e2e_s>
     sig:<st_s> "( y => a )" </>
 
-    src:<bcore_file_path_s> name:<st_s>"bhgp_eval_01.hgp"</> </>
+    src:<st_s> "y = a;" </>
 
     in: <bmath_hf3_adl_s> <st_s> "( 1 2 )" </> </>
     out:<bmath_hf3_adl_s> <st_s> "( 1 2 )" </> </>

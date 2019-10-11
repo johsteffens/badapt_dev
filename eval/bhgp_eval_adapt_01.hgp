@@ -1,0 +1,10 @@
+verify_signature ( y, z => a );
+
+dm = 4;
+w1 = adapt : rand ( [dm][dimof(a)]# );
+w2 = adapt : rand ( [dimof(a)][dm]# );
+v1 =         rand ( [dm]# );
+
+y = ( ( w1 ** a ) ^* v1 ) ^* rand ( [dimof(a[0])]# );
+z = ( ( a ^* w2 ) ** v1 ) ^* rand ( [dimof(a[0])]# );
+

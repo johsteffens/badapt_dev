@@ -26,12 +26,16 @@ int main( int argc, char** argv )
         }
     }
 
+    /// testing flects and spects
+    bcore_flect_parse_all_flects();
+    bcore_inst_test_all_types();
+
     BLM_INIT();
 
     s2_t ret = -1;
     bcore_main_frame_s* main_frame = BLM_CREATE( bcore_main_frame_s );
     main_frame->use_first_argument = true;
-    //ret = bcore_main_frame_s_main( main_frame, argc, argv );
+    ret = bcore_main_frame_s_main( main_frame, argc, argv );
     if( ret >= 0 )
     {
         BLM_DOWN();

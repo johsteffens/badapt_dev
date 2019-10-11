@@ -9,7 +9,7 @@ cell mlp( y => hidden_nodes, reduction_factor, a )
     q = b + w ** a;
     y = if( floor( hidden_nodes ) == 1 )
         then tanh( q )
-        else mlp( hidden_nodes * reduction_factor, reduction_factor, lrelu( q ) );
+        else mlp( hidden_nodes * reduction_factor, reduction_factor, relu_leaky( q ) );
 };
 
 y =	mlp( 10, 0.5, a );
