@@ -2,6 +2,7 @@
 *.xml
 badapt_dev.*
 build/badapt_dev
+training/*.state
 dev
 bin
 obj
