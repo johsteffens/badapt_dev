@@ -17,13 +17,15 @@ int main( int argc, char** argv )
     // bmath_quicktypes_to_stdout( NULL ); return 0;
 
     // plant
-    //if( argc > 1 && sc_t_equal( argv[ 1 ], "-p" ) )
+    if( argc > 1 && sc_t_equal( argv[ 1 ], "-p" ) )
     {
         if( bcore_plant_run_globally() )
         {
             bcore_down( true );
             return 0;
         }
+        argc--;
+        argv++;
     }
 
     /// testing flects and spects
@@ -47,7 +49,7 @@ int main( int argc, char** argv )
 
 //    bsym_test();
 //    bhgp_test();
-    bhgp_adaptive_test();
+//    bhgp_adaptive_test();
 //      bhgp_simple_eval();
 
 //    bcore_quicktypes_to_stdout( NULL );
@@ -59,7 +61,7 @@ int main( int argc, char** argv )
     //virtual_test();
     //return 0;
 
-//    badapt_mlp_s_test_sine_random();
+    badapt_mlp_s_test_sine_random();
 //    badapt_mlp_s_test_binary_add();
 //    badapt_mlp_s_test_binary_mul();
 //    badapt_mlp_s_test_binary_xsg3();

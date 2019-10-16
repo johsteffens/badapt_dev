@@ -464,7 +464,7 @@ s2_t bhgp_op_ar1_rand_s_solve( const bhgp_op_ar1_rand_s* o, bmath_hf3_s** r, bma
         u2_t rval = rbase * 21036284023;
         rval += (*r)->v_size;
         if( rval == 0 ) rval = 1;
-        bmath_hf3_s_set_random( *r, 1.0, -1.0, 1.0, &rval );
+        bmath_hf3_s_set_random( *r, 1.0, -0.5, 0.5, &rval );
     }
     return ( *r && (*r)->v_size ) ? 1 : 0;
 }
@@ -1229,18 +1229,21 @@ void bhgp_net_cell_s_clear_downlinks( bhgp_net_cell_s* o )
 BCORE_DEFINE_OBJECT_INST_P( bhgp_vm_adaptive_s )
 "aware badapt_adaptive"
 "{"
-    "st_s frame;"
-    "st_s src;"
+    "st_s sig;"
+    "aware => src;"
     "bmath_hf3_vm_frame_s vm;"
     "badapt_dynamics_std_s dynamics;"
     "sz_t in_size;"
     "sz_t out_size;"
-    "sz_t in_index;"
-    "sz_t out_index;"
+    "sz_t index_in;"
+    "sz_t index_out;"
+    "sz_t index_grad_out;"
+    "bcore_arr_sz_s index_arr_adaptive;"
     "func ^:get_in_size;"
     "func ^:get_out_size;"
     "func ^:get_dynamics_std;"
     "func ^:set_dynamics_std;"
+    "func ^:arc_to_sink;"
     "func ^:minfer;"
     "func ^:bgrad_adapt;"
 "}";
@@ -1248,8 +1251,8 @@ BCORE_DEFINE_OBJECT_INST_P( bhgp_vm_adaptive_s )
 BCORE_DEFINE_OBJECT_INST_P( bhgp_vm_builder_s )
 "aware badapt_builder"
 "{"
-    "st_s frame = \"( y => dim_y, a )\";"
-    "st_s src;"
+    "st_s sig = \"( y => dim_y, a )\";"
+    "aware => src;"
     "sz_t in_size;"
     "sz_t out_size;"
     "badapt_dynamics_std_s dynamics;"
@@ -1333,7 +1336,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 2605747501 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 3989087912 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -1694,6 +1697,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_OBJECT( bhgp_net_cell_s );
             BCORE_REGISTER_TRAIT( bhgp_net, bhgp );
             BCORE_REGISTER_NAME( infer );
+            BCORE_REGISTER_NAME( bp_grad );
             BCORE_REGISTER_NAME( data );
             BCORE_REGISTER_NAME( depletable );
             BCORE_REGISTER_NAME( grad );
@@ -1703,6 +1707,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_adaptive_get_out_size, bhgp_vm_adaptive_s_get_out_size );
             BCORE_REGISTER_FFUNC( badapt_adaptive_get_dynamics_std, bhgp_vm_adaptive_s_get_dynamics_std );
             BCORE_REGISTER_FFUNC( badapt_adaptive_set_dynamics_std, bhgp_vm_adaptive_s_set_dynamics_std );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_arc_to_sink, bhgp_vm_adaptive_s_arc_to_sink );
             BCORE_REGISTER_FFUNC( badapt_adaptive_minfer, bhgp_vm_adaptive_s_minfer );
             BCORE_REGISTER_FFUNC( badapt_adaptive_bgrad_adapt, bhgp_vm_adaptive_s_bgrad_adapt );
             BCORE_REGISTER_OBJECT( bhgp_vm_adaptive_s );

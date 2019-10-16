@@ -834,6 +834,7 @@
 #define TYPEOF_bhgp_vm 3743952100
 #define TYPEOF_bhgp_vm_s 2034301526
 #define TYPEOF_infer 796211167
+#define TYPEOF_bp_grad 4232733784
 #define TYPEOF_data 3631407781
 #define TYPEOF_depletable 1293116555
 #define TYPEOF_grad 2677704985
@@ -842,17 +843,18 @@
 #define TYPEOF_bhgp_vm_adaptive_s 1783547425
 #define BETH_EXPAND_ITEM_bhgp_vm_adaptive_s \
   BCORE_DECLARE_OBJECT( bhgp_vm_adaptive_s ) \
-    {aware_t _;st_s frame;st_s src;bmath_hf3_vm_frame_s vm;badapt_dynamics_std_s dynamics;sz_t in_size;sz_t out_size;sz_t in_index;sz_t out_index;}; \
+    {aware_t _;st_s sig;vd_t src;bmath_hf3_vm_frame_s vm;badapt_dynamics_std_s dynamics;sz_t in_size;sz_t out_size;sz_t index_in;sz_t index_out;sz_t index_grad_out;bcore_arr_sz_s index_arr_adaptive;}; \
   static inline sz_t bhgp_vm_adaptive_s_get_in_size( const bhgp_vm_adaptive_s* o ){ return o->in_size;  } \
   static inline sz_t bhgp_vm_adaptive_s_get_out_size( const bhgp_vm_adaptive_s* o ){ return o->out_size; } \
   static inline void bhgp_vm_adaptive_s_get_dynamics_std( const bhgp_vm_adaptive_s* o, badapt_dynamics_std_s* dynamics ){ badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); } \
   static inline void bhgp_vm_adaptive_s_set_dynamics_std( bhgp_vm_adaptive_s* o, const badapt_dynamics_std_s* dynamics ){ badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); } \
+  void bhgp_vm_adaptive_s_arc_to_sink( const bhgp_vm_adaptive_s* o, bcore_sink* sink ); \
   void bhgp_vm_adaptive_s_minfer( bhgp_vm_adaptive_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
-  static inline void bhgp_vm_adaptive_s_bgrad_adapt( bhgp_vm_adaptive_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out ){}
+  void bhgp_vm_adaptive_s_bgrad_adapt( bhgp_vm_adaptive_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out );
 #define TYPEOF_bhgp_vm_builder_s 2981332614
 #define BETH_EXPAND_ITEM_bhgp_vm_builder_s \
   BCORE_DECLARE_OBJECT( bhgp_vm_builder_s ) \
-    {aware_t _;st_s frame;st_s src;sz_t in_size;sz_t out_size;badapt_dynamics_std_s dynamics;u2_t rseed;}; \
+    {aware_t _;st_s sig;vd_t src;sz_t in_size;sz_t out_size;badapt_dynamics_std_s dynamics;u2_t rseed;}; \
   static inline sz_t bhgp_vm_builder_s_get_in_size( const bhgp_vm_builder_s* o ){ return o->in_size; } \
   static inline void bhgp_vm_builder_s_set_in_size( bhgp_vm_builder_s* o, sz_t size ){ o->in_size = size; } \
   static inline sz_t bhgp_vm_builder_s_get_out_size( const bhgp_vm_builder_s* o ){ return o->out_size; } \

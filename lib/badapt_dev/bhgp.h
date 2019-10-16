@@ -88,6 +88,14 @@
     - operation: cell embedded in a cell
     - once a cell is complete, data types can be finalized
 
+TODO:
+- consider adding a transposed flag to the net-node-holor
+- add transposition operation as reinterpret casting
+- elementwise unary operators simply pass on transposition state
+- binary operators solve transposition states explicitly
+- residual transpositions are executed
+- remove '^*^' ..  operators from language
+
 */
 
 /**
@@ -492,7 +500,7 @@ group :op =
                     u2_t rval = rbase * 21036284023;
                     rval += (*r)->v_size;
                     if( rval == 0 ) rval = 1;
-                    bmath_hf3_s_set_random( *r, 1.0, -1.0, 1.0, &rval );
+                    bmath_hf3_s_set_random( *r, 1.0, -0.5, 0.5, &rval );
                 }
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
@@ -1225,6 +1233,7 @@ group :vm =
 
     // procedure names
     name infer;
+    name bp_grad;
 
     // holor types
     name data;          // any type of data holder
@@ -1238,14 +1247,16 @@ group :vm =
 
         // === architecture parameters ================================
 
-        st_s                   frame; // frame signature
-        st_s                   src;   // path to holograph used by builder (here just for reference)
+        st_s                   sig;   // frame signature
+        aware =>               src;   // source (bcore_file_path_s or st_s with inline code)  (just for reference)
         bmath_hf3_vm_frame_s   vm;    // virtual machine
         badapt_dynamics_std_s  dynamics;
         sz_t                   in_size;  // input vector size
         sz_t                   out_size; // output vector size
-        sz_t                   in_index; // index into vm-holor array
-        sz_t                  out_index; // index into vm-holor array
+        sz_t             index_in;        // index into vm-holor array
+        sz_t             index_out;       // index into vm-holor array
+        sz_t             index_grad_out;  // index into vm-holor array
+        bcore_arr_sz_s   index_arr_adaptive; // indices of all adaptives
 
         // ==============================================================
 
@@ -1255,11 +1266,11 @@ group :vm =
         func ^ : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
         func ^ : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
 
-//        func ^ : arc_to_sink;
+        func ^ : arc_to_sink;
         func ^ : minfer;
 
 //        func ^ : bgrad;
-        func ^ : bgrad_adapt = {};
+        func ^ : bgrad_adapt;
         // ==============================================================
     };
 
@@ -1267,8 +1278,8 @@ group :vm =
 
     stamp :builder = aware badapt_builder
     {
-        st_s frame = "( y => dim_y, a )"; // frame signature
-        st_s src; // path to source file
+        st_s sig = "( y => dim_y, a )"; // frame signature
+        aware => src; // source (bcore_file_path_s or st_s with inline code)
 
         sz_t in_size;  // input vector size
         sz_t out_size; // output vector size
