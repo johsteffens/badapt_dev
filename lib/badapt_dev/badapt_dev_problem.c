@@ -246,7 +246,7 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
 
     for( sz_t i = 0; i < o->txt_size; i++ )
     {
-        u2_t rval = 12341234 * bmath_vf3_s_f3_sum( vout );
+        u2_t rval = 12341234 * bmath_vf3_s_fx_sum( vout );
 
         for( sz_t j = 0; j < vout->size; j++ ) vout->data[ j ] += f3_rnd_pos( &rval ) * o->heat;
 
