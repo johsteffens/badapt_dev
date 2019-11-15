@@ -3,6 +3,7 @@
 #include <sys/time.h>
 
 #include "badapt_std.h"
+#include "bhvm_std.h"
 #include "badapt_dev_signal.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
@@ -11,6 +12,7 @@
 int main( int argc, char** argv )
 {
     bcore_register_signal_handler( bmath_signal_handler );
+    bcore_register_signal_handler( bhvm_signal_handler );
     bcore_register_signal_handler( badapt_signal_handler );
     bcore_register_signal_handler( badapt_dev_signal_handler );
 
