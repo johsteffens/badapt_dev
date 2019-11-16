@@ -193,10 +193,19 @@ name if;
 name then;
 name else;
 
+/// operator class
+name op_class_regular;
+
+// A cast operator sets up a static relationship between the axon and dendrides (e.g. by referencing)
+// It does not perform effective operations at runtime and can therefore be executed just once during setup.
+// Its dendrite pass operators are also cast operators.
+name op_class_cast;
+
 /// operator group
 group :op =
 {
     feature strict 'a' ::get_sz get_arity;
+    feature        'a' ::get_sz get_class    = { return TYPEOF_op_class_regular; };
     feature        'a' ::get_sz get_priority = { return 10; };
     feature        'a' ::get_sc get_symbol   = { return NULL; };
 
@@ -208,17 +217,22 @@ group :op =
 
     /** Solve computes the result 'r' from an array of arguments 'a'.
       * 'a' represents an array of pointers. The array size is equal to arity.
-      * Solve can produced three valid states:
-      *   Detached (NULL): E.g. when Arguments do not (yet) supply sufficient information (e.g. due to insufficient connectivity)
+      * Solve can produce three valid states:
+      *   Detached (NULL): E.g. when arguments do not supply sufficient information (e.g. due to insufficient connectivity)
       *   Vacant (dimensions are fully determined)
       *   Determined - This represents a holor computed from literals and can itself be treated as literal.
       *
+      *   Settled: The result is considered settled when the input was sufficient specific for computing a vm-operation
+      *
       * Return:
       *   0: A valid result could be computed
-      *   1: Output is settled. Finalize and discard graph spanned by operation.
-      *   2: Output is settled. Finalize and discard graph spanned by operation. Set node-holor vacant (force subsequent graph to remain intact).
+      *   1: Output is settled. Triggers to finalize and discard graph spanned by operation.
+      *   2: Situation of 1, additionally sets node-holor vacant (forces subsequent graph to remain intact).
+      *      E.g. This is required for adaptive operands, which stay in the graph even though they might
+      *           have a literal state at compile time.
+      *
       *   Negative values indicate errors
-      *   -1: Incorrect operands for the given operation (syntax error)
+      *   -1: Incorrect operands for the given operation (this triggers a syntax error by the parser)
       */
     feature 'a' s2_t solve( const, bhvm_hf3_s** r, bhvm_hf3_s** a );
 
@@ -443,6 +457,28 @@ group :op =
             func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_leaky_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_leaky_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_leaky_s_create(); };
+        };
+
+        stamp :htp = aware :
+        {
+            func :: :get_symbol      = { return "htp"; };
+            func :: :get_priority    = { return 8; };
+            func :: :solve =
+            {
+                if( a[0] )
+                {
+                    bhvm_hf3_s_attach( r, bhvm_hf3_s_create() );
+                    bhvm_hf3_s_cast_htp( a[0], *r );
+                }
+                else
+                {
+                    bhvm_hf3_s_attach( r, NULL );
+                }
+
+                return ( *r && (*r)->v_size ) ? 1 : 0;
+            };
+            func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cast_htp_s_create(); };
+            func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cast_htp_s_create(); };
         };
 
 
@@ -1151,15 +1187,19 @@ group :vm =
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // procedure names
-    name infer;
-    name bp_grad;
+    name proc_name_infer;
+    name proc_name_bp_grad;
+    name proc_name_setup;
+    name proc_name_shelve;
+    name proc_name_cast;  /// contains cast operations
+    name proc_name_zero_adaptive_grad;
 
     // holor types
-    name data;          // any type of data holder
-    name depletable;    // holor can be set to vacant before shelving
-    name grad;          // holor represents a gradient
-    name adaptive;      // holor is adaptive
-    name adaptive_grad; // holor represents the gradient of an adaptive holor
+    name holor_type_data;          // any type of data holder
+    name holor_type_depletable;    // holor can be set to vacant before shelving
+    name holor_type_adaptive;      // holor is adaptive
+    name holor_type_adaptive_grad; // holor represents the gradient of an adaptive holor
+    name holor_type_cast;          // holor is the result of a cast (such holors are setup by a cast operator and clear()-ed for shelving)
 
     stamp :adaptive = aware badapt_adaptive
     {

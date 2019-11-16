@@ -301,7 +301,7 @@ static bhcl_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source*
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-/// bhcl_op_ar2
+/// bhcl_op_ar1
 
 s2_t bhcl_op_ar1_solve_unary( bhvm_hf3_s** r, bhvm_hf3_s** a, bmath_fp_f3_ar1 unary )
 {
@@ -1642,7 +1642,7 @@ void bhcl_net_node_s_set_flags( bhcl_net_node_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_net_node_s_vm_build_main( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_frame, tp_t proc_name )
+static void node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_frame )
 {
     ASSERT( o );
     if( o->flag ) return;
@@ -1655,7 +1655,7 @@ void bhcl_net_node_s_vm_build_main( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_
     BFOR_EACH( i, &o->upls )
     {
         bhcl_net_node_s* node = o->upls.data[ i ]->node;
-        bhcl_net_node_s_vm_build_main( node, vm_frame, proc_name );
+        node_s_vm_build_infer( node, vm_frame );
         bcore_arr_sz_s_push( arr_index, node->id );
         st_s_push_char( arr_sig, 'a' + i );
     }
@@ -1669,22 +1669,39 @@ void bhcl_net_node_s_vm_build_main( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_
     if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adapt_s )
     {
         bhcl_op_ar0_adapt_s* op_ar0_adapt = ( bhcl_op_ar0_adapt_s* )o->op;
-        vm_holor->type = TYPEOF_adaptive;
+        vm_holor->type = TYPEOF_holor_type_adaptive;
         bhvm_hf3_s_copy( &vm_holor->h, op_ar0_adapt->h );
     }
     else
     {
-        vm_holor->type = ( o->h->v_size == 0 ) ? TYPEOF_depletable : TYPEOF_data;
+        vm_holor->type = ( o->h->v_size == 0 ) ? TYPEOF_holor_type_depletable : TYPEOF_holor_type_data;
     }
 
     if( o->op )
     {
         ASSERT( bhcl_op_a_get_arity( o->op ) == o->upls.size );
+
         bhvm_hf3_vm_op* vm_op = bhcl_op_a_create_vm_op_ap_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
 
         if( vm_op )
         {
-            bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, proc_name, vm_op );
+            switch( bhcl_op_a_get_class( o->op ) )
+            {
+                case TYPEOF_op_class_regular:
+                {
+                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_infer, vm_op );
+                }
+                break;
+
+                case TYPEOF_op_class_cast:
+                {
+                    vm_holor->type = TYPEOF_holor_type_cast;
+                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_cast, vm_op );
+                }
+                break;
+
+                default: ERR_fa( "Invalid operator class" );
+            }
         }
         else
         {
@@ -1707,7 +1724,7 @@ void bhcl_net_node_s_vm_build_main( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_net_node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3_vm_frame_s* vm_frame, tp_t proc_name )
+static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3_vm_frame_s* vm_frame )
 {
     ASSERT( o );
     if( !o->h ) ERR_fa( "Holor is missing." );
@@ -1724,16 +1741,16 @@ void bhcl_net_node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_h
 
         if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adapt_s )
         {
-            vm_holor->type = TYPEOF_adaptive_grad;
+            vm_holor->type = TYPEOF_holor_type_adaptive_grad;
         }
         else
         {
-            vm_holor->type = TYPEOF_grad;
+            vm_holor->type = TYPEOF_holor_type_depletable;
 
             /// zero gradient
             if( o->dnls.size > 0 )
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, proc_name, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, o->gid ) );
+                bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_bp_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, o->gid ) );
             }
         }
 
@@ -1754,7 +1771,7 @@ void bhcl_net_node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_h
                 }
             }
             ASSERT( node_up_index >= 0 );
-            bhcl_net_node_s_vm_build_bp_grad( node, node_up_index, vm_frame, proc_name );
+            node_s_vm_build_bp_grad( node, node_up_index, vm_frame );
         }
 
         o->flag = true;
@@ -1792,7 +1809,25 @@ void bhcl_net_node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_h
 
         if( vm_op )
         {
-            bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, proc_name, vm_op );
+            switch( bhcl_op_a_get_class( o->op ) )
+            {
+                case TYPEOF_op_class_regular:
+                {
+                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_bp_grad, vm_op );
+                }
+                break;
+
+                case TYPEOF_op_class_cast:
+                {
+                    bhvm_hf3_vm_holor_s* up_vm_holor = bhvm_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->gid );
+                    up_vm_holor->type = TYPEOF_holor_type_cast;
+                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_cast, vm_op );
+                }
+                break;
+
+                default: ERR_fa( "Invalid operator class" );
+            }
+
         }
         else
         {
@@ -2243,11 +2278,10 @@ static void bhcl_net_cell_s_graph_to_sink( bhcl_net_cell_s* o, bcore_sink* sink 
 // ---------------------------------------------------------------------------------------------------------------------
 
 // builds main vm procedure
-void bhcl_net_cell_s_vm_build_main( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf, tp_t proc_name )
+static void cell_s_vm_build_infer( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
-    if( !proc_name ) proc_name = bhvm_hf3_vm_frame_s_entypeof( vmf, "main" );
-
-    bhvm_hf3_vm_frame_s_proc_reset( vmf, proc_name );
+    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_infer );
+    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_setup );
     ASSERT( bhcl_net_cell_s_is_consistent( o ) );
 
     bhvm_hf3_vm_arr_holor_s_set_size( &vmf->arr_holor, o->body.size );
@@ -2256,7 +2290,7 @@ void bhcl_net_cell_s_vm_build_main( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf
     {
         bhcl_net_node_s* node = o->excs.data[ i ];
         if( !node->h ) ERR_fa( "Unsolved node '#<sc_t>'\n", bhcl_ifnameof( node->name ) );
-        bhcl_net_node_s_vm_build_main( node, vmf, proc_name );
+        node_s_vm_build_infer( node, vmf );
     }
 
     bhcl_net_cell_s_clear_flags( o );
@@ -2265,47 +2299,47 @@ void bhcl_net_cell_s_vm_build_main( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf
 // ---------------------------------------------------------------------------------------------------------------------
 
 // builds bp_grad vm procedure
-void bhcl_net_cell_s_vm_build_bp_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf, tp_t proc_name )
+static void cell_s_vm_build_bp_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
-    if( !proc_name ) proc_name = bhvm_hf3_vm_frame_s_entypeof( vmf, "bp_grad" );
-    bhvm_hf3_vm_frame_s_proc_reset( vmf, proc_name );
+    if( !bhvm_hf3_vm_frame_s_proc_exists( vmf, TYPEOF_proc_name_infer ) )
+    {
+        ERR_fa( "Procedure 'infer' missing. Call 'build_infer' first." );
+    }
+
+    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_bp_grad );
     for( sz_t i = 0; i < o->body.size; i++ )
     {
         bhcl_net_node_s* node = o->body.data[ i ];
         if( !node->op ) continue;
         if( node->op->_ != TYPEOF_bhcl_op_ar0_adapt_s ) continue;
-        bhcl_net_node_s_vm_build_bp_grad( node, -1, vmf, proc_name );
+        node_s_vm_build_bp_grad( node, -1, vmf );
     }
     bhcl_net_cell_s_clear_flags( o );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed, tp_t proc_name )
+void bhcl_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
 {
-    if( !proc_name ) proc_name = bhvm_hf3_vm_frame_s_entypeof( o, "setup" );
-    bhvm_hf3_vm_frame_s_proc_reset( o, proc_name );
-
     const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
     {
         const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
         switch( holor->type )
         {
-            case TYPEOF_depletable:
-            case TYPEOF_grad:
-            case TYPEOF_adaptive_grad:
+            case TYPEOF_holor_type_depletable:
+            case TYPEOF_holor_type_adaptive_grad:
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( o, proc_name, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+                bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
             }
             break;
 
-            case TYPEOF_adaptive:
+            case TYPEOF_holor_type_adaptive:
             {
                 if( holor->h.v_size == 0 )
                 {
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( o, proc_name, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( o, proc_name, bhvm_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, rseed, 1.0, -0.5, 0.5 ) );
+                    bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+                    bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_setup, bhvm_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, rseed, 1.0, -0.5, 0.5 ) );
                 }
             }
             break;
@@ -2313,16 +2347,23 @@ void bhcl_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed, tp_t proc_name )
             default: break;
         }
     }
-    o->proc_setup = proc_name;
+
+    // append cast operations to setup and remove TYPEOF_proc_name_cast
+    if( bhvm_hf3_vm_frame_s_proc_exists( o, TYPEOF_proc_name_cast ) )
+    {
+        bhvm_hf3_vm_frame_s_proc_append_proc( o, TYPEOF_proc_name_setup, TYPEOF_proc_name_cast );
+        bhvm_hf3_vm_frame_s_proc_remove( o, TYPEOF_proc_name_cast );
+    }
+
+    o->proc_setup = TYPEOF_proc_name_setup;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 // builds vm procedure shelve for all holors
-void bhcl_vm_build_shelve( bhvm_hf3_vm_frame_s* o, tp_t proc_name )
+void bhcl_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
 {
-    if( !proc_name ) proc_name = bhvm_hf3_vm_frame_s_entypeof( o, "shelve" );
-    bhvm_hf3_vm_frame_s_proc_reset( o, proc_name );
+    bhvm_hf3_vm_frame_s_proc_reset( o, TYPEOF_proc_name_shelve );
 
     const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
@@ -2330,25 +2371,30 @@ void bhcl_vm_build_shelve( bhvm_hf3_vm_frame_s* o, tp_t proc_name )
         const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
         switch( holor->type )
         {
-            case TYPEOF_depletable:
+            case TYPEOF_holor_type_depletable:
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( o, proc_name, bhvm_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
+                bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_shelve, bhvm_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
+            }
+            break;
+
+            case TYPEOF_holor_type_cast:
+            {
+                bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_shelve, bhvm_hf3_vm_op_ar0_clear_s_csetup( NULL, i ) );
             }
             break;
 
             default: break;
         }
     }
-    o->proc_shelve = proc_name;
+    o->proc_shelve = TYPEOF_proc_name_shelve;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 // sets adaptive gradients to zero
-void bhcl_net_cell_s_vm_build_zero_adaptive_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf, tp_t proc_name )
+void bhcl_net_cell_s_vm_build_zero_adaptive_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
-    if( !proc_name ) proc_name = bhvm_hf3_vm_frame_s_entypeof( vmf, "zero_adaptive_grad" );
-    bhvm_hf3_vm_frame_s_proc_reset( vmf, proc_name );
+    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_zero_adaptive_grad );
 
     const bhvm_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
@@ -2356,9 +2402,9 @@ void bhcl_net_cell_s_vm_build_zero_adaptive_grad( bhcl_net_cell_s* o, bhvm_hf3_v
         const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
         switch( holor->type )
         {
-            case TYPEOF_adaptive_grad:
+            case TYPEOF_holor_type_adaptive_grad:
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( vmf, proc_name, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, i ) );
+                bhvm_hf3_vm_frame_s_proc_push_op_d( vmf, TYPEOF_proc_name_zero_adaptive_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, i ) );
             }
             break;
 
@@ -2417,7 +2463,7 @@ void bhcl_vm_adaptive_s_minfer( bhcl_vm_adaptive_s* o, const bmath_vf3_s* v_in, 
     ASSERT( v_out->size == h_out->v_size );
 
     bhvm_hf3_s_copy_v_data_from_vf3( h_in, v_in );
-    bhvm_hf3_vm_frame_s_proc_run( &o->vm, TYPEOF_infer );
+    bhvm_hf3_vm_frame_s_proc_run( &o->vm, TYPEOF_proc_name_infer );
     bhvm_hf3_s_copy_v_data_to_vf3( h_out, v_out );
 }
 
@@ -2536,12 +2582,17 @@ badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
 
     bhvm_hf3_vm_frame_s* vmf = &adaptive->vm;
 
-    bhcl_net_cell_s_vm_build_main(      net_frame, vmf, bhvm_hf3_vm_frame_s_entypeof( vmf, "infer"   ) );
-    bhcl_net_cell_s_vm_build_bp_grad(   net_frame, vmf, bhvm_hf3_vm_frame_s_entypeof( vmf, "bp_grad" ) );
-    bhcl_vm_build_setup(  vmf, o->rseed, bhvm_hf3_vm_frame_s_entypeof( vmf, "setup" ) );
-    bhcl_vm_build_shelve( vmf, bhvm_hf3_vm_frame_s_entypeof( vmf, "shelve"  ) );
-    bhcl_net_cell_s_vm_set_input(       net_frame, vmf );
-    bhcl_net_cell_s_vm_set_output(      net_frame, vmf );
+    bhvm_hf3_vm_frame_s_entypeof( vmf, nameof( TYPEOF_proc_name_infer ) );
+    bhvm_hf3_vm_frame_s_entypeof( vmf, nameof( TYPEOF_proc_name_bp_grad ) );
+    bhvm_hf3_vm_frame_s_entypeof( vmf, nameof( TYPEOF_proc_name_setup ) );
+    bhvm_hf3_vm_frame_s_entypeof( vmf, nameof( TYPEOF_proc_name_shelve ) );
+
+    cell_s_vm_build_infer(   net_frame, vmf );
+    cell_s_vm_build_bp_grad( net_frame, vmf );
+    bhcl_vm_build_setup(  vmf, o->rseed );
+    bhcl_vm_build_shelve( vmf );
+    bhcl_net_cell_s_vm_set_input(  net_frame, vmf );
+    bhcl_net_cell_s_vm_set_output( net_frame, vmf );
 
     ASSERT( vmf->input.size  == 2 );
     ASSERT( vmf->output.size == 1 );
@@ -2553,7 +2604,7 @@ badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
     // adaptive holors
     BFOR_EACH( i, &vmf->arr_holor )
     {
-        if( vmf->arr_holor.data[ i ].type == TYPEOF_adaptive )
+        if( vmf->arr_holor.data[ i ].type == TYPEOF_holor_type_adaptive )
         {
             bcore_arr_sz_s_push( &adaptive->index_arr_adaptive, i );
         }
@@ -2587,7 +2638,7 @@ badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
     bhvm_hf3_vm_frame_s_check_integrity( vmf );
 
     /// run setup
-    bhvm_hf3_vm_frame_s_proc_run( vmf, typeof( "setup" ) );
+    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_setup );
 
     BLM_RETURNV( badapt_adaptive*, ( badapt_adaptive* )adaptive );
 }
@@ -2630,7 +2681,7 @@ s2_t bhcl_eval_grad_s_run( const bhcl_eval_grad_s* o )
 
     // compute out0, e0
     bhvm_hf3_vm_frame_s_input_set_all( vmf, o->in );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, typeof( "main" ) );
+    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_infer );
     bhvm_hf3_vm_frame_s_output_get_all( vmf, out0 );
 
     ASSERT( tgt->size == out0->size );
@@ -2643,7 +2694,7 @@ s2_t bhcl_eval_grad_s_run( const bhcl_eval_grad_s* o )
     bhvm_hf3_adl_s_mul_scl_f3(  grad, 2.0, grad );
     bhvm_hf3_vm_frame_s_proc_run( vmf, typeof( "zero_adaptive_grad" ) );
     bhvm_hf3_vm_frame_s_output_set_paired_all( vmf, grad );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, typeof( "bp_grad" ) );
+    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_bp_grad );
 
     f3_t g_dev_sum = 0;
     f3_t g_dev_wgt = 0;
@@ -2660,7 +2711,7 @@ s2_t bhcl_eval_grad_s_run( const bhcl_eval_grad_s* o )
 
     BFOR_EACH( i, &vmf->arr_holor )
     {
-        if( vmf->arr_holor.data[ i ].type != TYPEOF_adaptive ) continue;
+        if( vmf->arr_holor.data[ i ].type != TYPEOF_holor_type_adaptive ) continue;
 
         bhvm_hf3_vm_holor_s* vm_ha = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, i );
         bhvm_hf3_vm_holor_s* vm_hg = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, vm_ha->idx_paired );
@@ -2818,28 +2869,34 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
         ASSERT( bhcl_net_cell_s_is_consistent( cloned_cell ) );
     }
 
-    f3_t time_vm_build_main      = 0;
-    f3_t time_vm_build_bp_grad   = 0;
-    f3_t time_vm_run_setup       = 0;
-    f3_t time_vm_run_main        = 0;
+    f3_t time_vm_build_infer   = 0;
+    f3_t time_vm_build_bp_grad = 0;
+    f3_t time_vm_run_setup     = 0;
+    f3_t time_vm_run_infer     = 0;
 
     bhvm_hf3_vm_frame_s* vm_frame = BLM_CREATE( bhvm_hf3_vm_frame_s );
-    CPU_TIME_OF( bhcl_net_cell_s_vm_build_main(      net_frame, vm_frame, bhvm_hf3_vm_frame_s_entypeof( vm_frame, "main"    ) ), time_vm_build_main    );
-    CPU_TIME_OF( bhcl_net_cell_s_vm_build_bp_grad(   net_frame, vm_frame, bhvm_hf3_vm_frame_s_entypeof( vm_frame, "bp_grad" ) ), time_vm_build_bp_grad );
+    bhvm_hf3_vm_frame_s_entypeof( vm_frame, nameof( TYPEOF_proc_name_infer ) );
+    bhvm_hf3_vm_frame_s_entypeof( vm_frame, nameof( TYPEOF_proc_name_bp_grad ) );
+    bhvm_hf3_vm_frame_s_entypeof( vm_frame, nameof( TYPEOF_proc_name_setup ) );
+    bhvm_hf3_vm_frame_s_entypeof( vm_frame, nameof( TYPEOF_proc_name_shelve ) );
+    bhvm_hf3_vm_frame_s_entypeof( vm_frame, nameof( TYPEOF_proc_name_zero_adaptive_grad ) );
 
-    bhcl_net_cell_s_vm_build_zero_adaptive_grad( net_frame, vm_frame, bhvm_hf3_vm_frame_s_entypeof( vm_frame, "zero_adaptive_grad" ) );
-    bhcl_vm_build_setup(  vm_frame, 1234, bhvm_hf3_vm_frame_s_entypeof( vm_frame, "setup"  ) );
-    bhcl_vm_build_shelve( vm_frame, bhvm_hf3_vm_frame_s_entypeof( vm_frame, "shelve" ) );
+    CPU_TIME_OF( cell_s_vm_build_infer(   net_frame, vm_frame ), time_vm_build_infer );
+    CPU_TIME_OF( cell_s_vm_build_bp_grad( net_frame, vm_frame ), time_vm_build_bp_grad );
+
+    bhcl_net_cell_s_vm_build_zero_adaptive_grad( net_frame, vm_frame );
+    bhcl_vm_build_setup(  vm_frame, 1234 );
+    bhcl_vm_build_shelve( vm_frame );
 
     bhcl_net_cell_s_vm_set_input(  net_frame, vm_frame );
     bhcl_net_cell_s_vm_set_output( net_frame, vm_frame );
-    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, typeof( "setup" ) ), time_vm_run_setup );
+    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_setup ), time_vm_run_setup );
 
     if( o->in ) bhvm_hf3_vm_frame_s_input_set_all( vm_frame, o->in );
 
     bhvm_hf3_vm_frame_s_check_integrity( vm_frame );
 
-    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, typeof( "main" ) ), time_vm_run_main );
+    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_infer ), time_vm_run_infer );
 
     bl_t success = true;
 
@@ -2849,10 +2906,10 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
         bcore_sink_a_push_fa( o->log, "  Parsing ................ #<f3_t>\n", 1000 * time_parse_sem );
         bcore_sink_a_push_fa( o->log, "  Building network ....... #<f3_t>\n", 1000 * time_build_net );
         bcore_sink_a_push_fa( o->log, "  Finalizing network ..... #<f3_t>\n", 1000 * time_final_net );
-        bcore_sink_a_push_fa( o->log, "  VM: Building 'main' .... #<f3_t>\n", 1000 * time_vm_build_main );
+        bcore_sink_a_push_fa( o->log, "  VM: Building 'infer' ... #<f3_t>\n", 1000 * time_vm_build_infer );
         bcore_sink_a_push_fa( o->log, "  VM: Building 'bp_grad' . #<f3_t>\n", 1000 * time_vm_build_bp_grad );
         bcore_sink_a_push_fa( o->log, "  VM: Running  'setup' ... #<f3_t>\n", 1000 * time_vm_run_setup );
-        bcore_sink_a_push_fa( o->log, "  VM: Running  'main' .... #<f3_t>\n", 1000 * time_vm_run_main );
+        bcore_sink_a_push_fa( o->log, "  VM: Running  'infer' ... #<f3_t>\n", 1000 * time_vm_run_infer );
 
         bcore_sink_a_push_fa( o->log, "VM library:\n" );
 

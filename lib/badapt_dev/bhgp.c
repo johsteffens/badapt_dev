@@ -2824,8 +2824,8 @@ s2_t bhgp_eval_e2e_s_run( const bhgp_eval_e2e_s* o )
     f3_t time_vm_run_main        = 0;
 
     bmath_hf3_vm_frame_s* vm_frame = BLM_CREATE( bmath_hf3_vm_frame_s );
-    CPU_TIME_OF( bhgp_net_cell_s_vm_build_main(      net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "main"    ) ), time_vm_build_main    );
-    CPU_TIME_OF( bhgp_net_cell_s_vm_build_bp_grad(   net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "bp_grad" ) ), time_vm_build_bp_grad );
+    CPU_TIME_OF( bhgp_net_cell_s_vm_build_main(    net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "main"    ) ), time_vm_build_main    );
+    CPU_TIME_OF( bhgp_net_cell_s_vm_build_bp_grad( net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "bp_grad" ) ), time_vm_build_bp_grad );
 
     bhgp_net_cell_s_vm_build_zero_adaptive_grad( net_frame, vm_frame, bmath_hf3_vm_frame_s_entypeof( vm_frame, "zero_adaptive_grad" ) );
     bhgp_vm_build_setup(  vm_frame, 1234, bmath_hf3_vm_frame_s_entypeof( vm_frame, "setup"  ) );

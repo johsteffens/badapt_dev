@@ -943,6 +943,8 @@
 #define TYPEOF_if 959999494
 #define TYPEOF_then 3844270454
 #define TYPEOF_else 3183434736
+#define TYPEOF_op_class_regular 3052243102
+#define TYPEOF_op_class_cast 1822035321
 #define TYPEOF_bhcl_context_s 32599654
 #define BETH_EXPAND_ITEM_bhcl_context_s \
   BCORE_DECLARE_OBJECT( bhcl_context_s ) \
@@ -976,6 +978,7 @@
   BCORE_FORWARD_OBJECT( bhcl_op_ar2 ); \
   BCORE_FORWARD_OBJECT( bhcl_op_ar3 ); \
   typedef sz_t (*bhcl_op_get_arity)( const bhcl_op* o ); \
+  typedef sz_t (*bhcl_op_get_class)( const bhcl_op* o ); \
   typedef sz_t (*bhcl_op_get_priority)( const bhcl_op* o ); \
   typedef sc_t (*bhcl_op_get_symbol)( const bhcl_op* o ); \
   typedef bhcl_op* (*bhcl_op_create_op_of_arn)( const bhcl_op* o, sz_t n ); \
@@ -989,6 +992,7 @@
   { \
       bcore_spect_header_s header; \
       bhcl_op_get_arity get_arity; \
+      bhcl_op_get_class get_class; \
       bhcl_op_get_priority get_priority; \
       bhcl_op_get_symbol get_symbol; \
       bhcl_op_create_op_of_arn create_op_of_arn; \
@@ -1005,6 +1009,9 @@
   static inline bl_t bhcl_op_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_bhcl_op ); } \
   static inline sz_t bhcl_op_a_get_arity( const bhcl_op* o ) { const bhcl_op_s* p = bhcl_op_s_get_aware( o ); assert( p->get_arity ); return p->get_arity( o ); } \
   static inline bl_t bhcl_op_a_defines_get_arity( const bhcl_op* o ) { return true; } \
+  static inline sz_t bhcl_op_a_get_class( const bhcl_op* o ) { const bhcl_op_s* p = bhcl_op_s_get_aware( o ); assert( p->get_class ); return p->get_class( o ); } \
+  static inline bl_t bhcl_op_a_defines_get_class( const bhcl_op* o ) { return true; } \
+  static inline sz_t bhcl_op_get_class__( const bhcl_op* o ) { return TYPEOF_op_class_regular; } \
   static inline sz_t bhcl_op_a_get_priority( const bhcl_op* o ) { const bhcl_op_s* p = bhcl_op_s_get_aware( o ); assert( p->get_priority ); return p->get_priority( o ); } \
   static inline bl_t bhcl_op_a_defines_get_priority( const bhcl_op* o ) { return true; } \
   static inline sz_t bhcl_op_get_priority__( const bhcl_op* o ) { return 10; } \
@@ -1212,6 +1219,16 @@
   static inline bhvm_hf3_vm_op* bhcl_op_ar1_relu_leaky_s_create_vm_op_ap( const bhcl_op_ar1_relu_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_leaky_s_create(); } \
   static inline bhvm_hf3_vm_op* bhcl_op_ar1_relu_leaky_s_create_vm_op_dp( const bhcl_op_ar1_relu_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_leaky_s_create(); } \
   static inline sz_t bhcl_op_ar1_relu_leaky_s_get_arity( const bhcl_op_ar1_relu_leaky_s* o ){ return 1; }
+#define TYPEOF_bhcl_op_ar1_htp_s 1357358426
+#define BETH_EXPAND_ITEM_bhcl_op_ar1_htp_s \
+  BCORE_DECLARE_OBJECT( bhcl_op_ar1_htp_s ) \
+    {aware_t _;}; \
+  static inline sc_t bhcl_op_ar1_htp_s_get_symbol( const bhcl_op_ar1_htp_s* o ){ return "htp"; } \
+  static inline sz_t bhcl_op_ar1_htp_s_get_priority( const bhcl_op_ar1_htp_s* o ){ return 8; } \
+  s2_t bhcl_op_ar1_htp_s_solve( const bhcl_op_ar1_htp_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a ); \
+  static inline bhvm_hf3_vm_op* bhcl_op_ar1_htp_s_create_vm_op_ap( const bhcl_op_ar1_htp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cast_htp_s_create(); } \
+  static inline bhvm_hf3_vm_op* bhcl_op_ar1_htp_s_create_vm_op_dp( const bhcl_op_ar1_htp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cast_htp_s_create(); } \
+  static inline sz_t bhcl_op_ar1_htp_s_get_arity( const bhcl_op_ar1_htp_s* o ){ return 1; }
 #define TYPEOF_bhcl_op_ar1_output_s 138861411
 #define BETH_EXPAND_ITEM_bhcl_op_ar1_output_s \
   BCORE_DECLARE_OBJECT( bhcl_op_ar1_output_s ) \
@@ -1261,6 +1278,7 @@
   BCORE_FORWARD_OBJECT( bhcl_op_ar1_softplus_s ); \
   BCORE_FORWARD_OBJECT( bhcl_op_ar1_relu_s ); \
   BCORE_FORWARD_OBJECT( bhcl_op_ar1_relu_leaky_s ); \
+  BCORE_FORWARD_OBJECT( bhcl_op_ar1_htp_s ); \
   BCORE_FORWARD_OBJECT( bhcl_op_ar1_output_s ); \
   BCORE_FORWARD_OBJECT( bhcl_op_ar1_adapt_s ); \
   BCORE_FORWARD_OBJECT( bhcl_op_ar1_dimof_s ); \
@@ -1279,6 +1297,7 @@
   BETH_EXPAND_ITEM_bhcl_op_ar1_softplus_s \
   BETH_EXPAND_ITEM_bhcl_op_ar1_relu_s \
   BETH_EXPAND_ITEM_bhcl_op_ar1_relu_leaky_s \
+  BETH_EXPAND_ITEM_bhcl_op_ar1_htp_s \
   BETH_EXPAND_ITEM_bhcl_op_ar1_output_s \
   BETH_EXPAND_ITEM_bhcl_op_ar1_adapt_s \
   BETH_EXPAND_ITEM_bhcl_op_ar1_dimof_s \
@@ -1647,13 +1666,17 @@
 
 #define TYPEOF_bhcl_vm 992638772
 #define TYPEOF_bhcl_vm_s 3811133990
-#define TYPEOF_infer 796211167
-#define TYPEOF_bp_grad 4232733784
-#define TYPEOF_data 3631407781
-#define TYPEOF_depletable 1293116555
-#define TYPEOF_grad 2677704985
-#define TYPEOF_adaptive 857148571
-#define TYPEOF_adaptive_grad 4069319300
+#define TYPEOF_proc_name_infer 1011184210
+#define TYPEOF_proc_name_bp_grad 2751854505
+#define TYPEOF_proc_name_setup 1686591127
+#define TYPEOF_proc_name_shelve 679697773
+#define TYPEOF_proc_name_cast 2120587881
+#define TYPEOF_proc_name_zero_adaptive_grad 2173676756
+#define TYPEOF_holor_type_data 393476823
+#define TYPEOF_holor_type_depletable 4171047993
+#define TYPEOF_holor_type_adaptive 612987657
+#define TYPEOF_holor_type_adaptive_grad 3377896594
+#define TYPEOF_holor_type_cast 1844256624
 #define TYPEOF_bhcl_vm_adaptive_s 129715345
 #define BETH_EXPAND_ITEM_bhcl_vm_adaptive_s \
   BCORE_DECLARE_OBJECT( bhcl_vm_adaptive_s ) \
