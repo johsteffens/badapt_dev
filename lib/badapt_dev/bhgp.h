@@ -199,7 +199,7 @@ group :op =
     /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
     feature        'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_get_arity( o ) == n ) ? :a_clone( o ) : NULL; };
 
-    /// signature prototype for axon-pass and dendride-pass functions
+    /// signature prototype for axon-pass and dendrite-pass functions
     signature bmath_hf3_vm_op* create_vm_op_pass( const, const bmath_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx );
 
     /** Solve computes the result 'r' from an array of arguments 'a'.

@@ -1796,7 +1796,7 @@ void bhgp_net_node_s_vm_build_bp_grad( bhgp_net_node_s* o, sz_t up_index, bmath_
         }
         else
         {
-            ERR_fa( "Could not create dendride-pass from #<sc_t>.", ifnameof( o->op->_ ) );
+            ERR_fa( "Could not create dendrite-pass from #<sc_t>.", ifnameof( o->op->_ ) );
         }
     }
 

@@ -196,7 +196,7 @@ name else;
 /// operator class
 name op_class_regular;
 
-// A cast operator sets up a static relationship between the axon and dendrides (e.g. by referencing)
+// A cast operator sets up a static relationship between the axon and dendrites (e.g. by referencing)
 // It does not perform effective operations at runtime and can therefore be executed just once during setup.
 // Its dendrite pass operators are also cast operators.
 name op_class_cast;
@@ -205,14 +205,14 @@ name op_class_cast;
 group :op =
 {
     feature strict 'a' ::get_sz get_arity;
-    feature        'a' ::get_sz get_class    = { return TYPEOF_op_class_regular; };
+    feature        'a' ::get_tp get_class    = { return TYPEOF_op_class_regular; };
     feature        'a' ::get_sz get_priority = { return 10; };
     feature        'a' ::get_sc get_symbol   = { return NULL; };
 
     /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
     feature        'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_get_arity( o ) == n ) ? :a_clone( o ) : NULL; };
 
-    /// signature prototype for axon-pass and dendride-pass functions
+    /// signature prototype for axon-pass and dendrite-pass functions
     signature bhvm_hf3_vm_op* create_vm_op_pass( const, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx );
 
     /** Solve computes the result 'r' from an array of arguments 'a'.
@@ -233,8 +233,9 @@ group :op =
       *
       *   Negative values indicate errors
       *   -1: Incorrect operands for the given operation (this triggers a syntax error by the parser)
+      *       if( msg ) function can push a specific error text.
       */
-    feature 'a' s2_t solve( const, bhvm_hf3_s** r, bhvm_hf3_s** a );
+    feature 'a' s2_t solve( const, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg );
 
     feature 'a' ::op* create_final( const, bhvm_hf3_s* h ) =
     {
@@ -461,14 +462,19 @@ group :op =
 
         stamp :htp = aware :
         {
+            func :: :get_class       = { return TYPEOF_op_class_cast; };
             func :: :get_symbol      = { return "htp"; };
             func :: :get_priority    = { return 8; };
             func :: :solve =
             {
                 if( a[0] )
                 {
-                    bhvm_hf3_s_attach( r, bhvm_hf3_s_create() );
-                    bhvm_hf3_s_cast_htp( a[0], *r );
+                    // (!) We must clone the holor rather than do a weak htp-cast of a[0].
+                    // Reason: a[0] can be removed during graph optimization.
+                    // TODO: Reference counting is not limited to objects. It can be applied to v_data and d_data directly.
+                    //       --> make weak casts use that form of reference counting
+                    bhvm_hf3_s_attach( r, bhvm_hf3_s_clone( a[0] ) );
+                    (*r)->htp = !(*r)->htp;
                 }
                 else
                 {
@@ -575,7 +581,20 @@ group :op =
                 bhvm_hf3_s_attach( r, ( a[0] && a[1] ) ? bhvm_hf3_s_create() : NULL );
                 if( *r )
                 {
-                    if( !bhvm_hf3_s_set_d_bmul( a[0], a[1], *r ) ) return -1;
+                    if( !bhvm_hf3_s_set_shape_bmul( a[0], a[1], *r ) )
+                    {
+                        if( msg )
+                        {
+                            s2_t bhs_code = bhvm_hf3_s_bhs_code( a[0], a[1] );
+                            if( !bhvm_hf3_s_bmul_bhs_code_allowed( bhs_code ) )
+                            {
+                                st_s_push_fa( msg, "Operation '");
+                                bhvm_hf3_st_s_push_bhs_code( msg, bhs_code );
+                                st_s_push_fa( msg, "' is not allowed.");
+                            }
+                        }
+                        return -1;
+                    }
                     if( a[0]->v_data && a[1]->v_data )
                     {
                         bhvm_hf3_s_fit_v_size( *r );
@@ -885,7 +904,7 @@ group :op =
                 bhvm_hf3_s_attach( r, ( a[0] && a[1] ) ? bhvm_hf3_s_create() : NULL );
                 if( *r )
                 {
-                    if( !bhvm_hf3_s_set_d_cat( a[0], a[1], *r ) ) return -1;
+                    if( !bhvm_hf3_s_set_shape_cat( a[0], a[1], *r ) ) return -1;
                     if( a[0]->v_data && a[1]->v_data )
                     {
                         bhvm_hf3_s_fit_v_size( *r );
@@ -1300,8 +1319,8 @@ group :eval =
         st_s name;              // name of test (only for logging)
         st_s sig;               // frame signature
         aware => src;           // source (bcore_file_path_s or st_s with inline code)
-        bhvm_hf3_adl_s => in;  // input holors
-        bhvm_hf3_adl_s => out; // expected output holors (if NULL, output is sent to log)
+        bhvm_hf3_adl_s => in;   // input holors
+        bhvm_hf3_adl_s => out;  // expected output holors (if NULL, output is sent to log)
         s2_t verbosity  = 1;    // verbosity;
         f3_t max_dev    = 1E-8; // if output deviation exceeds this value an error is generated
         hidden aware bcore_sink -> log;
@@ -1310,33 +1329,33 @@ group :eval =
 
         // constructor
         func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
-        func               : : run;
-        func bcore_main : main = { return @run( o ); };
+        func :               : run;
+        func bcore_main      : main = { return @run( o ); };
     };
 
-    stamp :arr_e2e = aware bcore_array { :e2e_s []; };
+    stamp :arr = aware bcore_array { aware :* []; };
 
-    /** set of end to end tests
-      * parameters inside act as default values for sub-tests
-      * sub tests can override some of the defaults by explicitly defining them
-      */
-    stamp :e2e_set = aware :
+    /** Set of evaluations (elements can be sets or end to end tests).
+     *  Parameters inside act as default values for sub-tests
+     *  sub tests can override some of the defaults by explicitly defining them.
+     */
+    stamp :set = aware :
     {
-        st_s set_name;          // name of this set (only for logging)
-        st_s sig;               // frame signature
+        st_s set_name;         // name of this set (only for logging)
+        st_s sig;              // frame signature
         bhvm_hf3_adl_s => in;  // input holors
         bhvm_hf3_adl_s => out; // expected output holors (if NULL, output is sent to log)
-        s2_t verbosity  = -1;   // >= 0 force overrides sub test verbosity
-        f3_t max_dev    = -1;   // >= 0 force overrides sub test max_dev
+        s2_t verbosity = -1;   // >= 0 force overrides sub test verbosity
+        f3_t max_dev   = -1;   // >= 0 force overrides sub test max_dev
 
-        :arr_e2e_s        arr;
+        :arr_s arr;
 
         hidden aware bcore_sink -> log; // force overrides all sub-test logs
 
         // constructor
         func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
-        func               : : run;
-        func bcore_main : main = { return @run( o ); };
+        func :               : run;
+        func bcore_main      : main = { return @run( o ); };
     };
 };
 
