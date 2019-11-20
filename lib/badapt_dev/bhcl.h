@@ -198,7 +198,7 @@ name op_class_regular;
 
 // A cast operator sets up a static relationship between the axon and dendrites (e.g. by referencing)
 // It does not perform effective operations at runtime and can therefore be executed just once during setup.
-// Its dendrite pass operators are also cast operators.
+// Its dendrite pass operators are also cast operators. These modify the axon gradient.
 name op_class_cast;
 
 /// operator group

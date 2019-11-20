@@ -7,7 +7,6 @@
 #include "badapt_dev_signal.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
-#include "bhgp.h"
 
 int main( int argc, char** argv )
 {
