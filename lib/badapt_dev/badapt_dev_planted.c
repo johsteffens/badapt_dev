@@ -121,6 +121,9 @@ BCORE_DEFINE_OBJECT_INST_P( bhcl_context_s )
     "bcore_arr_st_s arr_symbol_op2;"
     "bhcl_sem_cell_s cell;"
     "bcore_arr_tp_s control_types;"
+    "private bcore_mutex_s* randomizer_mutex;"
+    "bl_t randomizer_is_locked;"
+    "u2_t randomizer_rval;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -135,7 +138,10 @@ BCORE_DEFINE_SPECT( bhcl, bhcl_op )
     "feature aware bhcl_op : get_symbol = bhcl_op_get_symbol__;"
     "feature aware bhcl_op : create_op_of_arn = bhcl_op_create_op_of_arn__;"
     "feature aware bhcl_op : solve;"
+    "feature aware bhcl_op : solve_each_channel = bhcl_op_solve_each_channel__;"
     "feature aware bhcl_op : create_final = bhcl_op_create_final__;"
+    "feature aware bhcl_op : create_vm_op_ap_init = bhcl_op_create_vm_op_ap_init__;"
+    "feature aware bhcl_op : create_vm_op_ap_init_set_idx = bhcl_op_create_vm_op_ap_init_set_idx__;"
     "feature aware bhcl_op : create_vm_op_ap = bhcl_op_create_vm_op_ap__;"
     "feature aware bhcl_op : create_vm_op_ap_set_idx = bhcl_op_create_vm_op_ap_set_idx__;"
     "feature aware bhcl_op : create_vm_op_dp = bhcl_op_create_vm_op_dp__;"
@@ -148,6 +154,13 @@ bhcl_op* bhcl_op_create_final__( const bhcl_op* o, bhvm_hf3_s* h )
     bhcl_op_ar0_literal_s* final = bhcl_op_ar0_literal_s_create();
     final->h = bhvm_hf3_s_clone( h );
     return (bhcl_op*)final;
+}
+
+bhvm_hf3_vm_op* bhcl_op_create_vm_op_ap_init_set_idx__( const bhcl_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx )
+{
+    bhvm_hf3_vm_op* op = bhcl_op_a_create_vm_op_ap_init( o, vmf, arr_sig, arr_idx );
+    if( op ) bhvm_hf3_vm_op_set_args( op, arr_sig, arr_idx );
+    return op;
 }
 
 bhvm_hf3_vm_op* bhcl_op_create_vm_op_ap_set_idx__( const bhcl_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx )
@@ -194,15 +207,16 @@ s2_t bhcl_op_ar0_input_s_solve( const bhcl_op_ar0_input_s* o, bhvm_hf3_s** r, bh
     return ( *r && (*r)->v_size ) ? 1 : 0;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar0_adapt_s )
+BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar0_adaptive_s )
 "aware bhcl_op_ar0"
 "{"
     "bhvm_hf3_s -> h;"
+    "tp_t name;"
     "func bhcl_op:solve;"
     "func bhcl_op:get_arity;"
 "}";
 
-s2_t bhcl_op_ar0_adapt_s_solve( const bhcl_op_ar0_adapt_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg )
+s2_t bhcl_op_ar0_adaptive_s_solve( const bhcl_op_ar0_adaptive_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg )
 {
     if( o->h )
     {
@@ -390,7 +404,6 @@ BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar1_htp_s )
 "aware bhcl_op_ar1"
 "{"
     "func bhcl_op:get_class;"
-    "func bhcl_op:get_symbol;"
     "func bhcl_op:get_priority;"
     "func bhcl_op:solve;"
     "func bhcl_op:create_vm_op_ap;"
@@ -402,12 +415,14 @@ s2_t bhcl_op_ar1_htp_s_solve( const bhcl_op_ar1_htp_s* o, bhvm_hf3_s** r, bhvm_h
 {
     if( a[0] )
     {
-        // (!) We must clone the holor rather than do a weak htp-cast of a[0].
-        // Reason: a[0] can be removed during graph optimization.
-        // TODO: Reference counting is not limited to objects. It can be applied to v_data and d_data directly.
-        //       --> make weak casts use that form of reference counting
-        bhvm_hf3_s_attach( r, bhvm_hf3_s_clone( a[0] ) );
-        (*r)->htp = !(*r)->htp;
+        #if ( BHCL_OPTIMIZATION_LEVEL >= 1 )
+            // TODO: Watch this solution's stability.
+            bhvm_hf3_s_attach( r, bhvm_hf3_s_create() );
+            **r = bhvm_hf3_init_fork( a[0]->d_data, a[0]->d_size, a[0]->d_space, a[0]->v_data, a[0]->v_size, a[0]->v_space, !a[0]->htp );
+        #else
+            bhvm_hf3_s_attach( r, bhvm_hf3_s_clone( a[0] ) );
+            (*r)->htp = !(*r)->htp;
+        #endif
     }
     else
     {
@@ -432,9 +447,10 @@ s2_t bhcl_op_ar1_output_s_solve( const bhcl_op_ar1_output_s* o, bhvm_hf3_s** r, 
     return ( *r && (*r)->v_size ) ? 1 : 0;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar1_adapt_s )
+BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar1_adaptive_s )
 "aware bhcl_op_ar1"
 "{"
+    "tp_t name;"
     "func bhcl_op:get_symbol;"
     "func bhcl_op:get_priority;"
     "func bhcl_op:solve;"
@@ -442,16 +458,17 @@ BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar1_adapt_s )
     "func bhcl_op:get_arity;"
 "}";
 
-s2_t bhcl_op_ar1_adapt_s_solve( const bhcl_op_ar1_adapt_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg )
+s2_t bhcl_op_ar1_adaptive_s_solve( const bhcl_op_ar1_adaptive_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg )
 {
     bhvm_hf3_s_attach( r, bcore_fork( a[0] ) );
     return ( *r ) ? 2 : 0; // settle with value 2 to keep subsequent graph intact
 }
 
-bhcl_op* bhcl_op_ar1_adapt_s_create_final( const bhcl_op_ar1_adapt_s* o, bhvm_hf3_s* h )
+bhcl_op* bhcl_op_ar1_adaptive_s_create_final( const bhcl_op_ar1_adaptive_s* o, bhvm_hf3_s* h )
 {
-    bhcl_op_ar0_adapt_s* final = bhcl_op_ar0_adapt_s_create();
-    final->h = bhvm_hf3_s_clone( h );
+    bhcl_op_ar0_adaptive_s* final = bhcl_op_ar0_adaptive_s_create();
+    final->h    = bhvm_hf3_s_clone( h );
+    final->name = o->name;
     return (bhcl_op*)final;
 }
 
@@ -474,29 +491,30 @@ s2_t bhcl_op_ar1_dimof_s_solve( const bhcl_op_ar1_dimof_s* o, bhvm_hf3_s** r, bh
     return ( *r && (*r)->v_size ) ? 1 : 0;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar1_rand_s )
+BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar1_random_s )
 "aware bhcl_op_ar1"
 "{"
+    "u2_t rseed = 1234;"
     "func bhcl_op:get_symbol;"
     "func bhcl_op:get_priority;"
     "func bhcl_op:solve;"
     "func bhcl_op:get_arity;"
 "}";
 
-s2_t bhcl_op_ar1_rand_s_solve( const bhcl_op_ar1_rand_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg )
+s2_t bhcl_op_ar1_random_s_solve( const bhcl_op_ar1_random_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg )
 {
     bhvm_hf3_s_attach( r, a[0] ? bhvm_hf3_s_create() : NULL );
     if( a[0] )
     {
+        bhcl_context_s* context = bhcl_get_context();
+        ASSERT( context->randomizer_is_locked );
+        if( context->randomizer_rval == 0 )
+        {
+            context->randomizer_rval = o->rseed;
+        }
         bhvm_hf3_s_copy( *r, a[0] );
         if( !(*r)->v_size ) bhvm_hf3_s_fit_v_size( *r );
-        f3_t sum = f3_abs( bhvm_hf3_s_f3_sum( *r ) );
-        f3_t max = f3_abs( bhvm_hf3_s_f3_max( *r ) );
-        f3_t rbase = ( max > 0 ) ? ( sum / max ) : 0;
-        u2_t rval = rbase * 21036284023;
-        rval += (*r)->v_size;
-        if( rval == 0 ) rval = 1;
-        bhvm_hf3_s_set_random( *r, 1.0, -0.5, 0.5, &rval );
+        bhvm_hf3_s_set_random( *r, 1.0, -0.5, 0.5, &context->randomizer_rval );
     }
     return ( *r && (*r)->v_size ) ? 1 : 0;
 }
@@ -905,6 +923,43 @@ s2_t bhcl_op_ar2_cat_s_solve( const bhcl_op_ar2_cat_s* o, bhvm_hf3_s** r, bhvm_h
     return ( *r && (*r)->v_size ) ? 1 : 0;
 }
 
+BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar2_recurrent_s )
+"aware bhcl_op_ar2"
+"{"
+    "tp_t name;"
+    "func bhcl_op:get_symbol;"
+    "func bhcl_op:get_priority;"
+    "func bhcl_op:solve_each_channel;"
+    "func bhcl_op:solve;"
+    "func bhcl_op:create_vm_op_ap_init;"
+    "func bhcl_op:create_vm_op_ap;"
+    "func bhcl_op:get_arity;"
+"}";
+
+s2_t bhcl_op_ar2_recurrent_s_solve( const bhcl_op_ar2_recurrent_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg )
+{
+    if( a[0] )
+    {
+        bhvm_hf3_s_attach( r, bhvm_hf3_s_create() );
+        bhvm_hf3_s_copy_shape( *r, a[0] );
+        if( a[1] )
+        {
+            if( !bhvm_hf3_s_shape_equal( a[0], a[1] ) ) return -1;
+            return ( a[0]->v_size > 0 && a[1]->v_size > 0 ) ? 1 : 0;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        if( a[1] ) return -1;
+        bhvm_hf3_s_attach( r, NULL );
+        return 0;
+    }
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 // group: bhcl_op_ar3
 
@@ -1039,6 +1094,7 @@ BCORE_DEFINE_OBJECT_INST_P( bhcl_sem_cell_s )
     "func ^:get_enc_by_dn;"
     "func ^:get_priority;"
     "func ^:get_cell_by_name;"
+    "func ^:get_link_by_name;"
 "}";
 
 tp_t bhcl_sem_cell_s_get_name( const bhcl_sem_cell_s* o )
@@ -1049,6 +1105,13 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_get_cell_by_name( bhcl_sem_cell_s* o, tp_t name
     bhcl_sem* sem = o->body ? bhcl_sem_body_s_get_sem_by_name( o->body, name ) : NULL;
     if( sem && sem->_ == TYPEOF_bhcl_sem_cell_s ) return ( bhcl_sem_cell_s* )sem;
     if( o->parent ) return bhcl_sem_cell_s_get_cell_by_name( o->parent, name );
+    return NULL;
+}
+
+bhcl_sem_link_s* bhcl_sem_cell_s_get_link_by_name( bhcl_sem_cell_s* o, tp_t name )
+{
+    bhcl_sem* sem = o->body ? bhcl_sem_body_s_get_sem_by_name( o->body, name ) : NULL;
+    if( sem && sem->_ == TYPEOF_bhcl_sem_link_s ) return ( bhcl_sem_link_s* )sem;
     return NULL;
 }
 
@@ -1224,6 +1287,7 @@ BCORE_DEFINE_OBJECT_INST_P( bhcl_eval_e2e_s )
     "aware => src;"
     "bhvm_hf3_adl_s => in;"
     "bhvm_hf3_adl_s => out;"
+    "sz_t infer_cycles = 1;"
     "s2_t verbosity = 1;"
     "f3_t max_dev = 1E-8;"
     "hidden aware bcore_sink -> log;"
@@ -1270,7 +1334,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 451154518 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 3047990479 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -1311,8 +1375,14 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FEATURE( bhcl_op_create_op_of_arn );
             BCORE_REGISTER_FFUNC( bhcl_op_create_op_of_arn, bhcl_op_create_op_of_arn__ );
             BCORE_REGISTER_FEATURE( bhcl_op_solve );
+            BCORE_REGISTER_FEATURE( bhcl_op_solve_each_channel );
+            BCORE_REGISTER_FFUNC( bhcl_op_solve_each_channel, bhcl_op_solve_each_channel__ );
             BCORE_REGISTER_FEATURE( bhcl_op_create_final );
             BCORE_REGISTER_FFUNC( bhcl_op_create_final, bhcl_op_create_final__ );
+            BCORE_REGISTER_FEATURE( bhcl_op_create_vm_op_ap_init );
+            BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_ap_init, bhcl_op_create_vm_op_ap_init__ );
+            BCORE_REGISTER_FEATURE( bhcl_op_create_vm_op_ap_init_set_idx );
+            BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_ap_init_set_idx, bhcl_op_create_vm_op_ap_init_set_idx__ );
             BCORE_REGISTER_FEATURE( bhcl_op_create_vm_op_ap );
             BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_ap, bhcl_op_create_vm_op_ap__ );
             BCORE_REGISTER_FEATURE( bhcl_op_create_vm_op_ap_set_idx );
@@ -1328,9 +1398,9 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar0_input_s_solve );
             BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar0_input_s_get_arity );
             BCORE_REGISTER_OBJECT( bhcl_op_ar0_input_s );
-            BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar0_adapt_s_solve );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar0_adapt_s_get_arity );
-            BCORE_REGISTER_OBJECT( bhcl_op_ar0_adapt_s );
+            BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar0_adaptive_s_solve );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar0_adaptive_s_get_arity );
+            BCORE_REGISTER_OBJECT( bhcl_op_ar0_adaptive_s );
             BCORE_REGISTER_TRAIT( bhcl_op_ar0, bhcl_op );
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar1_identity_s_solve );
             BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_ap, bhcl_op_ar1_identity_s_create_vm_op_ap );
@@ -1430,7 +1500,6 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar1_relu_leaky_s_get_arity );
             BCORE_REGISTER_OBJECT( bhcl_op_ar1_relu_leaky_s );
             BCORE_REGISTER_FFUNC( bhcl_op_get_class, bhcl_op_ar1_htp_s_get_class );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar1_htp_s_get_symbol );
             BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar1_htp_s_get_priority );
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar1_htp_s_solve );
             BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_ap, bhcl_op_ar1_htp_s_create_vm_op_ap );
@@ -1442,22 +1511,22 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_dp, bhcl_op_ar1_output_s_create_vm_op_dp );
             BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar1_output_s_get_arity );
             BCORE_REGISTER_OBJECT( bhcl_op_ar1_output_s );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar1_adapt_s_get_symbol );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar1_adapt_s_get_priority );
-            BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar1_adapt_s_solve );
-            BCORE_REGISTER_FFUNC( bhcl_op_create_final, bhcl_op_ar1_adapt_s_create_final );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar1_adapt_s_get_arity );
-            BCORE_REGISTER_OBJECT( bhcl_op_ar1_adapt_s );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar1_adaptive_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar1_adaptive_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar1_adaptive_s_solve );
+            BCORE_REGISTER_FFUNC( bhcl_op_create_final, bhcl_op_ar1_adaptive_s_create_final );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar1_adaptive_s_get_arity );
+            BCORE_REGISTER_OBJECT( bhcl_op_ar1_adaptive_s );
             BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar1_dimof_s_get_symbol );
             BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar1_dimof_s_get_priority );
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar1_dimof_s_solve );
             BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar1_dimof_s_get_arity );
             BCORE_REGISTER_OBJECT( bhcl_op_ar1_dimof_s );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar1_rand_s_get_symbol );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar1_rand_s_get_priority );
-            BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar1_rand_s_solve );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar1_rand_s_get_arity );
-            BCORE_REGISTER_OBJECT( bhcl_op_ar1_rand_s );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar1_random_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar1_random_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar1_random_s_solve );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar1_random_s_get_arity );
+            BCORE_REGISTER_OBJECT( bhcl_op_ar1_random_s );
             BCORE_REGISTER_TRAIT( bhcl_op_ar1, bhcl_op );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_identity_s );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_neg_s );
@@ -1475,9 +1544,9 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_relu_leaky_s );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_htp_s );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_output_s );
-            bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_adapt_s );
+            bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_adaptive_s );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_dimof_s );
-            bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_rand_s );
+            bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar1_random_s );
             BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar2_bmul_s_get_symbol );
             BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar2_bmul_s_get_priority );
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar2_bmul_s_solve );
@@ -1554,6 +1623,14 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar2_cat_s_solve );
             BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar2_cat_s_get_arity );
             BCORE_REGISTER_OBJECT( bhcl_op_ar2_cat_s );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar2_recurrent_s_get_symbol );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar2_recurrent_s_get_priority );
+            BCORE_REGISTER_FFUNC( bhcl_op_solve_each_channel, bhcl_op_ar2_recurrent_s_solve_each_channel );
+            BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar2_recurrent_s_solve );
+            BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_ap_init, bhcl_op_ar2_recurrent_s_create_vm_op_ap_init );
+            BCORE_REGISTER_FFUNC( bhcl_op_create_vm_op_ap, bhcl_op_ar2_recurrent_s_create_vm_op_ap );
+            BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar2_recurrent_s_get_arity );
+            BCORE_REGISTER_OBJECT( bhcl_op_ar2_recurrent_s );
             BCORE_REGISTER_TRAIT( bhcl_op_ar2, bhcl_op );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar2_bmul_s );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar2_mul_s );
@@ -1569,6 +1646,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar2_index_s );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar2_inc_order_s );
             bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar2_cat_s );
+            bcore_inst_s_get_typed( TYPEOF_bhcl_op_ar2_recurrent_s );
             BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar3_branch_s_get_priority );
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar3_branch_s_solve );
             BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar3_branch_s_get_arity );
@@ -1597,6 +1675,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhcl_sem_get_enc_by_dn, bhcl_sem_cell_s_get_enc_by_dn );
             BCORE_REGISTER_FFUNC( bhcl_sem_get_priority, bhcl_sem_cell_s_get_priority );
             BCORE_REGISTER_FFUNC( bhcl_sem_get_cell_by_name, bhcl_sem_cell_s_get_cell_by_name );
+            BCORE_REGISTER_FFUNC( bhcl_sem_get_link_by_name, bhcl_sem_cell_s_get_link_by_name );
             BCORE_REGISTER_OBJECT( bhcl_sem_cell_s );
             BCORE_REGISTER_OBJECT( bhcl_sem_stack_flag_s );
             BCORE_REGISTER_SPECT( bhcl_sem );
@@ -1623,8 +1702,10 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_NAME( proc_name_bp_grad );
             BCORE_REGISTER_NAME( proc_name_setup );
             BCORE_REGISTER_NAME( proc_name_shelve );
-            BCORE_REGISTER_NAME( proc_name_cast );
             BCORE_REGISTER_NAME( proc_name_zero_adaptive_grad );
+            BCORE_REGISTER_NAME( proc_name_cast );
+            BCORE_REGISTER_NAME( proc_name_cast_reverse );
+            BCORE_REGISTER_NAME( proc_name_ap_init );
             BCORE_REGISTER_NAME( holor_type_data );
             BCORE_REGISTER_NAME( holor_type_depletable );
             BCORE_REGISTER_NAME( holor_type_adaptive );

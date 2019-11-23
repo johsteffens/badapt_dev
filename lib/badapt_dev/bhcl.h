@@ -29,8 +29,8 @@
 
     cell layer( y => hidden_nodes, a )
     {
-        w = adapt : rand : ( [ hidden_nodes ][ dimof( a ) ]# );
-        b = adapt : ( [ hidden_nodes ]0 );
+        w = adaptive : random : ( [ hidden_nodes ][ dimof( a ) ]# );
+        b = adaptive : ( [ hidden_nodes ]0 );
         y = b + w ** a;
     };
 
@@ -39,7 +39,7 @@
         l1 = layer( 10, a );
         l2 = layer( 20, relu( a ) );
         l3 = layer(  1, relu( a ) );
-        y -> tanh( l3.y );
+        y = tanh( l3.y );
     };
 
     ========================================
@@ -48,19 +48,19 @@
     cell layer( co, ho => dim_h, x, ci, hi )
     {
         // adaptive holors
-        w_fx = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        w_fh = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        w_ix = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        w_ih = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        w_ox = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        w_oh = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        w_qx = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        w_qh = adapt : rand( [ dim_h ][ dimof( x ) ]# );
+        w_fx = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_fh = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_ix = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_ih = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_ox = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_oh = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_qx = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_qh = adaptive : random( [ dim_h ][ dimof( x ) ]# );
 
-        b_f = adapt( [ dim_h ]0 );
-        b_i = adapt( [ dim_h ]0 );
-        b_o = adapt( [ dim_h ]0 );
-        b_q = adapt( [ dim_h ]0 );
+        b_f = adaptive( [ dim_h ]0 );
+        b_i = adaptive( [ dim_h ]0 );
+        b_o = adaptive( [ dim_h ]0 );
+        b_q = adaptive( [ dim_h ]0 );
 
         v_f = lgst( ( w_fx ** x ) + ( w_fh ** hi ) + b_f );
         v_i = lgst( ( w_ix ** x ) + ( w_ih ** hi ) + b_i );
@@ -74,18 +74,18 @@
 
     cell lstm( y => dim_h, x )
     {
-        w_r = adapt : rand( [ dim_h ][ dimof( x ) ]# );
-        b_r = adapt( [ dim_h ]# );
+        w_r = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        b_r = adaptive( [ dim_h ]# );
 
-        c = [ dim_h ]#; // recurrent
-        h = [ dim_h ]#; // recurrent
+        c = recurrent( [ dim_h ]0 );
+        h = recurrent( [ dim_h ]0 );
 
         l1 = layer( dim_h, x, ci = c, hi = h );
 
-        h -> l1.ho;
-        c -> l1.co;
+        h = l1.ho;
+        c = l1.co;
 
-        y -> tanh( w_r * h + b_r );
+        y = tanh( w_r * h + b_r );
     }
 
     g_out -> lstm( dim_h = 200, x = g_in ).y;
@@ -99,6 +99,21 @@
 
 TODO:
 
+   - (done) add keyword 'adaptive' preceding a link inserting adaptive operator between link and expression
+   - (done) pass name of link to operator and finally to gradient holor
+   - (done) inspect name of holor in gradient evaluation
+   - (done) rename rand --> random
+   - (done) remove keyword adapt
+   - (done) add htp syntax ... ^t ; remove syntax htp( ... )
+   - (done) random is too deterministic. Global randomizer should be used but ensure that network builder remains deterministic.
+   - (done) add recurrent operator
+   - (done) make weak casts use low-level reference counting. --> Avoid holor copying in solve function.
+   - allow elmentwise operators mix with scalars (like mul)
+   - look for generally accepted offline problems for neural networks
+   - parameterize adaptive (e.g. adaptive( min, max, additional cost ))
+   - index operator should be a cast-operator
+   - add a cost operator or cost expression to generate specific costs like weight energy (producing weight decay)
+   - recurrent: implement unrolled inference and bp_grad
 */
 
 /**
@@ -109,7 +124,7 @@ TODO:
  *  All links of a graph 'x' to outside objects the node must pass though an input channel of 'x'.
  *  Inside objects may not be referenced directly by outside objects.
  *  A graph adhering to this concept is called 'cell'
- *  An construction of a new graph must conclude with converting it to a cell.
+ *  A construction of a new graph must conclude with converting it to a cell.
  *  Cells can be used as objects for constructing new graphs.
  *
  *  Static Links:
@@ -140,13 +155,13 @@ TODO:
  *     holornova  (unused)
  *     helix   (mathematics, biology, earring, IT corporation)
  *     haptor  (biology: flatworm organ)
- *     haptive (synonym to haptic)
+ *     haptive (synonym to haptic) (no trademark (!) )
  *     hoptinet
  *     hoptivnet (unused)
  *     haptivnet (unused)
  *     adahonet  (unused)
  *     haptivscript (unused)
- *     haptivdown
+ *     haptivdown   // wordplay on markdown
  *
  *
  *  Dendpass-Algorithm:
@@ -170,7 +185,10 @@ TODO:
 #include "badapt_dev_planted.h"
 
 /**********************************************************************************************************************/
-/// f3-operators
+/// flags
+
+/// In case unstable behavior is observed, try debugging by reducing optimization level.
+#define BHCL_OPTIMIZATION_LEVEL 1
 
 /**********************************************************************************************************************/
 /// prototypes
@@ -237,6 +255,12 @@ group :op =
       */
     feature 'a' s2_t solve( const, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg );
 
+
+    /** Normally the node solver calls above solve after all arguments have been obtained.
+     *  Certain (potentially cyclic) operators require a solve for each input channel.
+     **/
+    feature 'a' bl_t solve_each_channel( const ) = { return false; };
+
     feature 'a' ::op* create_final( const, bhvm_hf3_s* h ) =
     {
         :ar0_literal_s* final = :ar0_literal_s_create();
@@ -244,8 +268,17 @@ group :op =
         return (::op*)final;
     };
 
+    /// virtual machine operation for forward initialization (towards axon).
+    feature 'a' :create_vm_op_pass create_vm_op_ap_init         = { return NULL; };
+    feature 'a' :create_vm_op_pass create_vm_op_ap_init_set_idx =
+    {
+        bhvm_hf3_vm_op* op = :a_create_vm_op_ap_init( o, vmf, arr_sig, arr_idx );
+        if( op ) bhvm_hf3_vm_op_set_args( op, arr_sig, arr_idx );
+        return op;
+    };
+
     /// virtual machine operation for forward processing (towards axon).
-    feature 'a' :create_vm_op_pass create_vm_op_ap = { return NULL; };
+    feature 'a' :create_vm_op_pass create_vm_op_ap         = { return NULL; };
     feature 'a' :create_vm_op_pass create_vm_op_ap_set_idx =
     {
         bhvm_hf3_vm_op* op = :a_create_vm_op_ap( o, vmf, arr_sig, arr_idx );
@@ -290,9 +323,10 @@ group :op =
         };
 
         /// nullary adaptive operator
-        stamp :adapt = aware :
+        stamp :adaptive = aware :
         {
             bhvm_hf3_s -> h;
+            tp_t name;
 
             func :: :solve =
             {
@@ -463,18 +497,19 @@ group :op =
         stamp :htp = aware :
         {
             func :: :get_class       = { return TYPEOF_op_class_cast; };
-            func :: :get_symbol      = { return "htp"; };
             func :: :get_priority    = { return 8; };
             func :: :solve =
             {
                 if( a[0] )
                 {
-                    // (!) We must clone the holor rather than do a weak htp-cast of a[0].
-                    // Reason: a[0] can be removed during graph optimization.
-                    // TODO: Reference counting is not limited to objects. It can be applied to v_data and d_data directly.
-                    //       --> make weak casts use that form of reference counting
-                    bhvm_hf3_s_attach( r, bhvm_hf3_s_clone( a[0] ) );
-                    (*r)->htp = !(*r)->htp;
+                    #if ( BHCL_OPTIMIZATION_LEVEL >= 1 )
+                        // TODO: Watch this solution's stability.
+                        bhvm_hf3_s_attach( r, bhvm_hf3_s_create() );
+                        **r = bhvm_hf3_init_fork( a[0]->d_data, a[0]->d_size, a[0]->d_space, a[0]->v_data, a[0]->v_size, a[0]->v_space, !a[0]->htp );
+                    #else
+                        bhvm_hf3_s_attach( r, bhvm_hf3_s_clone( a[0] ) );
+                        (*r)->htp = !(*r)->htp;
+                    #endif
                 }
                 else
                 {
@@ -502,15 +537,18 @@ group :op =
             func :: :create_vm_op_dp  = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cpy_s_create(); };
         };
 
-        /** marks a holor to be adaptive
+        /** marks a holor or expression to be adaptive
          *  Operation is settled when at least a vacant holor can be computed.
          *  If the holor is vacant, it is initialized in the virtual machine.
          */
-        stamp :adapt = aware :
+        stamp :adaptive = aware :
         {
-            func :: :get_symbol   = { return "adapt"; };
+            tp_t name;
+
+            func :: :get_symbol   = { return "adaptive"; };
             func :: :get_priority = { return 8; };
-            func :: :solve        =
+
+            func :: :solve =
             {
                 bhvm_hf3_s_attach( r, bcore_fork( a[0] ) );
                 return ( *r ) ? 2 : 0; // settle with value 2 to keep subsequent graph intact
@@ -518,8 +556,9 @@ group :op =
 
             func :: :create_final =
             {
-                ::ar0_adapt_s* final = ::ar0_adapt_s_create();
-                final->h = bhvm_hf3_s_clone( h );
+                ::ar0_adaptive_s* final = ::ar0_adaptive_s_create();
+                final->h    = bhvm_hf3_s_clone( h );
+                final->name = o->name;
                 return (:::op*)final;
             };
         };
@@ -540,24 +579,25 @@ group :op =
             };
         };
 
-        stamp :rand = aware :
+        stamp :random = aware :
         {
-            func :: :get_symbol   = { return "rand"; };
+            u2_t rseed = 1234;
+            func :: :get_symbol   = { return "random"; };
             func :: :get_priority = { return 8; };
             func :: :solve        =
             {
                 bhvm_hf3_s_attach( r, a[0] ? bhvm_hf3_s_create() : NULL );
                 if( a[0] )
                 {
+                    bhcl_context_s* context = bhcl_get_context();
+                    ASSERT( context->randomizer_is_locked );
+                    if( context->randomizer_rval == 0 )
+                    {
+                        context->randomizer_rval = o->rseed;
+                    }
                     bhvm_hf3_s_copy( *r, a[0] );
                     if( !(*r)->v_size ) bhvm_hf3_s_fit_v_size( *r );
-                    f3_t sum = f3_abs( bhvm_hf3_s_f3_sum( *r ) );
-                    f3_t max = f3_abs( bhvm_hf3_s_f3_max( *r ) );
-                    f3_t rbase = ( max > 0 ) ? ( sum / max ) : 0;
-                    u2_t rval = rbase * 21036284023;
-                    rval += (*r)->v_size;
-                    if( rval == 0 ) rval = 1;
-                    bhvm_hf3_s_set_random( *r, 1.0, -0.5, 0.5, &rval );
+                    bhvm_hf3_s_set_random( *r, 1.0, -0.5, 0.5, &context->randomizer_rval );
                 }
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
@@ -914,6 +954,44 @@ group :op =
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
         };
+
+        /// first argument is initialization, second is normal input
+        stamp :recurrent = aware :
+        {
+            tp_t name;
+
+            func :: :get_symbol   = { return "recurrent"; };
+            func :: :get_priority = { return 8; };
+            func :: :solve_each_channel = { return true; };
+
+            func :: :solve =
+            {
+                if( a[0] )
+                {
+                    bhvm_hf3_s_attach( r, bhvm_hf3_s_create() );
+                    bhvm_hf3_s_copy_shape( *r, a[0] );
+                    if( a[1] )
+                    {
+                        if( !bhvm_hf3_s_shape_equal( a[0], a[1] ) ) return -1;
+                        return ( a[0]->v_size > 0 && a[1]->v_size > 0 ) ? 1 : 0;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                else
+                {
+                    if( a[1] ) return -1;
+                    bhvm_hf3_s_attach( r, NULL );
+                    return 0;
+                }
+            };
+
+            // copies the l-value for initialization
+            func :: :create_vm_op_ap_init = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_ay_s_create(); }; // copies a-channel for initialization
+            func :: :create_vm_op_ap      = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_by_s_create(); }; // copies b-channel for axon pass
+        };
     };
 
     ///  ternary operator (arity 3)
@@ -1066,11 +1144,20 @@ group :sem =
         func : :get_enc_by_dn   = { return :links_s_get_link_by_dn(   &o->encs, dn   ); };
         func : :get_priority    = { return o->priority; };
 
+        // search for a cell descends the tree
         func : :get_cell_by_name =
         {
             ::sem* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
             if( sem && sem->_ == TYPEOF_:cell_s ) return ( :cell_s* )sem;
             if( o->parent ) return :cell_s_get_cell_by_name( o->parent, name );
+            return NULL;
+        };
+
+        // search for a link only looks up the body of this cell
+        func : :get_link_by_name =
+        {
+            ::sem* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
+            if( sem && sem->_ == TYPEOF_:link_s ) return ( :link_s* )sem;
             return NULL;
         };
 
@@ -1210,8 +1297,13 @@ group :vm =
     name proc_name_bp_grad;
     name proc_name_setup;
     name proc_name_shelve;
-    name proc_name_cast;  /// contains cast operations
     name proc_name_zero_adaptive_grad;
+
+    // subroutines copied to setup
+    name proc_name_cast;          // contains cast operations to be copied to setup
+    name proc_name_cast_reverse;  // contains cast operations to be copied to setup in reverse order
+    name proc_name_ap_init;       // contains ap_init operations
+
 
     // holor types
     name holor_type_data;          // any type of data holder
@@ -1297,13 +1389,14 @@ group :eval =
      *  given input and output using partial differentiation
      *  with given epsilon and comparing the result to the gradient
      *  obtained from reverse accumulating automatic differentiation.
+     *  (Does not work for recurrent nets)
      */
     stamp :grad = aware :
     {
         f3_t epsilon = 1E-2;
         bhvm_hf3_vm_frame_s -> vmf; // virtual machine
         bhvm_hf3_adl_s      -> in;  // input
-        bhvm_hf3_adl_s     -> out;  // target output
+        bhvm_hf3_adl_s      -> out; // target output
 
         s2_t verbosity  = 1;           // verbosity;
         f3_t max_dev    = 1E-4;        // if grad deviation exceeds this value an error is generated
@@ -1319,10 +1412,12 @@ group :eval =
         st_s name;              // name of test (only for logging)
         st_s sig;               // frame signature
         aware => src;           // source (bcore_file_path_s or st_s with inline code)
+
         bhvm_hf3_adl_s => in;   // input holors
         bhvm_hf3_adl_s => out;  // expected output holors (if NULL, output is sent to log)
-        s2_t verbosity  = 1;    // verbosity;
-        f3_t max_dev    = 1E-8; // if output deviation exceeds this value an error is generated
+        sz_t infer_cycles = 1;  // multiple infer cycles tests reentrant behavior (e.g. recurrent networks generate different output for each cycle)
+        s2_t verbosity = 1;    // verbosity;
+        f3_t max_dev   = 1E-8; // if output deviation exceeds this value an error is generated
         hidden aware bcore_sink -> log;
 
         :grad_s => grad;        // gradient test (vacant parameters are set by e2e)
@@ -1368,12 +1463,26 @@ stamp :context = aware :
     bcore_arr_st_s    arr_symbol_op2;
     :sem_cell_s       cell; // frame of a cell structure
     bcore_arr_tp_s    control_types; // types reserved for control and not allowed for identifiers
+
+    /** The randomizer is supposed to produce different values on repeated calls but
+     *  always the same sequence of random values for building a network.
+     *  Therefore randomizer_mutex is locked during a build.
+     */
+    private bcore_mutex_s* randomizer_mutex;
+    bl_t                   randomizer_is_locked;
+    u2_t                   randomizer_rval;
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // PLANT_SECTION
 #endif // TYPEOF_bhcl
+
+/**********************************************************************************************************************/
+
+/// returns global context
+bhcl_context_s* bhcl_get_context();
 
 /**********************************************************************************************************************/
 

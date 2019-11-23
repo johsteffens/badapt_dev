@@ -40,6 +40,7 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_evaluate_cell_stack( bhcl_sem_cell_s* o, bcore_
 bhcl_sem_link_s* bhcl_sem_cell_s_evaluate_link(       bhcl_sem_cell_s* o,                        bcore_source* source );
 bhcl_sem_link_s* bhcl_sem_cell_s_evaluate_link_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
 bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d(      bhcl_sem_cell_s* o, bhcl_op* op );
+bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_reset_name( bhcl_sem_cell_s* o, bhcl_op* op );
 void             bhcl_sem_cell_s_set_channels(        bhcl_sem_cell_s* o, sz_t excs, sz_t encs );
 
 bhcl_net_cell_s* bhcl_net_cell_s_create_from_sem_link( bhcl_sem_link_s* sem_link );
@@ -50,6 +51,13 @@ bhcl_net_cell_s* bhcl_net_cell_s_create_from_sem_link( bhcl_sem_link_s* sem_link
 /// context
 
 static bhcl_context_s* context_g = NULL;
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bhcl_context_s* bhcl_get_context()
+{
+    return context_g;
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -68,10 +76,13 @@ void bhcl_context_setup()
     bcore_push_traits_of_ancestor( TYPEOF_bhcl_op_ar1, arr_tp );
     bcore_push_traits_of_ancestor( TYPEOF_bhcl_op_ar2, arr_tp );
 
+    context_g->randomizer_mutex = bcore_mutex_s_create();
+
     for( sz_t i = 0; i < arr_tp->size; i++ )
     {
         bhcl_op* op = bhcl_op_t_create( arr_tp->data[ i ] );
         sc_t symbol = bhcl_op_a_get_symbol( op );
+        // bcore_msg_fa( "#<sc_t>\n", symbol );
         if( symbol )
         {
             sz_t arity = bhcl_op_a_get_arity( op );
@@ -108,7 +119,12 @@ void bhcl_context_setup()
 
 void bhcl_context_down()
 {
-    if( context_g ) bhcl_context_s_detach( &context_g );
+    if( context_g )
+    {
+        bcore_mutex_s_discard( context_g->randomizer_mutex );
+        context_g->randomizer_mutex = NULL;
+        bhcl_context_s_detach( &context_g );
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -518,9 +534,27 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d( bhcl_sem_cell_s* o, bhcl_op* op
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_reset_name( bhcl_sem_cell_s* o, bhcl_op* op )
+{
+    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d( o, op );
+    cell->name = 0;
+    return cell;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_set_source( bhcl_sem_cell_s* o, bhcl_op* op, bcore_source* source )
 {
     bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d( o, op );
+    bcore_source_point_s_set( &cell->source_point, source );
+    return cell;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( bhcl_sem_cell_s* o, bhcl_op* op, bcore_source* source )
+{
+    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name( o, op );
     bcore_source_point_s_set( &cell->source_point, source );
     return cell;
 }
@@ -533,7 +567,7 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_scalar( bhcl_sem_cell_s* o, f3_t* v )
     bhcl_op_ar0_literal_s* literal = bhcl_op_ar0_literal_s_create();
     literal->h = bhvm_hf3_s_create();
     bhvm_hf3_s_set_scalar_pf3( literal->h, v );
-    return bhcl_sem_cell_s_push_cell_op_d( o, ( bhcl_op* )literal );
+    return bhcl_sem_cell_s_push_cell_op_d_reset_name( o, ( bhcl_op* )literal );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -721,20 +755,50 @@ void bhcl_sem_cell_s_parse_body( bhcl_sem_cell_s* o, bcore_source* source )
     bcore_source_a_parse_fa( source, " " );
     while( !bcore_source_a_eos( source ) && !bcore_source_a_parse_bl_fa( source, " #=?'}'" ) )
     {
-        if( bcore_source_a_parse_bl_fa( source, " #?'cell'" ) )
+        if( bcore_source_a_parse_bl_fa( source, " #?'cell'" ) ) // definition of a cell
         {
             bhcl_sem_cell_s_parse( bhcl_sem_cell_s_push_cell( o ), source );
         }
-        else if( bcore_source_a_parse_bl_fa( source, " #?'verify_signature'" ) )
+        else if( bcore_source_a_parse_bl_fa( source, " #?'verify_signature'" ) ) // verifies signature of wrapping cell
         {
             bhcl_sem_cell_s_parse_verify_signature( o, source );
         }
-        else
+        else if( bcore_source_a_parse_bl_fa( source, " #?'adaptive'" ) ) // defining a link to an adaptive operator
+        {
+            tp_t tp_name = bhcl_parse_name( source );
+            bhcl_sem_link_s* link = bhcl_sem_cell_s_push_link( o );
+            bhcl_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
+            link->name = tp_name;
+            bhcl_op_ar1_adaptive_s* op_adaptive = bhcl_op_ar1_adaptive_s_create();
+            op_adaptive->name = tp_name;
+
+            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )op_adaptive, source );
+
+            bcore_source_a_parse_fa( source, " =" );
+            cell->encs.data[ 0 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+            link->up = cell->excs.data[ 0 ];
+        }
+        else if( bcore_source_a_parse_bl_fa( source, " #?'recurrent'" ) ) // A link is defined as recurrent by attaching recurrent operator with open input channel
+        {
+            tp_t tp_name = bhcl_parse_name( source );
+            bhcl_sem_link_s* link = bhcl_sem_cell_s_push_link( o );
+            bhcl_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
+            link->name = tp_name;
+            bhcl_op_ar2_recurrent_s* op_recurrent = bhcl_op_ar2_recurrent_s_create();
+            op_recurrent->name = tp_name;
+            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )op_recurrent, source );
+
+            bcore_source_a_parse_fa( source, " =" );
+            cell->encs.data[ 0 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+            link->up = cell->excs.data[ 0 ];
+        }
+        else // identifier
         {
             tp_t tp_name = bhcl_parse_name( source );
 
             vd_t item = NULL;
-            if( ( item = bhcl_sem_cell_s_get_exc_by_name( o, tp_name ) ) )
+
+            if( ( item = bhcl_sem_cell_s_get_exc_by_name( o, tp_name ) ) ) // identifier is exit channel of o
             {
                 bhcl_sem_link_s* link = item;
                 if( link->up )
@@ -743,6 +807,31 @@ void bhcl_sem_cell_s_parse_body( bhcl_sem_cell_s* o, bcore_source* source )
                 }
                 bcore_source_a_parse_fa( source, " =" );
                 link->up = bhcl_sem_cell_s_evaluate_link( o, source );
+            }
+            else if( ( item = bhcl_sem_cell_s_get_link_by_name( o, tp_name ) ) ) // identifier is a link defined in o's body
+            {
+                bhcl_sem_link_s* link = ( bhcl_sem_link_s* )item;
+
+                // Idle links should never occur. If they do, there is probably a bug in the bhcl-compiler.
+                if( !link->up       ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' is idle.", bhcl_ifnameof( tp_name ) );
+                if( !link->up->cell ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", bhcl_ifnameof( tp_name ) );
+                bhcl_sem_cell_s* cell = link->up->cell;
+                if( cell->op && cell->op->_ == TYPEOF_bhcl_op_ar2_recurrent_s )
+                {
+                    if( !cell->encs.data[ 1 ]->up )
+                    {
+                        bcore_source_a_parse_fa( source, " =" );
+                        cell->encs.data[ 1 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+                    }
+                    else
+                    {
+                        bcore_source_a_parse_err_fa( source, "Redefining a recurrent link '#<sc_t>'.", bhcl_ifnameof( tp_name ) );
+                    }
+                }
+                else
+                {
+                    bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", bhcl_ifnameof( tp_name ) );
+                }
             }
             else // unknown identifier --> creates a link
             {
@@ -855,7 +944,7 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_cat_cell( bhcl_sem_cell_s* o, bhcl_sem_cell_s* 
 
     for( sz_t i = 0; i < c1->excs.size; i++ )
     {
-        cell->excs.data[ i ]->up = c1->excs.data[ i ];
+        cell->excs.data[ i ]->up   = c1->excs.data[ i ];
         cell->excs.data[ i ]->name = c1->excs.data[ i ]->name;
     }
 
@@ -911,7 +1000,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 }
                 else if( tp_name == TYPEOF_if )
                 {
-                    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_set_source( o, ( bhcl_op* )bhcl_op_ar3_branch_s_create(), source );
+                    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar3_branch_s_create(), source );
                     cell->encs.data[ 0 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
                     bcore_source_a_parse_fa( source, " #skip';' then" );
                     cell->encs.data[ 1 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
@@ -921,7 +1010,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 }
                 else
                 {
-                    bcore_source_a_parse_err_fa( source, "Unexpected keyword '#<sc_t>'. Forgot ';' on previous statement?", name->sc );
+                    bcore_source_a_parse_err_fa( source, "Unexpected keyword '#<sc_t>'. Did you miss ';' after previous statement?", name->sc );
                 }
             }
             else
@@ -997,7 +1086,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 bhcl_op* op_unary = bhcl_op_a_create_op_of_arn( cell->op, 1 );
                 if( op_unary )
                 {
-                    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_set_source( o, op_unary, source );
+                    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, op_unary, source );
                     stack_push( stack, cell );
                     stack_push( stack, flag_una_op ); // flag after cell to avoid incorrect stack evaluation
                 }
@@ -1064,17 +1153,39 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
 
             if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) )
             {
-                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_set_source( o, ( bhcl_op* )bhcl_op_ar2_index_s_create(), source );
+                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar2_index_s_create(), source );
                 cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_bhcl_sem_link_s, source );
                 cell->encs.data[ 1 ]->up = link;
                 stack_push( stack, cell->excs.data[ 0 ] );
             }
             else
             {
-                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_set_source( o, ( bhcl_op* )bhcl_op_ar2_inc_order_s_create(), source );
+                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar2_inc_order_s_create(), source );
                 cell->encs.data[ 0 ]->up = link;
                 stack_push( stack, cell );
                 stack_push( stack, flag_inc_order );
+            }
+        }
+
+        // postfix htp
+        else if( bcore_source_a_parse_bl_fa( source, " #?'^t'" ) )
+        {
+            bhcl_sem_cell_s* htp_cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar1_htp_s_create(), source );
+            if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) )
+            {
+                htp_cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_bhcl_sem_link_s, source );
+                stack_push( stack, htp_cell->excs.data[ 0 ] );
+            }
+            else if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_cell_s ) )
+            {
+                bhcl_sem_cell_s* r_cell = stack_pop_of_type( stack, TYPEOF_bhcl_sem_cell_s, source );
+                stack_push( stack, htp_cell );
+                stack_push( stack, flag_cell_cat );
+                stack_push( stack, r_cell );
+            }
+            else
+            {
+                bcore_source_a_parse_err_fa( source, "transposition ':': invalid l-value." );
             }
         }
 
@@ -1261,7 +1372,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
     {
         bhcl_sem_link_s* link2 = stack_pop_link( stack, source );
         bhcl_sem_link_s* link1 = stack_pop_link( stack, source );
-        bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_set_source( o, ( bhcl_op* )bhcl_op_ar2_cat_s_create(), source );
+        bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar2_cat_s_create(), source );
         cell->encs.data[ 0 ]->up = link1;
         cell->encs.data[ 1 ]->up = link2;
         stack_push( stack, cell->excs.data[ 0 ] );
@@ -1469,6 +1580,12 @@ void bhcl_net_node_s_trace_to_sink( bhcl_net_node_s* o, sz_t indent, bcore_sink*
         return;
     }
 
+    bl_t recurring = o->flag;
+
+    if( recurring ) bcore_sink_a_push_fa( sink, "(recurring)" );
+
+    o->flag = true;
+
     if( o->h )
     {
         bhvm_hf3_s_brief_to_sink( o->h, sink );
@@ -1486,13 +1603,18 @@ void bhcl_net_node_s_trace_to_sink( bhcl_net_node_s* o, sz_t indent, bcore_sink*
         bcore_sink_a_push_fa( sink, "(noop)", symbol );
     }
 
-    for( sz_t i = 0; i < o->upls.size; i++ )
+    if( !recurring )
     {
-        sz_t incr = 4;
-        bcore_sink_a_push_fa( sink, "\n#rn{ }#rn{-}", indent, incr );
-        bhcl_net_node_s* node = o->upls.data[ i ]->node;
-        bhcl_net_node_s_trace_to_sink( node, indent + incr, sink );
+        for( sz_t i = 0; i < o->upls.size; i++ )
+        {
+            sz_t incr = 4;
+            bcore_sink_a_push_fa( sink, "\n#rn{ }#rn{-}", indent, incr );
+            bhcl_net_node_s* node = o->upls.data[ i ]->node;
+            bhcl_net_node_s_trace_to_sink( node, indent + incr, sink );
+        }
     }
+
+    o->flag = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1514,6 +1636,43 @@ void bhcl_net_node_s_err_fa( bhcl_net_node_s* o, sc_t format, ... )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+/// calls op-solve and sets node-holor
+static sz_t net_node_s_op_solve( bhcl_net_node_s* o, bhvm_hf3_s** arg_h )
+{
+    st_s* err_msg = st_s_create();
+    sz_t result = bhcl_op_a_solve( o->op, &o->h, arg_h, err_msg );
+
+    if( result < 0 )
+    {
+        sz_t arity = bhcl_op_a_get_arity( o->op );
+        sc_t name = bhcl_op_a_get_symbol( o->op );
+        if( !name ) name = ifnameof( o->op->_ );
+        st_s* msg = st_s_create();
+        st_s_push_fa( msg, "Operator '#<sc_t>' failed:", name );
+        if( err_msg->size > 0 ) st_s_push_fa( msg, " #<sc_t>", err_msg->sc );
+        st_s_push_fa( msg, "\n" );
+        for( sz_t i = 0; i < arity; i++ )
+        {
+            st_s_push_fa( msg, "arg[#<sz_t>]: ", i );
+            if( arg_h[ i ] )
+            {
+                bhvm_hf3_s_brief_to_sink( arg_h[ i ], (bcore_sink*)msg );
+            }
+            else
+            {
+                st_s_push_fa( msg, "null" );
+            }
+            st_s_push_fa( msg, "\n" );
+        }
+        bhcl_net_node_s_err_fa( o, "#<sc_t>", msg->sc );
+        st_s_discard( msg );
+    }
+    st_s_discard( err_msg );
+    return result;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 /**
  *  Function 'solve' executes operator->solve to compute a holor.
  *  If a holor can be computed (vacant or determined), the solve-route is considered finished
@@ -1524,6 +1683,10 @@ void bhcl_net_node_s_err_fa( bhcl_net_node_s* o, sc_t format, ... )
  */
 void bhcl_net_node_s_solve( bhcl_net_node_s* o )
 {
+    if( o->flag ) return; // cyclic link
+
+    o->flag = true;
+
     if( o->h ) return;
 
     if( o->op )
@@ -1536,7 +1699,11 @@ void bhcl_net_node_s_solve( bhcl_net_node_s* o )
 
         #define bhcl_MAX_ARITY 4 /* increase this number when assertion below fails */
         ASSERT( arity <= bhcl_MAX_ARITY );
-        bhvm_hf3_s* arg_h[ bhcl_MAX_ARITY ];
+        bhvm_hf3_s* arg_h[ bhcl_MAX_ARITY ] = { NULL };
+
+        sz_t result = -1;
+
+        bl_t solve_each_channel = bhcl_op_a_solve_each_channel( o->op );
 
         for( sz_t i = 0; i < arity; i++ )
         {
@@ -1546,40 +1713,10 @@ void bhcl_net_node_s_solve( bhcl_net_node_s* o )
                 bhcl_net_node_s_solve( arg_n );
                 arg_h[ i ] = arg_n->h;
             }
+            if( solve_each_channel ) result = net_node_s_op_solve( o, arg_h );
         }
 
-        sz_t result = 0;
-        {
-            st_s* err_msg = st_s_create();
-            result = bhcl_op_a_solve( o->op, &o->h, arg_h, err_msg );
-
-            if( result < 0 )
-            {
-                sc_t name = bhcl_op_a_get_symbol( o->op );
-                if( !name ) name = ifnameof( o->op->_ );
-                st_s* msg = st_s_create();
-                st_s_push_fa( msg, "Operator '#<sc_t>' failed:", name );
-                if( err_msg->size > 0 ) st_s_push_fa( msg, " #<sc_t>", err_msg->sc );
-                st_s_push_fa( msg, "\n" );
-                for( sz_t i = 0; i < arity; i++ )
-                {
-                    st_s_push_fa( msg, "arg[#<sz_t>]: ", i );
-                    if( arg_h[ i ] )
-                    {
-                        bhvm_hf3_s_brief_to_sink( arg_h[ i ], (bcore_sink*)msg );
-                    }
-                    else
-                    {
-                        st_s_push_fa( msg, "null" );
-                    }
-                    st_s_push_fa( msg, "\n" );
-                }
-                bhcl_net_node_s_err_fa( o, "#<sc_t>", msg->sc );
-                st_s_discard( msg );
-            }
-            st_s_discard( err_msg );
-        }
-
+        if( result < 0 ) result = net_node_s_op_solve( o, arg_h );
 
         // operation is settled and can be removed
         if( result >= 1 )
@@ -1589,6 +1726,8 @@ void bhcl_net_node_s_solve( bhcl_net_node_s* o )
             if( result == 2 && o->h ) bhvm_hf3_s_set_vacant( o->h );
         }
     }
+
+    o->flag = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1650,7 +1789,7 @@ void bhcl_net_node_s_set_flags( bhcl_net_node_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_frame )
+static void net_node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_frame )
 {
     ASSERT( o );
     if( o->flag ) return;
@@ -1663,7 +1802,7 @@ static void node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_f
     BFOR_EACH( i, &o->upls )
     {
         bhcl_net_node_s* node = o->upls.data[ i ]->node;
-        node_s_vm_build_infer( node, vm_frame );
+        net_node_s_vm_build_infer( node, vm_frame );
         bcore_arr_sz_s_push( arr_index, node->id );
         st_s_push_char( arr_sig, 'a' + i );
     }
@@ -1674,10 +1813,11 @@ static void node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_f
     bhvm_hf3_vm_holor_s* vm_holor = &vm_frame->arr_holor.data[ o->id ];
     vm_holor->name = o->name;
     bhvm_hf3_s_copy( &vm_holor->h, o->h );
-    if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adapt_s )
+    if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adaptive_s )
     {
-        bhcl_op_ar0_adapt_s* op_ar0_adapt = ( bhcl_op_ar0_adapt_s* )o->op;
+        bhcl_op_ar0_adaptive_s* op_ar0_adapt = ( bhcl_op_ar0_adaptive_s* )o->op;
         vm_holor->type = TYPEOF_holor_type_adaptive;
+        vm_holor->name = op_ar0_adapt->name;
         bhvm_hf3_s_copy( &vm_holor->h, op_ar0_adapt->h );
     }
     else
@@ -1689,8 +1829,16 @@ static void node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_f
     {
         ASSERT( bhcl_op_a_get_arity( o->op ) == o->upls.size );
 
-        bhvm_hf3_vm_op* vm_op = bhcl_op_a_create_vm_op_ap_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
+        // axon-initialization
+        bhvm_hf3_vm_op* vm_op = bhcl_op_a_create_vm_op_ap_init_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
+        if( vm_op )
+        {
+            bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_ap_init, vm_op );
+        }
 
+        vm_op = bhcl_op_a_create_vm_op_ap_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
+
+        // axon-pass
         if( vm_op )
         {
             switch( bhcl_op_a_get_class( o->op ) )
@@ -1747,8 +1895,10 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
         vm_holor->name = o->name;
         bhvm_hf3_s_copy_shape( &vm_holor->h, o->h );
 
-        if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adapt_s )
+        if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adaptive_s )
         {
+            bhcl_op_ar0_adaptive_s* op_adapt = ( bhcl_op_ar0_adaptive_s* )o->op;
+            vm_holor->name = op_adapt->name;
             vm_holor->type = TYPEOF_holor_type_adaptive_grad;
         }
         else
@@ -1831,7 +1981,11 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
                 {
                     bhvm_hf3_vm_holor_s* up_vm_holor = bhvm_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->gid );
                     up_vm_holor->type = TYPEOF_holor_type_cast;
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_cast, vm_op );
+
+                    /** Note: dendrite pass casts must be added in reverse order.
+                     *  This ensures that subsequent casts all refer to the correct target.
+                     */
+                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_cast_reverse, vm_op );
                 }
                 break;
 
@@ -2229,7 +2383,20 @@ static void net_cell_s_from_sem_recursive
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// builds a net cell from a semantic cell
+/// Finalization steps: Solves graph and optimizes it
+void bhcl_net_cell_s_finalize( bhcl_net_cell_s* o )
+{
+    bhcl_net_cell_s_solve( o );
+    bhcl_net_cell_s_remove_identities( o );
+    bhcl_net_cell_s_set_downlinks( o );
+    ASSERT( bhcl_net_cell_s_is_consistent( o ) );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Builds a net cell from a semantic cell
+ *  This function locks and initializes the randomizer to ensure a deterministic sequence of random values.
+ */
 void bhcl_net_cell_s_from_sem_cell
 (
     bhcl_net_cell_s* o,
@@ -2240,6 +2407,11 @@ void bhcl_net_cell_s_from_sem_cell
 )
 {
     ASSERT( sem_cell );
+    bcore_mutex_s_lock( context_g->randomizer_mutex );
+    ASSERT( !context_g->randomizer_is_locked );
+    context_g->randomizer_is_locked = true;
+    context_g->randomizer_rval = 0;
+
     bhcl_ctr_tree_s* tree = bhcl_ctr_tree_s_create();
     for( sz_t i = 0; i < sem_cell->encs.size; i++ )
     {
@@ -2267,17 +2439,12 @@ void bhcl_net_cell_s_from_sem_cell
 
     bhcl_net_cell_s_normalize( o );
     assert( bhcl_net_cell_s_is_consistent( o ) );
-}
 
-// ---------------------------------------------------------------------------------------------------------------------
-
-/// Finalization steps: Solves graph and optimizes it
-void bhcl_net_cell_s_finalize( bhcl_net_cell_s* o )
-{
-    bhcl_net_cell_s_solve( o );
-    bhcl_net_cell_s_remove_identities( o );
-    bhcl_net_cell_s_set_downlinks( o );
     ASSERT( bhcl_net_cell_s_is_consistent( o ) );
+    bhcl_net_cell_s_finalize( o );
+
+    context_g->randomizer_is_locked = false;
+    bcore_mutex_s_unlock( context_g->randomizer_mutex );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2303,7 +2470,7 @@ static void cell_s_vm_build_infer( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf 
     {
         bhcl_net_node_s* node = o->excs.data[ i ];
         if( !node->h ) ERR_fa( "Unsolved node '#<sc_t>'\n", bhcl_ifnameof( node->name ) );
-        node_s_vm_build_infer( node, vmf );
+        net_node_s_vm_build_infer( node, vmf );
     }
 
     bhcl_net_cell_s_clear_flags( o );
@@ -2324,7 +2491,7 @@ static void cell_s_vm_build_bp_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vm
     {
         bhcl_net_node_s* node = o->body.data[ i ];
         if( !node->op ) continue;
-        if( node->op->_ != TYPEOF_bhcl_op_ar0_adapt_s ) continue;
+        if( node->op->_ != TYPEOF_bhcl_op_ar0_adaptive_s ) continue;
         node_s_vm_build_bp_grad( node, -1, vmf );
     }
     bhcl_net_cell_s_clear_flags( o );
@@ -2361,11 +2528,24 @@ void bhcl_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
         }
     }
 
-    // append cast operations to setup and remove TYPEOF_proc_name_cast
+    // moving init subroutines to setup ...
+
     if( bhvm_hf3_vm_frame_s_proc_exists( o, TYPEOF_proc_name_cast ) )
     {
         bhvm_hf3_vm_frame_s_proc_append_proc( o, TYPEOF_proc_name_setup, TYPEOF_proc_name_cast );
         bhvm_hf3_vm_frame_s_proc_remove( o, TYPEOF_proc_name_cast );
+    }
+
+    if( bhvm_hf3_vm_frame_s_proc_exists( o, TYPEOF_proc_name_cast_reverse ) )
+    {
+        bhvm_hf3_vm_frame_s_proc_append_proc_reverse( o, TYPEOF_proc_name_setup, TYPEOF_proc_name_cast_reverse );
+        bhvm_hf3_vm_frame_s_proc_remove( o, TYPEOF_proc_name_cast_reverse );
+    }
+
+    if( bhvm_hf3_vm_frame_s_proc_exists( o, TYPEOF_proc_name_ap_init ) )
+    {
+        bhvm_hf3_vm_frame_s_proc_append_proc( o, TYPEOF_proc_name_setup, TYPEOF_proc_name_ap_init );
+        bhvm_hf3_vm_frame_s_proc_remove( o, TYPEOF_proc_name_ap_init );
     }
 
     o->proc_setup = TYPEOF_proc_name_setup;
@@ -2547,14 +2727,25 @@ bhcl_op* bhcl_vm_builder_s_build_input_op_create( vd_t vd_o, sz_t in_idx, tp_t i
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void bhvm_hf3_vm_frame_s_register_names( bhvm_hf3_vm_frame_s* o )
+/// Pulls all relevant names into frame's name map
+static void bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o )
 {
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_infer ) );
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_bp_grad ) );
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_setup ) );
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_shelve ) );
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_cast ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_cast_reverse ) );
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_zero_adaptive_grad ) );
+    BFOR_EACH( i, &o->arr_holor )
+    {
+        tp_t tp_name = o->arr_holor.data[ i ].name;
+        if( tp_name )
+        {
+            sc_t sc_name = bhcl_nameof( tp_name );
+            if( sc_name ) bhvm_hf3_vm_frame_s_entypeof( o, sc_name );
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2603,11 +2794,8 @@ badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
     // network cell
     bhcl_net_cell_s* net_frame = BLM_A_PUSH( bhcl_net_cell_s_create() );
     bhcl_net_cell_s_from_sem_cell( net_frame, sem_frame, bhcl_vm_builder_s_build_input_op_create, ( vd_t )o, NULL );
-    bhcl_net_cell_s_finalize( net_frame );
 
     bhvm_hf3_vm_frame_s* vmf = &adaptive->vm;
-
-    bhvm_hf3_vm_frame_s_register_names( vmf );
 
     cell_s_vm_build_infer(   net_frame, vmf );
     cell_s_vm_build_bp_grad( net_frame, vmf );
@@ -2615,6 +2803,8 @@ badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
     bhcl_vm_build_shelve( vmf );
     bhcl_net_cell_s_vm_set_input(  net_frame, vmf );
     bhcl_net_cell_s_vm_set_output( net_frame, vmf );
+
+    bhvm_hf3_vm_frame_s_pull_names( vmf );
 
     ASSERT( vmf->input.size  == 2 );
     ASSERT( vmf->output.size == 1 );
@@ -2678,7 +2868,6 @@ bhcl_op* bhcl_eval_e2e_s_input_op_create( vd_t arg, sz_t in_idx, tp_t in_name )
 {
     assert( *(aware_t*)arg == TYPEOF_bhcl_eval_e2e_s );
     bhcl_eval_e2e_s* o = arg;
-    if( !o->in ) return NULL;
     if( in_idx < 0 && in_idx >= o->in->size ) return NULL;
     bhcl_op_ar0_input_s* input = bhcl_op_ar0_input_s_create();
     input->h = bhvm_hf3_s_create();
@@ -2762,9 +2951,11 @@ s2_t bhcl_eval_grad_s_run( const bhcl_eval_grad_s* o )
         bhvm_hf3_vm_holor_s* vm_ha = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, i );
         bhvm_hf3_vm_holor_s* vm_hg = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, vm_ha->idx_paired );
 
+        sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vmf, vm_ha->name );
+
         if( o->verbosity >= 5 )
         {
-            bcore_sink_a_push_fa( o->log, "Holor #<sz_t> '", i );
+            bcore_sink_a_push_fa( o->log, "Adaptive holor '#<sc_t>' (address #<sz_t>): ", name, i );
             bhvm_hf3_s_brief_to_sink( &vm_ha->h, o->log );
             bcore_sink_a_push_fa( o->log, "':\n", i );
         }
@@ -2882,7 +3073,6 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
 
     f3_t time_parse_sem = 0;
     f3_t time_build_net = 0;
-    f3_t time_final_net = 0;
 
     /// semantic cell
     bhcl_sem_cell_s* sem_frame = BLM_A_PUSH( sem_cell_s_create_frame() );
@@ -2894,10 +3084,7 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
     bhcl_net_cell_s* net_frame = BLM_CREATE( bhcl_net_cell_s );
     CPU_TIME_OF( bhcl_net_cell_s_from_sem_cell( net_frame, sem_frame, bhcl_eval_e2e_s_input_op_create, ( vd_t )o, o->verbosity > 5 ? o->log : NULL ), time_build_net );
 
-    ASSERT( bhcl_net_cell_s_is_consistent( net_frame ) );
-    CPU_TIME_OF( bhcl_net_cell_s_finalize( net_frame ), time_final_net );
-
-    if( o->log && o->verbosity >= 2 )
+    if( o->log && o->verbosity >= 3 )
     {
         bcore_sink_a_push_fa( o->log, "Network Cell:\n" );
         bcore_sink_a_push_fa( o->log, "  Entry channels . #<sz_t>\n", net_frame->encs.size );
@@ -2911,7 +3098,6 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
         }
     }
 
-
     /// test copying of net_cell
     {
         bhcl_net_cell_s* cloned_cell = BLM_A_PUSH( bhcl_net_cell_s_clone( net_frame ) );
@@ -2924,7 +3110,6 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
     f3_t time_vm_run_infer     = 0;
 
     bhvm_hf3_vm_frame_s* vm_frame = BLM_CREATE( bhvm_hf3_vm_frame_s );
-    bhvm_hf3_vm_frame_s_register_names( vm_frame );
 
     CPU_TIME_OF( cell_s_vm_build_infer(   net_frame, vm_frame ), time_vm_build_infer );
     CPU_TIME_OF( cell_s_vm_build_bp_grad( net_frame, vm_frame ), time_vm_build_bp_grad );
@@ -2935,26 +3120,37 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
 
     bhcl_net_cell_s_vm_set_input(  net_frame, vm_frame );
     bhcl_net_cell_s_vm_set_output( net_frame, vm_frame );
+    bhvm_hf3_vm_frame_s_pull_names( vm_frame );
+
     CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_setup ), time_vm_run_setup );
 
     if( o->in ) bhvm_hf3_vm_frame_s_input_set_all( vm_frame, o->in );
     bhvm_hf3_vm_frame_s_check_integrity( vm_frame );
 
     CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_infer ), time_vm_run_infer );
+
+    for( sz_t i = 1; i < o->infer_cycles; i++ )
+    {
+        bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_infer );
+    }
+
     bhvm_hf3_vm_frame_s_check_integrity( vm_frame );
 
     bl_t success = true;
 
-    if( o->verbosity >= 3 )
+    if( o->verbosity >= 5 )
     {
         bcore_sink_a_push_fa( o->log, "Timing (ms):\n" );
         bcore_sink_a_push_fa( o->log, "  Parsing ................ #<f3_t>\n", 1000 * time_parse_sem );
         bcore_sink_a_push_fa( o->log, "  Building network ....... #<f3_t>\n", 1000 * time_build_net );
-        bcore_sink_a_push_fa( o->log, "  Finalizing network ..... #<f3_t>\n", 1000 * time_final_net );
         bcore_sink_a_push_fa( o->log, "  VM: Building 'infer' ... #<f3_t>\n", 1000 * time_vm_build_infer );
         bcore_sink_a_push_fa( o->log, "  VM: Building 'bp_grad' . #<f3_t>\n", 1000 * time_vm_build_bp_grad );
         bcore_sink_a_push_fa( o->log, "  VM: Running  'setup' ... #<f3_t>\n", 1000 * time_vm_run_setup );
         bcore_sink_a_push_fa( o->log, "  VM: Running  'infer' ... #<f3_t>\n", 1000 * time_vm_run_infer );
+        if( o->infer_cycles > 1 )
+        {
+            bcore_sink_a_push_fa( o->log, "  VM: Infer-cycles ....... #<sz_t>\n", o->infer_cycles );
+        }
 
         bcore_sink_a_push_fa( o->log, "VM library:\n" );
 
@@ -2963,6 +3159,15 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
             const bhvm_hf3_vm_proc_s* proc = vm_frame->library.data[ i ];
             sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vm_frame, proc->name );
             bcore_sink_a_push_fa( o->log, "  #p20.{#<sc_t> } #<sz_t>\n", name, proc->size );
+        }
+
+        if( o->verbosity >= 10 )
+        {
+            BFOR_EACH( i, &vm_frame->library )
+            {
+                const bhvm_hf3_vm_proc_s* proc = vm_frame->library.data[ i ];
+                bhvm_hf3_vm_frame_s_proc_to_sink( vm_frame, proc->name, o->log );
+            }
         }
     }
 
@@ -3015,7 +3220,7 @@ s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
         bhvm_hf3_vm_frame_s_attach( &grad->vmf, bcore_fork( vm_frame ) );
         bcore_sink_a_attach( &grad->log, bcore_fork( o->log ) );
         grad->verbosity = 0;
-        bhcl_eval_grad_s_run( grad ); // // run quietly
+        bhcl_eval_grad_s_run( grad ); // run quietly
         grad->verbosity = o->verbosity;
         s2_t grad_result = bhcl_eval_grad_s_run( grad ); // second run to test reentrance
         if( grad_result > 0 ) success = false;
