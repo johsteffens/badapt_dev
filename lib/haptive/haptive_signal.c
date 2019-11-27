@@ -1,4 +1,4 @@
-/** Author and Copyright 2019 Johannes Bernhard Steffens
+/** Copyright 2019 Johannes Bernhard Steffens
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  *  limitations under the License.
  */
 
-#include "badapt_dev_signal.h"
-#include "badapt_dev_planted.h"
-#include "badapt_dev_problem.h"
-#include "badapt_dev_ern.h"
-#include "badapt_dev_lstm.h"
-#include "bhcl.h"
+#include "haptive_signal.h"
+#include "haptive_planted.h"
+#include "haptive_graph.h"
+#include "haptive_eval.h"
 
-vd_t badapt_dev_signal_handler( const bcore_signal_s* o )
+//----------------------------------------------------------------------------------------------------------------------
+
+vd_t haptive_signal_handler( const bcore_signal_s* o )
 {
     vd_t ret = NULL;
 
@@ -36,16 +36,16 @@ vd_t badapt_dev_signal_handler( const bcore_signal_s* o )
     {
         bcore_fp_signal_handler arr[] =
         {
-            badapt_dev_planted_signal_handler,
-            badapt_dev_problem_signal_handler,
-            badapt_dev_ern_signal_handler,
-            badapt_dev_lstm_signal_handler,
-            bhcl_signal_handler
+            haptive_planted_signal_handler,
+            haptive_graph_signal_handler,
+            haptive_eval_signal_handler,
         };
 
         ret = bcore_signal_s_broadcast( o, arr, sizeof( arr ) / sizeof( bcore_fp_signal_handler ) );
     }
     return ret;
 }
+
+//----------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/

@@ -1,4 +1,4 @@
-/** Author and Copyright 2019 Johannes Bernhard Steffens
+/** Copyright 2019 Johannes Bernhard Steffens
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  *  limitations under the License.
  */
 
-#ifndef BADAPT_DEV_SIGNAL_H
-#define BADAPT_DEV_SIGNAL_H
+#ifndef HAPTIVE_SIGNAL_H
+#define HAPTIVE_SIGNAL_H
 
 /** Statically bound rudimentary runtime control of library items via signaling.
  */
@@ -23,7 +23,6 @@
 #include "bcore_signal.h"
 
 /// broadcasts a signal within the library
-vd_t badapt_dev_signal_handler( const bcore_signal_s* o );
+vd_t haptive_signal_handler( const bcore_signal_s* o );
 
-
-#endif  // BADAPT_DEV_SIGNAL_H
+#endif  // HAPTIVE_SIGNAL_H

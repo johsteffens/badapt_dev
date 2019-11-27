@@ -13,18 +13,9 @@
  *  limitations under the License.
  */
 
-/*
-    holorcell: improved holorgraph
-    - adapted to bhvm
-    - syntax with explicit transposition
-    - adding a transposed flag to the net-node-holor
-    - add transposition operation as reinterpret casting
-    - elementwise unary operators simply pass on transposition state
-    - binary operators solve transposition states explicitly
-    - residual transpositions are executed
-    - remove '^*^' ..  operators from language (everything is '**')
-    ========================================
+/**********************************************************************************************************************/
 
+/** haptive-graph
     MLP
 
     cell layer( y => hidden_nodes, a )
@@ -74,11 +65,11 @@
 
     cell lstm( y => dim_h, x )
     {
-        w_r = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        b_r = adaptive( [ dim_h ]# );
+        adaptive w_r = random( [ dim_h ][ dimof( x ) ]# );
+        adaptive b_r = [ dim_h ]#;
 
-        c = recurrent( [ dim_h ]0 );
-        h = recurrent( [ dim_h ]0 );
+        recurrent c = [ dim_h ]0;
+        recurrent h = [ dim_h ]0;
 
         l1 = layer( dim_h, x, ci = c, hi = h );
 
@@ -88,7 +79,7 @@
         y = tanh( w_r * h + b_r );
     }
 
-    g_out -> lstm( dim_h = 200, x = g_in ).y;
+    g_out = lstm( dim_h = 200, x = g_in ).y;
 
     - parse into cell
     - cell: tree of cell
@@ -98,17 +89,7 @@
     - once a cell is complete, data types can be finalized
 
 TODO:
-
-   - (done) add keyword 'adaptive' preceding a link inserting adaptive operator between link and expression
-   - (done) pass name of link to operator and finally to gradient holor
-   - (done) inspect name of holor in gradient evaluation
-   - (done) rename rand --> random
-   - (done) remove keyword adapt
-   - (done) add htp syntax ... ^t ; remove syntax htp( ... )
-   - (done) random is too deterministic. Global randomizer should be used but ensure that network builder remains deterministic.
-   - (done) add recurrent operator
-   - (done) make weak casts use low-level reference counting. --> Avoid holor copying in solve function.
-   - (done) run a branch-fuse test (tests correct behavior of fusing downlinks)
+   - allow explicit output channel selection only on cells with no free input channels
    - recurrent: implement unrolled inference and bp_grad
    - allow elementwise operators mix with scalars (like mul)
    - look for generally accepted offline problems for neural networks
@@ -148,6 +129,7 @@ TODO:
  *  ^t,        10     toggles transposition state (represents a reinterpret cast) (priority must be above multiplication)
  *
  *  Possible name ?
+ *     haptive (synonym to haptic) (no trademark (!) )
  *     holocell
  *     holorcell  (unused)
  *     holorframe (unused, term does not yet exist)
@@ -156,7 +138,6 @@ TODO:
  *     holornova  (unused)
  *     helix   (mathematics, biology, earring, IT corporation)
  *     haptor  (biology: flatworm organ)
- *     haptive (synonym to haptic) (no trademark (!) )
  *     hoptinet
  *     hoptivnet (unused)
  *     haptivnet (unused)
@@ -176,37 +157,34 @@ TODO:
  *    all downlinks.
  */
 
-#ifndef BHCL_H
-#define BHCL_H
+/**********************************************************************************************************************/
+
+#ifndef HAPTIVE_GRAPH_H
+#define HAPTIVE_GRAPH_H
 
 #include "bmath_std.h"
 #include "bhvm_std.h"
-#include "badapt_activator.h"
-#include "badapt_adaptive.h"
-#include "badapt_dev_planted.h"
+#include "badapt_std.h"
 
-/**********************************************************************************************************************/
-/// flags
-
-/// In case unstable behavior is observed, try debugging by reducing optimization level.
-#define BHCL_OPTIMIZATION_LEVEL 1
+#include "haptive_planted.h"
 
 /**********************************************************************************************************************/
 /// prototypes
 
-s2_t bhcl_op_ar1_solve_unary( bhvm_hf3_s** r, bhvm_hf3_s** a, bmath_fp_f3_ar1 unary );
+BCORE_FORWARD_OBJECT( haptive_context_s );
+
+s2_t haptive_op_ar1_solve_unary( bhvm_hf3_s** r, bhvm_hf3_s** a, bmath_fp_f3_ar1 unary );
+
+/// returns global context
+haptive_context_s* haptive_get_context();
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_bhcl
-PLANT_GROUP( bhcl, bcore_inst )
+#ifdef TYPEOF_haptive
+PLANT_GROUP( haptive, bcore_inst )
 #ifdef PLANT_SECTION
 
-signature sz_t get_sz( const );
-signature sc_t get_sc( const );
-signature tp_t get_tp( const );
-
-/// control types
+// language control types
 name cell;
 name if;
 name then;
@@ -219,6 +197,30 @@ name op_class_regular;
 // It does not perform effective operations at runtime and can therefore be executed just once during setup.
 // Its dendrite pass operators are also cast operators. These modify the axon gradient.
 name op_class_cast;
+
+// procedure names
+name proc_name_infer;
+name proc_name_bp_grad;
+name proc_name_setup;
+name proc_name_shelve;
+name proc_name_zero_adaptive_grad;
+
+// subroutines copied to setup
+name proc_name_cast;          // contains cast operations to be copied to setup
+name proc_name_cast_reverse;  // contains cast operations to be copied to setup in reverse order
+name proc_name_ap_init;       // contains ap_init operations
+
+// holor types
+name holor_type_data;          // any type of data holder
+name holor_type_depletable;    // holor can be set to vacant before shelving
+name holor_type_adaptive;      // holor is adaptive
+name holor_type_adaptive_grad; // holor represents the gradient of an adaptive holor
+name holor_type_cast;          // holor is the result of a cast (such holors are setup by a cast operator and clear()-ed for shelving)
+
+// basic signatures
+signature sz_t get_sz( const );
+signature sc_t get_sc( const );
+signature tp_t get_tp( const );
 
 /// operator group
 group :op =
@@ -370,7 +372,7 @@ group :op =
         {
             func :: :get_symbol       = { return "neg"; };
             func :: :get_priority     = { return 8; };
-            func :: :solve            = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx ); };
+            func :: :solve            = { return :solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx ); };
             func :: :create_vm_op_ap  = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_neg_s_create(); };
             func :: :create_vm_op_dp  = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_neg_s_create(); };
             func :: :create_op_of_arn =
@@ -385,7 +387,7 @@ group :op =
         {
             func :: :get_symbol      = { return "floor"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_floor_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_floor_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_floor_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar0_dp_ca_floor_s_create(); };
         };
@@ -394,7 +396,7 @@ group :op =
         {
             func :: :get_symbol      = { return "ceil"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_ceil_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_ceil_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_ceil_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar0_dp_ca_ceil_s_create(); };
         };
@@ -403,7 +405,7 @@ group :op =
         {
             func :: :get_symbol      = { return "exp"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_exp_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_exp_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_exp_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_exp_s_create(); };
         };
@@ -414,7 +416,7 @@ group :op =
         {
             func :: :get_symbol      = { return "lgst"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_lgst_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_s_create(); };
         };
@@ -423,7 +425,7 @@ group :op =
         {
             func :: :get_symbol      = { return "lgst_hard"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_hard_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_lgst_hard_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_hard_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_hard_s_create(); };
         };
@@ -432,7 +434,7 @@ group :op =
         {
             func :: :get_symbol      = { return "lgst_leaky"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_leaky_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_lgst_leaky_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_leaky_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_leaky_s_create(); };
         };
@@ -443,7 +445,7 @@ group :op =
         {
             func :: :get_symbol      = { return "tanh"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_tanh_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_s_create(); };
         };
@@ -452,7 +454,7 @@ group :op =
         {
             func :: :get_symbol      = { return "tanh_hard"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_hard_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_tanh_hard_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_hard_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_hard_s_create(); };
         };
@@ -461,7 +463,7 @@ group :op =
         {
             func :: :get_symbol      = { return "tanh_leaky"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_leaky_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_tanh_leaky_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_leaky_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_leaky_s_create(); };
         };
@@ -472,7 +474,7 @@ group :op =
         {
             func :: :get_symbol      = { return "softplus"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_softplus_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_softplus_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_softplus_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_softplus_s_create(); };
         };
@@ -481,7 +483,7 @@ group :op =
         {
             func :: :get_symbol      = { return "relu"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_relu_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_s_create(); };
         };
@@ -490,7 +492,7 @@ group :op =
         {
             func :: :get_symbol      = { return "relu_leaky"; };
             func :: :get_priority    = { return 8; };
-            func :: :solve           = { return bhcl_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_leaky_s_fx ); };
+            func :: :solve           = { return :solve_unary( r, a, bmath_f3_op_ar1_relu_leaky_s_fx ); };
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_leaky_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_leaky_s_create(); };
         };
@@ -590,7 +592,7 @@ group :op =
                 bhvm_hf3_s_attach( r, a[0] ? bhvm_hf3_s_create() : NULL );
                 if( a[0] )
                 {
-                    bhcl_context_s* context = bhcl_get_context();
+                    :::context_s* context = :::get_context();
                     ASSERT( context->randomizer_is_locked );
                     if( context->randomizer_rval == 0 )
                     {
@@ -1271,12 +1273,12 @@ group :net =
 
         func : :solve =
         {
-            BFOR_EACH( i, &o->excs ) bhcl_net_node_s_solve( o->excs.data[ i ] );
+            BFOR_EACH( i, &o->excs ) :node_s_solve( o->excs.data[ i ] );
         };
 
         func : :clear_downlinks =
         {
-            BFOR_EACH( i, &o->body ) bhcl_net_links_s_clear( &o->body.data[ i ]->dnls );
+            BFOR_EACH( i, &o->body ) :links_s_clear( &o->body.data[ i ]->dnls );
         };
 
         func : :set_downlinks;
@@ -1293,25 +1295,6 @@ group :vm =
 {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // procedure names
-    name proc_name_infer;
-    name proc_name_bp_grad;
-    name proc_name_setup;
-    name proc_name_shelve;
-    name proc_name_zero_adaptive_grad;
-
-    // subroutines copied to setup
-    name proc_name_cast;          // contains cast operations to be copied to setup
-    name proc_name_cast_reverse;  // contains cast operations to be copied to setup in reverse order
-    name proc_name_ap_init;       // contains ap_init operations
-
-    // holor types
-    name holor_type_data;          // any type of data holder
-    name holor_type_depletable;    // holor can be set to vacant before shelving
-    name holor_type_adaptive;      // holor is adaptive
-    name holor_type_adaptive_grad; // holor represents the gradient of an adaptive holor
-    name holor_type_cast;          // holor is the result of a cast (such holors are setup by a cast operator and clear()-ed for shelving)
-
     stamp :adaptive = aware badapt_adaptive
     {
 
@@ -1319,10 +1302,10 @@ group :vm =
 
         st_s                   sig;   // frame signature
         aware =>               src;   // source (bcore_file_path_s or st_s with inline code)  (just for reference)
-        bhvm_hf3_vm_frame_s   vm;    // virtual machine
+        bhvm_hf3_vm_frame_s    vm;    // virtual machine
         badapt_dynamics_std_s  dynamics;
-        sz_t                   in_size;  // input vector size
-        sz_t                   out_size; // output vector size
+        sz_t             in_size;         // input vector size
+        sz_t             out_size;        // output vector size
         sz_t             index_in;        // index into vm-holor array
         sz_t             index_out;       // index into vm-holor array
         sz_t             index_grad_out;  // index into vm-holor array
@@ -1378,84 +1361,6 @@ group :vm =
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// evaluation
-group :eval =
-{
-    /// runs test, returns 0 on success.
-    feature 'a' s2_t run( const );
-
-    /** Tests gradient computation for adaptive holors.
-     *  This is done by estimating the gradient for a
-     *  given input and output using partial differentiation
-     *  with given epsilon and comparing the result to the gradient
-     *  obtained from reverse accumulating automatic differentiation.
-     *  (Does not work for recurrent nets)
-     */
-    stamp :grad = aware :
-    {
-        f3_t epsilon = 1E-2;
-        bhvm_hf3_vm_frame_s -> vmf; // virtual machine
-        bhvm_hf3_adl_s      -> in;  // input
-        bhvm_hf3_adl_s      -> out; // target output
-
-        s2_t verbosity  = 1;           // verbosity;
-        f3_t max_dev    = 1E-4;        // if grad deviation exceeds this value an error is generated
-        hidden aware bcore_sink -> log;
-        func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
-        func : : run;
-        func bcore_main : main = { return @run( o ); };
-    };
-
-    /// single end to end test for a cell on a virtual machine
-    stamp :e2e = aware :
-    {
-        st_s name;              // name of test (only for logging)
-        st_s sig;               // frame signature
-        aware => src;           // source (bcore_file_path_s or st_s with inline code)
-
-        bhvm_hf3_adl_s => in;   // input holors
-        bhvm_hf3_adl_s => out;  // expected output holors (if NULL, output is sent to log)
-        sz_t infer_cycles = 1;  // multiple infer cycles tests reentrant behavior (e.g. recurrent networks generate different output for each cycle)
-        s2_t verbosity = 1;    // verbosity;
-        f3_t max_dev   = 1E-8; // if output deviation exceeds this value an error is generated
-        hidden aware bcore_sink -> log;
-
-        :grad_s => grad;        // gradient test (vacant parameters are set by e2e)
-
-        // constructor
-        func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
-        func :               : run;
-        func bcore_main      : main = { return @run( o ); };
-    };
-
-    stamp :arr = aware bcore_array { aware :* []; };
-
-    /** Set of evaluations (elements can be sets or end to end tests).
-     *  Parameters inside act as default values for sub-tests
-     *  sub tests can override some of the defaults by explicitly defining them.
-     */
-    stamp :set = aware :
-    {
-        st_s set_name;         // name of this set (only for logging)
-        st_s sig;              // frame signature
-        bhvm_hf3_adl_s => in;  // input holors
-        bhvm_hf3_adl_s => out; // expected output holors (if NULL, output is sent to log)
-        s2_t verbosity = -1;   // >= 0 force overrides sub test verbosity
-        f3_t max_dev   = -1;   // >= 0 force overrides sub test max_dev
-
-        :arr_s arr;
-
-        hidden aware bcore_sink -> log; // force overrides all sub-test logs
-
-        // constructor
-        func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
-        func :               : run;
-        func bcore_main      : main = { return @run( o ); };
-    };
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 // global context
 stamp :context = aware :
 {
@@ -1477,23 +1382,66 @@ stamp :context = aware :
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // PLANT_SECTION
-#endif // TYPEOF_bhcl
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Interface functions
+
+/// creates a frame-cell
+haptive_sem_cell_s* haptive_sem_cell_s_create_frame();
+
+/// frame-cell parsing from text source
+void haptive_sem_cell_s_parse_signature( haptive_sem_cell_s* o, bcore_source* source );
+void haptive_sem_cell_s_parse_body(      haptive_sem_cell_s* o, bcore_source* source );
+
+/** Builds a net cell from a semantic cell
+ *  This function locks and initializes the randomizer to ensure a deterministic sequence of random values.
+ */
+void haptive_net_cell_s_from_sem_cell
+(
+    haptive_net_cell_s* o,
+    haptive_sem_cell_s* sem_cell,
+    haptive_op* (*input_op_create)( vd_t arg, sz_t in_idx, tp_t in_name ),
+    vd_t arg,
+    bcore_sink* log
+);
+
+/// outputs graph to sink
+void haptive_net_cell_s_graph_to_sink( haptive_net_cell_s* o, bcore_sink* sink );
+
+/// builds vm procedure infer
+void haptive_cell_s_vm_build_infer( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf );
+
+/// builds vm procedure bp_grad
+void haptive_cell_s_vm_build_bp_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf );
+
+/// sets adaptive gradients to zero
+void haptive_net_cell_s_vm_build_zero_adaptive_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf );
+
+/// builds vm procedure setup
+void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed );
+
+/// builds vm procedure shelve
+void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o );
+
+/// specifies input holors on virtual machine
+void haptive_net_cell_s_vm_set_input(  const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf );
+
+/// specifies output holors on virtual machine
+void haptive_net_cell_s_vm_set_output( const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf );
+
+/// pulls all relevant names into frame's name map
+void haptive_bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o );
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+#endif // TYPEOF_haptive
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 
-/// returns global context
-bhcl_context_s* bhcl_get_context();
+vd_t haptive_graph_signal_handler( const bcore_signal_s* o );
 
 /**********************************************************************************************************************/
 
-void bhcl_simple_test( void );
-void bhcl_simple_eval( void );
-void bhcl_adaptive_test( void );
-
-/**********************************************************************************************************************/
-
-vd_t bhcl_signal_handler( const bcore_signal_s* o );
-
-/**********************************************************************************************************************/
-
-#endif // BHCL_H
+#endif // HAPTIVE_GRAPH_H

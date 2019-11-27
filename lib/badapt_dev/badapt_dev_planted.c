@@ -927,7 +927,6 @@ BCORE_DEFINE_OBJECT_INST_P( bhcl_op_ar2_recurrent_s )
 "aware bhcl_op_ar2"
 "{"
     "tp_t name;"
-    "func bhcl_op:get_symbol;"
     "func bhcl_op:get_priority;"
     "func bhcl_op:solve_each_channel;"
     "func bhcl_op:solve;"
@@ -1334,7 +1333,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 3047990479 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 1174633461 ) );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_abc_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_abc_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_abc_s_get_out_size );
@@ -1623,7 +1622,6 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar2_cat_s_solve );
             BCORE_REGISTER_FFUNC( bhcl_op_get_arity, bhcl_op_ar2_cat_s_get_arity );
             BCORE_REGISTER_OBJECT( bhcl_op_ar2_cat_s );
-            BCORE_REGISTER_FFUNC( bhcl_op_get_symbol, bhcl_op_ar2_recurrent_s_get_symbol );
             BCORE_REGISTER_FFUNC( bhcl_op_get_priority, bhcl_op_ar2_recurrent_s_get_priority );
             BCORE_REGISTER_FFUNC( bhcl_op_solve_each_channel, bhcl_op_ar2_recurrent_s_solve_each_channel );
             BCORE_REGISTER_FFUNC( bhcl_op_solve, bhcl_op_ar2_recurrent_s_solve );

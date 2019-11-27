@@ -595,7 +595,6 @@
 #define BETH_EXPAND_ITEM_bhcl_op_ar2_recurrent_s \
   BCORE_DECLARE_OBJECT( bhcl_op_ar2_recurrent_s ) \
     {aware_t _;tp_t name;}; \
-  static inline sc_t bhcl_op_ar2_recurrent_s_get_symbol( const bhcl_op_ar2_recurrent_s* o ){ return "recurrent"; } \
   static inline sz_t bhcl_op_ar2_recurrent_s_get_priority( const bhcl_op_ar2_recurrent_s* o ){ return 8; } \
   static inline bl_t bhcl_op_ar2_recurrent_s_solve_each_channel( const bhcl_op_ar2_recurrent_s* o ){ return true; } \
   s2_t bhcl_op_ar2_recurrent_s_solve( const bhcl_op_ar2_recurrent_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \

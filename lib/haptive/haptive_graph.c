@@ -13,12 +13,11 @@
  *  limitations under the License.
  */
 
-#include "bcore_std.h"
-#include "bmath_std.h"
-#include "bmath_plot.h"
-#include "bhcl.h"
+#include "haptive_graph.h"
 
-#ifdef TYPEOF_bhcl
+// ---------------------------------------------------------------------------------------------------------------------
+
+#ifdef TYPEOF_haptive
 
 /**********************************************************************************************************************/
 /// Prototypes
@@ -27,77 +26,76 @@
 // ---------------------------------------------------------------------------------------------------------------------
 // sem_cell
 
-void bhcl_sem_cell_s_create_args_out( bhcl_sem_cell_s* o, bcore_source* source );
-void bhcl_sem_cell_s_create_args_in(  bhcl_sem_cell_s* o, bhcl_sem_cell_s* frame, bcore_source* source );
-void bhcl_sem_cell_s_parse_body(      bhcl_sem_cell_s* o, bcore_source* source );
-void bhcl_sem_cell_s_wrap_cell(       bhcl_sem_cell_s* o, bhcl_sem_cell_s* cell );
+void haptive_sem_cell_s_create_args_out( haptive_sem_cell_s* o, bcore_source* source );
+void haptive_sem_cell_s_create_args_in(  haptive_sem_cell_s* o, haptive_sem_cell_s* frame, bcore_source* source );
+void haptive_sem_cell_s_wrap_cell(       haptive_sem_cell_s* o, haptive_sem_cell_s* cell );
 
-void             bhcl_sem_cell_s_parse(               bhcl_sem_cell_s* o,                        bcore_source* source );
-bhcl_sem*        bhcl_sem_cell_s_evaluate_sem(        bhcl_sem_cell_s* o,                        bcore_source* source );
-bhcl_sem*        bhcl_sem_cell_s_evaluate_sem_stack(  bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
-bhcl_sem_cell_s* bhcl_sem_cell_s_evaluate_cell(       bhcl_sem_cell_s* o,                        bcore_source* source );
-bhcl_sem_cell_s* bhcl_sem_cell_s_evaluate_cell_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
-bhcl_sem_link_s* bhcl_sem_cell_s_evaluate_link(       bhcl_sem_cell_s* o,                        bcore_source* source );
-bhcl_sem_link_s* bhcl_sem_cell_s_evaluate_link_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d(      bhcl_sem_cell_s* o, bhcl_op* op );
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_reset_name( bhcl_sem_cell_s* o, bhcl_op* op );
-void             bhcl_sem_cell_s_set_channels(        bhcl_sem_cell_s* o, sz_t excs, sz_t encs );
+void             haptive_sem_cell_s_parse(               haptive_sem_cell_s* o,                        bcore_source* source );
+haptive_sem*        haptive_sem_cell_s_evaluate_sem(        haptive_sem_cell_s* o,                        bcore_source* source );
+haptive_sem*        haptive_sem_cell_s_evaluate_sem_stack(  haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
+haptive_sem_cell_s* haptive_sem_cell_s_evaluate_cell(       haptive_sem_cell_s* o,                        bcore_source* source );
+haptive_sem_cell_s* haptive_sem_cell_s_evaluate_cell_stack( haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
+haptive_sem_link_s* haptive_sem_cell_s_evaluate_link(       haptive_sem_cell_s* o,                        bcore_source* source );
+haptive_sem_link_s* haptive_sem_cell_s_evaluate_link_stack( haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d(      haptive_sem_cell_s* o, haptive_op* op );
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d_reset_name( haptive_sem_cell_s* o, haptive_op* op );
+void             haptive_sem_cell_s_set_channels(        haptive_sem_cell_s* o, sz_t excs, sz_t encs );
 
-bhcl_net_cell_s* bhcl_net_cell_s_create_from_sem_link( bhcl_sem_link_s* sem_link );
+haptive_net_cell_s* haptive_net_cell_s_create_from_sem_link( haptive_sem_link_s* sem_link );
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 /// context
 
-static bhcl_context_s* context_g = NULL;
+static haptive_context_s* context_g = NULL;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_context_s* bhcl_get_context()
+haptive_context_s* haptive_get_context()
 {
     return context_g;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t bhcl_entypeof( sc_t name );
+tp_t haptive_entypeof( sc_t name );
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_context_setup()
+void haptive_context_setup()
 {
     if( context_g ) return;
-    context_g = bhcl_context_s_create();
+    context_g = haptive_context_s_create();
 
     BLM_INIT();
     bcore_arr_tp_s* arr_tp = BLM_CREATE( bcore_arr_tp_s );
 
-    bcore_push_traits_of_ancestor( TYPEOF_bhcl_op_ar1, arr_tp );
-    bcore_push_traits_of_ancestor( TYPEOF_bhcl_op_ar2, arr_tp );
+    bcore_push_traits_of_ancestor( TYPEOF_haptive_op_ar1, arr_tp );
+    bcore_push_traits_of_ancestor( TYPEOF_haptive_op_ar2, arr_tp );
 
     context_g->randomizer_mutex = bcore_mutex_s_create();
 
     for( sz_t i = 0; i < arr_tp->size; i++ )
     {
-        bhcl_op* op = bhcl_op_t_create( arr_tp->data[ i ] );
-        sc_t symbol = bhcl_op_a_get_symbol( op );
+        haptive_op* op = haptive_op_t_create( arr_tp->data[ i ] );
+        sc_t symbol = haptive_op_a_get_symbol( op );
         // bcore_msg_fa( "#<sc_t>\n", symbol );
         if( symbol )
         {
-            sz_t arity = bhcl_op_a_get_arity( op );
+            sz_t arity = haptive_op_a_get_arity( op );
             bcore_hmap_name_s_set_sc( &context_g->hmap_name, symbol );
             switch( arity )
             {
                 case 2: bcore_arr_st_s_push_sc( &context_g->arr_symbol_op2, symbol ); break;
                 default: break;
             }
-            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d( &context_g->cell, op );
+            haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d( &context_g->cell, op );
             cell->name = typeof( symbol );
         }
         else
         {
-            bhcl_op_a_detach( &op );
+            haptive_op_a_detach( &op );
         }
     }
 
@@ -107,88 +105,88 @@ void bhcl_context_setup()
     bcore_array_a_sort( (bcore_array*)&context_g->arr_symbol_op2, 0, -1, -1 );
 
     /// register control types
-    bcore_arr_tp_s_push( &context_g->control_types, bhcl_entypeof( "cell" ) );
-    bcore_arr_tp_s_push( &context_g->control_types, bhcl_entypeof( "if" ) );
-    bcore_arr_tp_s_push( &context_g->control_types, bhcl_entypeof( "then" ) );
-    bcore_arr_tp_s_push( &context_g->control_types, bhcl_entypeof( "else" ) );
+    bcore_arr_tp_s_push( &context_g->control_types, haptive_entypeof( "cell" ) );
+    bcore_arr_tp_s_push( &context_g->control_types, haptive_entypeof( "if" ) );
+    bcore_arr_tp_s_push( &context_g->control_types, haptive_entypeof( "then" ) );
+    bcore_arr_tp_s_push( &context_g->control_types, haptive_entypeof( "else" ) );
 
     BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_context_down()
+void haptive_context_down()
 {
     if( context_g )
     {
         bcore_mutex_s_discard( context_g->randomizer_mutex );
         context_g->randomizer_mutex = NULL;
-        bhcl_context_s_detach( &context_g );
+        haptive_context_s_detach( &context_g );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-sc_t bhcl_nameof( tp_t name )
+sc_t haptive_nameof( tp_t name )
 {
-    if( !context_g ) bhcl_context_setup();
+    if( !context_g ) haptive_context_setup();
     return bcore_hmap_name_s_get_sc( &context_g->hmap_name, name );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-sc_t bhcl_ifnameof( tp_t name )
+sc_t haptive_ifnameof( tp_t name )
 {
-    sc_t sc = bhcl_nameof( name );
+    sc_t sc = haptive_nameof( name );
     return sc ? sc : "";
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t bhcl_entypeof( sc_t name )
+tp_t haptive_entypeof( sc_t name )
 {
-    if( !context_g ) bhcl_context_setup();
+    if( !context_g ) haptive_context_setup();
     return bcore_hmap_name_s_set_sc( &context_g->hmap_name, name );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t bhcl_entypeof_fv( sc_t format, va_list args )
+tp_t haptive_entypeof_fv( sc_t format, va_list args )
 {
     st_s* s = st_s_create_fv( format, args );
-    tp_t tp = bhcl_entypeof( s->sc );
+    tp_t tp = haptive_entypeof( s->sc );
     st_s_discard( s );
     return tp;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t bhcl_entypeof_fa( sc_t format, ... )
+tp_t haptive_entypeof_fa( sc_t format, ... )
 {
     va_list args;
     va_start( args, format );
-    tp_t tp = bhcl_entypeof_fv( format, args );
+    tp_t tp = haptive_entypeof_fv( format, args );
     va_end( args );
     return tp;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t bhcl_parse_name( bcore_source* source )
+tp_t haptive_parse_name( bcore_source* source )
 {
     st_s* name = st_s_create();
     bcore_source_a_parse_fa( source, " #name", name );
     if( name->size == 0 ) bcore_source_a_parse_err_fa( source, "Identifier expected." );
-    tp_t tp_name = bhcl_entypeof( name->sc );
+    tp_t tp_name = haptive_entypeof( name->sc );
     st_s_discard( name );
     return tp_name;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t bhcl_parse_op2_symbol( bcore_source* source )
+tp_t haptive_parse_op2_symbol( bcore_source* source )
 {
-    if( !context_g ) bhcl_context_setup();
+    if( !context_g ) haptive_context_setup();
     bcore_arr_st_s* arr = &context_g->arr_symbol_op2;
 
     st_s* format = st_s_create();
@@ -212,7 +210,7 @@ tp_t bhcl_parse_op2_symbol( bcore_source* source )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t bhcl_is_control_type( tp_t name )
+tp_t haptive_is_control_type( tp_t name )
 {
     return ( bcore_arr_tp_s_find( &context_g->control_types, 0, -1, name ) < context_g->control_types.size );
 }
@@ -279,28 +277,28 @@ static bl_t stack_of_value( bcore_arr_vd_s* o, sz_t idx, vd_t value )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static bhcl_sem_link_s* stack_pop_link( bcore_arr_vd_s* o, bcore_source* source )
+static haptive_sem_link_s* stack_pop_link( bcore_arr_vd_s* o, bcore_source* source )
 {
-    return stack_pop_of_type( o, TYPEOF_bhcl_sem_link_s, source );
+    return stack_pop_of_type( o, TYPEOF_haptive_sem_link_s, source );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static bhcl_sem_cell_s* stack_pop_cell( bcore_arr_vd_s* o, bcore_source* source )
+static haptive_sem_cell_s* stack_pop_cell( bcore_arr_vd_s* o, bcore_source* source )
 {
-    return stack_pop_of_type( o, TYPEOF_bhcl_sem_cell_s, source );
+    return stack_pop_of_type( o, TYPEOF_haptive_sem_cell_s, source );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static bhcl_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source* source )
+static haptive_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source* source )
 {
     vd_t v = stack_pop( o );
     tp_t t = *(aware_t*)v;
-    if( t == TYPEOF_bhcl_sem_link_s ) return v;
-    if( t == TYPEOF_bhcl_sem_cell_s )
+    if( t == TYPEOF_haptive_sem_link_s ) return v;
+    if( t == TYPEOF_haptive_sem_cell_s )
     {
-        bhcl_sem_cell_s* cell = v;
+        haptive_sem_cell_s* cell = v;
         if( cell->excs.size != 1 )
         {
             bcore_source_a_parse_err_fa( source, "Cell has #<sz_t> exit channels. Require is 1.", cell->excs.size );
@@ -317,9 +315,9 @@ static bhcl_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source*
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-/// bhcl_op_ar1
+/// haptive_op_ar1
 
-s2_t bhcl_op_ar1_solve_unary( bhvm_hf3_s** r, bhvm_hf3_s** a, bmath_fp_f3_ar1 unary )
+s2_t haptive_op_ar1_solve_unary( bhvm_hf3_s** r, bhvm_hf3_s** a, bmath_fp_f3_ar1 unary )
 {
     bhvm_hf3_s_attach( r, a[0] ? bhvm_hf3_s_create() : NULL );
     if( a[0] )
@@ -332,11 +330,11 @@ s2_t bhcl_op_ar1_solve_unary( bhvm_hf3_s** r, bhvm_hf3_s** a, bmath_fp_f3_ar1 un
 
 
 /**********************************************************************************************************************/
-/// bhcl_op_ar2
+/// haptive_op_ar2
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhvm_hf3_vm_op* bhcl_op_ar2_mul_s_create_vm_op_ap( const bhcl_op_ar2_mul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx )
+bhvm_hf3_vm_op* haptive_op_ar2_mul_s_create_vm_op_ap( const haptive_op_ar2_mul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx )
 {
     ASSERT( arr_idx->size >= 2 );
     const bhvm_hf3_s* a = &bhvm_hf3_vm_frame_s_holors_get_by_index( ( bhvm_hf3_vm_frame_s* )vmf, arr_idx->data[ 0 ] )->h;
@@ -358,7 +356,7 @@ bhvm_hf3_vm_op* bhcl_op_ar2_mul_s_create_vm_op_ap( const bhcl_op_ar2_mul_s* o, c
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhvm_hf3_vm_op* bhcl_op_ar2_mul_s_create_vm_op_dp( const bhcl_op_ar2_mul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id )
+bhvm_hf3_vm_op* haptive_op_ar2_mul_s_create_vm_op_dp( const haptive_op_ar2_mul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id )
 {
     ASSERT( arr_idx->size >= 2 );
     const bhvm_hf3_s* a = &bhvm_hf3_vm_frame_s_holors_get_by_index( ( bhvm_hf3_vm_frame_s* )vmf, arr_idx->data[ 0 ] )->h;
@@ -392,9 +390,9 @@ bhvm_hf3_vm_op* bhcl_op_ar2_mul_s_create_vm_op_dp( const bhcl_op_ar2_mul_s* o, c
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_link_s* bhcl_sem_link_s_create_setup( tp_t name, bhcl_sem_link_s* up, bhcl_sem_link_s* dn, bhcl_sem_cell_s* cell, bl_t exit )
+haptive_sem_link_s* haptive_sem_link_s_create_setup( tp_t name, haptive_sem_link_s* up, haptive_sem_link_s* dn, haptive_sem_cell_s* cell, bl_t exit )
 {
-    bhcl_sem_link_s* o = bhcl_sem_link_s_create();
+    haptive_sem_link_s* o = haptive_sem_link_s_create();
     o->name = name;
     o->up = up;
     o->dn = dn;
@@ -406,21 +404,21 @@ bhcl_sem_link_s* bhcl_sem_link_s_create_setup( tp_t name, bhcl_sem_link_s* up, b
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Traces link to next membrane; returns NULL in case trace ends in open link
-bhcl_sem_link_s* bhcl_sem_link_s_trace_to_cell_membrane( bhcl_sem_link_s* o )
+haptive_sem_link_s* haptive_sem_link_s_trace_to_cell_membrane( haptive_sem_link_s* o )
 {
     if( !o || o->cell ) return o;
-    return bhcl_sem_link_s_trace_to_cell_membrane( o->up );
+    return haptive_sem_link_s_trace_to_cell_membrane( o->up );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Traces link to next cell; returns NULL in case trace ends in open link
-bhcl_sem_cell_s* bhcl_sem_link_s_trace_to_cell( bhcl_sem_link_s* o )
+haptive_sem_cell_s* haptive_sem_link_s_trace_to_cell( haptive_sem_link_s* o )
 {
-    bhcl_sem_link_s* link = bhcl_sem_link_s_trace_to_cell_membrane( o );
+    haptive_sem_link_s* link = haptive_sem_link_s_trace_to_cell_membrane( o );
     if( link )
     {
-        if( link->cell ) assert( *(aware_t*)link->cell == TYPEOF_bhcl_sem_cell_s );
+        if( link->cell ) assert( *(aware_t*)link->cell == TYPEOF_haptive_sem_cell_s );
         return link->cell;
     }
     else
@@ -436,36 +434,36 @@ bhcl_sem_cell_s* bhcl_sem_link_s_trace_to_cell( bhcl_sem_link_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_set_channels( bhcl_sem_cell_s* o, sz_t excs, sz_t encs )
+void haptive_sem_cell_s_set_channels( haptive_sem_cell_s* o, sz_t excs, sz_t encs )
 {
-    bhcl_sem_links_s_set_size( &o->excs, excs );
-    bhcl_sem_links_s_set_size( &o->encs, encs );
+    haptive_sem_links_s_set_size( &o->excs, excs );
+    haptive_sem_links_s_set_size( &o->encs, encs );
     for( sz_t i = 0; i < excs; i++ )
     {
-        o->excs.data[ i ] = bhcl_sem_link_s_create_setup( 0, NULL, NULL, o, true );
+        o->excs.data[ i ] = haptive_sem_link_s_create_setup( 0, NULL, NULL, o, true );
     }
     for( sz_t i = 0; i < encs; i++ )
     {
-        o->encs.data[ i ] = bhcl_sem_link_s_create_setup( 0, NULL, NULL, o, false );
+        o->encs.data[ i ] = haptive_sem_link_s_create_setup( 0, NULL, NULL, o, false );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_wrap_cell( bhcl_sem_cell_s* o, bhcl_sem_cell_s* src )
+void haptive_sem_cell_s_wrap_cell( haptive_sem_cell_s* o, haptive_sem_cell_s* src )
 {
     ASSERT( !o->body );
     ASSERT( !o->op   );
     o->priority = src->priority;
-    bhcl_sem_links_s_set_size( &o->encs, bhcl_sem_cell_s_get_arity( src ) );
-    bhcl_sem_links_s_set_size( &o->excs, src->excs.size );
+    haptive_sem_links_s_set_size( &o->encs, haptive_sem_cell_s_get_arity( src ) );
+    haptive_sem_links_s_set_size( &o->excs, src->excs.size );
 
     sz_t k = 0;
     for( sz_t i = 0; i < src->encs.size; i++ )
     {
         if( !src->encs.data[ i ]->up )
         {
-            o->encs.data[ k++ ] = bhcl_sem_link_s_create_setup( src->encs.data[ i ]->name, NULL, src->encs.data[ i ], o, false );
+            o->encs.data[ k++ ] = haptive_sem_link_s_create_setup( src->encs.data[ i ]->name, NULL, src->encs.data[ i ], o, false );
         }
     }
 
@@ -473,32 +471,32 @@ void bhcl_sem_cell_s_wrap_cell( bhcl_sem_cell_s* o, bhcl_sem_cell_s* src )
 
     for( sz_t i = 0; i < o->excs.size; i++ )
     {
-        o->excs.data[ i ] = bhcl_sem_link_s_create_setup( src->excs.data[ i ]->name, src->excs.data[ i ], NULL, o, true );
+        o->excs.data[ i ] = haptive_sem_link_s_create_setup( src->excs.data[ i ]->name, src->excs.data[ i ], NULL, o, true );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem* bhcl_sem_cell_s_push_sem( bhcl_sem_cell_s* o, tp_t type )
+haptive_sem* haptive_sem_cell_s_push_sem( haptive_sem_cell_s* o, tp_t type )
 {
-    if( !o->body ) o->body = bhcl_sem_body_s_create();
-    return bhcl_sem_body_s_push_t( o->body, type );
+    if( !o->body ) o->body = haptive_sem_body_s_create();
+    return haptive_sem_body_s_push_t( o->body, type );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell( bhcl_sem_cell_s* o )
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell( haptive_sem_cell_s* o )
 {
-    bhcl_sem_cell_s* cell = ( bhcl_sem_cell_s* )bhcl_sem_cell_s_push_sem( o, TYPEOF_bhcl_sem_cell_s );
+    haptive_sem_cell_s* cell = ( haptive_sem_cell_s* )haptive_sem_cell_s_push_sem( o, TYPEOF_haptive_sem_cell_s );
     cell->parent = o;
     return cell;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_link_s* bhcl_sem_cell_s_push_link( bhcl_sem_cell_s* o )
+haptive_sem_link_s* haptive_sem_cell_s_push_link( haptive_sem_cell_s* o )
 {
-    bhcl_sem_link_s* link = ( bhcl_sem_link_s* )bhcl_sem_cell_s_push_sem( o, TYPEOF_bhcl_sem_link_s );
+    haptive_sem_link_s* link = ( haptive_sem_link_s* )haptive_sem_cell_s_push_sem( o, TYPEOF_haptive_sem_link_s );
     return link;
 }
 
@@ -510,22 +508,22 @@ bhcl_sem_link_s* bhcl_sem_cell_s_push_link( bhcl_sem_cell_s* o )
  * Input channels are named in order 'a', 'b' ...
  * If ever more than 24 input channels are used, excess channels carry no name.
  */
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d( bhcl_sem_cell_s* o, bhcl_op* op )
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d( haptive_sem_cell_s* o, haptive_op* op )
 {
-    bhcl_sem_cell_s* cell = ( bhcl_sem_cell_s* )bhcl_sem_cell_s_push_cell( o );
-    bhcl_sem_cell_s_set_channels( cell, 1, bhcl_op_a_get_arity( op ) );
-    sc_t symbol = bhcl_op_a_get_symbol( op );
-    if( symbol ) cell->name = bhcl_entypeof( symbol );
+    haptive_sem_cell_s* cell = ( haptive_sem_cell_s* )haptive_sem_cell_s_push_cell( o );
+    haptive_sem_cell_s_set_channels( cell, 1, haptive_op_a_get_arity( op ) );
+    sc_t symbol = haptive_op_a_get_symbol( op );
+    if( symbol ) cell->name = haptive_entypeof( symbol );
     cell->op = op;
 
-    cell->priority = bhcl_op_a_get_priority( op );
-    cell->excs.data[ 0 ]->name = bhcl_entypeof( "y" );
+    cell->priority = haptive_op_a_get_priority( op );
+    cell->excs.data[ 0 ]->name = haptive_entypeof( "y" );
 
     for( sz_t i = 0; i < cell->encs.size; i++ )
     {
         if( i < 'y' - 'a' )
         {
-            cell->encs.data[ 0 ]->name = bhcl_entypeof_fa( "#<char>", 'a' + i );
+            cell->encs.data[ 0 ]->name = haptive_entypeof_fa( "#<char>", 'a' + i );
         }
     }
 
@@ -534,27 +532,27 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d( bhcl_sem_cell_s* o, bhcl_op* op
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_reset_name( bhcl_sem_cell_s* o, bhcl_op* op )
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d_reset_name( haptive_sem_cell_s* o, haptive_op* op )
 {
-    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d( o, op );
+    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d( o, op );
     cell->name = 0;
     return cell;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_set_source( bhcl_sem_cell_s* o, bhcl_op* op, bcore_source* source )
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d_set_source( haptive_sem_cell_s* o, haptive_op* op, bcore_source* source )
 {
-    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d( o, op );
+    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d( o, op );
     bcore_source_point_s_set( &cell->source_point, source );
     return cell;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( bhcl_sem_cell_s* o, bhcl_op* op, bcore_source* source )
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( haptive_sem_cell_s* o, haptive_op* op, bcore_source* source )
 {
-    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name( o, op );
+    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name( o, op );
     bcore_source_point_s_set( &cell->source_point, source );
     return cell;
 }
@@ -562,52 +560,52 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( bhcl_sem_
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// v can be NULL pushing an undetermined scalar
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_cell_scalar( bhcl_sem_cell_s* o, f3_t* v )
+haptive_sem_cell_s* haptive_sem_cell_s_push_cell_scalar( haptive_sem_cell_s* o, f3_t* v )
 {
-    bhcl_op_ar0_literal_s* literal = bhcl_op_ar0_literal_s_create();
+    haptive_op_ar0_literal_s* literal = haptive_op_ar0_literal_s_create();
     literal->h = bhvm_hf3_s_create();
     bhvm_hf3_s_set_scalar_pf3( literal->h, v );
-    return bhcl_sem_cell_s_push_cell_op_d_reset_name( o, ( bhcl_op* )literal );
+    return haptive_sem_cell_s_push_cell_op_d_reset_name( o, ( haptive_op* )literal );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_wrap_cell( bhcl_sem_cell_s* o, bhcl_sem_cell_s* src )
+haptive_sem_cell_s* haptive_sem_cell_s_push_wrap_cell( haptive_sem_cell_s* o, haptive_sem_cell_s* src )
 {
-    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell( o );
-    bhcl_sem_cell_s_wrap_cell( cell, src );
+    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell( o );
+    haptive_sem_cell_s_wrap_cell( cell, src );
     return cell;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_push_wrap_cell_set_source( bhcl_sem_cell_s* o, bhcl_sem_cell_s* src, bcore_source* source )
+haptive_sem_cell_s* haptive_sem_cell_s_push_wrap_cell_set_source( haptive_sem_cell_s* o, haptive_sem_cell_s* src, bcore_source* source )
 {
-    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_wrap_cell( o, src );
+    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_wrap_cell( o, src );
     bcore_source_point_s_set( &cell->source_point, source );
     return cell;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_assert_identifier_not_yet_defined( const bhcl_sem_cell_s* o, tp_t name, bcore_source* source )
+void haptive_sem_cell_s_assert_identifier_not_yet_defined( const haptive_sem_cell_s* o, tp_t name, bcore_source* source )
 {
     if
     (
-        bhcl_sem_links_s_name_exists( &o->encs, name ) ||
-        ( o->body && bhcl_sem_body_s_name_exists( o->body, name ) )
+        haptive_sem_links_s_name_exists( &o->encs, name ) ||
+        ( o->body && haptive_sem_body_s_name_exists( o->body, name ) )
     )
     {
-        bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' already exists.", bhcl_ifnameof( name ) );
+        bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' already exists.", haptive_ifnameof( name ) );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static bhcl_sem_cell_s* sem_cell_s_create_frame()
+haptive_sem_cell_s* haptive_sem_cell_s_create_frame()
 {
-    if( !context_g ) bhcl_context_setup();
-    bhcl_sem_cell_s* o = bhcl_sem_cell_s_create();
+    if( !context_g ) haptive_context_setup();
+    haptive_sem_cell_s* o = haptive_sem_cell_s_create();
     o->parent = &context_g->cell;
     return o;
 }
@@ -615,7 +613,7 @@ static bhcl_sem_cell_s* sem_cell_s_create_frame()
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// parses ( ... => ... )
-void bhcl_sem_cell_s_parse_signature( bhcl_sem_cell_s* o, bcore_source* source )
+void haptive_sem_cell_s_parse_signature( haptive_sem_cell_s* o, bcore_source* source )
 {
     bcore_source_a_parse_fa( source, " (" );
 
@@ -626,8 +624,8 @@ void bhcl_sem_cell_s_parse_signature( bhcl_sem_cell_s* o, bcore_source* source )
         while( !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            bhcl_sem_link_s* link = bhcl_sem_link_s_create_setup( bhcl_parse_name( source ), NULL, NULL, o, true );
-            bhcl_sem_links_s_push_d( &o->excs, link );
+            haptive_sem_link_s* link = haptive_sem_link_s_create_setup( haptive_parse_name( source ), NULL, NULL, o, true );
+            haptive_sem_links_s_push_d( &o->excs, link );
             first = false;
         }
     }
@@ -639,12 +637,12 @@ void bhcl_sem_cell_s_parse_signature( bhcl_sem_cell_s* o, bcore_source* source )
         while( !bcore_source_a_parse_bl_fa( source, " #?')'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            bhcl_sem_link_s* link = bhcl_sem_link_s_create_setup( bhcl_parse_name( source ), NULL, NULL, o, false );
+            haptive_sem_link_s* link = haptive_sem_link_s_create_setup( haptive_parse_name( source ), NULL, NULL, o, false );
             if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
             {
-                link->up = bhcl_sem_cell_s_evaluate_link( o->parent, source );
+                link->up = haptive_sem_cell_s_evaluate_link( o->parent, source );
             }
-            bhcl_sem_links_s_push_d( &o->encs, link );
+            haptive_sem_links_s_push_d( &o->encs, link );
             first = false;
         }
     }
@@ -652,15 +650,15 @@ void bhcl_sem_cell_s_parse_signature( bhcl_sem_cell_s* o, bcore_source* source )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_parse( bhcl_sem_cell_s* o, bcore_source* source )
+void haptive_sem_cell_s_parse( haptive_sem_cell_s* o, bcore_source* source )
 {
-    bhcl_sem_cell_s* frame = o->parent;
+    haptive_sem_cell_s* frame = o->parent;
 
     // cell signature without name is allowed
     if( !bcore_source_a_parse_bl_fa( source, " #=?'('" ) )
     {
-        tp_t tp_cell_name = bhcl_parse_name( source );
-        if( frame ) bhcl_sem_cell_s_assert_identifier_not_yet_defined( frame, tp_cell_name, source );
+        tp_t tp_cell_name = haptive_parse_name( source );
+        if( frame ) haptive_sem_cell_s_assert_identifier_not_yet_defined( frame, tp_cell_name, source );
         o->name = tp_cell_name;
     }
 
@@ -669,35 +667,35 @@ void bhcl_sem_cell_s_parse( bhcl_sem_cell_s* o, bcore_source* source )
     //  ( <args_out> => <args_in> ) { <body> }
     if( bcore_source_a_parse_bl_fa( source, " #=?'('" ) )
     {
-        bhcl_sem_cell_s_parse_signature( o, source );
+        haptive_sem_cell_s_parse_signature( o, source );
         bcore_source_a_parse_fa( source, " {" );
-        bhcl_sem_cell_s_parse_body( o, source );
+        haptive_sem_cell_s_parse_body( o, source );
         bcore_source_a_parse_fa( source, " }" );
     }
     else // = 'expression yielding a cell'
     {
         bcore_source_a_parse_fa( source, " = " );
-        bhcl_sem_cell_s* cell = bhcl_sem_cell_s_evaluate_cell( frame, source );
-        bhcl_sem_cell_s_wrap_cell( o, cell );
+        haptive_sem_cell_s* cell = haptive_sem_cell_s_evaluate_cell( frame, source );
+        haptive_sem_cell_s_wrap_cell( o, cell );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-st_s* bhcl_sem_cell_s_create_signature( const bhcl_sem_cell_s* o )
+st_s* haptive_sem_cell_s_create_signature( const haptive_sem_cell_s* o )
 {
     st_s* s = st_s_create();
     st_s_push_fa( s, "(" );
-    BFOR_EACH( i, &o->excs ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", bhcl_ifnameof( o->excs.data[ i ]->name ) );
+    BFOR_EACH( i, &o->excs ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", haptive_ifnameof( o->excs.data[ i ]->name ) );
     st_s_push_fa( s, "=>" );
-    BFOR_EACH( i, &o->encs ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", bhcl_ifnameof( o->encs.data[ i ]->name ) );
+    BFOR_EACH( i, &o->encs ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", haptive_ifnameof( o->encs.data[ i ]->name ) );
     st_s_push_fa( s, ")" );
     return s;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_parse_verify_signature( const bhcl_sem_cell_s* o, bcore_source* source )
+void haptive_sem_cell_s_parse_verify_signature( const haptive_sem_cell_s* o, bcore_source* source )
 {
     bcore_source_a_parse_fa( source, " (" );
 
@@ -709,7 +707,7 @@ void bhcl_sem_cell_s_parse_verify_signature( const bhcl_sem_cell_s* o, bcore_sou
         while( !err && !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            tp_t name = bhcl_parse_name( source );
+            tp_t name = haptive_parse_name( source );
             if( !err ) err = ( index >= o->excs.size );
             if( !err ) err = o->excs.data[ index ]->name != name;
             first = false;
@@ -718,7 +716,7 @@ void bhcl_sem_cell_s_parse_verify_signature( const bhcl_sem_cell_s* o, bcore_sou
         if( !err ) err = index != o->excs.size;
         if( err )
         {
-            st_s* sig = bhcl_sem_cell_s_create_signature( o );
+            st_s* sig = haptive_sem_cell_s_create_signature( o );
             bcore_source_a_parse_err_fa( source, "Cell signature is '#<sc_t>'", sig->sc );
             st_s_discard( sig );
         }
@@ -732,7 +730,7 @@ void bhcl_sem_cell_s_parse_verify_signature( const bhcl_sem_cell_s* o, bcore_sou
         while( !err && !bcore_source_a_parse_bl_fa( source, " #?')'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            tp_t name = bhcl_parse_name( source );
+            tp_t name = haptive_parse_name( source );
             if( !err ) err = ( index >= o->encs.size );
             if( !err ) err = o->encs.data[ index ]->name != name;
             first = false;
@@ -741,7 +739,7 @@ void bhcl_sem_cell_s_parse_verify_signature( const bhcl_sem_cell_s* o, bcore_sou
         if( !err ) err = index != o->encs.size;
         if( err )
         {
-            st_s* sig = bhcl_sem_cell_s_create_signature( o );
+            st_s* sig = haptive_sem_cell_s_create_signature( o );
             bcore_source_a_parse_err_fa( source, "Cell signature is '#<sc_t>'", sig->sc );
             st_s_discard( sig );
         }
@@ -750,96 +748,96 @@ void bhcl_sem_cell_s_parse_verify_signature( const bhcl_sem_cell_s* o, bcore_sou
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_parse_body( bhcl_sem_cell_s* o, bcore_source* source )
+void haptive_sem_cell_s_parse_body( haptive_sem_cell_s* o, bcore_source* source )
 {
     bcore_source_a_parse_fa( source, " " );
     while( !bcore_source_a_eos( source ) && !bcore_source_a_parse_bl_fa( source, " #=?'}'" ) )
     {
         if( bcore_source_a_parse_bl_fa( source, " #?'cell'" ) ) // definition of a cell
         {
-            bhcl_sem_cell_s_parse( bhcl_sem_cell_s_push_cell( o ), source );
+            haptive_sem_cell_s_parse( haptive_sem_cell_s_push_cell( o ), source );
         }
         else if( bcore_source_a_parse_bl_fa( source, " #?'verify_signature'" ) ) // verifies signature of wrapping cell
         {
-            bhcl_sem_cell_s_parse_verify_signature( o, source );
+            haptive_sem_cell_s_parse_verify_signature( o, source );
         }
         else if( bcore_source_a_parse_bl_fa( source, " #?'adaptive'" ) ) // defining a link to an adaptive operator
         {
-            tp_t tp_name = bhcl_parse_name( source );
-            bhcl_sem_link_s* link = bhcl_sem_cell_s_push_link( o );
-            bhcl_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
+            tp_t tp_name = haptive_parse_name( source );
+            haptive_sem_link_s* link = haptive_sem_cell_s_push_link( o );
+            haptive_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
             link->name = tp_name;
-            bhcl_op_ar1_adaptive_s* op_adaptive = bhcl_op_ar1_adaptive_s_create();
+            haptive_op_ar1_adaptive_s* op_adaptive = haptive_op_ar1_adaptive_s_create();
             op_adaptive->name = tp_name;
 
-            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )op_adaptive, source );
+            haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( haptive_op* )op_adaptive, source );
 
             bcore_source_a_parse_fa( source, " =" );
-            cell->encs.data[ 0 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+            cell->encs.data[ 0 ]->up = haptive_sem_cell_s_evaluate_link( o, source );
             link->up = cell->excs.data[ 0 ];
         }
         else if( bcore_source_a_parse_bl_fa( source, " #?'recurrent'" ) ) // A link is defined as recurrent by attaching recurrent operator with open input channel
         {
-            tp_t tp_name = bhcl_parse_name( source );
-            bhcl_sem_link_s* link = bhcl_sem_cell_s_push_link( o );
-            bhcl_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
+            tp_t tp_name = haptive_parse_name( source );
+            haptive_sem_link_s* link = haptive_sem_cell_s_push_link( o );
+            haptive_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
             link->name = tp_name;
-            bhcl_op_ar2_recurrent_s* op_recurrent = bhcl_op_ar2_recurrent_s_create();
+            haptive_op_ar2_recurrent_s* op_recurrent = haptive_op_ar2_recurrent_s_create();
             op_recurrent->name = tp_name;
-            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )op_recurrent, source );
+            haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( haptive_op* )op_recurrent, source );
 
             bcore_source_a_parse_fa( source, " =" );
-            cell->encs.data[ 0 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+            cell->encs.data[ 0 ]->up = haptive_sem_cell_s_evaluate_link( o, source );
             link->up = cell->excs.data[ 0 ];
         }
         else // identifier
         {
-            tp_t tp_name = bhcl_parse_name( source );
+            tp_t tp_name = haptive_parse_name( source );
 
             vd_t item = NULL;
 
-            if( ( item = bhcl_sem_cell_s_get_exc_by_name( o, tp_name ) ) ) // identifier is exit channel of o
+            if( ( item = haptive_sem_cell_s_get_exc_by_name( o, tp_name ) ) ) // identifier is exit channel of o
             {
-                bhcl_sem_link_s* link = item;
+                haptive_sem_link_s* link = item;
                 if( link->up )
                 {
-                    bcore_source_a_parse_err_fa( source, "Channel '#<sc_t>' of cell '#<sc_t>' has already been defined.", bhcl_ifnameof( tp_name ), bhcl_ifnameof( o->name ) );
+                    bcore_source_a_parse_err_fa( source, "Channel '#<sc_t>' of cell '#<sc_t>' has already been defined.", haptive_ifnameof( tp_name ), haptive_ifnameof( o->name ) );
                 }
                 bcore_source_a_parse_fa( source, " =" );
-                link->up = bhcl_sem_cell_s_evaluate_link( o, source );
+                link->up = haptive_sem_cell_s_evaluate_link( o, source );
             }
-            else if( ( item = bhcl_sem_cell_s_get_link_by_name( o, tp_name ) ) ) // identifier is a link defined in o's body
+            else if( ( item = haptive_sem_cell_s_get_link_by_name( o, tp_name ) ) ) // identifier is a link defined in o's body
             {
-                bhcl_sem_link_s* link = ( bhcl_sem_link_s* )item;
+                haptive_sem_link_s* link = ( haptive_sem_link_s* )item;
 
-                // Idle links should never occur. If they do, there is probably a bug in the bhcl-compiler.
-                if( !link->up       ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' is idle.", bhcl_ifnameof( tp_name ) );
-                if( !link->up->cell ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", bhcl_ifnameof( tp_name ) );
-                bhcl_sem_cell_s* cell = link->up->cell;
-                if( cell->op && cell->op->_ == TYPEOF_bhcl_op_ar2_recurrent_s )
+                // Idle links should never occur. If they do, there is probably a bug in the haptive-compiler.
+                if( !link->up       ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' is idle.", haptive_ifnameof( tp_name ) );
+                if( !link->up->cell ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", haptive_ifnameof( tp_name ) );
+                haptive_sem_cell_s* cell = link->up->cell;
+                if( cell->op && cell->op->_ == TYPEOF_haptive_op_ar2_recurrent_s )
                 {
                     if( !cell->encs.data[ 1 ]->up )
                     {
                         bcore_source_a_parse_fa( source, " =" );
-                        cell->encs.data[ 1 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+                        cell->encs.data[ 1 ]->up = haptive_sem_cell_s_evaluate_link( o, source );
                     }
                     else
                     {
-                        bcore_source_a_parse_err_fa( source, "Redefining a recurrent link '#<sc_t>'.", bhcl_ifnameof( tp_name ) );
+                        bcore_source_a_parse_err_fa( source, "Redefining a recurrent link '#<sc_t>'.", haptive_ifnameof( tp_name ) );
                     }
                 }
                 else
                 {
-                    bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", bhcl_ifnameof( tp_name ) );
+                    bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", haptive_ifnameof( tp_name ) );
                 }
             }
             else // unknown identifier --> creates a link
             {
-                bhcl_sem_link_s* link = bhcl_sem_cell_s_push_link( o );
-                bhcl_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
+                haptive_sem_link_s* link = haptive_sem_cell_s_push_link( o );
+                haptive_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
                 link->name = tp_name;
                 bcore_source_a_parse_fa( source, " =" );
-                link->up = bhcl_sem_cell_s_evaluate_link( o, source );
+                link->up = haptive_sem_cell_s_evaluate_link( o, source );
             }
 
         }
@@ -849,7 +847,7 @@ void bhcl_sem_cell_s_parse_body( bhcl_sem_cell_s* o, bcore_source* source )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_evaluate_set_encs( bhcl_sem_cell_s* o, bhcl_sem_cell_s* parent, bcore_source* source )
+void haptive_sem_cell_s_evaluate_set_encs( haptive_sem_cell_s* o, haptive_sem_cell_s* parent, bcore_source* source )
 {
     BLM_INIT();
     bcore_arr_vd_s* stack = BLM_CREATE( bcore_arr_vd_s );
@@ -868,18 +866,18 @@ void bhcl_sem_cell_s_evaluate_set_encs( bhcl_sem_cell_s* o, bhcl_sem_cell_s* par
             bcore_source_a_parse_fa( source, "#name", name );
             if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
             {
-                bhcl_sem_link_s* link = bhcl_sem_cell_s_get_enc_by_name( o, typeof( name->sc ) );
+                haptive_sem_link_s* link = haptive_sem_cell_s_get_enc_by_name( o, typeof( name->sc ) );
                 if( !link )
                 {
-                    bcore_source_a_parse_err_fa( source, "'#<sc_t>' specifies no entry channel of cell '#<sc_t>'.", name->sc, bhcl_ifnameof( o->name ) );
+                    bcore_source_a_parse_err_fa( source, "'#<sc_t>' specifies no entry channel of cell '#<sc_t>'.", name->sc, haptive_ifnameof( o->name ) );
                 }
 
                 if( link->up )
                 {
-                    bcore_source_a_parse_err_fa( source, "Entry channel '#<sc_t>' of cell '#<sc_t>' has already been set.", name->sc, bhcl_ifnameof( o->name ) );
+                    bcore_source_a_parse_err_fa( source, "Entry channel '#<sc_t>' of cell '#<sc_t>' has already been set.", name->sc, haptive_ifnameof( o->name ) );
                 }
 
-                link->up = bhcl_sem_cell_s_evaluate_link( parent, source );
+                link->up = haptive_sem_cell_s_evaluate_link( parent, source );
                 done = true;
             }
             else
@@ -890,9 +888,9 @@ void bhcl_sem_cell_s_evaluate_set_encs( bhcl_sem_cell_s* o, bhcl_sem_cell_s* par
 
         if( !done )
         {
-            bhcl_sem_link_s* link = bhcl_sem_cell_s_get_enc_by_open( o );
-            if( !link ) bcore_source_a_parse_err_fa( source, "Node '#<sc_t>': Number of free entry channels exceeded.", bhcl_ifnameof( o->name ) );
-            link->up = bhcl_sem_cell_s_evaluate_link_stack( parent, stack, source );
+            haptive_sem_link_s* link = haptive_sem_cell_s_get_enc_by_open( o );
+            if( !link ) bcore_source_a_parse_err_fa( source, "Node '#<sc_t>': Number of free entry channels exceeded.", haptive_ifnameof( o->name ) );
+            link->up = haptive_sem_cell_s_evaluate_link_stack( parent, stack, source );
         }
 
         first = false;
@@ -904,17 +902,17 @@ void bhcl_sem_cell_s_evaluate_set_encs( bhcl_sem_cell_s* o, bhcl_sem_cell_s* par
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// in body of o: creates new cell wrapping the catenated cells: cell = { c1 : c2 }
-bhcl_sem_cell_s* bhcl_sem_cell_s_cat_cell( bhcl_sem_cell_s* o, bhcl_sem_cell_s* c1, bhcl_sem_cell_s* c2, bcore_source* source )
+haptive_sem_cell_s* haptive_sem_cell_s_cat_cell( haptive_sem_cell_s* o, haptive_sem_cell_s* c1, haptive_sem_cell_s* c2, bcore_source* source )
 {
-    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell( o );
+    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell( o );
     bcore_source_point_s_set( &cell->source_point, source );
 
-    c1 = bhcl_sem_cell_s_push_wrap_cell( cell, c1 );
-    c2 = bhcl_sem_cell_s_push_wrap_cell( cell, c2 );
+    c1 = haptive_sem_cell_s_push_wrap_cell( cell, c1 );
+    c2 = haptive_sem_cell_s_push_wrap_cell( cell, c2 );
 
     // only free input channels get wrapped (code below must change in case wrapping scheme changes)
-    assert( c1->encs.size == bhcl_sem_cell_s_get_arity( c1 ) );
-    assert( c2->encs.size == bhcl_sem_cell_s_get_arity( c2 ) );
+    assert( c1->encs.size == haptive_sem_cell_s_get_arity( c1 ) );
+    assert( c2->encs.size == haptive_sem_cell_s_get_arity( c2 ) );
 
     /// free input channels of n1 must match output channels of n2
     if( c1->encs.size != c2->excs.size )
@@ -929,7 +927,7 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_cat_cell( bhcl_sem_cell_s* o, bhcl_sem_cell_s* 
     }
 
     /// channels of wrapping cell
-    bhcl_sem_cell_s_set_channels( cell, c1->excs.size, c2->encs.size );
+    haptive_sem_cell_s_set_channels( cell, c1->excs.size, c2->encs.size );
 
     for( sz_t i = 0; i < c2->encs.size; i++ )
     {
@@ -953,15 +951,15 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_cat_cell( bhcl_sem_cell_s* o, bhcl_sem_cell_s* 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
+void haptive_sem_cell_s_evaluate_stack( haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
     BLM_INIT();
     st_s* name = BLM_CREATE( st_s );
 
-    bhcl_sem_stack_flag_s* flag_bin_op    = BLM_CREATE( bhcl_sem_stack_flag_s );
-    bhcl_sem_stack_flag_s* flag_una_op    = BLM_CREATE( bhcl_sem_stack_flag_s );
-    bhcl_sem_stack_flag_s* flag_cell_cat  = BLM_CREATE( bhcl_sem_stack_flag_s );
-    bhcl_sem_stack_flag_s* flag_inc_order = BLM_CREATE( bhcl_sem_stack_flag_s );
+    haptive_sem_stack_flag_s* flag_bin_op    = BLM_CREATE( haptive_sem_stack_flag_s );
+    haptive_sem_stack_flag_s* flag_una_op    = BLM_CREATE( haptive_sem_stack_flag_s );
+    haptive_sem_stack_flag_s* flag_cell_cat  = BLM_CREATE( haptive_sem_stack_flag_s );
+    haptive_sem_stack_flag_s* flag_inc_order = BLM_CREATE( haptive_sem_stack_flag_s );
 
     tp_t op2_symbol = 0;
     bhvm_hf3_s* literal = NULL;
@@ -990,22 +988,22 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         {
             tp_t tp_name = typeof( name->sc );
 
-            if( bhcl_is_control_type( tp_name ) )
+            if( haptive_is_control_type( tp_name ) )
             {
                 if( tp_name == TYPEOF_cell ) // inline cell definition
                 {
-                    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell( o );
-                    bhcl_sem_cell_s_parse( cell, source );
+                    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell( o );
+                    haptive_sem_cell_s_parse( cell, source );
                     stack_push( stack, cell );
                 }
                 else if( tp_name == TYPEOF_if )
                 {
-                    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar3_branch_s_create(), source );
-                    cell->encs.data[ 0 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+                    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( haptive_op* )haptive_op_ar3_branch_s_create(), source );
+                    cell->encs.data[ 0 ]->up = haptive_sem_cell_s_evaluate_link( o, source );
                     bcore_source_a_parse_fa( source, " #skip';' then" );
-                    cell->encs.data[ 1 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+                    cell->encs.data[ 1 ]->up = haptive_sem_cell_s_evaluate_link( o, source );
                     bcore_source_a_parse_fa( source, " #skip';' else" );
-                    cell->encs.data[ 2 ]->up = bhcl_sem_cell_s_evaluate_link( o, source );
+                    cell->encs.data[ 2 ]->up = haptive_sem_cell_s_evaluate_link( o, source );
                     stack_push( stack, cell->excs.data[ 0 ] );
                 }
                 else
@@ -1015,22 +1013,22 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
             else
             {
-                vd_t item = bhcl_sem_cell_s_get_enc_by_name( o, tp_name );
-                if( !item && o->body   ) item = bhcl_sem_body_s_get_sem_by_name( o->body, tp_name );
-                if( !item && o->parent ) item = bhcl_sem_cell_s_get_cell_by_name( o->parent, tp_name );
+                vd_t item = haptive_sem_cell_s_get_enc_by_name( o, tp_name );
+                if( !item && o->body   ) item = haptive_sem_body_s_get_sem_by_name( o->body, tp_name );
+                if( !item && o->parent ) item = haptive_sem_cell_s_get_cell_by_name( o->parent, tp_name );
                 if( !item ) bcore_source_a_parse_err_fa( source, "Cannot evaluate identifier '#<sc_t>'.", name->sc );
                 tp_t tp_item = *(aware_t*)item;
 
                 switch( tp_item )
                 {
-                    case TYPEOF_bhcl_sem_cell_s:
+                    case TYPEOF_haptive_sem_cell_s:
                     {
-                        bhcl_sem_cell_s* cell = item;
+                        haptive_sem_cell_s* cell = item;
                         stack_push( stack, cell );
                     }
                     break;
 
-                    case TYPEOF_bhcl_sem_link_s: stack_push( stack, item ); break;
+                    case TYPEOF_haptive_sem_link_s: stack_push( stack, item ); break;
                     default: bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' represents invalid object '#<sc_t>'.", name->sc, ifnameof( tp_item ) );
                 }
             }
@@ -1041,7 +1039,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         {
             f3_t val = 0;
             bcore_source_a_parse_fa( source, " #<f3_t*>", &val );
-            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_scalar( o, &val );
+            haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_scalar( o, &val );
             bcore_source_point_s_set( &cell->source_point, source );
             stack_push( stack, cell->excs.data[ 0 ] );
         }
@@ -1049,7 +1047,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // undetermined scalar
         else if( bcore_source_a_parse_bl_fa( source, " #?'#'" ) )
         {
-            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_scalar( o, NULL );
+            haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_scalar( o, NULL );
             bcore_source_point_s_set( &cell->source_point, source );
             stack_push( stack, cell->excs.data[ 0 ] );
         }
@@ -1057,22 +1055,22 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // block or input channel selection in case l-value is a cell
         else if( bcore_source_a_parse_bl_fa( source, " #=?'('" ) )
         {
-            if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_cell_s ) )
+            if( stack_of_type( stack, 1, TYPEOF_haptive_sem_cell_s ) )
             {
-                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_wrap_cell_set_source( o, stack_pop( stack ), source );
-                bhcl_sem_cell_s_evaluate_set_encs( cell, o, source );
+                haptive_sem_cell_s* cell = haptive_sem_cell_s_push_wrap_cell_set_source( o, stack_pop( stack ), source );
+                haptive_sem_cell_s_evaluate_set_encs( cell, o, source );
                 stack_push( stack, cell );
             }
             else
             {
                 bcore_source_a_parse_fa( source, " (" );
-                stack_push( stack, bhcl_sem_cell_s_evaluate_sem( o, source ) );
+                stack_push( stack, haptive_sem_cell_s_evaluate_sem( o, source ) );
                 bcore_source_a_parse_fa( source, " )" );
             }
         }
 
         // binary operator from predefined symbols
-        else if( ( op2_symbol = bhcl_parse_op2_symbol( source ) ) )
+        else if( ( op2_symbol = haptive_parse_op2_symbol( source ) ) )
         {
             if
             (
@@ -1082,11 +1080,11 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
             )
             {
                 // binary op not applicable, try unary
-                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_get_cell_by_name( o, op2_symbol );
-                bhcl_op* op_unary = bhcl_op_a_create_op_of_arn( cell->op, 1 );
+                haptive_sem_cell_s* cell = haptive_sem_cell_s_get_cell_by_name( o, op2_symbol );
+                haptive_op* op_unary = haptive_op_a_create_op_of_arn( cell->op, 1 );
                 if( op_unary )
                 {
-                    bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, op_unary, source );
+                    haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, op_unary, source );
                     stack_push( stack, cell );
                     stack_push( stack, flag_una_op ); // flag after cell to avoid incorrect stack evaluation
                 }
@@ -1094,19 +1092,19 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 {
                     if( stack->size == 0 )
                     {
-                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", bhcl_ifnameof( op2_symbol ) );
+                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", haptive_ifnameof( op2_symbol ) );
                     }
                     else
                     {
-                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Successive binary operator. Right operand expected.", bhcl_ifnameof( op2_symbol ) );
+                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Successive binary operator. Right operand expected.", haptive_ifnameof( op2_symbol ) );
                     }
                 }
             }
             else
             {
-                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_get_cell_by_name( o, op2_symbol );
+                haptive_sem_cell_s* cell = haptive_sem_cell_s_get_cell_by_name( o, op2_symbol );
                 if( !cell ) bcore_source_a_parse_err_fa( source, "Syntax error." );
-                cell = bhcl_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
+                cell = haptive_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
                 stack_push( stack, flag_bin_op );
                 stack_push( stack, cell );
             }
@@ -1117,9 +1115,9 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         {
             bcore_source_a_parse_fa( source, "#until'>'>>", name );
             if( stack->size == 0 ) bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", name->sc );
-            bhcl_sem_cell_s* cell = bhcl_sem_cell_s_get_cell_by_name( o, typeof( name->sc ) );
+            haptive_sem_cell_s* cell = haptive_sem_cell_s_get_cell_by_name( o, typeof( name->sc ) );
             if( !cell ) bcore_source_a_parse_err_fa( source, "Cell '#<sc_t>' not found.", name->sc );
-            cell = bhcl_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
+            cell = haptive_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
             stack_push( stack, flag_bin_op );
             stack_push( stack, cell );
         }
@@ -1130,17 +1128,28 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
             bcore_source_a_parse_fa( source, "#name", name );
             if( name->size == 0 ) bcore_source_a_parse_err_fa( source, "Identifier expected." );
 
-            if( !stack_of_type( stack, 1, TYPEOF_bhcl_sem_cell_s ) )
+            if( !stack_of_type( stack, 1, TYPEOF_haptive_sem_cell_s ) )
             {
                 bcore_source_a_parse_err_fa( source, "Output channel selection on non-cell." );
             }
 
-            bhcl_sem_cell_s* cell = stack_pop( stack );
-            bhcl_sem_link_s* link = bhcl_sem_cell_s_get_exc_by_name( cell, typeof( name->sc ) );
+            haptive_sem_cell_s* cell = stack_pop( stack );
+            haptive_sem_link_s* link = haptive_sem_cell_s_get_exc_by_name( cell, typeof( name->sc ) );
+
+            if( haptive_sem_cell_s_get_arity( cell ) > 0 )
+            {
+                bcore_source_a_parse_err_fa
+                (
+                    source,
+                    "Output channel selection on cell '#<sc_t>' with #<sz_t> open input channels.",
+                    haptive_ifnameof( cell->name ),
+                    haptive_sem_cell_s_get_arity( cell )
+                );
+            }
 
             if( !link )
             {
-                bcore_source_a_parse_err_fa( source, "Cell '#<sc_t>':Invalid channel '#<sc_t>'.", bhcl_ifnameof( cell->name ), name->sc );
+                bcore_source_a_parse_err_fa( source, "Cell '#<sc_t>': Invalid channel '#<sc_t>'.", haptive_ifnameof( cell->name ), name->sc );
             }
             stack_push( stack, link );
         }
@@ -1148,19 +1157,19 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // array operator
         else if( bcore_source_a_parse_bl_fa( source, " #?'['" ) )
         {
-            bhcl_sem_link_s* link = bhcl_sem_cell_s_evaluate_link( o, source );
+            haptive_sem_link_s* link = haptive_sem_cell_s_evaluate_link( o, source );
             bcore_source_a_parse_bl_fa( source, " ]" );
 
-            if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) )
+            if( stack_of_type( stack, 1, TYPEOF_haptive_sem_link_s ) )
             {
-                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar2_index_s_create(), source );
-                cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_bhcl_sem_link_s, source );
+                haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( haptive_op* )haptive_op_ar2_index_s_create(), source );
+                cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_haptive_sem_link_s, source );
                 cell->encs.data[ 1 ]->up = link;
                 stack_push( stack, cell->excs.data[ 0 ] );
             }
             else
             {
-                bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar2_inc_order_s_create(), source );
+                haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( haptive_op* )haptive_op_ar2_inc_order_s_create(), source );
                 cell->encs.data[ 0 ]->up = link;
                 stack_push( stack, cell );
                 stack_push( stack, flag_inc_order );
@@ -1170,15 +1179,15 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // postfix htp
         else if( bcore_source_a_parse_bl_fa( source, " #?'^t'" ) )
         {
-            bhcl_sem_cell_s* htp_cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar1_htp_s_create(), source );
-            if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) )
+            haptive_sem_cell_s* htp_cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( haptive_op* )haptive_op_ar1_htp_s_create(), source );
+            if( stack_of_type( stack, 1, TYPEOF_haptive_sem_link_s ) )
             {
-                htp_cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_bhcl_sem_link_s, source );
+                htp_cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_haptive_sem_link_s, source );
                 stack_push( stack, htp_cell->excs.data[ 0 ] );
             }
-            else if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_cell_s ) )
+            else if( stack_of_type( stack, 1, TYPEOF_haptive_sem_cell_s ) )
             {
-                bhcl_sem_cell_s* r_cell = stack_pop_of_type( stack, TYPEOF_bhcl_sem_cell_s, source );
+                haptive_sem_cell_s* r_cell = stack_pop_of_type( stack, TYPEOF_haptive_sem_cell_s, source );
                 stack_push( stack, htp_cell );
                 stack_push( stack, flag_cell_cat );
                 stack_push( stack, r_cell );
@@ -1192,7 +1201,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // cell catenation
         else if( bcore_source_a_parse_bl_fa( source, " #?':'" ) )
         {
-            if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_cell_s ) )
+            if( stack_of_type( stack, 1, TYPEOF_haptive_sem_cell_s ) )
             {
                 stack_push( stack, flag_cell_cat );
             }
@@ -1216,11 +1225,11 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         /// priority stack processing ...
 
         // unary operator: right operand
-        while( stack->size >= 3 && stack_of_value( stack, 2, flag_una_op ) && stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) )
+        while( stack->size >= 3 && stack_of_value( stack, 2, flag_una_op ) && stack_of_type( stack, 1, TYPEOF_haptive_sem_link_s ) )
         {
-            bhcl_sem_link_s* link = stack_pop_link( stack, source );
+            haptive_sem_link_s* link = stack_pop_link( stack, source );
             stack_pop_of_value( stack, flag_una_op, source );
-            bhcl_sem_cell_s* cell = stack_pop_cell( stack, source );
+            haptive_sem_cell_s* cell = stack_pop_cell( stack, source );
             ASSERT( cell->encs.size == 1 );
             cell->encs.data[ 0 ]->up = link;
             stack_push( stack, cell->excs.data[ 0 ] );
@@ -1228,35 +1237,35 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
 
         if( stack->size >= 3 && stack_of_value( stack, 2, flag_bin_op ) )
         {
-            bhcl_sem_cell_s* cell = stack_pop_of_type( stack, TYPEOF_bhcl_sem_cell_s, source );
+            haptive_sem_cell_s* cell = stack_pop_of_type( stack, TYPEOF_haptive_sem_cell_s, source );
             stack_pop_of_value( stack, flag_bin_op, source );
-            bhcl_sem* arg1 = stack_pop( stack );
+            haptive_sem* arg1 = stack_pop( stack );
 
-            if( arg1->_ == TYPEOF_bhcl_sem_cell_s )
+            if( arg1->_ == TYPEOF_haptive_sem_cell_s )
             {
-                bhcl_sem_cell_s* cell1 = ( bhcl_sem_cell_s* )arg1;
+                haptive_sem_cell_s* cell1 = ( haptive_sem_cell_s* )arg1;
                 if( cell1->excs.size != 1 )
                 {
                     bcore_source_point_s_parse_err_fa
                     (
                         &cell1->source_point,
                         "Binary operator '#<sc_t>': Left operant '#<sc_t>' has #<sz_t> output channels. Expected: 1.",
-                        bhcl_ifnameof( cell->name ),
-                        bhcl_ifnameof( cell1->name ),
+                        haptive_ifnameof( cell->name ),
+                        haptive_ifnameof( cell1->name ),
                         cell1->excs.size
                     );
                 }
-                arg1 = ( bhcl_sem* )cell1->excs.data[ 0 ];
+                arg1 = ( haptive_sem* )cell1->excs.data[ 0 ];
             }
 
-            if( bhcl_sem_cell_s_get_arity( cell ) != 2 )
+            if( haptive_sem_cell_s_get_arity( cell ) != 2 )
             {
                 bcore_source_point_s_parse_err_fa
                 (
                     &cell->source_point,
                     "Binary operator '#<sc_t>' has arity '#<sz_t>'. Expected: '2'.",
-                    bhcl_ifnameof( cell->name ),
-                    bhcl_sem_cell_s_get_arity( cell )
+                    haptive_ifnameof( cell->name ),
+                    haptive_sem_cell_s_get_arity( cell )
                 );
             }
 
@@ -1266,7 +1275,7 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 (
                     &cell->source_point,
                     "Binary operator '#<sc_t>' has #<sz_t> output channels. Expected: 1.",
-                    bhcl_ifnameof( cell->name ),
+                    haptive_ifnameof( cell->name ),
                     cell->excs.size
                 );
             }
@@ -1280,19 +1289,19 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // cell-catenation
         if( stack->size >= 3 && stack_of_value( stack, 2, flag_cell_cat ) )
         {
-            if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_cell_s ) )  // cell1 : cell2
+            if( stack_of_type( stack, 1, TYPEOF_haptive_sem_cell_s ) )  // cell1 : cell2
             {
-                bhcl_sem_cell_s* cell2 = stack_pop_cell( stack, source );
+                haptive_sem_cell_s* cell2 = stack_pop_cell( stack, source );
                 stack_pop_of_value( stack, flag_cell_cat, source );
-                bhcl_sem_cell_s* cell1 = stack_pop_cell( stack, source );
-                stack_push( stack, bhcl_sem_cell_s_cat_cell( o, cell1, cell2, source ) );
+                haptive_sem_cell_s* cell1 = stack_pop_cell( stack, source );
+                stack_push( stack, haptive_sem_cell_s_cat_cell( o, cell1, cell2, source ) );
             }
-            else if( stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) ) // cell : link
+            else if( stack_of_type( stack, 1, TYPEOF_haptive_sem_link_s ) ) // cell : link
             {
-                bhcl_sem_link_s* link = stack_pop_link( stack, source );
+                haptive_sem_link_s* link = stack_pop_link( stack, source );
                 stack_pop_of_value( stack, flag_cell_cat, source );
-                bhcl_sem_cell_s* cell = stack_pop_cell( stack, source );
-                cell = bhcl_sem_cell_s_push_wrap_cell( o, cell );
+                haptive_sem_cell_s* cell = stack_pop_cell( stack, source );
+                cell = haptive_sem_cell_s_push_wrap_cell( o, cell );
                 if( cell->encs.size != 1 ) bcore_source_a_parse_err_fa( source, "Catenation 'Cell : Link': Cell has #<sz_t> free entry channels; required is 1", cell->encs.size );
                 cell->encs.data[ 0 ]->up = link;
                 stack_push( stack, cell );
@@ -1304,11 +1313,11 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         }
 
         // order incrementations (loop because multiple [] can be next to each other)
-        while( stack_of_value( stack, 2, flag_inc_order ) && stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) )
+        while( stack_of_value( stack, 2, flag_inc_order ) && stack_of_type( stack, 1, TYPEOF_haptive_sem_link_s ) )
         {
-            bhcl_sem_link_s* link2 = stack_pop_link( stack, source );
+            haptive_sem_link_s* link2 = stack_pop_link( stack, source );
             stack_pop_of_value( stack, flag_inc_order, source );
-            bhcl_sem_cell_s* cell  = stack_pop_cell( stack, source );
+            haptive_sem_cell_s* cell  = stack_pop_cell( stack, source );
             ASSERT( cell->encs.data[ 0 ]->up ); // was set at cell creation
             cell->encs.data[ 1 ]->up = link2;
             stack_push( stack, cell->excs.data[ 0 ] );
@@ -1320,26 +1329,26 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
     /// Binary operators
     while( stack->size >= 5 && stack_of_value( stack, 4, flag_bin_op ) ) // <left arg> <flag> <bin-operator> <output> <right arg>
     {
-        bhcl_sem_link_s* link2 = stack_pop_link_or_exit( stack, source );
-        bhcl_sem_link_s* out   = stack_pop_link( stack, source );
-        bhcl_sem_cell_s* cell  = stack_pop_cell( stack, source );
+        haptive_sem_link_s* link2 = stack_pop_link_or_exit( stack, source );
+        haptive_sem_link_s* out   = stack_pop_link( stack, source );
+        haptive_sem_cell_s* cell  = stack_pop_cell( stack, source );
         stack_pop_of_value( stack, flag_bin_op, source );
-        bhcl_sem_link_s* link1 = stack_pop_link_or_exit( stack, source );
+        haptive_sem_link_s* link1 = stack_pop_link_or_exit( stack, source );
 
         if( stack->size >= 4 && stack_of_value( stack, 3, flag_bin_op ) ) // merge with prior operation considering priority
         {
-            bhcl_sem_link_s* prior_out   = stack_pop_link( stack, source );
-            bhcl_sem_cell_s* prior_cell  = stack_pop_cell( stack, source );
+            haptive_sem_link_s* prior_out   = stack_pop_link( stack, source );
+            haptive_sem_cell_s* prior_cell  = stack_pop_cell( stack, source );
             stack_pop_of_value( stack, flag_bin_op, source );
-            bhcl_sem_link_s* prior_link1 = stack_pop_link_or_exit( stack, source );
+            haptive_sem_link_s* prior_link1 = stack_pop_link_or_exit( stack, source );
 
-            sz_t prior_priority = bhcl_sem_cell_s_get_priority( prior_cell );
-            sz_t cell_priority  = bhcl_sem_cell_s_get_priority( cell );
+            sz_t prior_priority = haptive_sem_cell_s_get_priority( prior_cell );
+            sz_t cell_priority  = haptive_sem_cell_s_get_priority( cell );
 
             if( prior_priority >= cell_priority  )
             {
-                bhcl_sem_cell_s_get_enc_by_open( cell )->up = prior_out;
-                bhcl_sem_cell_s_get_enc_by_open( cell )->up = link2;
+                haptive_sem_cell_s_get_enc_by_open( cell )->up = prior_out;
+                haptive_sem_cell_s_get_enc_by_open( cell )->up = link2;
 
                 stack_push( stack, prior_link1 );
                 stack_push( stack, flag_bin_op );
@@ -1349,8 +1358,8 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
             else
             {
-                bhcl_sem_cell_s_get_enc_by_open( cell )->up = link1;
-                bhcl_sem_cell_s_get_enc_by_open( cell )->up = link2;
+                haptive_sem_cell_s_get_enc_by_open( cell )->up = link1;
+                haptive_sem_cell_s_get_enc_by_open( cell )->up = link2;
 
                 stack_push( stack, prior_link1 );
                 stack_push( stack, flag_bin_op );
@@ -1361,18 +1370,18 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
         }
         else // fully resolve operation
         {
-            bhcl_sem_cell_s_get_enc_by_open( cell )->up = link1;
-            bhcl_sem_cell_s_get_enc_by_open( cell )->up = link2;
+            haptive_sem_cell_s_get_enc_by_open( cell )->up = link1;
+            haptive_sem_cell_s_get_enc_by_open( cell )->up = link2;
             stack_push( stack, out );
         }
     }
 
     /// Adjacent holors
-    while( stack->size >= 2 && stack_of_type( stack, 1, TYPEOF_bhcl_sem_link_s ) && stack_of_type( stack, 2, TYPEOF_bhcl_sem_link_s ) )
+    while( stack->size >= 2 && stack_of_type( stack, 1, TYPEOF_haptive_sem_link_s ) && stack_of_type( stack, 2, TYPEOF_haptive_sem_link_s ) )
     {
-        bhcl_sem_link_s* link2 = stack_pop_link( stack, source );
-        bhcl_sem_link_s* link1 = stack_pop_link( stack, source );
-        bhcl_sem_cell_s* cell = bhcl_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( bhcl_op* )bhcl_op_ar2_cat_s_create(), source );
+        haptive_sem_link_s* link2 = stack_pop_link( stack, source );
+        haptive_sem_link_s* link1 = stack_pop_link( stack, source );
+        haptive_sem_cell_s* cell = haptive_sem_cell_s_push_cell_op_d_reset_name_set_source( o, ( haptive_op* )haptive_op_ar2_cat_s_create(), source );
         cell->encs.data[ 0 ]->up = link1;
         cell->encs.data[ 1 ]->up = link2;
         stack_push( stack, cell->excs.data[ 0 ] );
@@ -1384,35 +1393,35 @@ void bhcl_sem_cell_s_evaluate_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem* bhcl_sem_cell_s_evaluate_sem_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
+haptive_sem* haptive_sem_cell_s_evaluate_sem_stack( haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
-    bhcl_sem_cell_s_evaluate_stack( o, stack, source );
+    haptive_sem_cell_s_evaluate_stack( o, stack, source );
     if( stack->size != 1 ) bcore_source_a_parse_err_fa( source, "Expression syntax error." );
     return stack_pop( stack );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem* bhcl_sem_cell_s_evaluate_sem( bhcl_sem_cell_s* o, bcore_source* source )
+haptive_sem* haptive_sem_cell_s_evaluate_sem( haptive_sem_cell_s* o, bcore_source* source )
 {
     BLM_INIT();
     bcore_arr_vd_s* stack = BLM_CREATE( bcore_arr_vd_s );
-    vd_t ret = bhcl_sem_cell_s_evaluate_sem_stack( o, stack, source );
+    vd_t ret = haptive_sem_cell_s_evaluate_sem_stack( o, stack, source );
     BLM_DOWN();
     return ret;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_link_s* bhcl_sem_cell_s_evaluate_link_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
+haptive_sem_link_s* haptive_sem_cell_s_evaluate_link_stack( haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
-    bhcl_sem* ret = bhcl_sem_cell_s_evaluate_sem_stack( o, stack, source );
-    if( *( aware_t* )ret == TYPEOF_bhcl_sem_cell_s )
+    haptive_sem* ret = haptive_sem_cell_s_evaluate_sem_stack( o, stack, source );
+    if( *( aware_t* )ret == TYPEOF_haptive_sem_cell_s )
     {
-        bhcl_sem_cell_s* cell = ( bhcl_sem_cell_s* )ret;
-        if( bhcl_sem_cell_s_get_arity( cell ) > 0 )
+        haptive_sem_cell_s* cell = ( haptive_sem_cell_s* )ret;
+        if( haptive_sem_cell_s_get_arity( cell ) > 0 )
         {
-            bcore_source_a_parse_err_fa( source, "Automatic exit channel selection on cell with #<sz_t> open entry channels.", bhcl_sem_cell_s_get_arity( cell ) );
+            bcore_source_a_parse_err_fa( source, "Automatic exit channel selection on cell with #<sz_t> open entry channels.", haptive_sem_cell_s_get_arity( cell ) );
         }
 
         if( cell->excs.size != 1 )
@@ -1420,48 +1429,48 @@ bhcl_sem_link_s* bhcl_sem_cell_s_evaluate_link_stack( bhcl_sem_cell_s* o, bcore_
             bcore_source_a_parse_err_fa( source, "Automatic exit channel selection on cell with #<sz_t> exit channels.", cell->excs.size );
         }
 
-        ret = ( bhcl_sem* )cell->excs.data[ 0 ];
+        ret = ( haptive_sem* )cell->excs.data[ 0 ];
     }
 
-    if( *( aware_t* )ret != TYPEOF_bhcl_sem_link_s )
+    if( *( aware_t* )ret != TYPEOF_haptive_sem_link_s )
     {
         bcore_source_a_parse_err_fa( source, "Expression yields #<sc_t>. Link expected.", ifnameof( *( aware_t* )ret ) );
     }
 
-    return ( bhcl_sem_link_s* )ret;
+    return ( haptive_sem_link_s* )ret;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_link_s* bhcl_sem_cell_s_evaluate_link( bhcl_sem_cell_s* o, bcore_source* source )
+haptive_sem_link_s* haptive_sem_cell_s_evaluate_link( haptive_sem_cell_s* o, bcore_source* source )
 {
     BLM_INIT();
     bcore_arr_vd_s* stack = BLM_CREATE( bcore_arr_vd_s );
-    bhcl_sem_link_s* ret = bhcl_sem_cell_s_evaluate_link_stack( o, stack, source );
+    haptive_sem_link_s* ret = haptive_sem_cell_s_evaluate_link_stack( o, stack, source );
     BLM_DOWN();
     return ret;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_evaluate_cell_stack( bhcl_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
+haptive_sem_cell_s* haptive_sem_cell_s_evaluate_cell_stack( haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source )
 {
-    bhcl_sem* ret = bhcl_sem_cell_s_evaluate_sem_stack( o, stack, source );
-    if( *( aware_t* )ret != TYPEOF_bhcl_sem_cell_s )
+    haptive_sem* ret = haptive_sem_cell_s_evaluate_sem_stack( o, stack, source );
+    if( *( aware_t* )ret != TYPEOF_haptive_sem_cell_s )
     {
         bcore_source_a_parse_err_fa( source, "Expression yields #<sc_t>. Cell Expected.", ifnameof( *( aware_t* )ret ) );
     }
-    return ( bhcl_sem_cell_s* )ret;
+    return ( haptive_sem_cell_s* )ret;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_sem_cell_s* bhcl_sem_cell_s_evaluate_cell( bhcl_sem_cell_s* o, bcore_source* source )
+haptive_sem_cell_s* haptive_sem_cell_s_evaluate_cell( haptive_sem_cell_s* o, bcore_source* source )
 {
     BLM_INIT();
     bcore_arr_vd_s* stack = BLM_CREATE( bcore_arr_vd_s );
-    bhcl_sem_cell_s* ret = bhcl_sem_cell_s_evaluate_cell_stack( o, stack, source );
-    BLM_RETURNV( bhcl_sem_cell_s*, ret );
+    haptive_sem_cell_s* ret = haptive_sem_cell_s_evaluate_cell_stack( o, stack, source );
+    BLM_RETURNV( haptive_sem_cell_s*, ret );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1482,9 +1491,9 @@ bhcl_sem_cell_s* bhcl_sem_cell_s_evaluate_cell( bhcl_sem_cell_s* o, bcore_source
  *
  *  Returns 0 in case of success.
  */
-s2_t bhcl_ctr_node_s_node_process( bhcl_ctr_node_s* o, bhcl_sem_cell_s* cell, bl_t enter, bhcl_ctr_node_s** node_out )
+s2_t haptive_ctr_node_s_node_process( haptive_ctr_node_s* o, haptive_sem_cell_s* cell, bl_t enter, haptive_ctr_node_s** node_out )
 {
-    bhcl_ctr_node_s* node = NULL;
+    haptive_ctr_node_s* node = NULL;
     if( enter )
     {
         for( sz_t i = 0; i < o->size; i++ )
@@ -1496,7 +1505,7 @@ s2_t bhcl_ctr_node_s_node_process( bhcl_ctr_node_s* o, bhcl_sem_cell_s* cell, bl
         }
         if( !node )
         {
-            node = bhcl_ctr_node_s_push_d( o, bhcl_ctr_node_s_create() );
+            node = haptive_ctr_node_s_push_d( o, haptive_ctr_node_s_create() );
             node->cell = cell;
             node->parent = o;
         }
@@ -1522,14 +1531,14 @@ s2_t bhcl_ctr_node_s_node_process( bhcl_ctr_node_s* o, bhcl_sem_cell_s* cell, bl
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-s2_t bhcl_ctr_tree_s_tree_process( bhcl_ctr_tree_s* o, bhcl_sem_cell_s* cell, bl_t enter, bhcl_ctr_node_s* node_in, bhcl_ctr_node_s** node_out )
+s2_t haptive_ctr_tree_s_tree_process( haptive_ctr_tree_s* o, haptive_sem_cell_s* cell, bl_t enter, haptive_ctr_node_s* node_in, haptive_ctr_node_s** node_out )
 {
     if( enter )
     {
-        bhcl_ctr_node_s* node = NULL;
+        haptive_ctr_node_s* node = NULL;
         if( !o->root )
         {
-            o->root = bhcl_ctr_node_s_create();
+            o->root = haptive_ctr_node_s_create();
             o->root->id = o->id_base++;
             o->root->cell = cell;
             node = o->root;
@@ -1543,7 +1552,7 @@ s2_t bhcl_ctr_tree_s_tree_process( bhcl_ctr_tree_s* o, bhcl_sem_cell_s* cell, bl
         }
         else
         {
-            s2_t ret = bhcl_ctr_node_s_node_process( node_in, cell, enter, &node );
+            s2_t ret = haptive_ctr_node_s_node_process( node_in, cell, enter, &node );
             if( ret ) return ret;
             if( node->id < 0 ) node->id = o->id_base++;
             *node_out = node;
@@ -1552,18 +1561,18 @@ s2_t bhcl_ctr_tree_s_tree_process( bhcl_ctr_tree_s* o, bhcl_sem_cell_s* cell, bl
     }
     else
     {
-        return bhcl_ctr_node_s_node_process( node_in, cell, enter, node_out );
+        return haptive_ctr_node_s_node_process( node_in, cell, enter, node_out );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bcore_source_point_s* bhcl_ctr_node_s_get_nearest_source_point( bhcl_ctr_node_s* o )
+bcore_source_point_s* haptive_ctr_node_s_get_nearest_source_point( haptive_ctr_node_s* o )
 {
     if( !o ) return NULL;
     if( !o->cell ) return NULL;
     if( o->cell->source_point.source ) return &o->cell->source_point;
-    return bhcl_ctr_node_s_get_nearest_source_point( o->parent );
+    return haptive_ctr_node_s_get_nearest_source_point( o->parent );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1572,7 +1581,7 @@ bcore_source_point_s* bhcl_ctr_node_s_get_nearest_source_point( bhcl_ctr_node_s*
 // net_node
 
 /// recursive trace; exits when the enter membrane of the root cell is reached
-void bhcl_net_node_s_trace_to_sink( bhcl_net_node_s* o, sz_t indent, bcore_sink* sink )
+void haptive_net_node_s_trace_to_sink( haptive_net_node_s* o, sz_t indent, bcore_sink* sink )
 {
     if( !o )
     {
@@ -1594,7 +1603,7 @@ void bhcl_net_node_s_trace_to_sink( bhcl_net_node_s* o, sz_t indent, bcore_sink*
     sc_t symbol = "";
     if( o->op )
     {
-        sc_t symbol = bhcl_op_a_get_symbol( o->op );
+        sc_t symbol = haptive_op_a_get_symbol( o->op );
         if( !symbol ) symbol = ifnameof( o->op->_ );
         bcore_sink_a_push_fa( sink, "(#<sc_t>)", symbol );
     }
@@ -1609,8 +1618,8 @@ void bhcl_net_node_s_trace_to_sink( bhcl_net_node_s* o, sz_t indent, bcore_sink*
         {
             sz_t incr = 4;
             bcore_sink_a_push_fa( sink, "\n#rn{ }#rn{-}", indent, incr );
-            bhcl_net_node_s* node = o->upls.data[ i ]->node;
-            bhcl_net_node_s_trace_to_sink( node, indent + incr, sink );
+            haptive_net_node_s* node = o->upls.data[ i ]->node;
+            haptive_net_node_s_trace_to_sink( node, indent + incr, sink );
         }
     }
 
@@ -1619,7 +1628,7 @@ void bhcl_net_node_s_trace_to_sink( bhcl_net_node_s* o, sz_t indent, bcore_sink*
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_net_node_s_err_fa( bhcl_net_node_s* o, sc_t format, ... )
+void haptive_net_node_s_err_fa( haptive_net_node_s* o, sc_t format, ... )
 {
     va_list args;
     va_start( args, format );
@@ -1637,15 +1646,15 @@ void bhcl_net_node_s_err_fa( bhcl_net_node_s* o, sc_t format, ... )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// calls op-solve and sets node-holor
-static sz_t net_node_s_op_solve( bhcl_net_node_s* o, bhvm_hf3_s** arg_h )
+static sz_t net_node_s_op_solve( haptive_net_node_s* o, bhvm_hf3_s** arg_h )
 {
     st_s* err_msg = st_s_create();
-    sz_t result = bhcl_op_a_solve( o->op, &o->h, arg_h, err_msg );
+    sz_t result = haptive_op_a_solve( o->op, &o->h, arg_h, err_msg );
 
     if( result < 0 )
     {
-        sz_t arity = bhcl_op_a_get_arity( o->op );
-        sc_t name = bhcl_op_a_get_symbol( o->op );
+        sz_t arity = haptive_op_a_get_arity( o->op );
+        sc_t name = haptive_op_a_get_symbol( o->op );
         if( !name ) name = ifnameof( o->op->_ );
         st_s* msg = st_s_create();
         st_s_push_fa( msg, "Operator '#<sc_t>' failed:", name );
@@ -1664,7 +1673,7 @@ static sz_t net_node_s_op_solve( bhcl_net_node_s* o, bhvm_hf3_s** arg_h )
             }
             st_s_push_fa( msg, "\n" );
         }
-        bhcl_net_node_s_err_fa( o, "#<sc_t>", msg->sc );
+        haptive_net_node_s_err_fa( o, "#<sc_t>", msg->sc );
         st_s_discard( msg );
     }
     st_s_discard( err_msg );
@@ -1678,10 +1687,10 @@ static sz_t net_node_s_op_solve( bhcl_net_node_s* o, bhvm_hf3_s** arg_h )
  *  If a holor can be computed (vacant or determined), the solve-route is considered finished
  *  and will not be processed again. A detached result (o->h == NULL) causes a route to be reentered.
  *  If operator->solve returns 1, the operation is considered settled, in which case all uplinks
- *  are removed and the operator is switched to a final arity0 version via bhcl_op_a_create_final.
+ *  are removed and the operator is switched to a final arity0 version via haptive_op_a_create_final.
  *  After settling, the graph can be run through an optimizer minimizing its structure.
  */
-void bhcl_net_node_s_solve( bhcl_net_node_s* o )
+void haptive_net_node_s_solve( haptive_net_node_s* o )
 {
     if( o->flag ) return; // cyclic link
 
@@ -1691,26 +1700,26 @@ void bhcl_net_node_s_solve( bhcl_net_node_s* o )
 
     if( o->op )
     {
-        sz_t arity = bhcl_op_a_get_arity( o->op );
+        sz_t arity = haptive_op_a_get_arity( o->op );
         if( arity != o->upls.size )
         {
-            bhcl_net_node_s_err_fa( o, "Operator arity #<sz_t> differs from node arity #<sz_t>", arity, o->upls.size );
+            haptive_net_node_s_err_fa( o, "Operator arity #<sz_t> differs from node arity #<sz_t>", arity, o->upls.size );
         }
 
-        #define bhcl_MAX_ARITY 4 /* increase this number when assertion below fails */
-        ASSERT( arity <= bhcl_MAX_ARITY );
-        bhvm_hf3_s* arg_h[ bhcl_MAX_ARITY ] = { NULL };
+        #define haptive_MAX_ARITY 4 /* increase this number when assertion below fails */
+        ASSERT( arity <= haptive_MAX_ARITY );
+        bhvm_hf3_s* arg_h[ haptive_MAX_ARITY ] = { NULL };
 
         sz_t result = -1;
 
-        bl_t solve_each_channel = bhcl_op_a_solve_each_channel( o->op );
+        bl_t solve_each_channel = haptive_op_a_solve_each_channel( o->op );
 
         for( sz_t i = 0; i < arity; i++ )
         {
-            bhcl_net_node_s* arg_n = o->upls.data[ i ]->node;
+            haptive_net_node_s* arg_n = o->upls.data[ i ]->node;
             if( arg_n )
             {
-                bhcl_net_node_s_solve( arg_n );
+                haptive_net_node_s_solve( arg_n );
                 arg_h[ i ] = arg_n->h;
             }
             if( solve_each_channel ) result = net_node_s_op_solve( o, arg_h );
@@ -1721,8 +1730,8 @@ void bhcl_net_node_s_solve( bhcl_net_node_s* o )
         // operation is settled and can be removed
         if( result >= 1 )
         {
-            bhcl_op_a_attach( &o->op, bhcl_op_a_create_final( o->op, o->h ) );
-            bhcl_net_links_s_clear( &o->upls );
+            haptive_op_a_attach( &o->op, haptive_op_a_create_final( o->op, o->h ) );
+            haptive_net_links_s_clear( &o->upls );
             if( result == 2 && o->h ) bhvm_hf3_s_set_vacant( o->h );
         }
     }
@@ -1733,9 +1742,9 @@ void bhcl_net_node_s_solve( bhcl_net_node_s* o )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Outputs the graph structure in text form to sink
-void bhcl_net_node_s_graph_to_sink( bhcl_net_node_s* o, bcore_sink* sink )
+void haptive_net_node_s_graph_to_sink( haptive_net_node_s* o, bcore_sink* sink )
 {
-    bhcl_net_node_s_trace_to_sink( o, 0, sink );
+    haptive_net_node_s_trace_to_sink( o, 0, sink );
     bcore_sink_a_push_fa( sink, "\n" );
 }
 
@@ -1744,15 +1753,15 @@ void bhcl_net_node_s_graph_to_sink( bhcl_net_node_s* o, bcore_sink* sink )
 /** Recursively sets downlinks for all non-flagged uplinks.
  *  Assumes initial state was normal.
  */
-void bhcl_net_node_s_set_downlinks( bhcl_net_node_s* o )
+void haptive_net_node_s_set_downlinks( haptive_net_node_s* o )
 {
     if( o->flag ) return;
     o->flag = true;
     BFOR_EACH( i, &o->upls )
     {
-        bhcl_net_node_s* node = o->upls.data[ i ]->node;
-        bhcl_net_links_s_push( &node->dnls )->node = o;
-        bhcl_net_node_s_set_downlinks( node );
+        haptive_net_node_s* node = o->upls.data[ i ]->node;
+        haptive_net_links_s_push( &node->dnls )->node = o;
+        haptive_net_node_s_set_downlinks( node );
     }
 }
 
@@ -1761,17 +1770,17 @@ void bhcl_net_node_s_set_downlinks( bhcl_net_node_s* o )
 /** Recursively skips identities.
  *  Assumes initial state was normal and downlinks not set
  */
-void bhcl_net_node_s_skip_identities( bhcl_net_node_s* o )
+void haptive_net_node_s_skip_identities( haptive_net_node_s* o )
 {
     if( o->flag ) return;
     o->flag = true;
     BFOR_EACH( i, &o->upls )
     {
-        bhcl_net_node_s* node = o->upls.data[ i ]->node;
-        while( node && node->op && node->op->_ == TYPEOF_bhcl_op_ar1_identity_s ) node = node->upls.data[ i ]->node;
+        haptive_net_node_s* node = o->upls.data[ i ]->node;
+        while( node && node->op && node->op->_ == TYPEOF_haptive_op_ar1_identity_s ) node = node->upls.data[ i ]->node;
         ASSERT( node );
         o->upls.data[ i ]->node = node;
-        bhcl_net_node_s_skip_identities( node );
+        haptive_net_node_s_skip_identities( node );
     }
 }
 
@@ -1780,16 +1789,16 @@ void bhcl_net_node_s_skip_identities( bhcl_net_node_s* o )
 /** Recursively sets flags for all nodes reachable via uplink.
  *  Assumes initial state was normal.
  */
-void bhcl_net_node_s_set_flags( bhcl_net_node_s* o )
+void haptive_net_node_s_set_flags( haptive_net_node_s* o )
 {
     if( o->flag ) return;
     o->flag = true;
-    BFOR_EACH( i, &o->upls ) bhcl_net_node_s_set_flags( o->upls.data[ i ]->node );
+    BFOR_EACH( i, &o->upls ) haptive_net_node_s_set_flags( o->upls.data[ i ]->node );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void net_node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* vm_frame )
+static void net_node_s_vm_build_infer( haptive_net_node_s* o, bhvm_hf3_vm_frame_s* vm_frame )
 {
     ASSERT( o );
     if( o->flag ) return;
@@ -1801,7 +1810,7 @@ static void net_node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* 
     st_s* arr_sig             = BLM_CREATE( st_s );
     BFOR_EACH( i, &o->upls )
     {
-        bhcl_net_node_s* node = o->upls.data[ i ]->node;
+        haptive_net_node_s* node = o->upls.data[ i ]->node;
         net_node_s_vm_build_infer( node, vm_frame );
         bcore_arr_sz_s_push( arr_index, node->id );
         st_s_push_char( arr_sig, 'a' + i );
@@ -1813,9 +1822,9 @@ static void net_node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* 
     bhvm_hf3_vm_holor_s* vm_holor = &vm_frame->arr_holor.data[ o->id ];
     vm_holor->name = o->name;
     bhvm_hf3_s_copy( &vm_holor->h, o->h );
-    if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adaptive_s )
+    if( o->op && o->op->_ == TYPEOF_haptive_op_ar0_adaptive_s )
     {
-        bhcl_op_ar0_adaptive_s* op_ar0_adapt = ( bhcl_op_ar0_adaptive_s* )o->op;
+        haptive_op_ar0_adaptive_s* op_ar0_adapt = ( haptive_op_ar0_adaptive_s* )o->op;
         vm_holor->type = TYPEOF_holor_type_adaptive;
         vm_holor->name = op_ar0_adapt->name;
         bhvm_hf3_s_copy( &vm_holor->h, op_ar0_adapt->h );
@@ -1827,21 +1836,21 @@ static void net_node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* 
 
     if( o->op )
     {
-        ASSERT( bhcl_op_a_get_arity( o->op ) == o->upls.size );
+        ASSERT( haptive_op_a_get_arity( o->op ) == o->upls.size );
 
         // axon-initialization
-        bhvm_hf3_vm_op* vm_op = bhcl_op_a_create_vm_op_ap_init_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
+        bhvm_hf3_vm_op* vm_op = haptive_op_a_create_vm_op_ap_init_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
         if( vm_op )
         {
             bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_ap_init, vm_op );
         }
 
-        vm_op = bhcl_op_a_create_vm_op_ap_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
+        vm_op = haptive_op_a_create_vm_op_ap_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
 
         // axon-pass
         if( vm_op )
         {
-            switch( bhcl_op_a_get_class( o->op ) )
+            switch( haptive_op_a_get_class( o->op ) )
             {
                 case TYPEOF_op_class_regular:
                 {
@@ -1880,7 +1889,7 @@ static void net_node_s_vm_build_infer( bhcl_net_node_s* o, bhvm_hf3_vm_frame_s* 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3_vm_frame_s* vm_frame )
+static void node_s_vm_build_bp_grad( haptive_net_node_s* o, sz_t up_index, bhvm_hf3_vm_frame_s* vm_frame )
 {
     ASSERT( o );
     if( !o->h ) ERR_fa( "Holor is missing." );
@@ -1895,9 +1904,9 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
         vm_holor->name = o->name;
         bhvm_hf3_s_copy_shape( &vm_holor->h, o->h );
 
-        if( o->op && o->op->_ == TYPEOF_bhcl_op_ar0_adaptive_s )
+        if( o->op && o->op->_ == TYPEOF_haptive_op_ar0_adaptive_s )
         {
-            bhcl_op_ar0_adaptive_s* op_adapt = ( bhcl_op_ar0_adaptive_s* )o->op;
+            haptive_op_ar0_adaptive_s* op_adapt = ( haptive_op_ar0_adaptive_s* )o->op;
             vm_holor->name = op_adapt->name;
             vm_holor->type = TYPEOF_holor_type_adaptive_grad;
         }
@@ -1906,7 +1915,7 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
             vm_holor->type = TYPEOF_holor_type_depletable;
 
             /// zero gradient for non-casts
-            if( o->dnls.size > 0 && ( bhcl_op_a_get_class( o->op ) != TYPEOF_op_class_cast ) )
+            if( o->dnls.size > 0 && ( haptive_op_a_get_class( o->op ) != TYPEOF_op_class_cast ) )
             {
                 bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_bp_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, o->gid ) );
             }
@@ -1918,7 +1927,7 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
         // build this gradient from all downlinks ...
         BFOR_EACH( i, &o->dnls )
         {
-            bhcl_net_node_s* node = o->dnls.data[ i ]->node;
+            haptive_net_node_s* node = o->dnls.data[ i ]->node;
             ASSERT( node->h );
             sz_t node_up_index = -1;
             BFOR_EACH( j, &node->upls )
@@ -1946,7 +1955,7 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
 
         BFOR_EACH( i, &o->upls )
         {
-            bhcl_net_node_s* node = o->upls.data[ i ]->node;
+            haptive_net_node_s* node = o->upls.data[ i ]->node;
             ASSERT( node->h );
             bcore_arr_sz_s_push( arr_index, node->id );
             st_s_push_char( arr_sig, 'a' + i );
@@ -1965,11 +1974,11 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
         st_s_push_char( arr_sig, 'v' );
 
         ASSERT( o->op );
-        bhvm_hf3_vm_op* vm_op = bhcl_op_a_create_vm_op_dp_set_idx( o->op, vm_frame, arr_sig->sc, arr_index, 'a' + up_index );
+        bhvm_hf3_vm_op* vm_op = haptive_op_a_create_vm_op_dp_set_idx( o->op, vm_frame, arr_sig->sc, arr_index, 'a' + up_index );
 
         if( vm_op )
         {
-            switch( bhcl_op_a_get_class( o->op ) )
+            switch( haptive_op_a_get_class( o->op ) )
             {
                 case TYPEOF_op_class_regular:
                 {
@@ -2015,7 +2024,7 @@ static void node_s_vm_build_bp_grad( bhcl_net_node_s* o, sz_t up_index, bhvm_hf3
  *  Node id is identical to body-index.
  */
 static s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 ) { return ( *( vd_t* )v2 > *( vd_t* )v1 ) ? 1 : ( *( vd_t* )v2 < *( vd_t* )v1 ) ? -1 : 0; }
-void bhcl_net_cell_s_normalize( bhcl_net_cell_s* o )
+void haptive_net_cell_s_normalize( haptive_net_cell_s* o )
 {
     bcore_arr_vd_s* arr = bcore_arr_vd_s_create();
     BFOR_EACH( i, &o->body ) bcore_arr_vd_s_push( arr, o->body.data[ i ] );
@@ -2051,10 +2060,10 @@ void bhcl_net_cell_s_normalize( bhcl_net_cell_s* o )
     BFOR_EACH( i, arr ) arr->data[ i ] = bcore_fork( arr->data[ i ] );
 
     // new body
-    bhcl_net_nodes_s_set_size( &o->body, 0 );
+    haptive_net_nodes_s_set_size( &o->body, 0 );
     for( sz_t i = 0; i < arr->size; i++ )
     {
-        bhcl_net_node_s* node = bhcl_net_nodes_s_push_d( &o->body, arr->data[ i ] );
+        haptive_net_node_s* node = haptive_net_nodes_s_push_d( &o->body, arr->data[ i ] );
         assert( node == arr->data[ i ] );
         node->id = i;
         node->flag = false;
@@ -2066,16 +2075,16 @@ void bhcl_net_cell_s_normalize( bhcl_net_cell_s* o )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Checks consistency of a normalized cell
-bl_t bhcl_net_cell_s_is_consistent( const bhcl_net_cell_s* o )
+bl_t haptive_net_cell_s_is_consistent( const haptive_net_cell_s* o )
 {
     BFOR_EACH( i, &o->body )
     {
-        const bhcl_net_node_s* node = o->body.data[ i ];
+        const haptive_net_node_s* node = o->body.data[ i ];
         if( node->flag ) return false;
         if( node->id != i ) return false;
         BFOR_EACH( i, &node->upls )
         {
-            const bhcl_net_node_s* node2 = node->upls.data[ i ]->node;
+            const haptive_net_node_s* node2 = node->upls.data[ i ]->node;
             if( node2->id < 0 ) return false;
             if( node2->id >= o->body.size ) return false;
             if( node2 != o->body.data[ node2->id ] ) return false;
@@ -2083,7 +2092,7 @@ bl_t bhcl_net_cell_s_is_consistent( const bhcl_net_cell_s* o )
 
         BFOR_EACH( i, &node->dnls )
         {
-            const bhcl_net_node_s* node2 = node->dnls.data[ i ]->node;
+            const haptive_net_node_s* node2 = node->dnls.data[ i ]->node;
             if( node2->id < 0 ) return false;
             if( node2->id >= o->body.size ) return false;
             if( node2 != o->body.data[ node2->id ] ) return false;
@@ -2093,7 +2102,7 @@ bl_t bhcl_net_cell_s_is_consistent( const bhcl_net_cell_s* o )
 
     BFOR_EACH( i, &o->encs )
     {
-        const bhcl_net_node_s* node2 = o->encs.data[ i ];
+        const haptive_net_node_s* node2 = o->encs.data[ i ];
         if( node2->id < 0 ) return false;
         if( node2->id >= o->body.size ) return false;
         if( node2 != o->body.data[ node2->id ] ) return false;
@@ -2102,7 +2111,7 @@ bl_t bhcl_net_cell_s_is_consistent( const bhcl_net_cell_s* o )
 
     BFOR_EACH( i, &o->excs )
     {
-        const bhcl_net_node_s* node2 = o->excs.data[ i ];
+        const haptive_net_node_s* node2 = o->excs.data[ i ];
         if( node2->id < 0 ) return false;
         if( node2->id >= o->body.size ) return false;
         if( node2 != o->body.data[ node2->id ] ) return false;
@@ -2114,22 +2123,22 @@ bl_t bhcl_net_cell_s_is_consistent( const bhcl_net_cell_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_net_cell_s_copy_x( bhcl_net_cell_s* o )
+void haptive_net_cell_s_copy_x( haptive_net_cell_s* o )
 {
     BFOR_EACH( i, &o->body )
     {
-        const bhcl_net_node_s* node = o->body.data[ i ];
+        const haptive_net_node_s* node = o->body.data[ i ];
         ASSERT( node->id == i );
         BFOR_EACH( i, &node->upls )
         {
-            const bhcl_net_node_s* node2 = node->upls.data[ i ]->node;
+            const haptive_net_node_s* node2 = node->upls.data[ i ]->node;
             ASSERT( node2->id >= 0 );
             ASSERT( node2->id < o->body.size );
             node->upls.data[ i ]->node = o->body.data[ node2->id ];
         }
         BFOR_EACH( i, &node->dnls )
         {
-            const bhcl_net_node_s* node2 = node->dnls.data[ i ]->node;
+            const haptive_net_node_s* node2 = node->dnls.data[ i ]->node;
             ASSERT( node2->id >= 0 );
             ASSERT( node2->id < o->body.size );
             node->dnls.data[ i ]->node = o->body.data[ node2->id ];
@@ -2141,7 +2150,7 @@ void bhcl_net_cell_s_copy_x( bhcl_net_cell_s* o )
         sz_t id = o->encs.data[ i ]->id;
         ASSERT( id >= 0 );
         ASSERT( id < o->body.size );
-        bhcl_net_node_s_detach( &o->encs.data[ i ] );
+        haptive_net_node_s_detach( &o->encs.data[ i ] );
         o->encs.data[ i ] = bcore_fork( o->body.data[ id ] );
     }
 
@@ -2150,20 +2159,20 @@ void bhcl_net_cell_s_copy_x( bhcl_net_cell_s* o )
         sz_t id = o->excs.data[ i ]->id;
         ASSERT( id >= 0 );
         ASSERT( id < o->body.size );
-        bhcl_net_node_s_detach( &o->excs.data[ i ] );
+        haptive_net_node_s_detach( &o->excs.data[ i ] );
         o->excs.data[ i ] = bcore_fork( o->body.data[ id ] );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_net_cell_s_set_downlinks( bhcl_net_cell_s* o )
+void haptive_net_cell_s_set_downlinks( haptive_net_cell_s* o )
 {
-    bhcl_net_cell_s_clear_flags( o );
-    bhcl_net_cell_s_clear_downlinks( o );
-    BFOR_EACH( i, &o->excs ) bhcl_net_node_s_set_downlinks( o->excs.data[ i ] );
-    bhcl_net_cell_s_clear_flags( o );
-    assert( bhcl_net_cell_s_is_consistent( o ) );
+    haptive_net_cell_s_clear_flags( o );
+    haptive_net_cell_s_clear_downlinks( o );
+    BFOR_EACH( i, &o->excs ) haptive_net_node_s_set_downlinks( o->excs.data[ i ] );
+    haptive_net_cell_s_clear_flags( o );
+    assert( haptive_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2171,24 +2180,24 @@ void bhcl_net_cell_s_set_downlinks( bhcl_net_cell_s* o )
 /** Removes all body-nodes not reachable via uplink from exit channels
  *  Creates an warning in case an entry channel is unreachable.
  */
-void bhcl_net_cell_s_remove_unreachable_nodes( bhcl_net_cell_s* o )
+void haptive_net_cell_s_remove_unreachable_nodes( haptive_net_cell_s* o )
 {
-    bhcl_net_cell_s_clear_flags( o );
-    BFOR_EACH( i, &o->excs ) bhcl_net_node_s_set_flags( o->excs.data[ i ] );
+    haptive_net_cell_s_clear_flags( o );
+    BFOR_EACH( i, &o->excs ) haptive_net_node_s_set_flags( o->excs.data[ i ] );
     BFOR_EACH( i, &o->encs )
     {
-        bhcl_net_node_s* node = o->encs.data[ i ];
+        haptive_net_node_s* node = o->encs.data[ i ];
         if( !node->flag && ( !( node->h && node->h->v_size > 0 ) ) )
         {
-            bcore_source_point_s_parse_msg_to_sink_fa( node->source_point, BCORE_STDERR, "Warning: Entry channel [#<sz_t>] '#<sc_t>' has no effect.", i, bhcl_ifnameof( node->name ) );
+            bcore_source_point_s_parse_msg_to_sink_fa( node->source_point, BCORE_STDERR, "Warning: Entry channel [#<sz_t>] '#<sc_t>' has no effect.", i, haptive_ifnameof( node->name ) );
         }
         node->flag = true;
     }
 
-    BFOR_EACH( i, &o->body ) if( !o->body.data[ i ]->flag ) bhcl_net_node_s_detach( &o->body.data[ i ] );
-    bhcl_net_cell_s_normalize( o );
+    BFOR_EACH( i, &o->body ) if( !o->body.data[ i ]->flag ) haptive_net_node_s_detach( &o->body.data[ i ] );
+    haptive_net_cell_s_normalize( o );
 
-    assert( bhcl_net_cell_s_is_consistent( o ) );
+    assert( haptive_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2196,14 +2205,14 @@ void bhcl_net_cell_s_remove_unreachable_nodes( bhcl_net_cell_s* o )
 /** Removes all body-nodes containing an identity operator and relinks remaining nodes accordingly
  *  Clears all downlinks;
  */
-void bhcl_net_cell_s_remove_identities( bhcl_net_cell_s* o )
+void haptive_net_cell_s_remove_identities( haptive_net_cell_s* o )
 {
-    bhcl_net_cell_s_clear_downlinks( o );
-    bhcl_net_cell_s_clear_flags( o );
-    BFOR_EACH( i, &o->excs ) bhcl_net_node_s_skip_identities( o->excs.data[ i ] );
-    bhcl_net_cell_s_clear_flags( o );
-    bhcl_net_cell_s_remove_unreachable_nodes( o );
-    assert( bhcl_net_cell_s_is_consistent( o ) );
+    haptive_net_cell_s_clear_downlinks( o );
+    haptive_net_cell_s_clear_flags( o );
+    BFOR_EACH( i, &o->excs ) haptive_net_node_s_skip_identities( o->excs.data[ i ] );
+    haptive_net_cell_s_clear_flags( o );
+    haptive_net_cell_s_remove_unreachable_nodes( o );
+    assert( haptive_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2214,22 +2223,22 @@ void bhcl_net_cell_s_remove_identities( bhcl_net_cell_s* o )
  */
 static void net_cell_s_from_sem_recursive
 (
-    bhcl_net_cell_s* o,
-    bhcl_sem_link_s* link,
-    bhcl_ctr_tree_s* ctr_tree,
-    bhcl_ctr_node_s* ctr_node,
-    bhcl_net_node_s* net_node_dn,
+    haptive_net_cell_s* o,
+    haptive_sem_link_s* link,
+    haptive_ctr_tree_s* ctr_tree,
+    haptive_ctr_node_s* ctr_node,
+    haptive_net_node_s* net_node_dn,
     sz_t             depth,
     bcore_sink*      log  // optional
 )
 {
     depth++;
     tp_t name = link->name;
-    if( log ) bcore_sink_a_push_fa( log, "Tracing link '#<sc_t>' at depth #<sz_t>\n", bhcl_ifnameof( name ), depth );
-    link = bhcl_sem_link_s_trace_to_cell_membrane( link );
-    if( !link ) ERR_fa( "Backtracing '#<sc_t>':\nTrace ends in open link.", bhcl_ifnameof( name ) );
-    bhcl_sem_cell_s* cell = link->cell;
-    bhcl_sem_link_s* next_link = NULL;
+    if( log ) bcore_sink_a_push_fa( log, "Tracing link '#<sc_t>' at depth #<sz_t>\n", haptive_ifnameof( name ), depth );
+    link = haptive_sem_link_s_trace_to_cell_membrane( link );
+    if( !link ) ERR_fa( "Backtracing '#<sc_t>':\nTrace ends in open link.", haptive_ifnameof( name ) );
+    haptive_sem_cell_s* cell = link->cell;
+    haptive_sem_link_s* next_link = NULL;
 
     if( depth > o->max_depth )
     {
@@ -2238,13 +2247,13 @@ static void net_cell_s_from_sem_recursive
 
     if( link->exit )
     {
-        bcore_source_point_s_parse_msg_to_sink_fa( &cell->source_point, log, "entering cell: '#<sc_t>' \n", bhcl_nameof( cell->name ) );
+        bcore_source_point_s_parse_msg_to_sink_fa( &cell->source_point, log, "entering cell: '#<sc_t>' \n", haptive_nameof( cell->name ) );
 
         // since we backtrace, a cell is entered through an 'exit' link
-        s2_t err = bhcl_ctr_tree_s_tree_process( ctr_tree, cell, true, ctr_node, &ctr_node );
+        s2_t err = haptive_ctr_tree_s_tree_process( ctr_tree, cell, true, ctr_node, &ctr_node );
         if( err )
         {
-            bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nEntering cell failed.", bhcl_ifnameof( name ) );
+            bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nEntering cell failed.", haptive_ifnameof( name ) );
         }
 
         if( cell->op )
@@ -2252,34 +2261,34 @@ static void net_cell_s_from_sem_recursive
             if( log ) bcore_sink_a_push_fa( log, "cell op: #<sc_t>\n", ifnameof( cell->op->_ ) );
 
             bl_t trace_up = false;
-            bhcl_net_node_s* net_node_up = bhcl_net_nodes_s_get_by_id( &o->body, ctr_node->id );
+            haptive_net_node_s* net_node_up = haptive_net_nodes_s_get_by_id( &o->body, ctr_node->id );
             if( !net_node_up )
             {
-                net_node_up = bhcl_net_nodes_s_push( &o->body );
+                net_node_up = haptive_net_nodes_s_push( &o->body );
                 net_node_up->id = ctr_node->id;
                 net_node_up->op = bcore_fork( cell->op );
 
-                bcore_source_point_s_attach( &net_node_up->source_point, bcore_fork( bhcl_ctr_node_s_get_nearest_source_point( ctr_node ) ) );
+                bcore_source_point_s_attach( &net_node_up->source_point, bcore_fork( haptive_ctr_node_s_get_nearest_source_point( ctr_node ) ) );
 
-                trace_up = bhcl_op_a_get_arity( net_node_up->op ) > 0;
+                trace_up = haptive_op_a_get_arity( net_node_up->op ) > 0;
                 if( log ) bcore_sink_a_push_fa( log, "new node id: '#<sz_t>'\n", net_node_up->id );
             }
 
             if( trace_up )
             {
-                sz_t arity = bhcl_op_a_get_arity( net_node_up->op );
+                sz_t arity = haptive_op_a_get_arity( net_node_up->op );
                 ASSERT( arity == cell->encs.size );
 
-                if( net_node_up->op->_ == TYPEOF_bhcl_op_ar3_branch_s )
+                if( net_node_up->op->_ == TYPEOF_haptive_op_ar3_branch_s )
                 {
                     if( log ) bcore_sink_a_push_fa( log, "Branch channel 0:\n" );
                     net_cell_s_from_sem_recursive( o, cell->encs.data[ 0 ], ctr_tree, ctr_node, net_node_up, depth, log );
-                    bhcl_net_node_s* arg0 = net_node_up->upls.data[ 0 ]->node;
-                    bhcl_net_node_s_solve( arg0 );
+                    haptive_net_node_s* arg0 = net_node_up->upls.data[ 0 ]->node;
+                    haptive_net_node_s_solve( arg0 );
                     if( arg0->h->v_data ) // determined holor
                     {
-                        bhcl_net_links_s_clear( &net_node_up->upls );
-                        bhcl_op_a_attach( &net_node_up->op, ( bhcl_op* )bhcl_op_ar1_identity_s_create() );
+                        haptive_net_links_s_clear( &net_node_up->upls );
+                        haptive_op_a_attach( &net_node_up->op, ( haptive_op* )haptive_op_ar1_identity_s_create() );
                         if( log ) bcore_sink_a_push_fa( log, "Condition check result: #<f3_t>. Identity to channel ", arg0->h->v_data[ 0 ] );
                         if( arg0->h->v_data[ 0 ] > 0 )
                         {
@@ -2311,7 +2320,7 @@ static void net_cell_s_from_sem_recursive
                 }
             }
 
-            bhcl_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
+            haptive_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
         }
         else if( link->up )
         {
@@ -2319,40 +2328,40 @@ static void net_cell_s_from_sem_recursive
         }
         else
         {
-            bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nOpen exit link '#<sc_t>'.", bhcl_ifnameof( name ), bhcl_ifnameof( link->name ) );
+            bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nOpen exit link '#<sc_t>'.", haptive_ifnameof( name ), haptive_ifnameof( link->name ) );
         }
     }
     else
     {
-        if( log ) bcore_sink_a_push_fa( log, "exiting cell: '#<sc_t>' \n", bhcl_ifnameof( cell->name ) );
+        if( log ) bcore_sink_a_push_fa( log, "exiting cell: '#<sc_t>' \n", haptive_ifnameof( cell->name ) );
 
-        s2_t err = bhcl_ctr_tree_s_tree_process( ctr_tree, cell, false, ctr_node, &ctr_node );
+        s2_t err = haptive_ctr_tree_s_tree_process( ctr_tree, cell, false, ctr_node, &ctr_node );
         if( err )
         {
             if( err == 1 )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nExiting from untraced cell.", bhcl_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nExiting from untraced cell.", haptive_ifnameof( name ) );
             }
             else
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nExiting cell failed.", bhcl_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nExiting cell failed.", haptive_ifnameof( name ) );
             }
         }
 
         if( !ctr_node ) // root membrane reached (trace ended)
         {
-            sz_t index = bhcl_sem_links_s_get_index_by_link( &cell->encs, link );
+            sz_t index = haptive_sem_links_s_get_index_by_link( &cell->encs, link );
             if( index == -1 )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nEnding trace: No matching input channel.", bhcl_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nEnding trace: No matching input channel.", haptive_ifnameof( name ) );
             }
             if( index >= o->encs.size )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nInput channel boundary exceeded.", bhcl_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nInput channel boundary exceeded.", haptive_ifnameof( name ) );
             }
 
-            bhcl_net_node_s* net_node_up = o->encs.data[ index ];
-            bhcl_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
+            haptive_net_node_s* net_node_up = o->encs.data[ index ];
+            haptive_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
 
             next_link = NULL;
         }
@@ -2363,10 +2372,10 @@ static void net_cell_s_from_sem_recursive
         }
         else
         {
-            next_link = bhcl_sem_cell_s_get_enc_by_dn( ctr_node->cell, link );
+            next_link = haptive_sem_cell_s_get_enc_by_dn( ctr_node->cell, link );
             if( !next_link )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nTrace ends in open link.", bhcl_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nTrace ends in open link.", haptive_ifnameof( name ) );
             }
         }
     }
@@ -2384,12 +2393,12 @@ static void net_cell_s_from_sem_recursive
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Finalization steps: Solves graph and optimizes it
-void bhcl_net_cell_s_finalize( bhcl_net_cell_s* o )
+void haptive_net_cell_s_finalize( haptive_net_cell_s* o )
 {
-    bhcl_net_cell_s_solve( o );
-    bhcl_net_cell_s_remove_identities( o );
-    bhcl_net_cell_s_set_downlinks( o );
-    ASSERT( bhcl_net_cell_s_is_consistent( o ) );
+    haptive_net_cell_s_solve( o );
+    haptive_net_cell_s_remove_identities( o );
+    haptive_net_cell_s_set_downlinks( o );
+    ASSERT( haptive_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2397,11 +2406,11 @@ void bhcl_net_cell_s_finalize( bhcl_net_cell_s* o )
 /** Builds a net cell from a semantic cell
  *  This function locks and initializes the randomizer to ensure a deterministic sequence of random values.
  */
-void bhcl_net_cell_s_from_sem_cell
+void haptive_net_cell_s_from_sem_cell
 (
-    bhcl_net_cell_s* o,
-    bhcl_sem_cell_s* sem_cell,
-    bhcl_op* (*input_op_create)( vd_t arg, sz_t in_idx, tp_t in_name ),
+    haptive_net_cell_s* o,
+    haptive_sem_cell_s* sem_cell,
+    haptive_op* (*input_op_create)( vd_t arg, sz_t in_idx, tp_t in_name ),
     vd_t arg,
     bcore_sink* log
 )
@@ -2412,11 +2421,11 @@ void bhcl_net_cell_s_from_sem_cell
     context_g->randomizer_is_locked = true;
     context_g->randomizer_rval = 0; // rval == 0 causes randomizer to be seeded by functions using it.
 
-    bhcl_ctr_tree_s* tree = bhcl_ctr_tree_s_create();
+    haptive_ctr_tree_s* tree = haptive_ctr_tree_s_create();
     for( sz_t i = 0; i < sem_cell->encs.size; i++ )
     {
-        bhcl_sem_link_s* sem_link = sem_cell->encs.data[ i ];
-        bhcl_net_node_s* net_node = bhcl_net_nodes_s_push( &o->encs );
+        haptive_sem_link_s* sem_link = sem_cell->encs.data[ i ];
+        haptive_net_node_s* net_node = haptive_net_nodes_s_push( &o->encs );
         net_node->name = sem_link->name;
         net_node->id   = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
@@ -2425,23 +2434,23 @@ void bhcl_net_cell_s_from_sem_cell
 
     for( sz_t i = 0; i < sem_cell->excs.size; i++ )
     {
-        bhcl_sem_link_s* sem_link = sem_cell->excs.data[ i ];
-        bhcl_net_node_s* net_node = bhcl_net_nodes_s_push( &o->excs );
+        haptive_sem_link_s* sem_link = sem_cell->excs.data[ i ];
+        haptive_net_node_s* net_node = haptive_net_nodes_s_push( &o->excs );
         net_node->name = sem_link->name;
         net_node->id = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
-        bhcl_op_ar1_output_s* op_ar1_output = bhcl_op_ar1_output_s_create();
-        net_node->op = ( bhcl_op* )op_ar1_output;
+        haptive_op_ar1_output_s* op_ar1_output = haptive_op_ar1_output_s_create();
+        net_node->op = ( haptive_op* )op_ar1_output;
         net_cell_s_from_sem_recursive( o, sem_link, tree, NULL, net_node, 0, log );
     }
 
-    bhcl_ctr_tree_s_discard( tree );
+    haptive_ctr_tree_s_discard( tree );
 
-    bhcl_net_cell_s_normalize( o );
-    assert( bhcl_net_cell_s_is_consistent( o ) );
+    haptive_net_cell_s_normalize( o );
+    assert( haptive_net_cell_s_is_consistent( o ) );
 
-    ASSERT( bhcl_net_cell_s_is_consistent( o ) );
-    bhcl_net_cell_s_finalize( o );
+    ASSERT( haptive_net_cell_s_is_consistent( o ) );
+    haptive_net_cell_s_finalize( o );
 
     context_g->randomizer_is_locked = false;
     bcore_mutex_s_unlock( context_g->randomizer_mutex );
@@ -2450,36 +2459,36 @@ void bhcl_net_cell_s_from_sem_cell
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// outputs graph to sink
-static void bhcl_net_cell_s_graph_to_sink( bhcl_net_cell_s* o, bcore_sink* sink )
+void haptive_net_cell_s_graph_to_sink( haptive_net_cell_s* o, bcore_sink* sink )
 {
-    BFOR_EACH( i, &o->excs ) bhcl_net_node_s_graph_to_sink( o->excs.data[ i ], sink );
+    BFOR_EACH( i, &o->excs ) haptive_net_node_s_graph_to_sink( o->excs.data[ i ], sink );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 // builds main vm procedure
-static void cell_s_vm_build_infer( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+void haptive_cell_s_vm_build_infer( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
     bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_infer );
     bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_setup );
-    ASSERT( bhcl_net_cell_s_is_consistent( o ) );
+    ASSERT( haptive_net_cell_s_is_consistent( o ) );
 
     bhvm_hf3_vm_arr_holor_s_set_size( &vmf->arr_holor, o->body.size );
 
     for( sz_t i = 0; i < o->excs.size; i++ )
     {
-        bhcl_net_node_s* node = o->excs.data[ i ];
-        if( !node->h ) ERR_fa( "Unsolved node '#<sc_t>'\n", bhcl_ifnameof( node->name ) );
+        haptive_net_node_s* node = o->excs.data[ i ];
+        if( !node->h ) ERR_fa( "Unsolved node '#<sc_t>'\n", haptive_ifnameof( node->name ) );
         net_node_s_vm_build_infer( node, vmf );
     }
 
-    bhcl_net_cell_s_clear_flags( o );
+    haptive_net_cell_s_clear_flags( o );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 // builds bp_grad vm procedure
-static void cell_s_vm_build_bp_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+void haptive_cell_s_vm_build_bp_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
     if( !bhvm_hf3_vm_frame_s_proc_exists( vmf, TYPEOF_proc_name_infer ) )
     {
@@ -2489,17 +2498,17 @@ static void cell_s_vm_build_bp_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vm
     bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_bp_grad );
     for( sz_t i = 0; i < o->body.size; i++ )
     {
-        bhcl_net_node_s* node = o->body.data[ i ];
+        haptive_net_node_s* node = o->body.data[ i ];
         if( !node->op ) continue;
-        if( node->op->_ != TYPEOF_bhcl_op_ar0_adaptive_s ) continue;
+        if( node->op->_ != TYPEOF_haptive_op_ar0_adaptive_s ) continue;
         node_s_vm_build_bp_grad( node, -1, vmf );
     }
-    bhcl_net_cell_s_clear_flags( o );
+    haptive_net_cell_s_clear_flags( o );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
+void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
 {
     const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
@@ -2554,7 +2563,7 @@ void bhcl_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
 // ---------------------------------------------------------------------------------------------------------------------
 
 // builds vm procedure shelve for all holors
-void bhcl_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
+void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
 {
     bhvm_hf3_vm_frame_s_proc_reset( o, TYPEOF_proc_name_shelve );
 
@@ -2585,7 +2594,7 @@ void bhcl_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
 // ---------------------------------------------------------------------------------------------------------------------
 
 // sets adaptive gradients to zero
-void bhcl_net_cell_s_vm_build_zero_adaptive_grad( bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+void haptive_net_cell_s_vm_build_zero_adaptive_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
     bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_zero_adaptive_grad );
 
@@ -2608,24 +2617,24 @@ void bhcl_net_cell_s_vm_build_zero_adaptive_grad( bhcl_net_cell_s* o, bhvm_hf3_v
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_net_cell_s_vm_set_input( const bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+void haptive_net_cell_s_vm_set_input( const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
     bcore_arr_sz_s_clear( &vmf->input );
     for( sz_t i = 0; i < o->encs.size; i++ )
     {
-        const bhcl_net_node_s* node = o->encs.data[ i ];
+        const haptive_net_node_s* node = o->encs.data[ i ];
         bhvm_hf3_vm_frame_s_input_push( vmf, node->id );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_net_cell_s_vm_set_output( const bhcl_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+void haptive_net_cell_s_vm_set_output( const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
     bcore_arr_sz_s_clear( &vmf->output );
     for( sz_t i = 0; i < o->excs.size; i++ )
     {
-        const bhcl_net_node_s* node = o->excs.data[ i ];
+        const haptive_net_node_s* node = o->excs.data[ i ];
         bhvm_hf3_vm_frame_s_output_push( vmf, node->id );
     }
 }
@@ -2638,14 +2647,14 @@ void bhcl_net_cell_s_vm_set_output( const bhcl_net_cell_s* o, bhvm_hf3_vm_frame_
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_vm_adaptive_s_arc_to_sink( const bhcl_vm_adaptive_s* o, bcore_sink* sink )
+void haptive_vm_adaptive_s_arc_to_sink( const haptive_vm_adaptive_s* o, bcore_sink* sink )
 {
     bcore_txt_ml_a_to_sink( o->src, sink );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_vm_adaptive_s_minfer( bhcl_vm_adaptive_s* o, const bmath_vf3_s* v_in, bmath_vf3_s* v_out )
+void haptive_vm_adaptive_s_minfer( haptive_vm_adaptive_s* o, const bmath_vf3_s* v_in, bmath_vf3_s* v_out )
 {
     ASSERT( o->index_in  < o->vm.arr_holor.size );
     ASSERT( o->index_out < o->vm.arr_holor.size );
@@ -2662,7 +2671,7 @@ void bhcl_vm_adaptive_s_minfer( bhcl_vm_adaptive_s* o, const bmath_vf3_s* v_in, 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void bhcl_vm_adaptive_s_bgrad_adapt( bhcl_vm_adaptive_s* o, bmath_vf3_s* v_grad_in, const bmath_vf3_s* v_grad_out )
+void haptive_vm_adaptive_s_bgrad_adapt( haptive_vm_adaptive_s* o, bmath_vf3_s* v_grad_in, const bmath_vf3_s* v_grad_out )
 {
     ASSERT( o->index_grad_out < o->vm.arr_holor.size );
 
@@ -2695,10 +2704,10 @@ void bhcl_vm_adaptive_s_bgrad_adapt( bhcl_vm_adaptive_s* o, bmath_vf3_s* v_grad_
 }
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_op* bhcl_vm_builder_s_build_input_op_create( vd_t vd_o, sz_t in_idx, tp_t in_name )
+haptive_op* haptive_vm_builder_s_build_input_op_create( vd_t vd_o, sz_t in_idx, tp_t in_name )
 {
-    const bhcl_vm_builder_s* o = vd_o;
-    bhcl_op_ar0_input_s* input = bhcl_op_ar0_input_s_create();
+    const haptive_vm_builder_s* o = vd_o;
+    haptive_op_ar0_input_s* input = haptive_op_ar0_input_s_create();
     input->h = bhvm_hf3_s_create();
 
     switch( in_idx )
@@ -2722,13 +2731,13 @@ bhcl_op* bhcl_vm_builder_s_build_input_op_create( vd_t vd_o, sz_t in_idx, tp_t i
         break;
     }
 
-    return ( bhcl_op* )input;
+    return ( haptive_op* )input;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// Pulls all relevant names into frame's name map
-static void bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o )
+// Pulls all relevant names into frame's name map
+void haptive_bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o )
 {
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_infer ) );
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_bp_grad ) );
@@ -2742,7 +2751,7 @@ static void bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o )
         tp_t tp_name = o->arr_holor.data[ i ].name;
         if( tp_name )
         {
-            sc_t sc_name = bhcl_nameof( tp_name );
+            sc_t sc_name = haptive_nameof( tp_name );
             if( sc_name ) bhvm_hf3_vm_frame_s_entypeof( o, sc_name );
         }
     }
@@ -2750,9 +2759,9 @@ static void bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
+badapt_adaptive* haptive_vm_builder_s_build( const haptive_vm_builder_s* o )
 {
-    bhcl_vm_adaptive_s* adaptive = bhcl_vm_adaptive_s_create();
+    haptive_vm_adaptive_s* adaptive = haptive_vm_adaptive_s_create();
     st_s_copy( &adaptive->sig, &o->sig );
     bcore_inst_a_replicate( ( bcore_inst** )&adaptive->src, ( const bcore_inst* )o->src );
 
@@ -2786,25 +2795,25 @@ badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
     }
 
     // semantic cell
-    bhcl_sem_cell_s* sem_frame = BLM_A_PUSH( sem_cell_s_create_frame() );
-    bhcl_sem_cell_s_parse_signature( sem_frame, BLM_A_PUSH( bcore_source_string_s_create_sc( o->sig.sc ) ) );
+    haptive_sem_cell_s* sem_frame = BLM_A_PUSH( haptive_sem_cell_s_create_frame() );
+    haptive_sem_cell_s_parse_signature( sem_frame, BLM_A_PUSH( bcore_source_string_s_create_sc( o->sig.sc ) ) );
     bcore_source_point_s_set( &sem_frame->source_point, source );
-    bhcl_sem_cell_s_parse_body( sem_frame, source );
+    haptive_sem_cell_s_parse_body( sem_frame, source );
 
     // network cell
-    bhcl_net_cell_s* net_frame = BLM_A_PUSH( bhcl_net_cell_s_create() );
-    bhcl_net_cell_s_from_sem_cell( net_frame, sem_frame, bhcl_vm_builder_s_build_input_op_create, ( vd_t )o, NULL );
+    haptive_net_cell_s* net_frame = BLM_A_PUSH( haptive_net_cell_s_create() );
+    haptive_net_cell_s_from_sem_cell( net_frame, sem_frame, haptive_vm_builder_s_build_input_op_create, ( vd_t )o, NULL );
 
     bhvm_hf3_vm_frame_s* vmf = &adaptive->vm;
 
-    cell_s_vm_build_infer(   net_frame, vmf );
-    cell_s_vm_build_bp_grad( net_frame, vmf );
-    bhcl_vm_build_setup(  vmf, o->rseed );
-    bhcl_vm_build_shelve( vmf );
-    bhcl_net_cell_s_vm_set_input(  net_frame, vmf );
-    bhcl_net_cell_s_vm_set_output( net_frame, vmf );
+    haptive_cell_s_vm_build_infer(   net_frame, vmf );
+    haptive_cell_s_vm_build_bp_grad( net_frame, vmf );
+    haptive_vm_build_setup(  vmf, o->rseed );
+    haptive_vm_build_shelve( vmf );
+    haptive_net_cell_s_vm_set_input(  net_frame, vmf );
+    haptive_net_cell_s_vm_set_output( net_frame, vmf );
 
-    bhvm_hf3_vm_frame_s_pull_names( vmf );
+    haptive_bhvm_hf3_vm_frame_s_pull_names( vmf );
 
     ASSERT( vmf->input.size  == 2 );
     ASSERT( vmf->output.size == 1 );
@@ -2859,518 +2868,15 @@ badapt_adaptive* bhcl_vm_builder_s_build( const bhcl_vm_builder_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/**********************************************************************************************************************/
-// eval
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-bhcl_op* bhcl_eval_e2e_s_input_op_create( vd_t arg, sz_t in_idx, tp_t in_name )
-{
-    assert( *(aware_t*)arg == TYPEOF_bhcl_eval_e2e_s );
-    bhcl_eval_e2e_s* o = arg;
-    if( in_idx < 0 && in_idx >= o->in->size ) return NULL;
-    bhcl_op_ar0_input_s* input = bhcl_op_ar0_input_s_create();
-    input->h = bhvm_hf3_s_create();
-    bhvm_hf3_s_copy_shape( input->h, o->in->data[ in_idx ] );
-    return ( bhcl_op* )input;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-s2_t bhcl_eval_grad_s_run( const bhcl_eval_grad_s* o )
-{
-    if( o->verbosity >= 2 ) bcore_sink_a_push_fa( o->log, "Gradient test:\n" );
-    BLM_INIT();
-    bhvm_hf3_vm_frame_s* vmf = o->vmf;
-
-    bhvm_hf3_adl_s* tgt  = BLM_CREATE( bhvm_hf3_adl_s );
-    bhvm_hf3_adl_s* out0 = BLM_CREATE( bhvm_hf3_adl_s ); // default output
-    bhvm_hf3_adl_s* out1 = BLM_CREATE( bhvm_hf3_adl_s ); // varied output
-    bhvm_hf3_adl_s* grad = BLM_CREATE( bhvm_hf3_adl_s );
-
-    ASSERT( o->in );
-    ASSERT( o->out );
-    bhvm_hf3_adl_s_copy( tgt, o->out );
-
-    // compute out0, e0
-    bhvm_hf3_vm_frame_s_input_set_all( vmf, o->in );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_infer );
-    bhvm_hf3_vm_frame_s_output_get_all( vmf, out0 );
-
-    ASSERT( tgt->size == out0->size );
-
-    // verify shapes
-    BFOR_EACH( i, tgt )
-    {
-        const bhvm_hf3_s* ht = tgt->data[ i ];
-        const bhvm_hf3_s* ho = out0->data[ i ];
-        if( !bhvm_hf3_s_shape_equal( ht, ho ) )
-        {
-            st_s* msg = st_s_create();
-            bcore_sink* sink = (bcore_sink*)msg;
-            bcore_sink_a_push_fa( sink, "Exit channel #<sz_t>: Output has different shape than target.\n", i );
-            bcore_sink_a_push_fa( sink, "Output: " );
-            bhvm_hf3_s_brief_to_sink( ho, sink );
-            bcore_sink_a_push_fa( sink, "\n" );
-            bcore_sink_a_push_fa( sink, "Target: " );
-            bhvm_hf3_s_brief_to_sink( ht, sink );
-            bcore_sink_a_push_fa( sink, "\n" );
-            ERR_fa( "#<sc_t>", msg->sc );
-            st_s_discard( msg );
-        }
-    }
-
-    f3_t e0 = bhvm_hf3_adl_s_f3_sub_sqr( tgt, out0 );
-
-    // compute gradients
-    bhvm_hf3_adl_s_copy( grad, out0 );
-    bhvm_hf3_adl_s_sub(  grad, tgt, grad );
-    bhvm_hf3_adl_s_mul_scl_f3(  grad, 2.0, grad );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_zero_adaptive_grad );
-    bhvm_hf3_vm_frame_s_output_set_paired_all( vmf, grad );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_bp_grad );
-    bhvm_hf3_vm_frame_s_check_integrity( vmf );
-
-    f3_t g_dev_sum = 0;
-    f3_t g_dev_wgt = 0;
-
-    ASSERT( o->max_dev > 0 );
-
-    /* Significance is the relative change of energy for a given variance.
-     * Tests below min_significance are not accurate enough to produce
-     * testable results
-     * If significance * max_dev < 1E-15 then the energy gradient cannot be resolved
-     * in f3_t. Such results are not counted as gradient deviation.
-     */
-    f3_t min_significance = 1E-15 / o->max_dev;
-
-    BFOR_EACH( i, &vmf->arr_holor )
-    {
-        if( vmf->arr_holor.data[ i ].type != TYPEOF_holor_type_adaptive ) continue;
-
-        bhvm_hf3_vm_holor_s* vm_ha = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, i );
-        bhvm_hf3_vm_holor_s* vm_hg = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, vm_ha->idx_paired );
-
-        sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vmf, vm_ha->name );
-
-        if( o->verbosity >= 5 )
-        {
-            bcore_sink_a_push_fa( o->log, "Adaptive holor '#<sc_t>' (address #<sz_t>): ", name, i );
-            bhvm_hf3_s_brief_to_sink( &vm_ha->h, o->log );
-            bcore_sink_a_push_fa( o->log, "':\n", i );
-        }
-
-        bhvm_hf3_s* ha = &vm_ha->h;
-        bhvm_hf3_s* hg = &vm_hg->h;
-
-        ASSERT( ha->v_size == hg->v_size );
-
-        for( sz_t i = 0; i < ha->v_size; i++ )
-        {
-            f3_t v0 = ha->v_data[ i ];
-
-            // set variation
-            ha->v_data[ i ] = v0 + o->epsilon;
-            bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_infer );
-            bhvm_hf3_vm_frame_s_output_get_all( vmf, out1 );
-            f3_t e1 = bhvm_hf3_adl_s_f3_sub_sqr( tgt, out1 );
-
-            f3_t d1 = e1 - e0;
-
-            f3_t max_e = f3_max( f3_abs( e0 ), f3_abs( e1 ) );
-            f3_t significance = f3_abs( d1 ) * ( ( max_e > 0 ) ? 1.0 / max_e : 0 );
-
-            f3_t g0 = hg->v_data[ i ];
-            f3_t g1 = d1 / o->epsilon;
-
-            f3_t g_dev = f3_abs( g1 - g0 );
-            f3_t g_max = f3_max( f3_abs( g1 ), f3_abs( g0 ) );
-            f3_t inv_g_max = ( g_max > 0 ) ? 1.0 / g_max : 0;
-            g_dev *= inv_g_max;
-
-            bl_t counted = ( significance >= min_significance );
-
-            if( counted )
-            {
-                g_dev_sum += g_dev;
-                g_dev_wgt += 1;
-            }
-
-            // reset variation
-            ha->v_data[ i ] = v0;
-
-            if( o->verbosity >= 5 )
-            {
-                sz_t n = 14;
-                if( i == 0 )
-                {
-                    bcore_sink_a_push_fa( o->log, "  " );
-                    bcore_sink_a_push_fa( o->log, "|#pn {index}", n );
-                    bcore_sink_a_push_fa( o->log, "|#pn { v0}", n );
-                    bcore_sink_a_push_fa( o->log, "|#pn { e1}", n );
-                    bcore_sink_a_push_fa( o->log, "|#pn { d1}", n );
-                    bcore_sink_a_push_fa( o->log, "|#pn { g0}", n );
-                    bcore_sink_a_push_fa( o->log, "|#pn { g1}", n );
-                    bcore_sink_a_push_fa( o->log, "|#pn { g_dev}", n );
-                    bcore_sink_a_push_fa( o->log, "|#pn {significance}", n );
-                    bcore_sink_a_push_fa( o->log, "\n" );
-                }
-                bcore_sink_a_push_fa( o->log, "  " );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<sz_t>}", n, i );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, v0 );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, e1 );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, d1 );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, g0 );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, g1 );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, g_dev );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<f3_t>}", n, significance );
-                bcore_sink_a_push_fa( o->log, "|#pn {#<sc_t>}", n, counted ? "" : "(not counted)" );
-                bcore_sink_a_push_fa( o->log, "\n" );
-            }
-        }
-    }
-
-    f3_t g_dev = ( g_dev_wgt > 0 ) ? ( g_dev_sum / g_dev_wgt ) : 0;
-    bl_t success = ( g_dev <= o->max_dev );
-    if( !success || o->verbosity >= 2 ) bcore_sink_a_push_fa( o->log, "Gradient deviation: #<f3_t>.\n", g_dev );
-
-    BLM_RETURNV( s2_t, success ? 0 : 1 );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-s2_t bhcl_eval_e2e_s_run( const bhcl_eval_e2e_s* o )
-{
-    BLM_INIT();
-
-    if( o->name.size > 0 && o->verbosity >= 2 )
-    {
-        bcore_sink_a_push_fa( o->log, "#<sc_t>:\n", o->name.sc );
-    }
-
-    bcore_source* source = NULL;
-    if( !o->src ) ERR_fa( "Source missing." );
-    switch( *(aware_t*)o->src )
-    {
-        case TYPEOF_bcore_file_path_s:
-        {
-            source = BLM_A_PUSH( bcore_file_open_source_path( ( const bcore_file_path_s* )o->src ) );
-        }
-        break;
-
-        case TYPEOF_st_s:
-        {
-            source = BLM_A_PUSH( bcore_source_string_s_create_from_string( ( const st_s* )o->src ) );
-        }
-        break;
-
-        default:
-        {
-            ERR_fa( "Invalid source type '#<sc_t>'.", ifnameof( *(aware_t*)o->src ) );
-        }
-        break;
-    }
-
-    f3_t time_parse_sem = 0;
-    f3_t time_build_net = 0;
-
-    /// semantic cell
-    bhcl_sem_cell_s* sem_frame = BLM_A_PUSH( sem_cell_s_create_frame() );
-    bhcl_sem_cell_s_parse_signature( sem_frame, BLM_A_PUSH( bcore_source_string_s_create_from_string( &o->sig ) ) );
-    bcore_source_point_s_set( &sem_frame->source_point, source );
-    CPU_TIME_OF( bhcl_sem_cell_s_parse_body( sem_frame, source ), time_parse_sem );
-
-    /// network cell
-    bhcl_net_cell_s* net_frame = BLM_CREATE( bhcl_net_cell_s );
-    CPU_TIME_OF( bhcl_net_cell_s_from_sem_cell( net_frame, sem_frame, bhcl_eval_e2e_s_input_op_create, ( vd_t )o, o->verbosity > 5 ? o->log : NULL ), time_build_net );
-
-    if( o->log && o->verbosity >= 3 )
-    {
-        bcore_sink_a_push_fa( o->log, "Network Cell:\n" );
-        bcore_sink_a_push_fa( o->log, "  Entry channels . #<sz_t>\n", net_frame->encs.size );
-        bcore_sink_a_push_fa( o->log, "  Body size ...... #<sz_t>\n", net_frame->body.size );
-        bcore_sink_a_push_fa( o->log, "  Exit channels .. #<sz_t>\n", net_frame->excs.size );
-
-        if( o->verbosity >= 2 && net_frame->body.size < 1000 )
-        {
-            bcore_sink_a_push_fa( o->log, "Network Graph Structure:\n" );
-            bhcl_net_cell_s_graph_to_sink( net_frame, o->log );
-        }
-    }
-
-    /// test copying of net_cell
-    {
-        bhcl_net_cell_s* cloned_cell = BLM_A_PUSH( bhcl_net_cell_s_clone( net_frame ) );
-        ASSERT( bhcl_net_cell_s_is_consistent( cloned_cell ) );
-    }
-
-    f3_t time_vm_build_infer   = 0;
-    f3_t time_vm_build_bp_grad = 0;
-    f3_t time_vm_run_setup     = 0;
-    f3_t time_vm_run_infer     = 0;
-
-    bhvm_hf3_vm_frame_s* vm_frame = BLM_CREATE( bhvm_hf3_vm_frame_s );
-
-    CPU_TIME_OF( cell_s_vm_build_infer(   net_frame, vm_frame ), time_vm_build_infer );
-    CPU_TIME_OF( cell_s_vm_build_bp_grad( net_frame, vm_frame ), time_vm_build_bp_grad );
-
-    bhcl_net_cell_s_vm_build_zero_adaptive_grad( net_frame, vm_frame );
-    bhcl_vm_build_setup(  vm_frame, 1234 );
-    bhcl_vm_build_shelve( vm_frame );
-
-    bhcl_net_cell_s_vm_set_input(  net_frame, vm_frame );
-    bhcl_net_cell_s_vm_set_output( net_frame, vm_frame );
-    bhvm_hf3_vm_frame_s_pull_names( vm_frame );
-
-    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_setup ), time_vm_run_setup );
-
-    if( o->in ) bhvm_hf3_vm_frame_s_input_set_all( vm_frame, o->in );
-    bhvm_hf3_vm_frame_s_check_integrity( vm_frame );
-
-    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_infer ), time_vm_run_infer );
-
-    for( sz_t i = 1; i < o->infer_cycles; i++ )
-    {
-        bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_infer );
-    }
-
-    bhvm_hf3_vm_frame_s_check_integrity( vm_frame );
-
-    bl_t success = true;
-
-    if( o->verbosity >= 5 )
-    {
-        bcore_sink_a_push_fa( o->log, "Timing (ms):\n" );
-        bcore_sink_a_push_fa( o->log, "  Parsing ................ #<f3_t>\n", 1000 * time_parse_sem );
-        bcore_sink_a_push_fa( o->log, "  Building network ....... #<f3_t>\n", 1000 * time_build_net );
-        bcore_sink_a_push_fa( o->log, "  VM: Building 'infer' ... #<f3_t>\n", 1000 * time_vm_build_infer );
-        bcore_sink_a_push_fa( o->log, "  VM: Building 'bp_grad' . #<f3_t>\n", 1000 * time_vm_build_bp_grad );
-        bcore_sink_a_push_fa( o->log, "  VM: Running  'setup' ... #<f3_t>\n", 1000 * time_vm_run_setup );
-        bcore_sink_a_push_fa( o->log, "  VM: Running  'infer' ... #<f3_t>\n", 1000 * time_vm_run_infer );
-        if( o->infer_cycles > 1 )
-        {
-            bcore_sink_a_push_fa( o->log, "  VM: Infer-cycles ....... #<sz_t>\n", o->infer_cycles );
-        }
-
-        bcore_sink_a_push_fa( o->log, "VM library:\n" );
-
-        BFOR_EACH( i, &vm_frame->library )
-        {
-            const bhvm_hf3_vm_proc_s* proc = vm_frame->library.data[ i ];
-            sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vm_frame, proc->name );
-            bcore_sink_a_push_fa( o->log, "  #p20.{#<sc_t> } #<sz_t>\n", name, proc->size );
-        }
-
-        if( o->verbosity >= 10 )
-        {
-            BFOR_EACH( i, &vm_frame->library )
-            {
-                const bhvm_hf3_vm_proc_s* proc = vm_frame->library.data[ i ];
-                bhvm_hf3_vm_frame_s_proc_to_sink( vm_frame, proc->name, o->log );
-            }
-        }
-    }
-
-    for( sz_t i = 0; i < net_frame->excs.size; i++ )
-    {
-        tp_t name = net_frame->excs.data[ i ]->name;
-        bhvm_hf3_s* h_vm = &bhvm_hf3_vm_frame_s_output_get_holor( vm_frame, i )->h;
-        if( o->out && i < o->out->size )
-        {
-            bhvm_hf3_s* h_out = o->out->data[ i ];
-
-            if( !bhvm_hf3_s_shape_equal( h_vm, h_out ) )
-            {
-                bcore_sink_a_push_fa( o->log, "Output '#<sc_t>': Shape mismatch.\n", bhcl_ifnameof( name ) );
-                bcore_sink_a_push_fa( o->log, "Returned: ");
-                bhvm_hf3_s_brief_to_sink( h_vm, o->log );
-                bcore_sink_a_push_fa( o->log, "\n");
-                bcore_sink_a_push_fa( o->log, "Expected: ");
-                bhvm_hf3_s_brief_to_sink( h_out, o->log );
-                bcore_sink_a_push_fa( o->log, "\n");
-                success = false;
-            }
-            else
-            {
-                f3_t dev = bhvm_hf3_s_fdev_equ( h_vm, h_out );
-                if( dev > o->max_dev )
-                {
-                    bcore_sink_a_push_fa( o->log, "Output '#<sc_t>':\n", bhcl_ifnameof( name ) );
-                    bhvm_hf3_s_to_sink_nl( h_vm, o->log );
-                    bcore_sink_a_push_fa( o->log, "Deviation: #<f3_t>.\n", dev );
-                    success = false;
-                }
-            }
-        }
-        else
-        {
-            if( o->log && o->verbosity >= 2 )
-            {
-                bcore_sink_a_push_fa( o->log, "Output '#<sc_t>':\n", bhcl_ifnameof( name ) );
-                bhvm_hf3_s_to_sink_nl( h_vm, o->log );
-            }
-        }
-    }
-
-    if( o->grad )
-    {
-        bhcl_eval_grad_s* grad = BLM_A_PUSH( bhcl_eval_grad_s_clone( o->grad ) );
-        if( !grad->in  ) grad->in = bcore_fork( o->in );
-        if( !grad->out ) grad->in = bcore_fork( o->out );
-        bhvm_hf3_vm_frame_s_attach( &grad->vmf, bcore_fork( vm_frame ) );
-        bcore_sink_a_attach( &grad->log, bcore_fork( o->log ) );
-        grad->verbosity = 0;
-        bhcl_eval_grad_s_run( grad ); // run quietly
-        grad->verbosity = o->verbosity;
-        s2_t grad_result = bhcl_eval_grad_s_run( grad ); // second run to test reentrance
-        if( grad_result > 0 ) success = false;
-    }
-
-    if( o->verbosity >= 1 )
-    {
-        if( o->name.size > 0 ) bcore_sink_a_push_fa( o->log, "#p20 {#<sc_t>} : ", o->name.sc );
-        bcore_sink_a_push_fa( o->log, success ? "OK" : "FAIL" );
-        bcore_sink_a_push_fa( o->log, "\n" );
-    }
-
-    BLM_RETURNV( s2_t, success ? 0 : 1 );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-s2_t bhcl_eval_set_s_run( const bhcl_eval_set_s* o )
-{
-    BLM_INIT();
-
-    if( o->set_name.size > 0 && o->verbosity > 0 )
-    {
-        bcore_sink_a_push_fa( o->log, "#<sc_t>:\n", o->set_name.sc );
-    }
-    s2_t ret_val = 0;
-    for( sz_t i = 0; i < o->arr.size; i++ )
-    {
-        bhcl_eval* eval = o->arr.data[ i ];
-        if( !eval ) continue;
-        if( eval->_ == TYPEOF_bhcl_eval_e2e_s )
-        {
-            bhcl_eval_e2e_s* e2e = bhcl_eval_e2e_s_clone( ( bhcl_eval_e2e_s* )eval );
-            if( e2e->sig.size == 0 ) st_s_copy( &e2e->sig, &o->sig );
-            if( !e2e->in  ) e2e->in  = bcore_fork( o->in  );
-            if( !e2e->out ) e2e->out = bcore_fork( o->out );
-            if( o->verbosity >= 0 ) e2e->verbosity = o->verbosity;
-            if( o->max_dev   >= 0 ) e2e->max_dev   = o->max_dev;
-
-            bcore_sink_a_attach( &e2e->log, bcore_fork( o->log ) );
-
-            s2_t err_val = bhcl_eval_e2e_s_run( e2e );
-            ret_val = s2_max( err_val, ret_val );
-
-            bhcl_eval_e2e_s_discard( e2e );
-        }
-        else if( eval->_ == TYPEOF_bhcl_eval_set_s )
-        {
-            bhcl_eval_set_s* set = bhcl_eval_set_s_clone( ( bhcl_eval_set_s* )eval );
-            if( set->sig.size == 0 ) st_s_copy( &set->sig, &o->sig );
-            if( !set->in  ) set->in  = bcore_fork( o->in  );
-            if( !set->out ) set->out = bcore_fork( o->out );
-            if( o->verbosity >= 0 ) set->verbosity = o->verbosity;
-            if( o->max_dev   >= 0 ) set->max_dev   = o->max_dev;
-
-            bcore_sink_a_attach( &set->log, bcore_fork( o->log ) );
-
-            s2_t err_val = bhcl_eval_set_s_run( set );
-            ret_val = s2_max( err_val, ret_val );
-
-            bhcl_eval_set_s_discard( set );
-        }
-        else
-        {
-            ERR_fa( "Unsupported evaluation object '<#sc_t>'.", ifnameof( eval->_ ) );
-        }
-    }
-
-    BLM_RETURNV( s2_t, ret_val );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
+#endif // TYPEOF_haptive
 
 /**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bhcl_op* bhcl_test_input_op_create( vd_t arg, sz_t in_idx, tp_t in_name )
+vd_t haptive_graph_signal_handler( const bcore_signal_s* o )
 {
-    bhcl_op_ar0_input_s* input = bhcl_op_ar0_input_s_create();
-    input->h = bhvm_hf3_s_create();
-    bhvm_hf3_s_set_d_data_na( input->h, 1, 100 );
-    return ( bhcl_op* )input;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void bhcl_simple_eval( void )
-{
-    BLM_INIT();
-
-    bhcl_eval_e2e_s* e2e = BLM_CREATE( bhcl_eval_e2e_s );
-    st_s_copy_sc( &e2e->sig, "(y=>a)" );
-
-    e2e->src = bcore_file_path_s_create_sc( "models/bhcl_eval_01.hgp" );
-
-//    st_s_copy_sc( &e2e->src.name, "models/bhcl_eval_01.hgp" );
-
-    bhvm_hf3_s* h = bhvm_hf3_adl_s_push( ( e2e->in = bhvm_hf3_adl_s_create() ) );
-    bhvm_hf3_s_set_d_data_na( h, 1, 2 );
-    bhvm_hf3_s_set_v_data_na( h, 2, 1, 1 );
-    e2e->verbosity = 1;
-    e2e->max_dev   = 1E-8;
-
-    bhcl_eval_e2e_s_run( e2e );
-
-    bcore_txt_ml_a_to_stdout( e2e );
-
-    BLM_DOWN();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void bhcl_adaptive_test( void )
-{
-    BLM_INIT();
-    bhcl_vm_builder_s* builder = BLM_CREATE( bhcl_vm_builder_s );
-    builder->in_size  = 2;
-    builder->out_size = 3;
-    builder->src = bcore_file_path_s_create_sc( "models/bhcl_vm_mlp.hgp" );
-
-    badapt_adaptive* adaptive = BLM_A_PUSH( bhcl_vm_builder_s_build( builder ) );
-
-    bmath_vf3_s* v1 = BLM_CREATE( bmath_vf3_s );
-    bmath_vf3_s* v2 = BLM_CREATE( bmath_vf3_s );
-    bmath_vf3_s_set_size( v1, badapt_adaptive_a_get_in_size(  adaptive ) );
-    bmath_vf3_s_set_size( v2, badapt_adaptive_a_get_out_size( adaptive ) );
-
-    bmath_vf3_s_fill( v1, 1 );
-    bmath_vf3_s_fill( v2, 0 );
-
-    badapt_adaptive_a_minfer( adaptive, v1, v2 );
-
-    bmath_vf3_s_to_stdout( v1 );
-    bmath_vf3_s_to_stdout( v2 );
-
-    BLM_DOWN();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-#endif // TYPEOF_bhcl
-
-/**********************************************************************************************************************/
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-vd_t bhcl_signal_handler( const bcore_signal_s* o )
-{
-    switch( bcore_signal_s_handle_type( o, typeof( "bhcl" ) ) )
+    switch( bcore_signal_s_handle_type( o, typeof( "haptive_graph" ) ) )
     {
         case TYPEOF_init1:
         {
@@ -3379,8 +2885,8 @@ vd_t bhcl_signal_handler( const bcore_signal_s* o )
 
         case TYPEOF_down1:
         {
-#ifdef TYPEOF_bhcl
-            bhcl_context_down();
+#ifdef TYPEOF_haptive
+            haptive_context_down();
 #endif // TYPEOF_bhcl
         }
         break;
@@ -3392,7 +2898,7 @@ vd_t bhcl_signal_handler( const bcore_signal_s* o )
 
         case TYPEOF_plant:
         {
-            bcore_plant_compile( "badapt_dev_planted", __FILE__ );
+            bcore_plant_compile( "haptive_planted", __FILE__ );
         }
         break;
 
