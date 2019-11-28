@@ -15,8 +15,7 @@
 
 /**********************************************************************************************************************/
 
-/** Description
-
+/** Evaluation Framework for haptive-graph
 */
 
 /**********************************************************************************************************************/
@@ -49,8 +48,8 @@ stamp :grad = aware :
     bhvm_hf3_adl_s      -> in;  // input
     bhvm_hf3_adl_s      -> out; // target output
 
-    s2_t verbosity  = 1;           // verbosity;
-    f3_t max_dev    = 1E-4;        // if grad deviation exceeds this value an error is generated
+    s2_t verbosity  = 1;    // verbosity;
+    f3_t max_dev    = 1E-4; // if grad deviation exceeds this value an error is generated
     hidden aware bcore_sink -> log;
     func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
     func : : run;

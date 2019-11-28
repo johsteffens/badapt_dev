@@ -1842,7 +1842,7 @@ static void net_node_s_vm_build_infer( haptive_net_node_s* o, bhvm_hf3_vm_frame_
         bhvm_hf3_vm_op* vm_op = haptive_op_a_create_vm_op_ap_init_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
         if( vm_op )
         {
-            bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_ap_init, vm_op );
+            bhvm_hf3_vm_frame_s_mcode_op_push_d( vm_frame, TYPEOF_mcode_name_ap_init, vm_op );
         }
 
         vm_op = haptive_op_a_create_vm_op_ap_set_idx( o->op, vm_frame, arr_sig->sc, arr_index );
@@ -1854,14 +1854,14 @@ static void net_node_s_vm_build_infer( haptive_net_node_s* o, bhvm_hf3_vm_frame_
             {
                 case TYPEOF_op_class_regular:
                 {
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_infer, vm_op );
+                    bhvm_hf3_vm_frame_s_mcode_op_push_d( vm_frame, TYPEOF_mcode_name_infer, vm_op );
                 }
                 break;
 
                 case TYPEOF_op_class_cast:
                 {
                     vm_holor->type = TYPEOF_holor_type_cast;
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_cast, vm_op );
+                    bhvm_hf3_vm_frame_s_mcode_op_push_d( vm_frame, TYPEOF_mcode_name_cast, vm_op );
                 }
                 break;
 
@@ -1917,7 +1917,7 @@ static void node_s_vm_build_bp_grad( haptive_net_node_s* o, sz_t up_index, bhvm_
             /// zero gradient for non-casts
             if( o->dnls.size > 0 && ( haptive_op_a_get_class( o->op ) != TYPEOF_op_class_cast ) )
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_bp_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, o->gid ) );
+                bhvm_hf3_vm_frame_s_mcode_op_push_d( vm_frame, TYPEOF_mcode_name_bp_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, o->gid ) );
             }
         }
 
@@ -1982,7 +1982,7 @@ static void node_s_vm_build_bp_grad( haptive_net_node_s* o, sz_t up_index, bhvm_
             {
                 case TYPEOF_op_class_regular:
                 {
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_bp_grad, vm_op );
+                    bhvm_hf3_vm_frame_s_mcode_op_push_d( vm_frame, TYPEOF_mcode_name_bp_grad, vm_op );
                 }
                 break;
 
@@ -1994,7 +1994,7 @@ static void node_s_vm_build_bp_grad( haptive_net_node_s* o, sz_t up_index, bhvm_
                     /** Note: dendrite pass casts must be added in reverse order.
                      *  This ensures that subsequent casts all refer to the correct target.
                      */
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( vm_frame, TYPEOF_proc_name_cast_reverse, vm_op );
+                    bhvm_hf3_vm_frame_s_mcode_op_push_d( vm_frame, TYPEOF_mcode_name_cast_reverse, vm_op );
                 }
                 break;
 
@@ -2469,8 +2469,8 @@ void haptive_net_cell_s_graph_to_sink( haptive_net_cell_s* o, bcore_sink* sink )
 // builds main vm procedure
 void haptive_cell_s_vm_build_infer( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
-    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_infer );
-    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_setup );
+    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_infer );
+    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_setup );
     ASSERT( haptive_net_cell_s_is_consistent( o ) );
 
     bhvm_hf3_vm_arr_holor_s_set_size( &vmf->arr_holor, o->body.size );
@@ -2490,12 +2490,12 @@ void haptive_cell_s_vm_build_infer( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* 
 // builds bp_grad vm procedure
 void haptive_cell_s_vm_build_bp_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
-    if( !bhvm_hf3_vm_frame_s_proc_exists( vmf, TYPEOF_proc_name_infer ) )
+    if( !bhvm_hf3_vm_frame_s_mcode_exists( vmf, TYPEOF_mcode_name_infer ) )
     {
         ERR_fa( "Procedure 'infer' missing. Call 'build_infer' first." );
     }
 
-    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_bp_grad );
+    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_bp_grad );
     for( sz_t i = 0; i < o->body.size; i++ )
     {
         haptive_net_node_s* node = o->body.data[ i ];
@@ -2519,7 +2519,7 @@ void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
             case TYPEOF_holor_type_depletable:
             case TYPEOF_holor_type_adaptive_grad:
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
             }
             break;
 
@@ -2527,8 +2527,8 @@ void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
             {
                 if( holor->h.v_size == 0 )
                 {
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
-                    bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_setup, bhvm_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, rseed, 1.0, -0.5, 0.5 ) );
+                    bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+                    bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, rseed, 1.0, -0.5, 0.5 ) );
                 }
             }
             break;
@@ -2539,25 +2539,25 @@ void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
 
     // moving init subroutines to setup ...
 
-    if( bhvm_hf3_vm_frame_s_proc_exists( o, TYPEOF_proc_name_cast ) )
+    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_cast ) )
     {
-        bhvm_hf3_vm_frame_s_proc_append_proc( o, TYPEOF_proc_name_setup, TYPEOF_proc_name_cast );
-        bhvm_hf3_vm_frame_s_proc_remove( o, TYPEOF_proc_name_cast );
+        bhvm_hf3_vm_frame_s_mcode_push( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_cast );
+        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_cast );
     }
 
-    if( bhvm_hf3_vm_frame_s_proc_exists( o, TYPEOF_proc_name_cast_reverse ) )
+    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_cast_reverse ) )
     {
-        bhvm_hf3_vm_frame_s_proc_append_proc_reverse( o, TYPEOF_proc_name_setup, TYPEOF_proc_name_cast_reverse );
-        bhvm_hf3_vm_frame_s_proc_remove( o, TYPEOF_proc_name_cast_reverse );
+        bhvm_hf3_vm_frame_s_mcode_push_reverse( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_cast_reverse );
+        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_cast_reverse );
     }
 
-    if( bhvm_hf3_vm_frame_s_proc_exists( o, TYPEOF_proc_name_ap_init ) )
+    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_ap_init ) )
     {
-        bhvm_hf3_vm_frame_s_proc_append_proc( o, TYPEOF_proc_name_setup, TYPEOF_proc_name_ap_init );
-        bhvm_hf3_vm_frame_s_proc_remove( o, TYPEOF_proc_name_ap_init );
+        bhvm_hf3_vm_frame_s_mcode_push( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_ap_init );
+        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_ap_init );
     }
 
-    o->proc_setup = TYPEOF_proc_name_setup;
+    o->proc_setup = TYPEOF_mcode_name_setup;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2565,7 +2565,7 @@ void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
 // builds vm procedure shelve for all holors
 void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
 {
-    bhvm_hf3_vm_frame_s_proc_reset( o, TYPEOF_proc_name_shelve );
+    bhvm_hf3_vm_frame_s_mcode_reset( o, TYPEOF_mcode_name_shelve );
 
     const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
@@ -2575,20 +2575,20 @@ void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
         {
             case TYPEOF_holor_type_depletable:
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_shelve, bhvm_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
+                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_shelve, bhvm_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
             }
             break;
 
             case TYPEOF_holor_type_cast:
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( o, TYPEOF_proc_name_shelve, bhvm_hf3_vm_op_ar0_clear_s_csetup( NULL, i ) );
+                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_shelve, bhvm_hf3_vm_op_ar0_clear_s_csetup( NULL, i ) );
             }
             break;
 
             default: break;
         }
     }
-    o->proc_shelve = TYPEOF_proc_name_shelve;
+    o->proc_shelve = TYPEOF_mcode_name_shelve;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2596,7 +2596,7 @@ void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
 // sets adaptive gradients to zero
 void haptive_net_cell_s_vm_build_zero_adaptive_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
 {
-    bhvm_hf3_vm_frame_s_proc_reset( vmf, TYPEOF_proc_name_zero_adaptive_grad );
+    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_zero_adaptive_grad );
 
     const bhvm_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
     for( sz_t i = 0; i < arr_holor->size; i++ )
@@ -2606,7 +2606,7 @@ void haptive_net_cell_s_vm_build_zero_adaptive_grad( haptive_net_cell_s* o, bhvm
         {
             case TYPEOF_holor_type_adaptive_grad:
             {
-                bhvm_hf3_vm_frame_s_proc_push_op_d( vmf, TYPEOF_proc_name_zero_adaptive_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, i ) );
+                bhvm_hf3_vm_frame_s_mcode_op_push_d( vmf, TYPEOF_mcode_name_zero_adaptive_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, i ) );
             }
             break;
 
@@ -2665,7 +2665,7 @@ void haptive_vm_adaptive_s_minfer( haptive_vm_adaptive_s* o, const bmath_vf3_s* 
     ASSERT( v_out->size == h_out->v_size );
 
     bhvm_hf3_s_copy_v_data_from_vf3( h_in, v_in );
-    bhvm_hf3_vm_frame_s_proc_run( &o->vm, TYPEOF_proc_name_infer );
+    bhvm_hf3_vm_frame_s_mcode_run( &o->vm, TYPEOF_mcode_name_infer );
     bhvm_hf3_s_copy_v_data_to_vf3( h_out, v_out );
 }
 
@@ -2679,7 +2679,7 @@ void haptive_vm_adaptive_s_bgrad_adapt( haptive_vm_adaptive_s* o, bmath_vf3_s* v
 
     ASSERT( v_grad_out->size == h_grad_out->v_size );
     bhvm_hf3_s_copy_v_data_from_vf3( h_grad_out, v_grad_out );
-    bhvm_hf3_vm_frame_s_proc_run( &o->vm, TYPEOF_proc_name_bp_grad );
+    bhvm_hf3_vm_frame_s_mcode_run( &o->vm, TYPEOF_mcode_name_bp_grad );
 
     f3_t l2_reg_factor = ( 1.0 - o->dynamics.lambda_l2  * o->dynamics.epsilon );
     f3_t l1_reg_offset = o->dynamics.lambda_l1 * o->dynamics.epsilon;
@@ -2739,13 +2739,13 @@ haptive_op* haptive_vm_builder_s_build_input_op_create( vd_t vd_o, sz_t in_idx, 
 // Pulls all relevant names into frame's name map
 void haptive_bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o )
 {
-    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_infer ) );
-    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_bp_grad ) );
-    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_setup ) );
-    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_shelve ) );
-    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_cast ) );
-    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_cast_reverse ) );
-    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_proc_name_zero_adaptive_grad ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_infer ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_bp_grad ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_setup ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_shelve ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_cast ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_cast_reverse ) );
+    bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_zero_adaptive_grad ) );
     BFOR_EACH( i, &o->arr_holor )
     {
         tp_t tp_name = o->arr_holor.data[ i ].name;
@@ -2859,7 +2859,7 @@ badapt_adaptive* haptive_vm_builder_s_build( const haptive_vm_builder_s* o )
     bhvm_hf3_vm_frame_s_check_integrity( vmf );
 
     /// run setup
-    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_setup );
+    bhvm_hf3_vm_frame_s_mcode_run( vmf, TYPEOF_mcode_name_setup );
 
     bhvm_hf3_vm_frame_s_check_integrity( vmf );
 

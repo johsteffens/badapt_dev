@@ -47,7 +47,7 @@ s2_t haptive_eval_grad_s_run( const haptive_eval_grad_s* o )
 
     // compute out0, e0
     bhvm_hf3_vm_frame_s_input_set_all( vmf, o->in );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_infer );
+    bhvm_hf3_vm_frame_s_mcode_run( vmf, TYPEOF_mcode_name_infer );
     bhvm_hf3_vm_frame_s_output_get_all( vmf, out0 );
 
     ASSERT( tgt->size == out0->size );
@@ -79,9 +79,9 @@ s2_t haptive_eval_grad_s_run( const haptive_eval_grad_s* o )
     bhvm_hf3_adl_s_copy( grad, out0 );
     bhvm_hf3_adl_s_sub(  grad, tgt, grad );
     bhvm_hf3_adl_s_mul_scl_f3(  grad, 2.0, grad );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_zero_adaptive_grad );
+    bhvm_hf3_vm_frame_s_mcode_run( vmf, TYPEOF_mcode_name_zero_adaptive_grad );
     bhvm_hf3_vm_frame_s_output_set_paired_all( vmf, grad );
-    bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_bp_grad );
+    bhvm_hf3_vm_frame_s_mcode_run( vmf, TYPEOF_mcode_name_bp_grad );
     bhvm_hf3_vm_frame_s_check_integrity( vmf );
 
     f3_t g_dev_sum = 0;
@@ -124,7 +124,7 @@ s2_t haptive_eval_grad_s_run( const haptive_eval_grad_s* o )
 
             // set variation
             ha->v_data[ i ] = v0 + o->epsilon;
-            bhvm_hf3_vm_frame_s_proc_run( vmf, TYPEOF_proc_name_infer );
+            bhvm_hf3_vm_frame_s_mcode_run( vmf, TYPEOF_mcode_name_infer );
             bhvm_hf3_vm_frame_s_output_get_all( vmf, out1 );
             f3_t e1 = bhvm_hf3_adl_s_f3_sub_sqr( tgt, out1 );
 
@@ -275,16 +275,16 @@ s2_t haptive_eval_e2e_s_run( const haptive_eval_e2e_s* o )
     haptive_net_cell_s_vm_set_output( net_frame, vm_frame );
     haptive_bhvm_hf3_vm_frame_s_pull_names( vm_frame );
 
-    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_setup ), time_vm_run_setup );
+    CPU_TIME_OF( bhvm_hf3_vm_frame_s_mcode_run( vm_frame, TYPEOF_mcode_name_setup ), time_vm_run_setup );
 
     if( o->in ) bhvm_hf3_vm_frame_s_input_set_all( vm_frame, o->in );
     bhvm_hf3_vm_frame_s_check_integrity( vm_frame );
 
-    CPU_TIME_OF( bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_infer ), time_vm_run_infer );
+    CPU_TIME_OF( bhvm_hf3_vm_frame_s_mcode_run( vm_frame, TYPEOF_mcode_name_infer ), time_vm_run_infer );
 
     for( sz_t i = 1; i < o->infer_cycles; i++ )
     {
-        bhvm_hf3_vm_frame_s_proc_run( vm_frame, TYPEOF_proc_name_infer );
+        bhvm_hf3_vm_frame_s_mcode_run( vm_frame, TYPEOF_mcode_name_infer );
     }
 
     bhvm_hf3_vm_frame_s_check_integrity( vm_frame );
@@ -305,21 +305,21 @@ s2_t haptive_eval_e2e_s_run( const haptive_eval_e2e_s* o )
             bcore_sink_a_push_fa( o->log, "  VM: Infer-cycles ....... #<sz_t>\n", o->infer_cycles );
         }
 
-        bcore_sink_a_push_fa( o->log, "VM library:\n" );
+        bcore_sink_a_push_fa( o->log, "VM Microcode:\n" );
 
-        BFOR_EACH( i, &vm_frame->library )
+        BFOR_EACH( i, &vm_frame->lib_mcode.arr )
         {
-            const bhvm_hf3_vm_proc_s* proc = vm_frame->library.data[ i ];
-            sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vm_frame, proc->name );
-            bcore_sink_a_push_fa( o->log, "  #p20.{#<sc_t> } #<sz_t>\n", name, proc->size );
+            const bhvm_hf3_vm_mcode_s* mcode = vm_frame->lib_mcode.arr.data[ i ];
+            sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vm_frame, mcode->name );
+            bcore_sink_a_push_fa( o->log, "  #p20.{#<sc_t> } #<sz_t>\n", name, mcode->size );
         }
 
         if( o->verbosity >= 10 )
         {
-            BFOR_EACH( i, &vm_frame->library )
+            BFOR_EACH( i, &vm_frame->lib_mcode.arr )
             {
-                const bhvm_hf3_vm_proc_s* proc = vm_frame->library.data[ i ];
-                bhvm_hf3_vm_frame_s_proc_to_sink( vm_frame, proc->name, o->log );
+                const bhvm_hf3_vm_mcode_s* mcode = vm_frame->lib_mcode.arr.data[ i ];
+                bhvm_hf3_vm_frame_s_mcode_to_sink( vm_frame, mcode->name, o->log );
             }
         }
     }

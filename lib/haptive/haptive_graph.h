@@ -89,7 +89,10 @@
     - once a cell is complete, data types can be finalized
 
 TODO:
-   - allow explicit output channel selection only on cells with no free input channels
+   - (done) allow explicit output channel selection only on cells with no free input channels
+   - virtual machine: overhaul differentiating between micro- and macrocode
+   -                  add macro operations operating on the frame
+   -                  add macro operations controlling program flow
    - recurrent: implement unrolled inference and bp_grad
    - allow elementwise operators mix with scalars (like mul)
    - look for generally accepted offline problems for neural networks
@@ -168,6 +171,9 @@ TODO:
 
 #include "haptive_planted.h"
 
+/// In case unstable behavior is observed, try debugging by reducing optimization level.
+#define HAPTIVE_GRAPH_OPTIMIZATION_LEVEL 1
+
 /**********************************************************************************************************************/
 /// prototypes
 
@@ -198,17 +204,17 @@ name op_class_regular;
 // Its dendrite pass operators are also cast operators. These modify the axon gradient.
 name op_class_cast;
 
-// procedure names
-name proc_name_infer;
-name proc_name_bp_grad;
-name proc_name_setup;
-name proc_name_shelve;
-name proc_name_zero_adaptive_grad;
+// microcode names
+name mcode_name_infer;
+name mcode_name_bp_grad;
+name mcode_name_setup;
+name mcode_name_shelve;
+name mcode_name_zero_adaptive_grad;
 
 // subroutines copied to setup
-name proc_name_cast;          // contains cast operations to be copied to setup
-name proc_name_cast_reverse;  // contains cast operations to be copied to setup in reverse order
-name proc_name_ap_init;       // contains ap_init operations
+name mcode_name_cast;          // contains cast operations to be copied to setup
+name mcode_name_cast_reverse;  // contains cast operations to be copied to setup in reverse order
+name mcode_name_ap_init;       // contains ap_init operations
 
 // holor types
 name holor_type_data;          // any type of data holder
@@ -505,7 +511,7 @@ group :op =
             {
                 if( a[0] )
                 {
-                    #if ( BHCL_OPTIMIZATION_LEVEL >= 1 )
+                    #if ( HAPTIVE_GRAPH_OPTIMIZATION_LEVEL >= 1 )
                         // TODO: Watch this solution's stability.
                         bhvm_hf3_s_attach( r, bhvm_hf3_s_create() );
                         **r = bhvm_hf3_init_fork( a[0]->d_data, a[0]->d_size, a[0]->d_space, a[0]->v_data, a[0]->v_size, a[0]->v_space, !a[0]->htp );
