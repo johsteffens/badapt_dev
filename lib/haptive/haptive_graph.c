@@ -2557,7 +2557,7 @@ void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
         bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_ap_init );
     }
 
-    o->proc_setup = TYPEOF_mcode_name_setup;
+    o->mcode_setup = TYPEOF_mcode_name_setup;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2588,7 +2588,7 @@ void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
             default: break;
         }
     }
-    o->proc_shelve = TYPEOF_mcode_name_shelve;
+    o->mcode_shelve = TYPEOF_mcode_name_shelve;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
