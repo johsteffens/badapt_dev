@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2019-11-28T17:18:23Z
+ *  Last File Update: 2019-12-12T12:53:52Z
  *
  *  Copyright and License of this File:
  *
@@ -115,39 +115,39 @@
   static inline bl_t haptive_op_a_defines_get_arity( const haptive_op* o ) { return true; } \
   static inline tp_t haptive_op_a_get_class( const haptive_op* o ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->get_class ); return p->get_class( o ); } \
   static inline bl_t haptive_op_a_defines_get_class( const haptive_op* o ) { return true; } \
-  static inline tp_t haptive_op_get_class__( const haptive_op* o ) { return TYPEOF_op_class_regular; } \
+  static inline tp_t haptive_op_get_class__( const haptive_op* o ){return TYPEOF_op_class_regular;} \
   static inline sz_t haptive_op_a_get_priority( const haptive_op* o ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->get_priority ); return p->get_priority( o ); } \
   static inline bl_t haptive_op_a_defines_get_priority( const haptive_op* o ) { return true; } \
-  static inline sz_t haptive_op_get_priority__( const haptive_op* o ) { return 10; } \
+  static inline sz_t haptive_op_get_priority__( const haptive_op* o ){return 10;} \
   static inline sc_t haptive_op_a_get_symbol( const haptive_op* o ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->get_symbol ); return p->get_symbol( o ); } \
   static inline bl_t haptive_op_a_defines_get_symbol( const haptive_op* o ) { return true; } \
-  static inline sc_t haptive_op_get_symbol__( const haptive_op* o ) { return NULL; } \
+  static inline sc_t haptive_op_get_symbol__( const haptive_op* o ){return NULL;} \
   static inline haptive_op* haptive_op_a_create_op_of_arn( const haptive_op* o, sz_t n ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_op_of_arn ); return p->create_op_of_arn( o, n ); } \
   static inline bl_t haptive_op_a_defines_create_op_of_arn( const haptive_op* o ) { return true; } \
-  static inline haptive_op* haptive_op_create_op_of_arn__( const haptive_op* o, sz_t n ) { return ( haptive_op_a_get_arity( o ) == n ) ? haptive_op_a_clone( o ) : NULL; } \
+  static inline haptive_op* haptive_op_create_op_of_arn__( const haptive_op* o, sz_t n ){return ( haptive_op_a_get_arity( o ) == n ) ? haptive_op_a_clone( o ) : NULL;} \
   static inline s2_t haptive_op_a_solve( const haptive_op* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->solve ); return p->solve( o, r, a, msg ); } \
   static inline bl_t haptive_op_a_defines_solve( const haptive_op* o ) { return haptive_op_s_get_aware( o )->solve != NULL; } \
   static inline bl_t haptive_op_a_solve_each_channel( const haptive_op* o ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->solve_each_channel ); return p->solve_each_channel( o ); } \
   static inline bl_t haptive_op_a_defines_solve_each_channel( const haptive_op* o ) { return true; } \
-  static inline bl_t haptive_op_solve_each_channel__( const haptive_op* o ) { return false; } \
+  static inline bl_t haptive_op_solve_each_channel__( const haptive_op* o ){return false;} \
   static inline haptive_op* haptive_op_a_create_final( const haptive_op* o, bhvm_hf3_s* h ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_final ); return p->create_final( o, h ); } \
   static inline bl_t haptive_op_a_defines_create_final( const haptive_op* o ) { return true; } \
   haptive_op* haptive_op_create_final__( const haptive_op* o, bhvm_hf3_s* h ); \
   static inline bhvm_hf3_vm_op* haptive_op_a_create_vm_op_ap_init( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_vm_op_ap_init ); return p->create_vm_op_ap_init( o, vmf, arr_sig, arr_idx ); } \
   static inline bl_t haptive_op_a_defines_create_vm_op_ap_init( const haptive_op* o ) { return true; } \
-  static inline bhvm_hf3_vm_op* haptive_op_create_vm_op_ap_init__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ) { return NULL; } \
+  static inline bhvm_hf3_vm_op* haptive_op_create_vm_op_ap_init__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return NULL;} \
   static inline bhvm_hf3_vm_op* haptive_op_a_create_vm_op_ap_init_set_idx( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_vm_op_ap_init_set_idx ); return p->create_vm_op_ap_init_set_idx( o, vmf, arr_sig, arr_idx ); } \
   static inline bl_t haptive_op_a_defines_create_vm_op_ap_init_set_idx( const haptive_op* o ) { return true; } \
   bhvm_hf3_vm_op* haptive_op_create_vm_op_ap_init_set_idx__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ); \
   static inline bhvm_hf3_vm_op* haptive_op_a_create_vm_op_ap( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_vm_op_ap ); return p->create_vm_op_ap( o, vmf, arr_sig, arr_idx ); } \
   static inline bl_t haptive_op_a_defines_create_vm_op_ap( const haptive_op* o ) { return true; } \
-  static inline bhvm_hf3_vm_op* haptive_op_create_vm_op_ap__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ) { return NULL; } \
+  static inline bhvm_hf3_vm_op* haptive_op_create_vm_op_ap__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return NULL;} \
   static inline bhvm_hf3_vm_op* haptive_op_a_create_vm_op_ap_set_idx( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_vm_op_ap_set_idx ); return p->create_vm_op_ap_set_idx( o, vmf, arr_sig, arr_idx ); } \
   static inline bl_t haptive_op_a_defines_create_vm_op_ap_set_idx( const haptive_op* o ) { return true; } \
   bhvm_hf3_vm_op* haptive_op_create_vm_op_ap_set_idx__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ); \
   static inline bhvm_hf3_vm_op* haptive_op_a_create_vm_op_dp( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_vm_op_dp ); return p->create_vm_op_dp( o, vmf, arr_sig, arr_idx, ch_id ); } \
   static inline bl_t haptive_op_a_defines_create_vm_op_dp( const haptive_op* o ) { return true; } \
-  static inline bhvm_hf3_vm_op* haptive_op_create_vm_op_dp__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ) { return NULL; } \
+  static inline bhvm_hf3_vm_op* haptive_op_create_vm_op_dp__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){return NULL;} \
   static inline bhvm_hf3_vm_op* haptive_op_a_create_vm_op_dp_set_idx( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ) { const haptive_op_s* p = haptive_op_s_get_aware( o ); assert( p->create_vm_op_dp_set_idx ); return p->create_vm_op_dp_set_idx( o, vmf, arr_sig, arr_idx, ch_id ); } \
   static inline bl_t haptive_op_a_defines_create_vm_op_dp_set_idx( const haptive_op* o ) { return true; } \
   bhvm_hf3_vm_op* haptive_op_create_vm_op_dp_set_idx__( const haptive_op* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ); \
@@ -166,19 +166,19 @@
   BCORE_DECLARE_OBJECT( haptive_op_ar0_literal_s ) \
     {aware_t _;bhvm_hf3_s* h;}; \
   s2_t haptive_op_ar0_literal_s_solve( const haptive_op_ar0_literal_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar0_literal_s_get_arity( const haptive_op_ar0_literal_s* o ){ return 0; }
+  static inline sz_t haptive_op_ar0_literal_s_get_arity( const haptive_op_ar0_literal_s* o ){return 0;}
 #define TYPEOF_haptive_op_ar0_input_s 1735675625
 #define BETH_EXPAND_ITEM_haptive_op_ar0_input_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar0_input_s ) \
     {aware_t _;bhvm_hf3_s* h;}; \
   s2_t haptive_op_ar0_input_s_solve( const haptive_op_ar0_input_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar0_input_s_get_arity( const haptive_op_ar0_input_s* o ){ return 0; }
+  static inline sz_t haptive_op_ar0_input_s_get_arity( const haptive_op_ar0_input_s* o ){return 0;}
 #define TYPEOF_haptive_op_ar0_adaptive_s 4110665497
 #define BETH_EXPAND_ITEM_haptive_op_ar0_adaptive_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar0_adaptive_s ) \
     {aware_t _;bhvm_hf3_s* h;tp_t name;}; \
   s2_t haptive_op_ar0_adaptive_s_solve( const haptive_op_ar0_adaptive_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar0_adaptive_s_get_arity( const haptive_op_ar0_adaptive_s* o ){ return 0; }
+  static inline sz_t haptive_op_ar0_adaptive_s_get_arity( const haptive_op_ar0_adaptive_s* o ){return 0;}
 #define BETH_EXPAND_GROUP_haptive_op_ar0 \
   BCORE_FORWARD_OBJECT( haptive_op_ar0 ); \
   BCORE_FORWARD_OBJECT( haptive_op_ar0_literal_s ); \
@@ -198,183 +198,183 @@
   BCORE_DECLARE_OBJECT( haptive_op_ar1_identity_s ) \
     {aware_t _;}; \
   s2_t haptive_op_ar1_identity_s_solve( const haptive_op_ar1_identity_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_identity_s_create_vm_op_ap( const haptive_op_ar1_identity_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_identity_s_create_vm_op_dp( const haptive_op_ar1_identity_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cpy_s_create(); } \
-  static inline sz_t haptive_op_ar1_identity_s_get_arity( const haptive_op_ar1_identity_s* o ){ return 1; }
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_identity_s_create_vm_op_ap( const haptive_op_ar1_identity_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_identity_s_create_vm_op_dp( const haptive_op_ar1_identity_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cpy_s_create();} \
+  static inline sz_t haptive_op_ar1_identity_s_get_arity( const haptive_op_ar1_identity_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_neg_s 1108668352
 #define BETH_EXPAND_ITEM_haptive_op_ar1_neg_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_neg_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_neg_s_get_symbol( const haptive_op_ar1_neg_s* o ){ return "neg"; } \
-  static inline sz_t haptive_op_ar1_neg_s_get_priority( const haptive_op_ar1_neg_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_neg_s_solve( const haptive_op_ar1_neg_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_neg_s_create_vm_op_ap( const haptive_op_ar1_neg_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_neg_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_neg_s_create_vm_op_dp( const haptive_op_ar1_neg_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_neg_s_create(); } \
+  static inline sc_t haptive_op_ar1_neg_s_get_symbol( const haptive_op_ar1_neg_s* o ){return "neg";} \
+  static inline sz_t haptive_op_ar1_neg_s_get_priority( const haptive_op_ar1_neg_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_neg_s_solve( const haptive_op_ar1_neg_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_neg_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_neg_s_create_vm_op_ap( const haptive_op_ar1_neg_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_neg_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_neg_s_create_vm_op_dp( const haptive_op_ar1_neg_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_neg_s_create();} \
   haptive_op* haptive_op_ar1_neg_s_create_op_of_arn( const haptive_op_ar1_neg_s* o, sz_t n ); \
-  static inline sz_t haptive_op_ar1_neg_s_get_arity( const haptive_op_ar1_neg_s* o ){ return 1; }
+  static inline sz_t haptive_op_ar1_neg_s_get_arity( const haptive_op_ar1_neg_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_floor_s 116536248
 #define BETH_EXPAND_ITEM_haptive_op_ar1_floor_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_floor_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_floor_s_get_symbol( const haptive_op_ar1_floor_s* o ){ return "floor"; } \
-  static inline sz_t haptive_op_ar1_floor_s_get_priority( const haptive_op_ar1_floor_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_floor_s_solve( const haptive_op_ar1_floor_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_floor_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_floor_s_create_vm_op_ap( const haptive_op_ar1_floor_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_floor_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_floor_s_create_vm_op_dp( const haptive_op_ar1_floor_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar0_dp_ca_floor_s_create(); } \
-  static inline sz_t haptive_op_ar1_floor_s_get_arity( const haptive_op_ar1_floor_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_floor_s_get_symbol( const haptive_op_ar1_floor_s* o ){return "floor";} \
+  static inline sz_t haptive_op_ar1_floor_s_get_priority( const haptive_op_ar1_floor_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_floor_s_solve( const haptive_op_ar1_floor_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_floor_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_floor_s_create_vm_op_ap( const haptive_op_ar1_floor_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_floor_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_floor_s_create_vm_op_dp( const haptive_op_ar1_floor_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar0_dp_ca_floor_s_create();} \
+  static inline sz_t haptive_op_ar1_floor_s_get_arity( const haptive_op_ar1_floor_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_ceil_s 2402776267
 #define BETH_EXPAND_ITEM_haptive_op_ar1_ceil_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_ceil_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_ceil_s_get_symbol( const haptive_op_ar1_ceil_s* o ){ return "ceil"; } \
-  static inline sz_t haptive_op_ar1_ceil_s_get_priority( const haptive_op_ar1_ceil_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_ceil_s_solve( const haptive_op_ar1_ceil_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_ceil_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_ceil_s_create_vm_op_ap( const haptive_op_ar1_ceil_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_ceil_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_ceil_s_create_vm_op_dp( const haptive_op_ar1_ceil_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar0_dp_ca_ceil_s_create(); } \
-  static inline sz_t haptive_op_ar1_ceil_s_get_arity( const haptive_op_ar1_ceil_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_ceil_s_get_symbol( const haptive_op_ar1_ceil_s* o ){return "ceil";} \
+  static inline sz_t haptive_op_ar1_ceil_s_get_priority( const haptive_op_ar1_ceil_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_ceil_s_solve( const haptive_op_ar1_ceil_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_ceil_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_ceil_s_create_vm_op_ap( const haptive_op_ar1_ceil_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_ceil_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_ceil_s_create_vm_op_dp( const haptive_op_ar1_ceil_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar0_dp_ca_ceil_s_create();} \
+  static inline sz_t haptive_op_ar1_ceil_s_get_arity( const haptive_op_ar1_ceil_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_exp_s 1898334025
 #define BETH_EXPAND_ITEM_haptive_op_ar1_exp_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_exp_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_exp_s_get_symbol( const haptive_op_ar1_exp_s* o ){ return "exp"; } \
-  static inline sz_t haptive_op_ar1_exp_s_get_priority( const haptive_op_ar1_exp_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_exp_s_solve( const haptive_op_ar1_exp_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_exp_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_exp_s_create_vm_op_ap( const haptive_op_ar1_exp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_exp_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_exp_s_create_vm_op_dp( const haptive_op_ar1_exp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_exp_s_create(); } \
-  static inline sz_t haptive_op_ar1_exp_s_get_arity( const haptive_op_ar1_exp_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_exp_s_get_symbol( const haptive_op_ar1_exp_s* o ){return "exp";} \
+  static inline sz_t haptive_op_ar1_exp_s_get_priority( const haptive_op_ar1_exp_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_exp_s_solve( const haptive_op_ar1_exp_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_exp_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_exp_s_create_vm_op_ap( const haptive_op_ar1_exp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_exp_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_exp_s_create_vm_op_dp( const haptive_op_ar1_exp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_exp_s_create();} \
+  static inline sz_t haptive_op_ar1_exp_s_get_arity( const haptive_op_ar1_exp_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_lgst_s 1600681072
 #define BETH_EXPAND_ITEM_haptive_op_ar1_lgst_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_lgst_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_lgst_s_get_symbol( const haptive_op_ar1_lgst_s* o ){ return "lgst"; } \
-  static inline sz_t haptive_op_ar1_lgst_s_get_priority( const haptive_op_ar1_lgst_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_lgst_s_solve( const haptive_op_ar1_lgst_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_s_create_vm_op_ap( const haptive_op_ar1_lgst_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_s_create_vm_op_dp( const haptive_op_ar1_lgst_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_s_create(); } \
-  static inline sz_t haptive_op_ar1_lgst_s_get_arity( const haptive_op_ar1_lgst_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_lgst_s_get_symbol( const haptive_op_ar1_lgst_s* o ){return "lgst";} \
+  static inline sz_t haptive_op_ar1_lgst_s_get_priority( const haptive_op_ar1_lgst_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_lgst_s_solve( const haptive_op_ar1_lgst_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_s_create_vm_op_ap( const haptive_op_ar1_lgst_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_s_create_vm_op_dp( const haptive_op_ar1_lgst_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_s_create();} \
+  static inline sz_t haptive_op_ar1_lgst_s_get_arity( const haptive_op_ar1_lgst_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_lgst_hard_s 3587624952
 #define BETH_EXPAND_ITEM_haptive_op_ar1_lgst_hard_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_lgst_hard_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_lgst_hard_s_get_symbol( const haptive_op_ar1_lgst_hard_s* o ){ return "lgst_hard"; } \
-  static inline sz_t haptive_op_ar1_lgst_hard_s_get_priority( const haptive_op_ar1_lgst_hard_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_lgst_hard_s_solve( const haptive_op_ar1_lgst_hard_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_hard_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_hard_s_create_vm_op_ap( const haptive_op_ar1_lgst_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_hard_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_hard_s_create_vm_op_dp( const haptive_op_ar1_lgst_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_hard_s_create(); } \
-  static inline sz_t haptive_op_ar1_lgst_hard_s_get_arity( const haptive_op_ar1_lgst_hard_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_lgst_hard_s_get_symbol( const haptive_op_ar1_lgst_hard_s* o ){return "lgst_hard";} \
+  static inline sz_t haptive_op_ar1_lgst_hard_s_get_priority( const haptive_op_ar1_lgst_hard_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_lgst_hard_s_solve( const haptive_op_ar1_lgst_hard_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_hard_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_hard_s_create_vm_op_ap( const haptive_op_ar1_lgst_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_hard_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_hard_s_create_vm_op_dp( const haptive_op_ar1_lgst_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_hard_s_create();} \
+  static inline sz_t haptive_op_ar1_lgst_hard_s_get_arity( const haptive_op_ar1_lgst_hard_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_lgst_leaky_s 1839494669
 #define BETH_EXPAND_ITEM_haptive_op_ar1_lgst_leaky_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_lgst_leaky_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_lgst_leaky_s_get_symbol( const haptive_op_ar1_lgst_leaky_s* o ){ return "lgst_leaky"; } \
-  static inline sz_t haptive_op_ar1_lgst_leaky_s_get_priority( const haptive_op_ar1_lgst_leaky_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_lgst_leaky_s_solve( const haptive_op_ar1_lgst_leaky_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_leaky_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_leaky_s_create_vm_op_ap( const haptive_op_ar1_lgst_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_leaky_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_leaky_s_create_vm_op_dp( const haptive_op_ar1_lgst_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_leaky_s_create(); } \
-  static inline sz_t haptive_op_ar1_lgst_leaky_s_get_arity( const haptive_op_ar1_lgst_leaky_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_lgst_leaky_s_get_symbol( const haptive_op_ar1_lgst_leaky_s* o ){return "lgst_leaky";} \
+  static inline sz_t haptive_op_ar1_lgst_leaky_s_get_priority( const haptive_op_ar1_lgst_leaky_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_lgst_leaky_s_solve( const haptive_op_ar1_lgst_leaky_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_lgst_leaky_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_leaky_s_create_vm_op_ap( const haptive_op_ar1_lgst_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_lgst_leaky_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_lgst_leaky_s_create_vm_op_dp( const haptive_op_ar1_lgst_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_lgst_leaky_s_create();} \
+  static inline sz_t haptive_op_ar1_lgst_leaky_s_get_arity( const haptive_op_ar1_lgst_leaky_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_tanh_s 1042884931
 #define BETH_EXPAND_ITEM_haptive_op_ar1_tanh_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_tanh_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_tanh_s_get_symbol( const haptive_op_ar1_tanh_s* o ){ return "tanh"; } \
-  static inline sz_t haptive_op_ar1_tanh_s_get_priority( const haptive_op_ar1_tanh_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_tanh_s_solve( const haptive_op_ar1_tanh_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_s_create_vm_op_ap( const haptive_op_ar1_tanh_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_s_create_vm_op_dp( const haptive_op_ar1_tanh_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_s_create(); } \
-  static inline sz_t haptive_op_ar1_tanh_s_get_arity( const haptive_op_ar1_tanh_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_tanh_s_get_symbol( const haptive_op_ar1_tanh_s* o ){return "tanh";} \
+  static inline sz_t haptive_op_ar1_tanh_s_get_priority( const haptive_op_ar1_tanh_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_tanh_s_solve( const haptive_op_ar1_tanh_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_s_create_vm_op_ap( const haptive_op_ar1_tanh_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_s_create_vm_op_dp( const haptive_op_ar1_tanh_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_s_create();} \
+  static inline sz_t haptive_op_ar1_tanh_s_get_arity( const haptive_op_ar1_tanh_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_tanh_hard_s 2164453949
 #define BETH_EXPAND_ITEM_haptive_op_ar1_tanh_hard_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_tanh_hard_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_tanh_hard_s_get_symbol( const haptive_op_ar1_tanh_hard_s* o ){ return "tanh_hard"; } \
-  static inline sz_t haptive_op_ar1_tanh_hard_s_get_priority( const haptive_op_ar1_tanh_hard_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_tanh_hard_s_solve( const haptive_op_ar1_tanh_hard_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_hard_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_hard_s_create_vm_op_ap( const haptive_op_ar1_tanh_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_hard_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_hard_s_create_vm_op_dp( const haptive_op_ar1_tanh_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_hard_s_create(); } \
-  static inline sz_t haptive_op_ar1_tanh_hard_s_get_arity( const haptive_op_ar1_tanh_hard_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_tanh_hard_s_get_symbol( const haptive_op_ar1_tanh_hard_s* o ){return "tanh_hard";} \
+  static inline sz_t haptive_op_ar1_tanh_hard_s_get_priority( const haptive_op_ar1_tanh_hard_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_tanh_hard_s_solve( const haptive_op_ar1_tanh_hard_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_hard_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_hard_s_create_vm_op_ap( const haptive_op_ar1_tanh_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_hard_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_hard_s_create_vm_op_dp( const haptive_op_ar1_tanh_hard_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_hard_s_create();} \
+  static inline sz_t haptive_op_ar1_tanh_hard_s_get_arity( const haptive_op_ar1_tanh_hard_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_tanh_leaky_s 4029199902
 #define BETH_EXPAND_ITEM_haptive_op_ar1_tanh_leaky_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_tanh_leaky_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_tanh_leaky_s_get_symbol( const haptive_op_ar1_tanh_leaky_s* o ){ return "tanh_leaky"; } \
-  static inline sz_t haptive_op_ar1_tanh_leaky_s_get_priority( const haptive_op_ar1_tanh_leaky_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_tanh_leaky_s_solve( const haptive_op_ar1_tanh_leaky_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_leaky_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_leaky_s_create_vm_op_ap( const haptive_op_ar1_tanh_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_leaky_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_leaky_s_create_vm_op_dp( const haptive_op_ar1_tanh_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_leaky_s_create(); } \
-  static inline sz_t haptive_op_ar1_tanh_leaky_s_get_arity( const haptive_op_ar1_tanh_leaky_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_tanh_leaky_s_get_symbol( const haptive_op_ar1_tanh_leaky_s* o ){return "tanh_leaky";} \
+  static inline sz_t haptive_op_ar1_tanh_leaky_s_get_priority( const haptive_op_ar1_tanh_leaky_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_tanh_leaky_s_solve( const haptive_op_ar1_tanh_leaky_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_tanh_leaky_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_leaky_s_create_vm_op_ap( const haptive_op_ar1_tanh_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_tanh_leaky_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_tanh_leaky_s_create_vm_op_dp( const haptive_op_ar1_tanh_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_tanh_leaky_s_create();} \
+  static inline sz_t haptive_op_ar1_tanh_leaky_s_get_arity( const haptive_op_ar1_tanh_leaky_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_softplus_s 1357244482
 #define BETH_EXPAND_ITEM_haptive_op_ar1_softplus_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_softplus_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_softplus_s_get_symbol( const haptive_op_ar1_softplus_s* o ){ return "softplus"; } \
-  static inline sz_t haptive_op_ar1_softplus_s_get_priority( const haptive_op_ar1_softplus_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_softplus_s_solve( const haptive_op_ar1_softplus_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_softplus_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_softplus_s_create_vm_op_ap( const haptive_op_ar1_softplus_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_softplus_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_softplus_s_create_vm_op_dp( const haptive_op_ar1_softplus_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_softplus_s_create(); } \
-  static inline sz_t haptive_op_ar1_softplus_s_get_arity( const haptive_op_ar1_softplus_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_softplus_s_get_symbol( const haptive_op_ar1_softplus_s* o ){return "softplus";} \
+  static inline sz_t haptive_op_ar1_softplus_s_get_priority( const haptive_op_ar1_softplus_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_softplus_s_solve( const haptive_op_ar1_softplus_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_softplus_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_softplus_s_create_vm_op_ap( const haptive_op_ar1_softplus_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_softplus_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_softplus_s_create_vm_op_dp( const haptive_op_ar1_softplus_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_softplus_s_create();} \
+  static inline sz_t haptive_op_ar1_softplus_s_get_arity( const haptive_op_ar1_softplus_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_relu_s 1734110320
 #define BETH_EXPAND_ITEM_haptive_op_ar1_relu_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_relu_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_relu_s_get_symbol( const haptive_op_ar1_relu_s* o ){ return "relu"; } \
-  static inline sz_t haptive_op_ar1_relu_s_get_priority( const haptive_op_ar1_relu_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_relu_s_solve( const haptive_op_ar1_relu_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_s_create_vm_op_ap( const haptive_op_ar1_relu_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_s_create_vm_op_dp( const haptive_op_ar1_relu_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_s_create(); } \
-  static inline sz_t haptive_op_ar1_relu_s_get_arity( const haptive_op_ar1_relu_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_relu_s_get_symbol( const haptive_op_ar1_relu_s* o ){return "relu";} \
+  static inline sz_t haptive_op_ar1_relu_s_get_priority( const haptive_op_ar1_relu_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_relu_s_solve( const haptive_op_ar1_relu_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_s_create_vm_op_ap( const haptive_op_ar1_relu_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_s_create_vm_op_dp( const haptive_op_ar1_relu_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_s_create();} \
+  static inline sz_t haptive_op_ar1_relu_s_get_arity( const haptive_op_ar1_relu_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_relu_leaky_s 3862474253
 #define BETH_EXPAND_ITEM_haptive_op_ar1_relu_leaky_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_relu_leaky_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_relu_leaky_s_get_symbol( const haptive_op_ar1_relu_leaky_s* o ){ return "relu_leaky"; } \
-  static inline sz_t haptive_op_ar1_relu_leaky_s_get_priority( const haptive_op_ar1_relu_leaky_s* o ){ return 8; } \
-  static inline s2_t haptive_op_ar1_relu_leaky_s_solve( const haptive_op_ar1_relu_leaky_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){ return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_leaky_s_fx ); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_leaky_s_create_vm_op_ap( const haptive_op_ar1_relu_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_leaky_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_leaky_s_create_vm_op_dp( const haptive_op_ar1_relu_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_leaky_s_create(); } \
-  static inline sz_t haptive_op_ar1_relu_leaky_s_get_arity( const haptive_op_ar1_relu_leaky_s* o ){ return 1; }
+  static inline sc_t haptive_op_ar1_relu_leaky_s_get_symbol( const haptive_op_ar1_relu_leaky_s* o ){return "relu_leaky";} \
+  static inline sz_t haptive_op_ar1_relu_leaky_s_get_priority( const haptive_op_ar1_relu_leaky_s* o ){return 8;} \
+  static inline s2_t haptive_op_ar1_relu_leaky_s_solve( const haptive_op_ar1_relu_leaky_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ){return haptive_op_ar1_solve_unary( r, a, bmath_f3_op_ar1_relu_leaky_s_fx );} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_leaky_s_create_vm_op_ap( const haptive_op_ar1_relu_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_relu_leaky_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_relu_leaky_s_create_vm_op_dp( const haptive_op_ar1_relu_leaky_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_dp_ca_relu_leaky_s_create();} \
+  static inline sz_t haptive_op_ar1_relu_leaky_s_get_arity( const haptive_op_ar1_relu_leaky_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_htp_s 2248194830
 #define BETH_EXPAND_ITEM_haptive_op_ar1_htp_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_htp_s ) \
     {aware_t _;}; \
-  static inline tp_t haptive_op_ar1_htp_s_get_class( const haptive_op_ar1_htp_s* o ){ return TYPEOF_op_class_cast; } \
-  static inline sz_t haptive_op_ar1_htp_s_get_priority( const haptive_op_ar1_htp_s* o ){ return 8; } \
+  static inline tp_t haptive_op_ar1_htp_s_get_class( const haptive_op_ar1_htp_s* o ){return TYPEOF_op_class_cast;} \
+  static inline sz_t haptive_op_ar1_htp_s_get_priority( const haptive_op_ar1_htp_s* o ){return 8;} \
   s2_t haptive_op_ar1_htp_s_solve( const haptive_op_ar1_htp_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_htp_s_create_vm_op_ap( const haptive_op_ar1_htp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cast_htp_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_htp_s_create_vm_op_dp( const haptive_op_ar1_htp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cast_htp_s_create(); } \
-  static inline sz_t haptive_op_ar1_htp_s_get_arity( const haptive_op_ar1_htp_s* o ){ return 1; }
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_htp_s_create_vm_op_ap( const haptive_op_ar1_htp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cast_htp_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_htp_s_create_vm_op_dp( const haptive_op_ar1_htp_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cast_htp_s_create();} \
+  static inline sz_t haptive_op_ar1_htp_s_get_arity( const haptive_op_ar1_htp_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_output_s 3401051791
 #define BETH_EXPAND_ITEM_haptive_op_ar1_output_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_output_s ) \
     {aware_t _;}; \
   s2_t haptive_op_ar1_output_s_solve( const haptive_op_ar1_output_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_output_s_create_vm_op_ap( const haptive_op_ar1_output_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar1_output_s_create_vm_op_dp( const haptive_op_ar1_output_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cpy_s_create(); } \
-  static inline sz_t haptive_op_ar1_output_s_get_arity( const haptive_op_ar1_output_s* o ){ return 1; }
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_output_s_create_vm_op_ap( const haptive_op_ar1_output_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar1_output_s_create_vm_op_dp( const haptive_op_ar1_output_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ){ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cpy_s_create();} \
+  static inline sz_t haptive_op_ar1_output_s_get_arity( const haptive_op_ar1_output_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_adaptive_s 1988274712
 #define BETH_EXPAND_ITEM_haptive_op_ar1_adaptive_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_adaptive_s ) \
     {aware_t _;tp_t name;}; \
-  static inline sc_t haptive_op_ar1_adaptive_s_get_symbol( const haptive_op_ar1_adaptive_s* o ){ return "adaptive"; } \
-  static inline sz_t haptive_op_ar1_adaptive_s_get_priority( const haptive_op_ar1_adaptive_s* o ){ return 8; } \
+  static inline sc_t haptive_op_ar1_adaptive_s_get_symbol( const haptive_op_ar1_adaptive_s* o ){return "adaptive";} \
+  static inline sz_t haptive_op_ar1_adaptive_s_get_priority( const haptive_op_ar1_adaptive_s* o ){return 8;} \
   s2_t haptive_op_ar1_adaptive_s_solve( const haptive_op_ar1_adaptive_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
   haptive_op* haptive_op_ar1_adaptive_s_create_final( const haptive_op_ar1_adaptive_s* o, bhvm_hf3_s* h ); \
-  static inline sz_t haptive_op_ar1_adaptive_s_get_arity( const haptive_op_ar1_adaptive_s* o ){ return 1; }
+  static inline sz_t haptive_op_ar1_adaptive_s_get_arity( const haptive_op_ar1_adaptive_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_dimof_s 893675473
 #define BETH_EXPAND_ITEM_haptive_op_ar1_dimof_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_dimof_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar1_dimof_s_get_symbol( const haptive_op_ar1_dimof_s* o ){ return "dimof"; } \
-  static inline sz_t haptive_op_ar1_dimof_s_get_priority( const haptive_op_ar1_dimof_s* o ){ return 8; } \
+  static inline sc_t haptive_op_ar1_dimof_s_get_symbol( const haptive_op_ar1_dimof_s* o ){return "dimof";} \
+  static inline sz_t haptive_op_ar1_dimof_s_get_priority( const haptive_op_ar1_dimof_s* o ){return 8;} \
   s2_t haptive_op_ar1_dimof_s_solve( const haptive_op_ar1_dimof_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar1_dimof_s_get_arity( const haptive_op_ar1_dimof_s* o ){ return 1; }
+  static inline sz_t haptive_op_ar1_dimof_s_get_arity( const haptive_op_ar1_dimof_s* o ){return 1;}
 #define TYPEOF_haptive_op_ar1_random_s 110295153
 #define BETH_EXPAND_ITEM_haptive_op_ar1_random_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar1_random_s ) \
     {aware_t _;u2_t rseed;}; \
-  static inline sc_t haptive_op_ar1_random_s_get_symbol( const haptive_op_ar1_random_s* o ){ return "random"; } \
-  static inline sz_t haptive_op_ar1_random_s_get_priority( const haptive_op_ar1_random_s* o ){ return 8; } \
+  static inline sc_t haptive_op_ar1_random_s_get_symbol( const haptive_op_ar1_random_s* o ){return "random";} \
+  static inline sz_t haptive_op_ar1_random_s_get_priority( const haptive_op_ar1_random_s* o ){return 8;} \
   s2_t haptive_op_ar1_random_s_solve( const haptive_op_ar1_random_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar1_random_s_get_arity( const haptive_op_ar1_random_s* o ){ return 1; }
+  static inline sz_t haptive_op_ar1_random_s_get_arity( const haptive_op_ar1_random_s* o ){return 1;}
 #define BETH_EXPAND_GROUP_haptive_op_ar1 \
   BCORE_FORWARD_OBJECT( haptive_op_ar1 ); \
   BCORE_FORWARD_OBJECT( haptive_op_ar1_identity_s ); \
@@ -425,130 +425,130 @@
 #define BETH_EXPAND_ITEM_haptive_op_ar2_bmul_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_bmul_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_bmul_s_get_symbol( const haptive_op_ar2_bmul_s* o ){ return "**"; } \
-  static inline sz_t haptive_op_ar2_bmul_s_get_priority( const haptive_op_ar2_bmul_s* o ){ return 9; } \
+  static inline sc_t haptive_op_ar2_bmul_s_get_symbol( const haptive_op_ar2_bmul_s* o ){return "**";} \
+  static inline sz_t haptive_op_ar2_bmul_s_get_priority( const haptive_op_ar2_bmul_s* o ){return 9;} \
   s2_t haptive_op_ar2_bmul_s_solve( const haptive_op_ar2_bmul_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline bhvm_hf3_vm_op* haptive_op_ar2_bmul_s_create_vm_op_ap( const haptive_op_ar2_bmul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_bmul_s_create(); } \
+  static inline bhvm_hf3_vm_op* haptive_op_ar2_bmul_s_create_vm_op_ap( const haptive_op_ar2_bmul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_bmul_s_create();} \
   bhvm_hf3_vm_op* haptive_op_ar2_bmul_s_create_vm_op_dp( const haptive_op_ar2_bmul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ); \
-  static inline sz_t haptive_op_ar2_bmul_s_get_arity( const haptive_op_ar2_bmul_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_bmul_s_get_arity( const haptive_op_ar2_bmul_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_mul_s 2333743137
 #define BETH_EXPAND_ITEM_haptive_op_ar2_mul_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_mul_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_mul_s_get_symbol( const haptive_op_ar2_mul_s* o ){ return "*"; } \
-  static inline sz_t haptive_op_ar2_mul_s_get_priority( const haptive_op_ar2_mul_s* o ){ return 9; } \
+  static inline sc_t haptive_op_ar2_mul_s_get_symbol( const haptive_op_ar2_mul_s* o ){return "*";} \
+  static inline sz_t haptive_op_ar2_mul_s_get_priority( const haptive_op_ar2_mul_s* o ){return 9;} \
   s2_t haptive_op_ar2_mul_s_solve( const haptive_op_ar2_mul_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
   bhvm_hf3_vm_op* haptive_op_ar2_mul_s_create_vm_op_ap( const haptive_op_ar2_mul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ); \
   bhvm_hf3_vm_op* haptive_op_ar2_mul_s_create_vm_op_dp( const haptive_op_ar2_mul_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ); \
-  static inline sz_t haptive_op_ar2_mul_s_get_arity( const haptive_op_ar2_mul_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_mul_s_get_arity( const haptive_op_ar2_mul_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_add_s 507445292
 #define BETH_EXPAND_ITEM_haptive_op_ar2_add_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_add_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_add_s_get_symbol( const haptive_op_ar2_add_s* o ){ return "+"; } \
-  static inline sz_t haptive_op_ar2_add_s_get_priority( const haptive_op_ar2_add_s* o ){ return 8; } \
+  static inline sc_t haptive_op_ar2_add_s_get_symbol( const haptive_op_ar2_add_s* o ){return "+";} \
+  static inline sz_t haptive_op_ar2_add_s_get_priority( const haptive_op_ar2_add_s* o ){return 8;} \
   s2_t haptive_op_ar2_add_s_solve( const haptive_op_ar2_add_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline bhvm_hf3_vm_op* haptive_op_ar2_add_s_create_vm_op_ap( const haptive_op_ar2_add_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_add_s_create(); } \
+  static inline bhvm_hf3_vm_op* haptive_op_ar2_add_s_create_vm_op_ap( const haptive_op_ar2_add_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_add_s_create();} \
   bhvm_hf3_vm_op* haptive_op_ar2_add_s_create_vm_op_dp( const haptive_op_ar2_add_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ); \
-  static inline sz_t haptive_op_ar2_add_s_get_arity( const haptive_op_ar2_add_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_add_s_get_arity( const haptive_op_ar2_add_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_sub_s 3915630525
 #define BETH_EXPAND_ITEM_haptive_op_ar2_sub_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_sub_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_sub_s_get_symbol( const haptive_op_ar2_sub_s* o ){ return "-"; } \
-  static inline sz_t haptive_op_ar2_sub_s_get_priority( const haptive_op_ar2_sub_s* o ){ return 8; } \
+  static inline sc_t haptive_op_ar2_sub_s_get_symbol( const haptive_op_ar2_sub_s* o ){return "-";} \
+  static inline sz_t haptive_op_ar2_sub_s_get_priority( const haptive_op_ar2_sub_s* o ){return 8;} \
   s2_t haptive_op_ar2_sub_s_solve( const haptive_op_ar2_sub_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline bhvm_hf3_vm_op* haptive_op_ar2_sub_s_create_vm_op_ap( const haptive_op_ar2_sub_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_sub_s_create(); } \
+  static inline bhvm_hf3_vm_op* haptive_op_ar2_sub_s_create_vm_op_ap( const haptive_op_ar2_sub_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar2_sub_s_create();} \
   bhvm_hf3_vm_op* haptive_op_ar2_sub_s_create_vm_op_dp( const haptive_op_ar2_sub_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx, char ch_id ); \
   haptive_op* haptive_op_ar2_sub_s_create_op_of_arn( const haptive_op_ar2_sub_s* o, sz_t n ); \
-  static inline sz_t haptive_op_ar2_sub_s_get_arity( const haptive_op_ar2_sub_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_sub_s_get_arity( const haptive_op_ar2_sub_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_equal_s 249548095
 #define BETH_EXPAND_ITEM_haptive_op_ar2_equal_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_equal_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_equal_s_get_symbol( const haptive_op_ar2_equal_s* o ){ return "=="; } \
-  static inline sz_t haptive_op_ar2_equal_s_get_priority( const haptive_op_ar2_equal_s* o ){ return 6; } \
+  static inline sc_t haptive_op_ar2_equal_s_get_symbol( const haptive_op_ar2_equal_s* o ){return "==";} \
+  static inline sz_t haptive_op_ar2_equal_s_get_priority( const haptive_op_ar2_equal_s* o ){return 6;} \
   s2_t haptive_op_ar2_equal_s_solve( const haptive_op_ar2_equal_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_equal_s_get_arity( const haptive_op_ar2_equal_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_equal_s_get_arity( const haptive_op_ar2_equal_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_larger_s 1346535242
 #define BETH_EXPAND_ITEM_haptive_op_ar2_larger_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_larger_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_larger_s_get_symbol( const haptive_op_ar2_larger_s* o ){ return ">"; } \
-  static inline sz_t haptive_op_ar2_larger_s_get_priority( const haptive_op_ar2_larger_s* o ){ return 6; } \
+  static inline sc_t haptive_op_ar2_larger_s_get_symbol( const haptive_op_ar2_larger_s* o ){return ">";} \
+  static inline sz_t haptive_op_ar2_larger_s_get_priority( const haptive_op_ar2_larger_s* o ){return 6;} \
   s2_t haptive_op_ar2_larger_s_solve( const haptive_op_ar2_larger_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_larger_s_get_arity( const haptive_op_ar2_larger_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_larger_s_get_arity( const haptive_op_ar2_larger_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_smaller_s 3169127723
 #define BETH_EXPAND_ITEM_haptive_op_ar2_smaller_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_smaller_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_smaller_s_get_symbol( const haptive_op_ar2_smaller_s* o ){ return "<"; } \
-  static inline sz_t haptive_op_ar2_smaller_s_get_priority( const haptive_op_ar2_smaller_s* o ){ return 6; } \
+  static inline sc_t haptive_op_ar2_smaller_s_get_symbol( const haptive_op_ar2_smaller_s* o ){return "<";} \
+  static inline sz_t haptive_op_ar2_smaller_s_get_priority( const haptive_op_ar2_smaller_s* o ){return 6;} \
   s2_t haptive_op_ar2_smaller_s_solve( const haptive_op_ar2_smaller_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_smaller_s_get_arity( const haptive_op_ar2_smaller_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_smaller_s_get_arity( const haptive_op_ar2_smaller_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_larger_equal_s 603459713
 #define BETH_EXPAND_ITEM_haptive_op_ar2_larger_equal_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_larger_equal_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_larger_equal_s_get_symbol( const haptive_op_ar2_larger_equal_s* o ){ return ">="; } \
-  static inline sz_t haptive_op_ar2_larger_equal_s_get_priority( const haptive_op_ar2_larger_equal_s* o ){ return 6; } \
+  static inline sc_t haptive_op_ar2_larger_equal_s_get_symbol( const haptive_op_ar2_larger_equal_s* o ){return ">=";} \
+  static inline sz_t haptive_op_ar2_larger_equal_s_get_priority( const haptive_op_ar2_larger_equal_s* o ){return 6;} \
   s2_t haptive_op_ar2_larger_equal_s_solve( const haptive_op_ar2_larger_equal_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_larger_equal_s_get_arity( const haptive_op_ar2_larger_equal_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_larger_equal_s_get_arity( const haptive_op_ar2_larger_equal_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_smaller_equal_s 2989271408
 #define BETH_EXPAND_ITEM_haptive_op_ar2_smaller_equal_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_smaller_equal_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_smaller_equal_s_get_symbol( const haptive_op_ar2_smaller_equal_s* o ){ return "<="; } \
-  static inline sz_t haptive_op_ar2_smaller_equal_s_get_priority( const haptive_op_ar2_smaller_equal_s* o ){ return 6; } \
+  static inline sc_t haptive_op_ar2_smaller_equal_s_get_symbol( const haptive_op_ar2_smaller_equal_s* o ){return "<=";} \
+  static inline sz_t haptive_op_ar2_smaller_equal_s_get_priority( const haptive_op_ar2_smaller_equal_s* o ){return 6;} \
   s2_t haptive_op_ar2_smaller_equal_s_solve( const haptive_op_ar2_smaller_equal_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_smaller_equal_s_get_arity( const haptive_op_ar2_smaller_equal_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_smaller_equal_s_get_arity( const haptive_op_ar2_smaller_equal_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_logic_and_s 4227634991
 #define BETH_EXPAND_ITEM_haptive_op_ar2_logic_and_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_logic_and_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_logic_and_s_get_symbol( const haptive_op_ar2_logic_and_s* o ){ return "&"; } \
-  static inline sz_t haptive_op_ar2_logic_and_s_get_priority( const haptive_op_ar2_logic_and_s* o ){ return 6; } \
+  static inline sc_t haptive_op_ar2_logic_and_s_get_symbol( const haptive_op_ar2_logic_and_s* o ){return "&";} \
+  static inline sz_t haptive_op_ar2_logic_and_s_get_priority( const haptive_op_ar2_logic_and_s* o ){return 6;} \
   s2_t haptive_op_ar2_logic_and_s_solve( const haptive_op_ar2_logic_and_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_logic_and_s_get_arity( const haptive_op_ar2_logic_and_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_logic_and_s_get_arity( const haptive_op_ar2_logic_and_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_logic_or_s 2130890827
 #define BETH_EXPAND_ITEM_haptive_op_ar2_logic_or_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_logic_or_s ) \
     {aware_t _;}; \
-  static inline sc_t haptive_op_ar2_logic_or_s_get_symbol( const haptive_op_ar2_logic_or_s* o ){ return "|"; } \
-  static inline sz_t haptive_op_ar2_logic_or_s_get_priority( const haptive_op_ar2_logic_or_s* o ){ return 6; } \
+  static inline sc_t haptive_op_ar2_logic_or_s_get_symbol( const haptive_op_ar2_logic_or_s* o ){return "|";} \
+  static inline sz_t haptive_op_ar2_logic_or_s_get_priority( const haptive_op_ar2_logic_or_s* o ){return 6;} \
   s2_t haptive_op_ar2_logic_or_s_solve( const haptive_op_ar2_logic_or_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_logic_or_s_get_arity( const haptive_op_ar2_logic_or_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_logic_or_s_get_arity( const haptive_op_ar2_logic_or_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_index_s 1044964511
 #define BETH_EXPAND_ITEM_haptive_op_ar2_index_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_index_s ) \
     {aware_t _;}; \
-  static inline sz_t haptive_op_ar2_index_s_get_priority( const haptive_op_ar2_index_s* o ){ return 20; } \
+  static inline sz_t haptive_op_ar2_index_s_get_priority( const haptive_op_ar2_index_s* o ){return 20;} \
   s2_t haptive_op_ar2_index_s_solve( const haptive_op_ar2_index_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_index_s_get_arity( const haptive_op_ar2_index_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_index_s_get_arity( const haptive_op_ar2_index_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_inc_order_s 3681973472
 #define BETH_EXPAND_ITEM_haptive_op_ar2_inc_order_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_inc_order_s ) \
     {aware_t _;}; \
-  static inline sz_t haptive_op_ar2_inc_order_s_get_priority( const haptive_op_ar2_inc_order_s* o ){ return 20; } \
+  static inline sz_t haptive_op_ar2_inc_order_s_get_priority( const haptive_op_ar2_inc_order_s* o ){return 20;} \
   s2_t haptive_op_ar2_inc_order_s_solve( const haptive_op_ar2_inc_order_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_inc_order_s_get_arity( const haptive_op_ar2_inc_order_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_inc_order_s_get_arity( const haptive_op_ar2_inc_order_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_cat_s 2696809875
 #define BETH_EXPAND_ITEM_haptive_op_ar2_cat_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_cat_s ) \
     {aware_t _;}; \
-  static inline sz_t haptive_op_ar2_cat_s_get_priority( const haptive_op_ar2_cat_s* o ){ return 6; } \
+  static inline sz_t haptive_op_ar2_cat_s_get_priority( const haptive_op_ar2_cat_s* o ){return 6;} \
   s2_t haptive_op_ar2_cat_s_solve( const haptive_op_ar2_cat_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar2_cat_s_get_arity( const haptive_op_ar2_cat_s* o ){ return 2; }
+  static inline sz_t haptive_op_ar2_cat_s_get_arity( const haptive_op_ar2_cat_s* o ){return 2;}
 #define TYPEOF_haptive_op_ar2_recurrent_s 304285521
 #define BETH_EXPAND_ITEM_haptive_op_ar2_recurrent_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar2_recurrent_s ) \
     {aware_t _;tp_t name;}; \
-  static inline sz_t haptive_op_ar2_recurrent_s_get_priority( const haptive_op_ar2_recurrent_s* o ){ return 8; } \
-  static inline bl_t haptive_op_ar2_recurrent_s_solve_each_channel( const haptive_op_ar2_recurrent_s* o ){ return true; } \
+  static inline sz_t haptive_op_ar2_recurrent_s_get_priority( const haptive_op_ar2_recurrent_s* o ){return 8;} \
+  static inline bl_t haptive_op_ar2_recurrent_s_solve_each_channel( const haptive_op_ar2_recurrent_s* o ){return true;} \
   s2_t haptive_op_ar2_recurrent_s_solve( const haptive_op_ar2_recurrent_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline bhvm_hf3_vm_op* haptive_op_ar2_recurrent_s_create_vm_op_ap_init( const haptive_op_ar2_recurrent_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_ay_s_create(); } \
-  static inline bhvm_hf3_vm_op* haptive_op_ar2_recurrent_s_create_vm_op_ap( const haptive_op_ar2_recurrent_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){ return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_by_s_create(); } \
-  static inline sz_t haptive_op_ar2_recurrent_s_get_arity( const haptive_op_ar2_recurrent_s* o ){ return 2; }
+  static inline bhvm_hf3_vm_op* haptive_op_ar2_recurrent_s_create_vm_op_ap_init( const haptive_op_ar2_recurrent_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_ay_s_create();} \
+  static inline bhvm_hf3_vm_op* haptive_op_ar2_recurrent_s_create_vm_op_ap( const haptive_op_ar2_recurrent_s* o, const bhvm_hf3_vm_frame_s* vmf, sc_t arr_sig, const bcore_arr_sz_s* arr_idx ){return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cpy_by_s_create();} \
+  static inline sz_t haptive_op_ar2_recurrent_s_get_arity( const haptive_op_ar2_recurrent_s* o ){return 2;}
 #define BETH_EXPAND_GROUP_haptive_op_ar2 \
   BCORE_FORWARD_OBJECT( haptive_op_ar2 ); \
   BCORE_FORWARD_OBJECT( haptive_op_ar2_bmul_s ); \
@@ -591,9 +591,9 @@
 #define BETH_EXPAND_ITEM_haptive_op_ar3_branch_s \
   BCORE_DECLARE_OBJECT( haptive_op_ar3_branch_s ) \
     {aware_t _;}; \
-  static inline sz_t haptive_op_ar3_branch_s_get_priority( const haptive_op_ar3_branch_s* o ){ return  5; } \
+  static inline sz_t haptive_op_ar3_branch_s_get_priority( const haptive_op_ar3_branch_s* o ){return  5;} \
   s2_t haptive_op_ar3_branch_s_solve( const haptive_op_ar3_branch_s* o, bhvm_hf3_s** r, bhvm_hf3_s** a, st_s* msg ); \
-  static inline sz_t haptive_op_ar3_branch_s_get_arity( const haptive_op_ar3_branch_s* o ){ return  3; }
+  static inline sz_t haptive_op_ar3_branch_s_get_arity( const haptive_op_ar3_branch_s* o ){return  3;}
 #define BETH_EXPAND_GROUP_haptive_op_ar3 \
   BCORE_FORWARD_OBJECT( haptive_op_ar3 ); \
   BCORE_FORWARD_OBJECT( haptive_op_ar3_branch_s ); \
@@ -608,7 +608,7 @@
 #define BETH_EXPAND_ITEM_haptive_sem_link_s \
   BCORE_DECLARE_OBJECT( haptive_sem_link_s ) \
     {aware_t _;tp_t name;haptive_sem_link_s* up;haptive_sem_link_s* dn;vd_t cell;bl_t exit;}; \
-  tp_t haptive_sem_link_s_get_name( const haptive_sem_link_s* o );
+  static inline tp_t haptive_sem_link_s_get_name( const haptive_sem_link_s* o ){return o->name;}
 #define TYPEOF_haptive_sem_links_s 4201010668
 #define BETH_EXPAND_ITEM_haptive_sem_links_s \
   BCORE_DECLARE_OBJECT( haptive_sem_links_s ) \
@@ -650,13 +650,13 @@
 #define BETH_EXPAND_ITEM_haptive_sem_cell_s \
   BCORE_DECLARE_OBJECT( haptive_sem_cell_s ) \
     {aware_t _;tp_t name;haptive_sem_links_s encs;haptive_sem_links_s excs;haptive_sem_body_s* body;haptive_op* op;sz_t priority;haptive_sem_cell_s* parent;bcore_source_point_s source_point;}; \
-  tp_t haptive_sem_cell_s_get_name( const haptive_sem_cell_s* o ); \
-  static inline sz_t haptive_sem_cell_s_get_arity( const haptive_sem_cell_s* o ){ return haptive_sem_links_s_count_open(       &o->encs       ); } \
-  static inline haptive_sem_link_s* haptive_sem_cell_s_get_enc_by_name( haptive_sem_cell_s* o, tp_t name ){ return haptive_sem_links_s_get_link_by_name( &o->encs, name ); } \
-  static inline haptive_sem_link_s* haptive_sem_cell_s_get_exc_by_name( haptive_sem_cell_s* o, tp_t name ){ return haptive_sem_links_s_get_link_by_name( &o->excs, name ); } \
-  static inline haptive_sem_link_s* haptive_sem_cell_s_get_enc_by_open( haptive_sem_cell_s* o ){ return haptive_sem_links_s_get_link_by_up(   &o->encs, NULL ); } \
-  static inline haptive_sem_link_s* haptive_sem_cell_s_get_enc_by_dn( haptive_sem_cell_s* o, haptive_sem_link_s* dn ){ return haptive_sem_links_s_get_link_by_dn(   &o->encs, dn   ); } \
-  static inline sz_t haptive_sem_cell_s_get_priority( const haptive_sem_cell_s* o ){ return o->priority; } \
+  static inline tp_t haptive_sem_cell_s_get_name( const haptive_sem_cell_s* o ){return o->name;} \
+  static inline sz_t haptive_sem_cell_s_get_arity( const haptive_sem_cell_s* o ){return haptive_sem_links_s_count_open(       &o->encs       );} \
+  static inline haptive_sem_link_s* haptive_sem_cell_s_get_enc_by_name( haptive_sem_cell_s* o, tp_t name ){return haptive_sem_links_s_get_link_by_name( &o->encs, name );} \
+  static inline haptive_sem_link_s* haptive_sem_cell_s_get_exc_by_name( haptive_sem_cell_s* o, tp_t name ){return haptive_sem_links_s_get_link_by_name( &o->excs, name );} \
+  static inline haptive_sem_link_s* haptive_sem_cell_s_get_enc_by_open( haptive_sem_cell_s* o ){return haptive_sem_links_s_get_link_by_up(   &o->encs, NULL );} \
+  static inline haptive_sem_link_s* haptive_sem_cell_s_get_enc_by_dn( haptive_sem_cell_s* o, haptive_sem_link_s* dn ){return haptive_sem_links_s_get_link_by_dn(   &o->encs, dn   );} \
+  static inline sz_t haptive_sem_cell_s_get_priority( const haptive_sem_cell_s* o ){return o->priority;} \
   haptive_sem_cell_s* haptive_sem_cell_s_get_cell_by_name( haptive_sem_cell_s* o, tp_t name ); \
   haptive_sem_link_s* haptive_sem_cell_s_get_link_by_name( haptive_sem_cell_s* o, tp_t name );
 #define TYPEOF_haptive_sem_stack_flag_s 1664665544
@@ -682,7 +682,7 @@
   static inline bl_t haptive_sem_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_haptive_sem ); } \
   static inline tp_t haptive_sem_a_get_name( const haptive_sem* o ) { const haptive_sem_s* p = haptive_sem_s_get_aware( o ); assert( p->get_name ); return p->get_name( o ); } \
   static inline bl_t haptive_sem_a_defines_get_name( const haptive_sem* o ) { return true; } \
-  static inline tp_t haptive_sem_get_name__( const haptive_sem* o ) { return 0; } \
+  static inline tp_t haptive_sem_get_name__( const haptive_sem* o ){return 0;} \
   BETH_EXPAND_ITEM_haptive_sem_link_s \
   BETH_EXPAND_ITEM_haptive_sem_links_s \
   BETH_EXPAND_ITEM_haptive_sem_body_s \
@@ -773,7 +773,7 @@
   void haptive_net_cell_s_clear_downlinks( haptive_net_cell_s* o ); \
   void haptive_net_cell_s_set_downlinks( haptive_net_cell_s* o ); \
   void haptive_net_cell_s_copy_x( haptive_net_cell_s* o ); \
-  static inline void haptive_net_cell_s_mutated( haptive_net_cell_s* o ){ ERR_fa( "Cannot reconstitute." ); }
+  static inline void haptive_net_cell_s_mutated( haptive_net_cell_s* o ){ERR_fa( "Cannot reconstitute." );}
 #define BETH_EXPAND_GROUP_haptive_net \
   BCORE_FORWARD_OBJECT( haptive_net ); \
   BCORE_FORWARD_OBJECT( haptive_net_link_s ); \
@@ -796,10 +796,10 @@
 #define BETH_EXPAND_ITEM_haptive_vm_adaptive_s \
   BCORE_DECLARE_OBJECT( haptive_vm_adaptive_s ) \
     {aware_t _;st_s sig;vd_t src;bhvm_hf3_vm_frame_s vm;badapt_dynamics_std_s dynamics;sz_t in_size;sz_t out_size;sz_t index_in;sz_t index_out;sz_t index_grad_out;bcore_arr_sz_s index_arr_adaptive;}; \
-  static inline sz_t haptive_vm_adaptive_s_get_in_size( const haptive_vm_adaptive_s* o ){ return o->in_size;  } \
-  static inline sz_t haptive_vm_adaptive_s_get_out_size( const haptive_vm_adaptive_s* o ){ return o->out_size; } \
-  static inline void haptive_vm_adaptive_s_get_dynamics_std( const haptive_vm_adaptive_s* o, badapt_dynamics_std_s* dynamics ){ badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); } \
-  static inline void haptive_vm_adaptive_s_set_dynamics_std( haptive_vm_adaptive_s* o, const badapt_dynamics_std_s* dynamics ){ badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); } \
+  static inline sz_t haptive_vm_adaptive_s_get_in_size( const haptive_vm_adaptive_s* o ){return o->in_size;} \
+  static inline sz_t haptive_vm_adaptive_s_get_out_size( const haptive_vm_adaptive_s* o ){return o->out_size;} \
+  static inline void haptive_vm_adaptive_s_get_dynamics_std( const haptive_vm_adaptive_s* o, badapt_dynamics_std_s* dynamics ){badapt_dynamics_std_s_copy( dynamics, &o->dynamics );} \
+  static inline void haptive_vm_adaptive_s_set_dynamics_std( haptive_vm_adaptive_s* o, const badapt_dynamics_std_s* dynamics ){badapt_dynamics_std_s_copy( &o->dynamics, dynamics );} \
   void haptive_vm_adaptive_s_arc_to_sink( const haptive_vm_adaptive_s* o, bcore_sink* sink ); \
   void haptive_vm_adaptive_s_minfer( haptive_vm_adaptive_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
   void haptive_vm_adaptive_s_bgrad_adapt( haptive_vm_adaptive_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out );
@@ -807,10 +807,10 @@
 #define BETH_EXPAND_ITEM_haptive_vm_builder_s \
   BCORE_DECLARE_OBJECT( haptive_vm_builder_s ) \
     {aware_t _;st_s sig;vd_t src;sz_t in_size;sz_t out_size;badapt_dynamics_std_s dynamics;u2_t rseed;}; \
-  static inline sz_t haptive_vm_builder_s_get_in_size( const haptive_vm_builder_s* o ){ return o->in_size; } \
-  static inline void haptive_vm_builder_s_set_in_size( haptive_vm_builder_s* o, sz_t size ){ o->in_size = size; } \
-  static inline sz_t haptive_vm_builder_s_get_out_size( const haptive_vm_builder_s* o ){ return o->out_size; } \
-  static inline void haptive_vm_builder_s_set_out_size( haptive_vm_builder_s* o, sz_t size ){ o->out_size = size; } \
+  static inline sz_t haptive_vm_builder_s_get_in_size( const haptive_vm_builder_s* o ){return o->in_size;} \
+  static inline void haptive_vm_builder_s_set_in_size( haptive_vm_builder_s* o, sz_t size ){o->in_size = size;} \
+  static inline sz_t haptive_vm_builder_s_get_out_size( const haptive_vm_builder_s* o ){return o->out_size;} \
+  static inline void haptive_vm_builder_s_set_out_size( haptive_vm_builder_s* o, sz_t size ){o->out_size = size;} \
   badapt_adaptive* haptive_vm_builder_s_build( const haptive_vm_builder_s* o );
 #define BETH_EXPAND_GROUP_haptive_vm \
   BCORE_FORWARD_OBJECT( haptive_vm ); \
@@ -831,16 +831,16 @@
 #define BETH_EXPAND_ITEM_haptive_eval_grad_s \
   BCORE_DECLARE_OBJECT( haptive_eval_grad_s ) \
     {aware_t _;f3_t epsilon;bhvm_hf3_vm_frame_s* vmf;bhvm_hf3_adl_s* in;bhvm_hf3_adl_s* out;s2_t verbosity;f3_t max_dev;bcore_sink* log;}; \
-  static inline void haptive_eval_grad_s_init_x( haptive_eval_grad_s* o ){ o->log = bcore_fork( BCORE_STDOUT ); } \
+  static inline void haptive_eval_grad_s_init_x( haptive_eval_grad_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   s2_t haptive_eval_grad_s_run( const haptive_eval_grad_s* o ); \
-  static inline s2_t haptive_eval_grad_s_main( haptive_eval_grad_s* o, const bcore_arr_st_s* args ){ return haptive_eval_grad_s_run( o ); }
+  static inline s2_t haptive_eval_grad_s_main( haptive_eval_grad_s* o, const bcore_arr_st_s* args ){return haptive_eval_grad_s_run( o );}
 #define TYPEOF_haptive_eval_e2e_s 70660180
 #define BETH_EXPAND_ITEM_haptive_eval_e2e_s \
   BCORE_DECLARE_OBJECT( haptive_eval_e2e_s ) \
     {aware_t _;st_s name;st_s sig;vd_t src;bhvm_hf3_adl_s* in;bhvm_hf3_adl_s* out;sz_t infer_cycles;s2_t verbosity;f3_t max_dev;bcore_sink* log;haptive_eval_grad_s* grad;}; \
-  static inline void haptive_eval_e2e_s_init_x( haptive_eval_e2e_s* o ){ o->log = bcore_fork( BCORE_STDOUT ); } \
+  static inline void haptive_eval_e2e_s_init_x( haptive_eval_e2e_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   s2_t haptive_eval_e2e_s_run( const haptive_eval_e2e_s* o ); \
-  static inline s2_t haptive_eval_e2e_s_main( haptive_eval_e2e_s* o, const bcore_arr_st_s* args ){ return haptive_eval_e2e_s_run( o ); }
+  static inline s2_t haptive_eval_e2e_s_main( haptive_eval_e2e_s* o, const bcore_arr_st_s* args ){return haptive_eval_e2e_s_run( o );}
 #define TYPEOF_haptive_eval_arr_s 1794550753
 #define BETH_EXPAND_ITEM_haptive_eval_arr_s \
   BCORE_DECLARE_OBJECT( haptive_eval_arr_s ) \
@@ -860,9 +860,9 @@
 #define BETH_EXPAND_ITEM_haptive_eval_set_s \
   BCORE_DECLARE_OBJECT( haptive_eval_set_s ) \
     {aware_t _;st_s set_name;st_s sig;bhvm_hf3_adl_s* in;bhvm_hf3_adl_s* out;s2_t verbosity;f3_t max_dev;haptive_eval_arr_s arr;bcore_sink* log;}; \
-  static inline void haptive_eval_set_s_init_x( haptive_eval_set_s* o ){ o->log = bcore_fork( BCORE_STDOUT ); } \
+  static inline void haptive_eval_set_s_init_x( haptive_eval_set_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   s2_t haptive_eval_set_s_run( const haptive_eval_set_s* o ); \
-  static inline s2_t haptive_eval_set_s_main( haptive_eval_set_s* o, const bcore_arr_st_s* args ){ return haptive_eval_set_s_run( o ); }
+  static inline s2_t haptive_eval_set_s_main( haptive_eval_set_s* o, const bcore_arr_st_s* args ){return haptive_eval_set_s_run( o );}
 #define BETH_EXPAND_GROUP_haptive_eval \
   BCORE_FORWARD_OBJECT( haptive_eval ); \
   BCORE_FORWARD_OBJECT( haptive_eval_grad_s ); \

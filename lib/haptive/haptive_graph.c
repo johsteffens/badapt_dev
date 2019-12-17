@@ -1820,18 +1820,18 @@ static void net_node_s_vm_build_infer( haptive_net_node_s* o, bhvm_hf3_vm_frame_
 
     ASSERT( o->id >= 0 && o->id < vm_frame->arr_holor.size );
     bhvm_hf3_vm_holor_s* vm_holor = &vm_frame->arr_holor.data[ o->id ];
-    vm_holor->name = o->name;
+    vm_holor->p.name = o->name;
     bhvm_hf3_s_copy( &vm_holor->h, o->h );
     if( o->op && o->op->_ == TYPEOF_haptive_op_ar0_adaptive_s )
     {
         haptive_op_ar0_adaptive_s* op_ar0_adapt = ( haptive_op_ar0_adaptive_s* )o->op;
-        vm_holor->type = TYPEOF_holor_type_adaptive;
-        vm_holor->name = op_ar0_adapt->name;
+        vm_holor->p.type = TYPEOF_holor_type_adaptive;
+        vm_holor->p.name = op_ar0_adapt->name;
         bhvm_hf3_s_copy( &vm_holor->h, op_ar0_adapt->h );
     }
     else
     {
-        vm_holor->type = ( o->h->v_size == 0 ) ? TYPEOF_holor_type_depletable : TYPEOF_holor_type_data;
+        vm_holor->p.type = ( o->h->v_size == 0 ) ? TYPEOF_holor_type_depletable : TYPEOF_holor_type_data;
     }
 
     if( o->op )
@@ -1860,7 +1860,7 @@ static void net_node_s_vm_build_infer( haptive_net_node_s* o, bhvm_hf3_vm_frame_
 
                 case TYPEOF_op_class_cast:
                 {
-                    vm_holor->type = TYPEOF_holor_type_cast;
+                    vm_holor->p.type = TYPEOF_holor_type_cast;
                     bhvm_hf3_vm_frame_s_mcode_op_push_d( vm_frame, TYPEOF_mcode_name_cast, vm_op );
                 }
                 break;
@@ -1901,18 +1901,18 @@ static void node_s_vm_build_bp_grad( haptive_net_node_s* o, sz_t up_index, bhvm_
         o->gid = vm_frame->arr_holor.size;
 
         bhvm_hf3_vm_holor_s* vm_holor = bhvm_hf3_vm_frame_s_holors_push( vm_frame );
-        vm_holor->name = o->name;
+        vm_holor->p.name = o->name;
         bhvm_hf3_s_copy_shape( &vm_holor->h, o->h );
 
         if( o->op && o->op->_ == TYPEOF_haptive_op_ar0_adaptive_s )
         {
             haptive_op_ar0_adaptive_s* op_adapt = ( haptive_op_ar0_adaptive_s* )o->op;
-            vm_holor->name = op_adapt->name;
-            vm_holor->type = TYPEOF_holor_type_adaptive_grad;
+            vm_holor->p.name = op_adapt->name;
+            vm_holor->p.type = TYPEOF_holor_type_adaptive_grad;
         }
         else
         {
-            vm_holor->type = TYPEOF_holor_type_depletable;
+            vm_holor->p.type = TYPEOF_holor_type_depletable;
 
             /// zero gradient for non-casts
             if( o->dnls.size > 0 && ( haptive_op_a_get_class( o->op ) != TYPEOF_op_class_cast ) )
@@ -1921,8 +1921,8 @@ static void node_s_vm_build_bp_grad( haptive_net_node_s* o, sz_t up_index, bhvm_
             }
         }
 
-        bhvm_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->id  )->idx_paired = o->gid;
-        bhvm_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->gid )->idx_paired = o->id;
+        bhvm_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->id  )->p.idx_paired = o->gid;
+        bhvm_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->gid )->p.idx_paired = o->id;
 
         // build this gradient from all downlinks ...
         BFOR_EACH( i, &o->dnls )
@@ -1989,7 +1989,7 @@ static void node_s_vm_build_bp_grad( haptive_net_node_s* o, sz_t up_index, bhvm_
                 case TYPEOF_op_class_cast:
                 {
                     bhvm_hf3_vm_holor_s* up_vm_holor = bhvm_hf3_vm_frame_s_holors_get_by_index( vm_frame, o->gid );
-                    up_vm_holor->type = TYPEOF_holor_type_cast;
+                    up_vm_holor->p.type = TYPEOF_holor_type_cast;
 
                     /** Note: dendrite pass casts must be added in reverse order.
                      *  This ensures that subsequent casts all refer to the correct target.
@@ -2514,7 +2514,7 @@ void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
     for( sz_t i = 0; i < arr_holor->size; i++ )
     {
         const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
-        switch( holor->type )
+        switch( holor->p.type )
         {
             case TYPEOF_holor_type_depletable:
             case TYPEOF_holor_type_adaptive_grad:
@@ -2571,7 +2571,7 @@ void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
     for( sz_t i = 0; i < arr_holor->size; i++ )
     {
         const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
-        switch( holor->type )
+        switch( holor->p.type )
         {
             case TYPEOF_holor_type_depletable:
             {
@@ -2602,7 +2602,7 @@ void haptive_net_cell_s_vm_build_zero_adaptive_grad( haptive_net_cell_s* o, bhvm
     for( sz_t i = 0; i < arr_holor->size; i++ )
     {
         const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
-        switch( holor->type )
+        switch( holor->p.type )
         {
             case TYPEOF_holor_type_adaptive_grad:
             {
@@ -2687,7 +2687,7 @@ void haptive_vm_adaptive_s_bgrad_adapt( haptive_vm_adaptive_s* o, bmath_vf3_s* v
     BFOR_EACH( i, &o->index_arr_adaptive )
     {
         bhvm_hf3_vm_holor_s* vh = bhvm_hf3_vm_frame_s_holors_get_by_index( &o->vm, o->index_arr_adaptive.data[ i ] );
-        bhvm_hf3_vm_holor_s* vg = bhvm_hf3_vm_frame_s_holors_get_by_index( &o->vm, vh->idx_paired );
+        bhvm_hf3_vm_holor_s* vg = bhvm_hf3_vm_frame_s_holors_get_by_index( &o->vm, vh->p.idx_paired );
         bhvm_hf3_s* h = &vh->h;
         bhvm_hf3_s* g = &vg->h;
         bhvm_hf3_s_mul_scl_add( g, &o->dynamics.epsilon, h, h );
@@ -2748,7 +2748,7 @@ void haptive_bhvm_hf3_vm_frame_s_pull_names( bhvm_hf3_vm_frame_s* o )
     bhvm_hf3_vm_frame_s_entypeof( o, nameof( TYPEOF_mcode_name_zero_adaptive_grad ) );
     BFOR_EACH( i, &o->arr_holor )
     {
-        tp_t tp_name = o->arr_holor.data[ i ].name;
+        tp_t tp_name = o->arr_holor.data[ i ].p.name;
         if( tp_name )
         {
             sc_t sc_name = haptive_nameof( tp_name );
@@ -2820,12 +2820,12 @@ badapt_adaptive* haptive_vm_builder_s_build( const haptive_vm_builder_s* o )
 
     adaptive->index_in       = vmf->input.data [ 1 ];
     adaptive->index_out      = vmf->output.data[ 0 ];
-    adaptive->index_grad_out = vmf->arr_holor.data[ adaptive->index_out ].idx_paired;
+    adaptive->index_grad_out = vmf->arr_holor.data[ adaptive->index_out ].p.idx_paired;
 
     // adaptive holors
     BFOR_EACH( i, &vmf->arr_holor )
     {
-        if( vmf->arr_holor.data[ i ].type == TYPEOF_holor_type_adaptive )
+        if( vmf->arr_holor.data[ i ].p.type == TYPEOF_holor_type_adaptive )
         {
             bcore_arr_sz_s_push( &adaptive->index_arr_adaptive, i );
         }

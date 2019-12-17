@@ -384,7 +384,7 @@ group :op =
             func :: :create_op_of_arn =
             {
                 return ( n == 2 ) ? (::*)::ar2_sub_s_create()
-                     : ( n == 1 ) ? (::*)@clone( o )
+                     : ( n == 1 ) ? (::*)@_clone( o )
                      : NULL;
             };
         };
@@ -530,7 +530,6 @@ group :op =
             func :: :create_vm_op_ap = { return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_cast_htp_s_create(); };
             func :: :create_vm_op_dp = { ASSERT( ch_id == 'a' ); return ( bhvm_hf3_vm_op* )bhvm_hf3_vm_op_ar1_dp_ca_cast_htp_s_create(); };
         };
-
 
         /// ===== other ... =====
 
@@ -782,7 +781,7 @@ group :op =
 
             func :: :create_op_of_arn =
             {
-                return ( n == 2 ) ? (::*)@clone( o )
+                return ( n == 2 ) ? (::*)@_clone( o )
                      : ( n == 1 ) ? (::*)::ar1_neg_s_create()
                      : NULL;
             };

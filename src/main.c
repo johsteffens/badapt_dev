@@ -6,6 +6,7 @@
 #include "bhvm_std.h"
 #include "badapt_dev_signal.h"
 #include "haptive_signal.h"
+#include "lion_signal.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
 
@@ -16,6 +17,7 @@ int main( int argc, char** argv )
     bcore_register_signal_handler( badapt_signal_handler );
     bcore_register_signal_handler( badapt_dev_signal_handler );
     bcore_register_signal_handler( haptive_signal_handler );
+    bcore_register_signal_handler( lion_signal_handler );
 
     // bmath_quicktypes_to_stdout( NULL ); return 0;
 

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2019-11-28T17:18:23Z
+ *  Last File Update: 2019-12-12T12:53:52Z
  *
  *  Copyright and License of this File:
  *
@@ -139,7 +139,7 @@ s2_t haptive_op_ar0_adaptive_s_solve( const haptive_op_ar0_adaptive_s* o, bhvm_h
     {
         bhvm_hf3_s_detach( r );
     }
-
+    
     return 0; // no need to settle
 }
 
@@ -340,7 +340,7 @@ s2_t haptive_op_ar1_htp_s_solve( const haptive_op_ar1_htp_s* o, bhvm_hf3_s** r, 
     {
         bhvm_hf3_s_attach( r, NULL );
     }
-
+    
     return ( *r && (*r)->v_size ) ? 1 : 0;
 }
 
@@ -914,19 +914,10 @@ BCORE_DEFINE_OBJECT_INST_P( haptive_sem_link_s )
     "func ^:get_name;"
 "}";
 
-tp_t haptive_sem_link_s_get_name( const haptive_sem_link_s* o )
-{ return o->name; }
-
 BCORE_DEFINE_OBJECT_INST_P( haptive_sem_links_s )
 "aware bcore_array"
 "{"
     "haptive_sem_link_s => [];"
-    "func haptive_sem:get_link_by_name;"
-    "func haptive_sem:name_exists;"
-    "func haptive_sem:get_link_by_up;"
-    "func haptive_sem:get_link_by_dn;"
-    "func haptive_sem:get_index_by_link;"
-    "func haptive_sem:count_open;"
 "}";
 
 haptive_sem_link_s* haptive_sem_links_s_get_link_by_name( haptive_sem_links_s* o, tp_t name )
@@ -970,8 +961,6 @@ BCORE_DEFINE_OBJECT_INST_P( haptive_sem_body_s )
 "aware bcore_array"
 "{"
     "aware haptive_sem=> [];"
-    "func haptive_sem:name_exists;"
-    "func haptive_sem:get_sem_by_name;"
 "}";
 
 bl_t haptive_sem_body_s_name_exists( const haptive_sem_body_s* o, tp_t name )
@@ -998,18 +987,7 @@ BCORE_DEFINE_OBJECT_INST_P( haptive_sem_cell_s )
     "private haptive_sem_cell_s* parent;"
     "hidden bcore_source_point_s source_point;"
     "func ^:get_name;"
-    "func ^:get_arity;"
-    "func ^:get_enc_by_name;"
-    "func ^:get_exc_by_name;"
-    "func ^:get_enc_by_open;"
-    "func ^:get_enc_by_dn;"
-    "func ^:get_priority;"
-    "func ^:get_cell_by_name;"
-    "func ^:get_link_by_name;"
 "}";
-
-tp_t haptive_sem_cell_s_get_name( const haptive_sem_cell_s* o )
-{ return o->name; }
 
 haptive_sem_cell_s* haptive_sem_cell_s_get_cell_by_name( haptive_sem_cell_s* o, tp_t name )
 {
@@ -1083,14 +1061,12 @@ BCORE_DEFINE_OBJECT_INST_P( haptive_net_node_s )
     "aware haptive_op -> op;"
     "bhvm_hf3_s-> h;"
     "bcore_source_point_s -> source_point;"
-    "func ^:solve;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( haptive_net_nodes_s )
 "aware bcore_array"
 "{"
     "haptive_net_node_s => [];"
-    "func haptive_net:get_by_id;"
 "}";
 
 haptive_net_node_s* haptive_net_nodes_s_get_by_id( haptive_net_nodes_s* o, sz_t id )
@@ -1106,12 +1082,6 @@ BCORE_DEFINE_OBJECT_INST_P( haptive_net_cell_s )
     "haptive_net_nodes_s body;"
     "haptive_net_nodes_s encs;"
     "haptive_net_nodes_s excs;"
-    "func ^:is_consistent;"
-    "func ^:normalize;"
-    "func ^:clear_flags;"
-    "func ^:solve;"
-    "func ^:clear_downlinks;"
-    "func ^:set_downlinks;"
     "func bcore_inst_call:copy_x;"
     "func bcore_via_call:mutated;"
 "}";
@@ -1249,7 +1219,7 @@ vd_t haptive_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "haptive_planted_hash" ), sr_tp( 2215593221 ) );
+            bcore_const_x_set_d( typeof( "haptive_planted_hash" ), sr_tp( 3262565464 ) );
 
             // --------------------------------------------------------------------
             // source: haptive_graph.h
@@ -1579,25 +1549,9 @@ vd_t haptive_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( haptive_sem_get_name, haptive_sem_get_name__ );
             BCORE_REGISTER_FFUNC( haptive_sem_get_name, haptive_sem_link_s_get_name );
             BCORE_REGISTER_OBJECT( haptive_sem_link_s );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_link_by_name, haptive_sem_links_s_get_link_by_name );
-            BCORE_REGISTER_FFUNC( haptive_sem_name_exists, haptive_sem_links_s_name_exists );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_link_by_up, haptive_sem_links_s_get_link_by_up );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_link_by_dn, haptive_sem_links_s_get_link_by_dn );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_index_by_link, haptive_sem_links_s_get_index_by_link );
-            BCORE_REGISTER_FFUNC( haptive_sem_count_open, haptive_sem_links_s_count_open );
             BCORE_REGISTER_OBJECT( haptive_sem_links_s );
-            BCORE_REGISTER_FFUNC( haptive_sem_name_exists, haptive_sem_body_s_name_exists );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_sem_by_name, haptive_sem_body_s_get_sem_by_name );
             BCORE_REGISTER_OBJECT( haptive_sem_body_s );
             BCORE_REGISTER_FFUNC( haptive_sem_get_name, haptive_sem_cell_s_get_name );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_arity, haptive_sem_cell_s_get_arity );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_enc_by_name, haptive_sem_cell_s_get_enc_by_name );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_exc_by_name, haptive_sem_cell_s_get_exc_by_name );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_enc_by_open, haptive_sem_cell_s_get_enc_by_open );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_enc_by_dn, haptive_sem_cell_s_get_enc_by_dn );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_priority, haptive_sem_cell_s_get_priority );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_cell_by_name, haptive_sem_cell_s_get_cell_by_name );
-            BCORE_REGISTER_FFUNC( haptive_sem_get_link_by_name, haptive_sem_cell_s_get_link_by_name );
             BCORE_REGISTER_OBJECT( haptive_sem_cell_s );
             BCORE_REGISTER_OBJECT( haptive_sem_stack_flag_s );
             BCORE_REGISTER_SPECT( haptive_sem );
@@ -1610,16 +1564,8 @@ vd_t haptive_planted_signal_handler( const bcore_signal_s* o )
             // group: haptive_net
             BCORE_REGISTER_OBJECT( haptive_net_link_s );
             BCORE_REGISTER_OBJECT( haptive_net_links_s );
-            BCORE_REGISTER_FFUNC( haptive_net_solve, haptive_net_node_s_solve );
             BCORE_REGISTER_OBJECT( haptive_net_node_s );
-            BCORE_REGISTER_FFUNC( haptive_net_get_by_id, haptive_net_nodes_s_get_by_id );
             BCORE_REGISTER_OBJECT( haptive_net_nodes_s );
-            BCORE_REGISTER_FFUNC( haptive_net_is_consistent, haptive_net_cell_s_is_consistent );
-            BCORE_REGISTER_FFUNC( haptive_net_normalize, haptive_net_cell_s_normalize );
-            BCORE_REGISTER_FFUNC( haptive_net_clear_flags, haptive_net_cell_s_clear_flags );
-            BCORE_REGISTER_FFUNC( haptive_net_solve, haptive_net_cell_s_solve );
-            BCORE_REGISTER_FFUNC( haptive_net_clear_downlinks, haptive_net_cell_s_clear_downlinks );
-            BCORE_REGISTER_FFUNC( haptive_net_set_downlinks, haptive_net_cell_s_set_downlinks );
             BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, haptive_net_cell_s_copy_x );
             BCORE_REGISTER_FFUNC( bcore_via_call_mutated, haptive_net_cell_s_mutated );
             BCORE_REGISTER_OBJECT( haptive_net_cell_s );

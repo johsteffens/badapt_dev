@@ -53,7 +53,7 @@ stamp :grad = aware :
     hidden aware bcore_sink -> log;
     func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
     func : : run;
-    func bcore_main : main = { return @run( o ); };
+    func bcore_main : main = { return @_run( o ); };
 };
 
 /// single end to end test for a cell on a virtual machine
@@ -75,7 +75,7 @@ stamp :e2e = aware :
     // constructor
     func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
     func :               : run;
-    func bcore_main      : main = { return @run( o ); };
+    func bcore_main      : main = { return @_run( o ); };
 };
 
 stamp :arr = aware bcore_array { aware :* []; };
@@ -100,7 +100,7 @@ stamp :set = aware :
     // constructor
     func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
     func :               : run;
-    func bcore_main      : main = { return @run( o ); };
+    func bcore_main      : main = { return @_run( o ); };
 };
 
 #endif // PLANT_SECTION

@@ -99,12 +99,12 @@ s2_t haptive_eval_grad_s_run( const haptive_eval_grad_s* o )
 
     BFOR_EACH( i, &vmf->arr_holor )
     {
-        if( vmf->arr_holor.data[ i ].type != TYPEOF_holor_type_adaptive ) continue;
+        if( vmf->arr_holor.data[ i ].p.type != TYPEOF_holor_type_adaptive ) continue;
 
         bhvm_hf3_vm_holor_s* vm_ha = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, i );
-        bhvm_hf3_vm_holor_s* vm_hg = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, vm_ha->idx_paired );
+        bhvm_hf3_vm_holor_s* vm_hg = bhvm_hf3_vm_frame_s_holors_get_by_index( vmf, vm_ha->p.idx_paired );
 
-        sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vmf, vm_ha->name );
+        sc_t name = bhvm_hf3_vm_frame_s_ifnameof( vmf, vm_ha->p.name );
 
         if( o->verbosity >= 5 )
         {
