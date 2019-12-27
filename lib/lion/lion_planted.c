@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2019-12-27T17:19:13Z
+ *  Last File Update: 2019-12-27T18:50:41Z
  *
  *  Copyright and License of this File:
  *
@@ -137,7 +137,7 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
         {
             bhvm_holor_s_init_weak_from_holor( &hbase->holor_ads.data[ i ], ( i < arity ) ? &a[ i ]->h : hr );
             arr_ci->data[ i ].i = i;
-            arr_ci->data[ i ].c = ( i < arity ) ? 'A' + i : 'Y';
+            arr_ci->data[ i ].c = ( i < arity ) ? 'a' + i : 'y';
         }
     
         result->type_vop_ap = lion_nop_a_defines_type_vop_ap( o ) ? lion_nop_a_type_vop_ap( o ) : 0;
@@ -1002,7 +1002,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2566702602 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2003837385 ) );
 
             // --------------------------------------------------------------------
             // source: lion_nop.h

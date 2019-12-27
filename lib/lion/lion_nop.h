@@ -102,7 +102,7 @@ feature 'a' sz_t priority( const ) = { return 10; };
 feature 'a' sc_t symbol( const )   = { return NULL; };
 
 /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
-feature        'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n ) ? :a_clone( o ) : NULL; };
+feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n ) ? :a_clone( o ) : NULL; };
 
 /** Solve computes the result 'r' from an array of arguments 'a'.
   * 'a' represents an array of pointers. The array size is equal to arity.
@@ -204,7 +204,7 @@ feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) =
         {
             bhvm_holor_s_init_weak_from_holor( &hbase->holor_ads.data[ i ], ( i < arity ) ? &a[ i ]->h : hr );
             arr_ci->data[ i ].i = i;
-            arr_ci->data[ i ].c = ( i < arity ) ? 'A' + i : 'Y';
+            arr_ci->data[ i ].c = ( i < arity ) ? 'a' + i : 'y';
         }
 
         result->type_vop_ap = :a_defines_type_vop_ap( o ) ? :a_type_vop_ap( o ) : 0;

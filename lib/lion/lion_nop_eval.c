@@ -196,10 +196,10 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
         bhvm_mcode_frame_s* frame = BLM_CREATE( bhvm_mcode_frame_s );
         bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
 
-        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'A' );
-        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'Y' );
-        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'a' );
-        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'y' );
+        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'a' );
+        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'y' );
+        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'f' );
+        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'z' );
 
         bhvm_holor_s* ina  = &frame->hbase->holor_ads.data[ i_ina  ];
         bhvm_holor_s* out  = &frame->hbase->holor_ads.data[ i_out  ];
@@ -422,12 +422,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
         bhvm_mcode_frame_s* frame = BLM_CREATE( bhvm_mcode_frame_s );
         bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
 
-        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'A' );
-        sz_t i_inb  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &hb->h, NULL, 'B' );
-        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'Y' );
-        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'a' );
-        sz_t i_ginb = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &hb->h, NULL, 'b' );
-        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'y' );
+        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'a' );
+        sz_t i_inb  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &hb->h, NULL, 'b' );
+        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'y' );
+        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'f' );
+        sz_t i_ginb = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &hb->h, NULL, 'g' );
+        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'z' );
 
         bhvm_holor_s* ina  = &frame->hbase->holor_ads.data[ i_ina  ];
         bhvm_holor_s* inb  = &frame->hbase->holor_ads.data[ i_inb  ];
