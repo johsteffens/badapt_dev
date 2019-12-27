@@ -16,6 +16,7 @@
 #include "lion_signal.h"
 #include "lion_planted.h"
 #include "lion_nop.h"
+#include "lion_nop_eval.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,6 +38,7 @@ vd_t lion_signal_handler( const bcore_signal_s* o )
         {
             lion_planted_signal_handler,
             lion_nop_signal_handler,
+            lion_nop_eval_signal_handler,
         };
 
         ret = bcore_signal_s_broadcast( o, arr, sizeof( arr ) / sizeof( bcore_fp_signal_handler ) );
