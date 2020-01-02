@@ -1,14 +1,16 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2019-12-27T18:50:41Z
+ *  Last File Update: 2020-01-02T13:50:25Z
  *
  *  Copyright and License of this File:
  *
  *  Generated code inherits the copyright and license of the underlying beth-plant source code.
  *  Source code defining this file is distributed across following files:
  *
+ *  lion_root.h
  *  lion_nop.h
  *  lion_nop_eval.h
+ *  lion_sem.h
  *
  */
 
@@ -20,8 +22,8 @@
 
 
 /**********************************************************************************************************************/
-// source: lion_nop.h
-#include "lion_nop.h"
+// source: lion_root.h
+#include "lion_root.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion
@@ -41,6 +43,10 @@ BCORE_DEFINE_OBJECT_INST_P( lion_holor_s )
     "bhvm_holor_s h;"
     "func bcore_fp:copy_typed;"
 "}";
+
+/**********************************************************************************************************************/
+// source: lion_nop.h
+#include "lion_nop.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_nop
@@ -913,6 +919,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_generator_s )
     "f3_t v_min = -1;"
     "f3_t v_max = 1;"
     "sz_t cycles = 0;"
+    "bcore_arr_uz_s tolerated_cycles;"
     "aware lion_nop_eval=> eval;"
     "func ^:set_param;"
     "func ^:run;"
@@ -994,6 +1001,134 @@ BCORE_DEFINE_SPECT( bcore_inst, lion_nop_eval )
 "}";
 
 /**********************************************************************************************************************/
+// source: lion_sem.h
+#include "lion_sem.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_sem
+
+BCORE_DEFINE_OBJECT_INST_P( lion_sem_context_s )
+"aware bcore_inst"
+"{"
+    "bcore_hmap_name_s hmap_name;"
+    "bcore_arr_st_s arr_symbol_op2;"
+    "lion_sem_cell_s => cell;"
+    "bcore_arr_tp_s control_types;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_sem_link_s )
+"aware lion_sem"
+"{"
+    "tp_t name;"
+    "private lion_sem_link_s -> up;"
+    "private lion_sem_link_s -> dn;"
+    "private vd_t cell;"
+    "bl_t exit;"
+    "func ^:get_name;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_sem_links_s )
+"aware bcore_array"
+"{"
+    "lion_sem_link_s => [];"
+"}";
+
+lion_sem_link_s* lion_sem_links_s_get_link_by_name( lion_sem_links_s* o, tp_t name )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return o->data[ i ];
+    return NULL;
+}
+
+bl_t lion_sem_links_s_name_exists( const lion_sem_links_s* o, tp_t name )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return true;
+    return false;
+}
+
+lion_sem_link_s* lion_sem_links_s_get_link_by_up( lion_sem_links_s* o, lion_sem_link_s* up )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->up == up ) return o->data[ i ];
+    return NULL;
+}
+
+lion_sem_link_s* lion_sem_links_s_get_link_by_dn( lion_sem_links_s* o, lion_sem_link_s* dn )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
+    return NULL;
+}
+
+sz_t lion_sem_links_s_get_index_by_link( lion_sem_links_s* o, lion_sem_link_s* link )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ] == link ) return i;
+    return -1;
+}
+
+sz_t lion_sem_links_s_count_open( const lion_sem_links_s* o )
+{
+    sz_t count = 0;
+    BFOR_EACH( i, o ) count += ( o->data[ i ]->up == NULL );
+    return count;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_sem_body_s )
+"aware bcore_array"
+"{"
+    "aware lion_sem=> [];"
+"}";
+
+bl_t lion_sem_body_s_name_exists( const lion_sem_body_s* o, tp_t name )
+{
+    BFOR_EACH( i, o ) if( lion_sem_a_get_name( o->data[ i ] ) == name ) return true;
+    return false;
+}
+
+lion_sem* lion_sem_body_s_get_sem_by_name( lion_sem_body_s* o, tp_t name )
+{
+    BFOR_EACH( i, o ) if( lion_sem_a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+    return NULL;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_sem_cell_s )
+"aware lion_sem"
+"{"
+    "tp_t name;"
+    "lion_sem_links_s encs;"
+    "lion_sem_links_s excs;"
+    "lion_sem_body_s => body;"
+    "aware lion_nop -> nop;"
+    "sz_t priority = 10;"
+    "private lion_sem_cell_s* parent;"
+    "hidden bcore_source_point_s source_point;"
+    "func ^:get_name;"
+"}";
+
+lion_sem_cell_s* lion_sem_cell_s_get_cell_by_name( lion_sem_cell_s* o, tp_t name )
+{
+    lion_sem* sem = o->body ? lion_sem_body_s_get_sem_by_name( o->body, name ) : NULL;
+    if( sem && sem->_ == TYPEOF_lion_sem_cell_s ) return ( lion_sem_cell_s* )sem;
+    if( o->parent ) return lion_sem_cell_s_get_cell_by_name( o->parent, name );
+    return NULL;
+}
+
+lion_sem_link_s* lion_sem_cell_s_get_link_by_name( lion_sem_cell_s* o, tp_t name )
+{
+    lion_sem* sem = o->body ? lion_sem_body_s_get_sem_by_name( o->body, name ) : NULL;
+    if( sem && sem->_ == TYPEOF_lion_sem_link_s ) return ( lion_sem_link_s* )sem;
+    return NULL;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_sem_stack_flag_s )
+"aware lion_sem"
+"{"
+"}";
+
+BCORE_DEFINE_SPECT( bcore_inst, lion_sem )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware lion_sem : get_name = lion_sem_get_name__;"
+"}";
+
+/**********************************************************************************************************************/
 
 vd_t lion_planted_signal_handler( const bcore_signal_s* o )
 {
@@ -1002,16 +1137,19 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2003837385 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 214799528 ) );
 
             // --------------------------------------------------------------------
-            // source: lion_nop.h
+            // source: lion_root.h
 
             // group: lion
             BCORE_REGISTER_OBJECT( lion_hmeta_s );
             BCORE_REGISTER_FFUNC( bcore_fp_copy_typed, lion_holor_s_copy_typed );
             BCORE_REGISTER_OBJECT( lion_holor_s );
             BCORE_REGISTER_TRAIT( lion, bcore_inst );
+
+            // --------------------------------------------------------------------
+            // source: lion_nop.h
 
             // group: lion_nop
             BCORE_REGISTER_NAME( nop_class_regular );
@@ -1368,6 +1506,31 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_main_main, lion_nop_eval_ar2_s_main );
             BCORE_REGISTER_OBJECT( lion_nop_eval_ar2_s );
             BCORE_REGISTER_SPECT( lion_nop_eval );
+
+            // --------------------------------------------------------------------
+            // source: lion_sem.h
+
+            // group: lion_sem
+            BCORE_REGISTER_OBJECT( lion_sem_context_s );
+            BCORE_REGISTER_NAME( cell );
+            BCORE_REGISTER_NAME( if );
+            BCORE_REGISTER_NAME( then );
+            BCORE_REGISTER_NAME( else );
+            BCORE_REGISTER_NAME( holor_type_data );
+            BCORE_REGISTER_NAME( holor_type_depletable );
+            BCORE_REGISTER_NAME( holor_type_adaptive );
+            BCORE_REGISTER_NAME( holor_type_adaptive_grad );
+            BCORE_REGISTER_NAME( holor_type_cast );
+            BCORE_REGISTER_FEATURE( lion_sem_get_name );
+            BCORE_REGISTER_FFUNC( lion_sem_get_name, lion_sem_get_name__ );
+            BCORE_REGISTER_FFUNC( lion_sem_get_name, lion_sem_link_s_get_name );
+            BCORE_REGISTER_OBJECT( lion_sem_link_s );
+            BCORE_REGISTER_OBJECT( lion_sem_links_s );
+            BCORE_REGISTER_OBJECT( lion_sem_body_s );
+            BCORE_REGISTER_FFUNC( lion_sem_get_name, lion_sem_cell_s_get_name );
+            BCORE_REGISTER_OBJECT( lion_sem_cell_s );
+            BCORE_REGISTER_OBJECT( lion_sem_stack_flag_s );
+            BCORE_REGISTER_SPECT( lion_sem );
         }
         break;
         default: break;

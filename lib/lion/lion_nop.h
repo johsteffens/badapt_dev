@@ -24,55 +24,8 @@
 
 #include "bmath_std.h"
 #include "bhvm_mcode.h"
+#include "lion_root.h"
 #include "lion_planted.h"
-
-/**********************************************************************************************************************/
-
-#ifdef TYPEOF_lion
-
-PLANT_GROUP( lion, bcore_inst )
-#ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-signature void clear( mutable );
-
-stamp :hmeta = aware bhvm_mcode_hmeta
-{
-    tp_t name;
-    tp_t class;
-    bl_t htp;  // holor is transposed
-
-    func : :clear = { o->name = o->class = 0; o->htp = false; };
-};
-
-stamp :holor = aware :
-{
-    :hmeta_s     m;
-    bhvm_holor_s h;
-
-    func bcore_fp :copy_typed;
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-void lion_holor_s_to_sink(      const lion_holor_s* o, bcore_sink* sink );
-void lion_holor_s_to_sink_nl(   const lion_holor_s* o, bcore_sink* sink ); // appends newline
-void lion_holor_s_to_stdout(    const lion_holor_s* o );
-void lion_holor_s_to_stdout_nl( const lion_holor_s* o ); // appends newline
-
-/** compacted version, single line */
-void lion_holor_s_brief_to_sink(       const lion_holor_s* o, bcore_sink* sink );
-void lion_holor_s_brief_to_stdout(     const lion_holor_s* o );
-
-/** multiline version */
-void lion_holor_s_formatted_to_sink(   const lion_holor_s* o, bcore_sink* sink );
-void lion_holor_s_formatted_to_stdout( const lion_holor_s* o );
-
-/// sets holor from text source
-void lion_holor_s_parse( lion_holor_s* o, bcore_source* source );
-
-#endif // TYPEOF_lion
 
 /**********************************************************************************************************************/
 

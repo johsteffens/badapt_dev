@@ -99,8 +99,11 @@ stamp :generator = aware :
     sz_t max_dim        =  3;
     f3_t v_min          = -1;
     f3_t v_max          =  1;
+    sz_t cycles         =  0;
 
-    sz_t cycles         = 0;
+    // Cycles with borderline conditions producing an error despite being mathematically correct
+    // are not marked as error if listed in tolerated_cycles.
+    bcore_arr_uz_s tolerated_cycles;
     aware : => eval;
 
     func : :set_param = { :param_s_set( &o->param, param ); };

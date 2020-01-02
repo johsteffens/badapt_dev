@@ -30,7 +30,7 @@ void haptive_sem_cell_s_create_args_out( haptive_sem_cell_s* o, bcore_source* so
 void haptive_sem_cell_s_create_args_in(  haptive_sem_cell_s* o, haptive_sem_cell_s* frame, bcore_source* source );
 void haptive_sem_cell_s_wrap_cell(       haptive_sem_cell_s* o, haptive_sem_cell_s* cell );
 
-void             haptive_sem_cell_s_parse(               haptive_sem_cell_s* o,                        bcore_source* source );
+void                haptive_sem_cell_s_parse(               haptive_sem_cell_s* o,                        bcore_source* source );
 haptive_sem*        haptive_sem_cell_s_evaluate_sem(        haptive_sem_cell_s* o,                        bcore_source* source );
 haptive_sem*        haptive_sem_cell_s_evaluate_sem_stack(  haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
 haptive_sem_cell_s* haptive_sem_cell_s_evaluate_cell(       haptive_sem_cell_s* o,                        bcore_source* source );
@@ -39,9 +39,7 @@ haptive_sem_link_s* haptive_sem_cell_s_evaluate_link(       haptive_sem_cell_s* 
 haptive_sem_link_s* haptive_sem_cell_s_evaluate_link_stack( haptive_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
 haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d(      haptive_sem_cell_s* o, haptive_op* op );
 haptive_sem_cell_s* haptive_sem_cell_s_push_cell_op_d_reset_name( haptive_sem_cell_s* o, haptive_op* op );
-void             haptive_sem_cell_s_set_channels(        haptive_sem_cell_s* o, sz_t excs, sz_t encs );
-
-haptive_net_cell_s* haptive_net_cell_s_create_from_sem_link( haptive_sem_link_s* sem_link );
+void                haptive_sem_cell_s_set_channels(        haptive_sem_cell_s* o, sz_t excs, sz_t encs );
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -702,7 +700,7 @@ void haptive_sem_cell_s_parse_verify_signature( const haptive_sem_cell_s* o, bco
     // parse excs
     {
         bl_t first = true;
-        sz_t index= 0;
+        sz_t index = 0;
         bl_t err = false;
         while( !err && !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
         {

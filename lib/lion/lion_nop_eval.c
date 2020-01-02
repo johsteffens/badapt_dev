@@ -86,9 +86,12 @@ lion_nop_eval_result_s* lion_nop_eval_generator_s_run( const lion_nop_eval_gener
         lion_nop_eval_result_s* r = BLM_A_PUSH( lion_nop_eval_a_run( eval ) );
         if( r && r->error )
         {
-            st_s* s = BLM_A_PUSH( st_s_clone( &r->msg ) );
-            st_s_copy_fa( &r->msg, "At cycle #<sz_t>:\n#<st_s*>", i, s );
-            BLM_RETURNV( lion_nop_eval_result_s*, lion_nop_eval_result_s_clone( r ) );
+            if( bcore_arr_uz_s_find( &o->tolerated_cycles, 0, -1, i ) == o->tolerated_cycles.size )
+            {
+                st_s* s = BLM_A_PUSH( st_s_clone( &r->msg ) );
+                st_s_copy_fa( &r->msg, "At cycle #<sz_t>:\n#<st_s*>", i, s );
+                BLM_RETURNV( lion_nop_eval_result_s*, lion_nop_eval_result_s_clone( r ) );
+            }
         }
         BLM_DOWN();
     }

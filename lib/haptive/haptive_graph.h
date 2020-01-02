@@ -317,7 +317,6 @@ group :op =
                 bhvm_hf3_s_attach( r, bcore_fork( o->h ) );
                 return ( *r && (*r)->v_size ) ? 1 : 0;
             };
-
         };
 
         /// formal input (used for resolving the network; not part of syntax)

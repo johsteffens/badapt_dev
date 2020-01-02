@@ -1,14 +1,16 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2019-12-27T18:50:41Z
+ *  Last File Update: 2020-01-02T13:50:25Z
  *
  *  Copyright and License of this File:
  *
  *  Generated code inherits the copyright and license of the underlying beth-plant source code.
  *  Source code defining this file is distributed across following files:
  *
+ *  lion_root.h
  *  lion_nop.h
  *  lion_nop_eval.h
+ *  lion_sem.h
  *
  */
 
@@ -19,7 +21,7 @@
 
 
 /**********************************************************************************************************************/
-// source: lion_nop.h
+// source: lion_root.h
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion
@@ -42,6 +44,9 @@
   BCORE_FORWARD_OBJECT( lion_holor_s ); \
   BETH_EXPAND_ITEM_lion_hmeta_s \
   BETH_EXPAND_ITEM_lion_holor_s
+
+/**********************************************************************************************************************/
+// source: lion_nop.h
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_nop
@@ -650,7 +655,7 @@
 #define TYPEOF_lion_nop_eval_generator_s 3224773740
 #define BETH_EXPAND_ITEM_lion_nop_eval_generator_s \
   BCORE_DECLARE_OBJECT( lion_nop_eval_generator_s ) \
-    {aware_t _;lion_nop_eval_param_s param;bl_t set_htp;bl_t set_value;bl_t set_shape;bl_t set_dim;bl_t set_v_type;sz_t max_shape_size;sz_t max_dim;f3_t v_min;f3_t v_max;sz_t cycles;lion_nop_eval* eval;}; \
+    {aware_t _;lion_nop_eval_param_s param;bl_t set_htp;bl_t set_value;bl_t set_shape;bl_t set_dim;bl_t set_v_type;sz_t max_shape_size;sz_t max_dim;f3_t v_min;f3_t v_max;sz_t cycles;bcore_arr_uz_s tolerated_cycles;lion_nop_eval* eval;}; \
   static inline void lion_nop_eval_generator_s_set_param( lion_nop_eval_generator_s* o, const lion_nop_eval_param_s* param ){lion_nop_eval_param_s_set( &o->param, param );} \
   lion_nop_eval_result_s* lion_nop_eval_generator_s_run( const lion_nop_eval_generator_s* o ); \
   static inline s2_t lion_nop_eval_generator_s_main( lion_nop_eval_generator_s* o, const bcore_arr_st_s* args ){lion_nop_eval_result_s_resolve( lion_nop_eval_generator_s_run( o ) ); return 0;}
@@ -731,6 +736,114 @@
   BETH_EXPAND_ITEM_lion_nop_eval_set_s \
   BETH_EXPAND_ITEM_lion_nop_eval_ar1_s \
   BETH_EXPAND_ITEM_lion_nop_eval_ar2_s
+
+/**********************************************************************************************************************/
+// source: lion_sem.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_sem
+
+#define TYPEOF_lion_sem 2576968235
+#define TYPEOF_lion_sem_s 2089841725
+#define TYPEOF_lion_sem_context_s 2384100905
+#define BETH_EXPAND_ITEM_lion_sem_context_s \
+  BCORE_DECLARE_OBJECT( lion_sem_context_s ) \
+    {aware_t _;bcore_hmap_name_s hmap_name;bcore_arr_st_s arr_symbol_op2;lion_sem_cell_s* cell;bcore_arr_tp_s control_types;};
+#define TYPEOF_cell 1759288501
+#define TYPEOF_if 959999494
+#define TYPEOF_then 3844270454
+#define TYPEOF_else 3183434736
+#define TYPEOF_holor_type_data 393476823
+#define TYPEOF_holor_type_depletable 4171047993
+#define TYPEOF_holor_type_adaptive 612987657
+#define TYPEOF_holor_type_adaptive_grad 3377896594
+#define TYPEOF_holor_type_cast 1844256624
+#define TYPEOF_lion_sem_link_s 2798512654
+#define BETH_EXPAND_ITEM_lion_sem_link_s \
+  BCORE_DECLARE_OBJECT( lion_sem_link_s ) \
+    {aware_t _;tp_t name;lion_sem_link_s* up;lion_sem_link_s* dn;vd_t cell;bl_t exit;}; \
+  static inline tp_t lion_sem_link_s_get_name( const lion_sem_link_s* o ){return o->name;}
+#define TYPEOF_lion_sem_links_s 2159338623
+#define BETH_EXPAND_ITEM_lion_sem_links_s \
+  BCORE_DECLARE_OBJECT( lion_sem_links_s ) \
+    {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_sem_link_s, );}; \
+  lion_sem_link_s* lion_sem_links_s_get_link_by_name( lion_sem_links_s* o, tp_t name ); \
+  bl_t lion_sem_links_s_name_exists( const lion_sem_links_s* o, tp_t name ); \
+  lion_sem_link_s* lion_sem_links_s_get_link_by_up( lion_sem_links_s* o, lion_sem_link_s* up ); \
+  lion_sem_link_s* lion_sem_links_s_get_link_by_dn( lion_sem_links_s* o, lion_sem_link_s* dn ); \
+  sz_t lion_sem_links_s_get_index_by_link( lion_sem_links_s* o, lion_sem_link_s* link ); \
+  sz_t lion_sem_links_s_count_open( const lion_sem_links_s* o ); \
+  static inline void lion_sem_links_s_set_space( lion_sem_links_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_sem_links_s, ( bcore_array* )o, size ); } \
+  static inline void lion_sem_links_s_set_size( lion_sem_links_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_sem_links_s, ( bcore_array* )o, size ); } \
+  static inline void lion_sem_links_s_clear( lion_sem_links_s* o ) { bcore_array_t_set_space( TYPEOF_lion_sem_links_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_sem_link_s* lion_sem_links_s_push_c( lion_sem_links_s* o, const lion_sem_link_s* v ) { bcore_array_t_push( TYPEOF_lion_sem_links_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_sem_link_s, v ) ); return o->data[ o->size - 1 ]; } \
+  static inline lion_sem_link_s* lion_sem_links_s_push_d( lion_sem_links_s* o,       lion_sem_link_s* v ) { bcore_array_t_push( TYPEOF_lion_sem_links_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_sem_link_s, v ) ); return o->data[ o->size - 1 ]; } \
+  static inline lion_sem_link_s* lion_sem_links_s_push( lion_sem_links_s* o ) \
+  { \
+      bcore_array_t_push( TYPEOF_lion_sem_links_s, ( bcore_array* )o, sr_t_create( TYPEOF_lion_sem_link_s ) ); \
+      return o->data[ o->size - 1 ]; \
+  }
+#define TYPEOF_lion_sem_body_s 1290276002
+#define BETH_EXPAND_ITEM_lion_sem_body_s \
+  BCORE_DECLARE_OBJECT( lion_sem_body_s ) \
+    {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_sem, );}; \
+  bl_t lion_sem_body_s_name_exists( const lion_sem_body_s* o, tp_t name ); \
+  lion_sem* lion_sem_body_s_get_sem_by_name( lion_sem_body_s* o, tp_t name ); \
+  static inline void lion_sem_body_s_set_space( lion_sem_body_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_sem_body_s, ( bcore_array* )o, size ); } \
+  static inline void lion_sem_body_s_set_size( lion_sem_body_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_sem_body_s, ( bcore_array* )o, size ); } \
+  static inline void lion_sem_body_s_clear( lion_sem_body_s* o ) { bcore_array_t_set_space( TYPEOF_lion_sem_body_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_sem* lion_sem_body_s_push_c( lion_sem_body_s* o, const lion_sem* v ) { bcore_array_t_push( TYPEOF_lion_sem_body_s, ( bcore_array* )o, sr_awc( v ) ); return o->data[ o->size - 1 ]; } \
+  static inline lion_sem* lion_sem_body_s_push_d( lion_sem_body_s* o,       lion_sem* v ) { bcore_array_t_push( TYPEOF_lion_sem_body_s, ( bcore_array* )o, sr_asd( v ) ); return o->data[ o->size - 1 ]; } \
+  static inline lion_sem* lion_sem_body_s_push_t( lion_sem_body_s* o, tp_t t ) \
+  { \
+      bcore_trait_assert_satisfied_type( TYPEOF_lion_sem, t ); \
+      bcore_array_t_push( TYPEOF_lion_sem_body_s, ( bcore_array* )o, sr_t_create( t ) ); \
+      return o->data[ o->size - 1 ]; \
+  }
+#define TYPEOF_lion_sem_cell_s 2003406506
+#define BETH_EXPAND_ITEM_lion_sem_cell_s \
+  BCORE_DECLARE_OBJECT( lion_sem_cell_s ) \
+    {aware_t _;tp_t name;lion_sem_links_s encs;lion_sem_links_s excs;lion_sem_body_s* body;lion_nop* nop;sz_t priority;lion_sem_cell_s* parent;bcore_source_point_s source_point;}; \
+  static inline tp_t lion_sem_cell_s_get_name( const lion_sem_cell_s* o ){return o->name;} \
+  static inline sz_t lion_sem_cell_s_get_arity( const lion_sem_cell_s* o ){return lion_sem_links_s_count_open(       &o->encs       );} \
+  static inline lion_sem_link_s* lion_sem_cell_s_get_enc_by_name( lion_sem_cell_s* o, tp_t name ){return lion_sem_links_s_get_link_by_name( &o->encs, name );} \
+  static inline lion_sem_link_s* lion_sem_cell_s_get_exc_by_name( lion_sem_cell_s* o, tp_t name ){return lion_sem_links_s_get_link_by_name( &o->excs, name );} \
+  static inline lion_sem_link_s* lion_sem_cell_s_get_enc_by_open( lion_sem_cell_s* o ){return lion_sem_links_s_get_link_by_up(   &o->encs, NULL );} \
+  static inline lion_sem_link_s* lion_sem_cell_s_get_enc_by_dn( lion_sem_cell_s* o, lion_sem_link_s* dn ){return lion_sem_links_s_get_link_by_dn(   &o->encs, dn   );} \
+  static inline sz_t lion_sem_cell_s_get_priority( const lion_sem_cell_s* o ){return o->priority;} \
+  lion_sem_cell_s* lion_sem_cell_s_get_cell_by_name( lion_sem_cell_s* o, tp_t name ); \
+  lion_sem_link_s* lion_sem_cell_s_get_link_by_name( lion_sem_cell_s* o, tp_t name );
+#define TYPEOF_lion_sem_stack_flag_s 3570599949
+#define BETH_EXPAND_ITEM_lion_sem_stack_flag_s \
+  BCORE_DECLARE_OBJECT( lion_sem_stack_flag_s ) \
+    {aware_t _;};
+#define BETH_EXPAND_GROUP_lion_sem \
+  BCORE_FORWARD_OBJECT( lion_sem ); \
+  BCORE_FORWARD_OBJECT( lion_sem_context_s ); \
+  BCORE_FORWARD_OBJECT( lion_sem_link_s ); \
+  BCORE_FORWARD_OBJECT( lion_sem_links_s ); \
+  BCORE_FORWARD_OBJECT( lion_sem_body_s ); \
+  BCORE_FORWARD_OBJECT( lion_sem_cell_s ); \
+  BCORE_FORWARD_OBJECT( lion_sem_stack_flag_s ); \
+  typedef tp_t (*lion_sem_get_name)( const lion_sem* o ); \
+  BCORE_DECLARE_SPECT( lion_sem ) \
+  { \
+      bcore_spect_header_s header; \
+      lion_sem_get_name get_name; \
+  }; \
+  static inline lion_sem* lion_sem_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_lion_sem, t ); return ( lion_sem* )bcore_inst_t_create( t ); } \
+  static inline bl_t lion_sem_t_is_trait_of( tp_t t ) { return bcore_trait_is_of( t, TYPEOF_lion_sem ); } \
+  BCORE_DECLARE_VIRTUAL_AWARE_OBJECT( lion_sem ) \
+  static inline bl_t lion_sem_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_lion_sem ); } \
+  BETH_EXPAND_ITEM_lion_sem_context_s \
+  static inline tp_t lion_sem_a_get_name( const lion_sem* o ) { const lion_sem_s* p = lion_sem_s_get_aware( o ); assert( p->get_name ); return p->get_name( o ); } \
+  static inline bl_t lion_sem_a_defines_get_name( const lion_sem* o ) { return true; } \
+  static inline tp_t lion_sem_get_name__( const lion_sem* o ){return 0;} \
+  BETH_EXPAND_ITEM_lion_sem_link_s \
+  BETH_EXPAND_ITEM_lion_sem_links_s \
+  BETH_EXPAND_ITEM_lion_sem_body_s \
+  BETH_EXPAND_ITEM_lion_sem_cell_s \
+  BETH_EXPAND_ITEM_lion_sem_stack_flag_s
 
 /**********************************************************************************************************************/
 
