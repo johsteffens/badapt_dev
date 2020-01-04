@@ -199,10 +199,10 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
         bhvm_mcode_frame_s* frame = BLM_CREATE( bhvm_mcode_frame_s );
         bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
 
-        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'a' );
-        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'y' );
-        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'f' );
-        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'z' );
+        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, &ha->h, NULL, 'a', arr_ci );
+        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame,  &r->h, NULL, 'y', arr_ci );
+        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, &ha->h, NULL, 'f', arr_ci );
+        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame,  &r->h, NULL, 'z', arr_ci );
 
         bhvm_holor_s* ina  = &frame->hbase->holor_ads.data[ i_ina  ];
         bhvm_holor_s* out  = &frame->hbase->holor_ads.data[ i_out  ];
@@ -213,8 +213,8 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
         bhvm_holor_s*  scl = BLM_CREATE( bhvm_holor_s );
         bhvm_holor_s_set_scalar_f3( scl, 1.0 );
 
-        lion_nop_a_mcode_push_ap( nop, result,      arr_ci, frame );
-        lion_nop_a_mcode_push_dp( nop, result, 'a', arr_ci, frame );
+        lion_nop_a_mcode_push_ap_track( nop, result,      arr_ci, frame );
+        lion_nop_a_mcode_push_dp_track( nop, result, 'a', arr_ci, frame );
 
         bhvm_hop_ar0_zro_s_f( out );
 
@@ -425,12 +425,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
         bhvm_mcode_frame_s* frame = BLM_CREATE( bhvm_mcode_frame_s );
         bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
 
-        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'a' );
-        sz_t i_inb  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &hb->h, NULL, 'b' );
-        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'y' );
-        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &ha->h, NULL, 'f' );
-        sz_t i_ginb = bhvm_mcode_frame_s_push_hmc( frame, arr_ci, &hb->h, NULL, 'g' );
-        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame, arr_ci,  &r->h, NULL, 'z' );
+        sz_t i_ina  = bhvm_mcode_frame_s_push_hmc( frame, &ha->h, NULL, 'a', arr_ci );
+        sz_t i_inb  = bhvm_mcode_frame_s_push_hmc( frame, &hb->h, NULL, 'b', arr_ci );
+        sz_t i_out  = bhvm_mcode_frame_s_push_hmc( frame,  &r->h, NULL, 'y', arr_ci );
+        sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, &ha->h, NULL, 'f', arr_ci );
+        sz_t i_ginb = bhvm_mcode_frame_s_push_hmc( frame, &hb->h, NULL, 'g', arr_ci );
+        sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame,  &r->h, NULL, 'z', arr_ci );
 
         bhvm_holor_s* ina  = &frame->hbase->holor_ads.data[ i_ina  ];
         bhvm_holor_s* inb  = &frame->hbase->holor_ads.data[ i_inb  ];
@@ -443,9 +443,9 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
         bhvm_holor_s*  scl = BLM_CREATE( bhvm_holor_s );
         bhvm_holor_s_set_scalar_f3( scl, 1.0 );
 
-        lion_nop_a_mcode_push_ap( nop, result,      arr_ci, frame );
-        lion_nop_a_mcode_push_dp( nop, result, 'a', arr_ci, frame );
-        lion_nop_a_mcode_push_dp( nop, result, 'b', arr_ci, frame );
+        lion_nop_a_mcode_push_ap_track( nop, result,      arr_ci, frame );
+        lion_nop_a_mcode_push_dp_track( nop, result, 'a', arr_ci, frame );
+        lion_nop_a_mcode_push_dp_track( nop, result, 'b', arr_ci, frame );
 
         bhvm_hop_ar0_zro_s_f( out );
 

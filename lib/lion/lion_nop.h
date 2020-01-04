@@ -43,11 +43,20 @@ PLANT_GROUP( lion_nop, bcore_inst )
 name nop_class_regular;
 name nop_class_cast;
 
+// holor classes (possibly redundant)
+name holor_class_data;          // any type of data holder
+name holor_class_depletable;    // holor can be set to vacant before shelving
+name holor_class_adaptive;      // holor is adaptive
+name holor_class_adaptive_grad; // holor represents the gradient of an adaptive holor
+name holor_class_cast;          // holor is the result of a cast (such holors are setup by a cast operator and clear()-ed for shelving)
+
 /// tracks
 name track_ap;
 name track_dp;
 name track_setup_ap;
 name track_setup_dp;
+name track_shelve_ap;
+name track_shelve_dp;
 
 feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o->_ ) ); return -1; };
 feature 'a' tp_t class( const ) = { return TYPEOF_nop_class_regular; };
@@ -171,10 +180,14 @@ feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) =
     BLM_RETURNV( bl_t, true );
 };
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /** Normally, the node solver calls solve after all arguments have been obtained.
  *  Certain (potentially cyclic) operators require a solve for each input channel.
  **/
 feature 'a' bl_t requires_solve_for_each_channel( const ) = { return false; };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /** Finalizes holor.
  *  Default implementation turns it into a literal.
@@ -186,20 +199,75 @@ feature 'a' :* create_final( const, lion_holor_s* h ) =
     return (:*)final;
 };
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// preferred vop type (optional, when the type does not depend on holor parameters)
 feature 'a' tp_t type_vop_ap( const );
 feature 'a' tp_t type_vop_dp_a( const );
 feature 'a' tp_t type_vop_dp_b( const );
 feature 'a' tp_t type_vop_dp_c( const );
 
-feature 'a' void mcode_push_ap( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// axon pass (output) holor + initialization code
+feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, bhvm_mcode_frame_s* mcf ) =
+{
+    bhvm_holor_s* h = &result->h->h;
+    lion_hmeta_s* m = &result->h->m;
+    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+    if( h->v.size == 0 )
+    {
+        bhvm_vop* op;
+
+        bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ) )[ 0 ] = idx;
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, op );
+
+        bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ) )[ 0 ] = idx;
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, op );
+    }
+    return idx;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// dendrite pass (input) gradient holor + initialization code
+feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, bhvm_mcode_frame_s* mcf ) =
+{
+    BLM_INIT();
+
+    bhvm_holor_s* h = BLM_CREATE( bhvm_holor_s );
+    bhvm_holor_s_copy_shape_type( h, &result->h->h );
+    lion_hmeta_s* m = &result->h->m;
+    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+    bhvm_vop* op;
+
+    /// determine holor in setup_dp track
+    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ) )[ 0 ] = idx;
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp, op );
+
+    /// zero holor in dp track
+    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ) )[ 0 ] = idx;
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, op );
+
+    /// clear holor in shelve_dp track
+    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ) )[ 0 ] = idx;
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, op );
+
+    BLM_RETURNV( sz_t, idx );
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+feature 'a' void mcode_push_ap_track( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     assert( result->type_vop_ap );
     tp_t type = ( :a_defines_type_vop_ap( o ) ) ? :a_type_vop_ap( o ) : result->type_vop_ap;
     bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
 };
 
-feature 'a' void mcode_push_dp( const, const :solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+feature 'a' void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     if( ch_id < 'a' || ch_id > 'c' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     if( ch_id >= :a_arity( o ) + 'a' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
@@ -299,6 +367,16 @@ group :ar0 = retrievable
             result->codable = false;
             return true;
         };
+
+        func :: :mcode_push_ap_holor =
+        {
+            bhvm_vop_ar0_randomize_s* randomize = bhvm_vop_ar0_randomize_s_create();
+            sz_t i = ::mcode_push_ap_holor__( ( lion_nop* )o, result, mcf );
+            randomize->i.v[ 0 ] = i;
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, ( bhvm_vop* )randomize );
+            return i;
+        };
+
     };
 
 };
@@ -480,6 +558,7 @@ group :ar1 = retrievable
             ::ar0_adaptive_s* final = ::ar0_adaptive_s_create();
             final->h = lion_holor_s_clone( h );
             final->h->m.name = o->name;
+            final->h->m.class = TYPEOF_holor_class_adaptive;
             return (::*)final;
         };
     };
@@ -789,7 +868,7 @@ group :ar2 = retrievable
         func :: :type_vop_dp_a = { return 0; };
         func :: :type_vop_dp_b = { return 0; };
 
-        func :: :mcode_push_ap =
+        func :: :mcode_push_ap_track =
         {
             bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_setup_ap, bhvm_vop_t_create( TYPEOF_bhvm_vop_ar1_cpy_ay_s ), arr_ci );
             bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap,       bhvm_vop_t_create( TYPEOF_bhvm_vop_ar1_cpy_by_s ), arr_ci );

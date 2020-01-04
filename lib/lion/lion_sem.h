@@ -1,4 +1,4 @@
-/** Author and Copyright 2019 Johannes Bernhard Steffens
+/** Author and Copyright 2020 Johannes Bernhard Steffens
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -204,13 +204,6 @@ name if;
 name then;
 name else;
 
-// holor types
-name holor_type_data;          // any type of data holder
-name holor_type_depletable;    // holor can be set to vacant before shelving
-name holor_type_adaptive;      // holor is adaptive
-name holor_type_adaptive_grad; // holor represents the gradient of an adaptive holor
-name holor_type_cast;          // holor is the result of a cast (such holors are setup by a cast operator and clear()-ed for shelving)
-
 signature   sz_t get_arity( const );
 signature   sz_t get_priority( const );
 feature 'a' tp_t get_name( const ) = { return 0; };
@@ -354,6 +347,14 @@ stamp :stack_flag = aware : {};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+sc_t lion_nameof(   tp_t name );
+sc_t lion_ifnameof( tp_t name );
+tp_t lion_entypeof( sc_t name );
+tp_t lion_entypeof_fv( sc_t format, va_list args );
+tp_t lion_entypeof_fa( sc_t format, ... );
+
+lion_sem_link_s* lion_sem_link_s_trace_to_cell_membrane( lion_sem_link_s* o );
 
 #endif // TYPEOF_lion_sem
 
