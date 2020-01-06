@@ -879,6 +879,181 @@ void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+// builds main vm procedure
+//void haptive_cell_s_vm_build_infer( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+//{
+//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_infer );
+//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_setup );
+//    ASSERT( haptive_net_cell_s_is_consistent( o ) );
+//
+//    bhvm_hf3_vm_arr_holor_s_set_size( &vmf->arr_holor, o->body.size );
+//
+//    for( sz_t i = 0; i < o->excs.size; i++ )
+//    {
+//        haptive_net_node_s* node = o->excs.data[ i ];
+//        if( !node->h ) ERR_fa( "Unsolved node '#<sc_t>'\n", haptive_ifnameof( node->name ) );
+//        net_node_s_vm_build_infer( node, vmf );
+//    }
+//
+//    haptive_net_cell_s_clear_flags( o );
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------
+//
+//// builds bp_grad vm procedure
+//void haptive_cell_s_vm_build_bp_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+//{
+//    if( !bhvm_hf3_vm_frame_s_mcode_exists( vmf, TYPEOF_mcode_name_infer ) )
+//    {
+//        ERR_fa( "Procedure 'infer' missing. Call 'build_infer' first." );
+//    }
+//
+//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_bp_grad );
+//    for( sz_t i = 0; i < o->body.size; i++ )
+//    {
+//        haptive_net_node_s* node = o->body.data[ i ];
+//        if( !node->op ) continue;
+//        if( node->op->_ != TYPEOF_haptive_op_ar0_adaptive_s ) continue;
+//        node_s_vm_build_bp_grad( node, -1, vmf );
+//    }
+//    haptive_net_cell_s_clear_flags( o );
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------
+//
+//void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
+//{
+//    const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
+//    for( sz_t i = 0; i < arr_holor->size; i++ )
+//    {
+//        const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
+//        switch( holor->p.type )
+//        {
+//            case TYPEOF_holor_type_depletable:
+//            case TYPEOF_holor_type_adaptive_grad:
+//            {
+//                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+//            }
+//            break;
+//
+//            case TYPEOF_holor_type_adaptive:
+//            {
+//                if( holor->h.v_size == 0 )
+//                {
+//                    bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
+//                    bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, rseed, 1.0, -0.5, 0.5 ) );
+//                }
+//            }
+//            break;
+//
+//            default: break;
+//        }
+//    }
+//
+//    // moving init subroutines to setup ...
+//
+//    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_cast ) )
+//    {
+//        bhvm_hf3_vm_frame_s_mcode_push( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_cast );
+//        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_cast );
+//    }
+//
+//    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_cast_reverse ) )
+//    {
+//        bhvm_hf3_vm_frame_s_mcode_push_reverse( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_cast_reverse );
+//        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_cast_reverse );
+//    }
+//
+//    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_ap_init ) )
+//    {
+//        bhvm_hf3_vm_frame_s_mcode_push( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_ap_init );
+//        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_ap_init );
+//    }
+//
+//    o->mcode_setup = TYPEOF_mcode_name_setup;
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------
+//
+//// builds vm procedure shelve for all holors
+//void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
+//{
+//    bhvm_hf3_vm_frame_s_mcode_reset( o, TYPEOF_mcode_name_shelve );
+//
+//    const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
+//    for( sz_t i = 0; i < arr_holor->size; i++ )
+//    {
+//        const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
+//        switch( holor->p.type )
+//        {
+//            case TYPEOF_holor_type_depletable:
+//            {
+//                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_shelve, bhvm_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
+//            }
+//            break;
+//
+//            case TYPEOF_holor_type_cast:
+//            {
+//                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_shelve, bhvm_hf3_vm_op_ar0_clear_s_csetup( NULL, i ) );
+//            }
+//            break;
+//
+//            default: break;
+//        }
+//    }
+//    o->mcode_shelve = TYPEOF_mcode_name_shelve;
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------
+//
+//// sets adaptive gradients to zero
+//void haptive_net_cell_s_vm_build_zero_adaptive_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+//{
+//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_zero_adaptive_grad );
+//
+//    const bhvm_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
+//    for( sz_t i = 0; i < arr_holor->size; i++ )
+//    {
+//        const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
+//        switch( holor->p.type )
+//        {
+//            case TYPEOF_holor_type_adaptive_grad:
+//            {
+//                bhvm_hf3_vm_frame_s_mcode_op_push_d( vmf, TYPEOF_mcode_name_zero_adaptive_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, i ) );
+//            }
+//            break;
+//
+//            default: break;
+//        }
+//    }
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------
+//
+//void haptive_net_cell_s_vm_set_input( const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+//{
+//    bcore_arr_sz_s_clear( &vmf->input );
+//    for( sz_t i = 0; i < o->encs.size; i++ )
+//    {
+//        const haptive_net_node_s* node = o->encs.data[ i ];
+//        bhvm_hf3_vm_frame_s_input_push( vmf, node->id );
+//    }
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------
+//
+//void haptive_net_cell_s_vm_set_output( const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
+//{
+//    bcore_arr_sz_s_clear( &vmf->output );
+//    for( sz_t i = 0; i < o->excs.size; i++ )
+//    {
+//        const haptive_net_node_s* node = o->excs.data[ i ];
+//        bhvm_hf3_vm_frame_s_output_push( vmf, node->id );
+//    }
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------
+
 /**********************************************************************************************************************/
 
 vd_t lion_net_signal_handler( const bcore_signal_s* o )

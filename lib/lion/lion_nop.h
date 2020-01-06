@@ -158,10 +158,9 @@ feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) =
         bhvm_holor_s_fit_size( hr );
 
         // We setup a mini frame and run vop_ap on it.
-        bhvm_mcode_hbase_s* hbase = BLM_CREATE( bhvm_mcode_hbase_s );
-        bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
-        bhvm_mcode_hbase_s_set_size( hbase, arity + 1 );
-        bhvm_vop_arr_ci_s_set_size( arr_ci, arity + 1 );
+        bhvm_mcode_hbase_s* hbase = BLM_CREATEC( bhvm_mcode_hbase_s, set_size, arity + 1 );
+        bhvm_vop_arr_ci_s* arr_ci = BLM_CREATEC( bhvm_vop_arr_ci_s,  set_size, arity + 1 );
+
         for( sz_t i = 0; i <= arity; i++ )
         {
             bhvm_holor_s_init_weak_from_holor( &hbase->holor_ads.data[ i ], ( i < arity ) ? &a[ i ]->h : hr );
@@ -171,9 +170,8 @@ feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) =
 
         result->type_vop_ap = :a_defines_type_vop_ap( o ) ? :a_type_vop_ap( o ) : 0;
         assert( result->type_vop_ap );
-        bhvm_vop* vop = BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) );
-        bhvm_vop_a_set_args( vop, arr_ci );
-        bhvm_vop_a_run( vop, hbase->holor_ads.data );
+
+        bhvm_vop_a_run( bhvm_vop_a_set_args( BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) ), arr_ci ), hbase->holor_ads.data );
     }
 
     result->settled = settled;
@@ -235,8 +233,7 @@ feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, bhvm
 {
     BLM_INIT();
 
-    bhvm_holor_s* h = BLM_CREATE( bhvm_holor_s );
-    bhvm_holor_s_copy_shape_type( h, &result->h->h );
+    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     bhvm_vop* op;

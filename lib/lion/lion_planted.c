@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-01-04T12:29:22Z
+ *  Last File Update: 2020-01-06T11:02:25Z
  *
  *  Copyright and License of this File:
  *
@@ -138,10 +138,9 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
         bhvm_holor_s_fit_size( hr );
     
         // We setup a mini frame and run vop_ap on it.
-        bhvm_mcode_hbase_s* hbase = BLM_CREATE( bhvm_mcode_hbase_s );
-        bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
-        bhvm_mcode_hbase_s_set_size( hbase, arity + 1 );
-        bhvm_vop_arr_ci_s_set_size( arr_ci, arity + 1 );
+        bhvm_mcode_hbase_s* hbase = BLM_CREATEC( bhvm_mcode_hbase_s, set_size, arity + 1 );
+        bhvm_vop_arr_ci_s* arr_ci = BLM_CREATEC( bhvm_vop_arr_ci_s,  set_size, arity + 1 );
+    
         for( sz_t i = 0; i <= arity; i++ )
         {
             bhvm_holor_s_init_weak_from_holor( &hbase->holor_ads.data[ i ], ( i < arity ) ? &a[ i ]->h : hr );
@@ -151,9 +150,8 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
     
         result->type_vop_ap = lion_nop_a_defines_type_vop_ap( o ) ? lion_nop_a_type_vop_ap( o ) : 0;
         assert( result->type_vop_ap );
-        bhvm_vop* vop = BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) );
-        bhvm_vop_a_set_args( vop, arr_ci );
-        bhvm_vop_a_run( vop, hbase->holor_ads.data );
+    
+        bhvm_vop_a_run( bhvm_vop_a_set_args( BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) ), arr_ci ), hbase->holor_ads.data );
     }
     
     result->settled = settled;
@@ -189,8 +187,7 @@ sz_t lion_nop_mcode_push_dp_holor__( const lion_nop* o, const lion_nop_solve_res
 {
     BLM_INIT();
     
-    bhvm_holor_s* h = BLM_CREATE( bhvm_holor_s );
-    bhvm_holor_s_copy_shape_type( h, &result->h->h );
+    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     bhvm_vop* op;
@@ -1291,7 +1288,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1159743438 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 217599379 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

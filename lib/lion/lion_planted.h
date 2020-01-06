@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-01-04T12:29:22Z
+ *  Last File Update: 2020-01-06T11:02:25Z
  *
  *  Copyright and License of this File:
  *
@@ -689,9 +689,9 @@
 #define BETH_EXPAND_ITEM_lion_nop_eval_arr_s \
   BCORE_DECLARE_OBJECT( lion_nop_eval_arr_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_nop_eval, );}; \
-  static inline void lion_nop_eval_arr_s_set_space( lion_nop_eval_arr_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, size ); } \
-  static inline void lion_nop_eval_arr_s_set_size( lion_nop_eval_arr_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, size ); } \
-  static inline void lion_nop_eval_arr_s_clear( lion_nop_eval_arr_s* o ) { bcore_array_t_set_space( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_nop_eval_arr_s* lion_nop_eval_arr_s_set_space( lion_nop_eval_arr_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_nop_eval_arr_s* lion_nop_eval_arr_s_set_size( lion_nop_eval_arr_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_nop_eval_arr_s* lion_nop_eval_arr_s_clear( lion_nop_eval_arr_s* o ) { bcore_array_t_set_space( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, 0 ); return o; } \
   static inline lion_nop_eval* lion_nop_eval_arr_s_push_c( lion_nop_eval_arr_s* o, const lion_nop_eval* v ) { bcore_array_t_push( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, sr_awc( v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_nop_eval* lion_nop_eval_arr_s_push_d( lion_nop_eval_arr_s* o,       lion_nop_eval* v ) { bcore_array_t_push( TYPEOF_lion_nop_eval_arr_s, ( bcore_array* )o, sr_asd( v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_nop_eval* lion_nop_eval_arr_s_push_t( lion_nop_eval_arr_s* o, tp_t t ) \
@@ -787,9 +787,9 @@
   lion_sem_link_s* lion_sem_links_s_get_link_by_dn( lion_sem_links_s* o, lion_sem_link_s* dn ); \
   sz_t lion_sem_links_s_get_index_by_link( lion_sem_links_s* o, lion_sem_link_s* link ); \
   sz_t lion_sem_links_s_count_open( const lion_sem_links_s* o ); \
-  static inline void lion_sem_links_s_set_space( lion_sem_links_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_sem_links_s, ( bcore_array* )o, size ); } \
-  static inline void lion_sem_links_s_set_size( lion_sem_links_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_sem_links_s, ( bcore_array* )o, size ); } \
-  static inline void lion_sem_links_s_clear( lion_sem_links_s* o ) { bcore_array_t_set_space( TYPEOF_lion_sem_links_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_sem_links_s* lion_sem_links_s_set_space( lion_sem_links_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_sem_links_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_sem_links_s* lion_sem_links_s_set_size( lion_sem_links_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_sem_links_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_sem_links_s* lion_sem_links_s_clear( lion_sem_links_s* o ) { bcore_array_t_set_space( TYPEOF_lion_sem_links_s, ( bcore_array* )o, 0 ); return o; } \
   static inline lion_sem_link_s* lion_sem_links_s_push_c( lion_sem_links_s* o, const lion_sem_link_s* v ) { bcore_array_t_push( TYPEOF_lion_sem_links_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_sem_link_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_sem_link_s* lion_sem_links_s_push_d( lion_sem_links_s* o,       lion_sem_link_s* v ) { bcore_array_t_push( TYPEOF_lion_sem_links_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_sem_link_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_sem_link_s* lion_sem_links_s_push( lion_sem_links_s* o ) \
@@ -803,9 +803,9 @@
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_sem, );}; \
   bl_t lion_sem_body_s_name_exists( const lion_sem_body_s* o, tp_t name ); \
   lion_sem* lion_sem_body_s_get_sem_by_name( lion_sem_body_s* o, tp_t name ); \
-  static inline void lion_sem_body_s_set_space( lion_sem_body_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_sem_body_s, ( bcore_array* )o, size ); } \
-  static inline void lion_sem_body_s_set_size( lion_sem_body_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_sem_body_s, ( bcore_array* )o, size ); } \
-  static inline void lion_sem_body_s_clear( lion_sem_body_s* o ) { bcore_array_t_set_space( TYPEOF_lion_sem_body_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_sem_body_s* lion_sem_body_s_set_space( lion_sem_body_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_sem_body_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_sem_body_s* lion_sem_body_s_set_size( lion_sem_body_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_sem_body_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_sem_body_s* lion_sem_body_s_clear( lion_sem_body_s* o ) { bcore_array_t_set_space( TYPEOF_lion_sem_body_s, ( bcore_array* )o, 0 ); return o; } \
   static inline lion_sem* lion_sem_body_s_push_c( lion_sem_body_s* o, const lion_sem* v ) { bcore_array_t_push( TYPEOF_lion_sem_body_s, ( bcore_array* )o, sr_awc( v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_sem* lion_sem_body_s_push_d( lion_sem_body_s* o,       lion_sem* v ) { bcore_array_t_push( TYPEOF_lion_sem_body_s, ( bcore_array* )o, sr_asd( v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_sem* lion_sem_body_s_push_t( lion_sem_body_s* o, tp_t t ) \
@@ -871,9 +871,9 @@
 #define BETH_EXPAND_ITEM_lion_ctr_node_s \
   BCORE_DECLARE_OBJECT( lion_ctr_node_s ) \
     {aware_t _;sz_t id;lion_sem_cell_s* cell;lion_ctr_node_s* parent;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_ctr_node_s, );}; \
-  static inline void lion_ctr_node_s_set_space( lion_ctr_node_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, size ); } \
-  static inline void lion_ctr_node_s_set_size( lion_ctr_node_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, size ); } \
-  static inline void lion_ctr_node_s_clear( lion_ctr_node_s* o ) { bcore_array_t_set_space( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_ctr_node_s* lion_ctr_node_s_set_space( lion_ctr_node_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_ctr_node_s* lion_ctr_node_s_set_size( lion_ctr_node_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_ctr_node_s* lion_ctr_node_s_clear( lion_ctr_node_s* o ) { bcore_array_t_set_space( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, 0 ); return o; } \
   static inline lion_ctr_node_s* lion_ctr_node_s_push_c( lion_ctr_node_s* o, const lion_ctr_node_s* v ) { bcore_array_t_push( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_ctr_node_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_ctr_node_s* lion_ctr_node_s_push_d( lion_ctr_node_s* o,       lion_ctr_node_s* v ) { bcore_array_t_push( TYPEOF_lion_ctr_node_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_ctr_node_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_ctr_node_s* lion_ctr_node_s_push( lion_ctr_node_s* o ) \
@@ -905,9 +905,9 @@
 #define BETH_EXPAND_ITEM_lion_net_links_s \
   BCORE_DECLARE_OBJECT( lion_net_links_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_net_link_s, );}; \
-  static inline void lion_net_links_s_set_space( lion_net_links_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_net_links_s, ( bcore_array* )o, size ); } \
-  static inline void lion_net_links_s_set_size( lion_net_links_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_net_links_s, ( bcore_array* )o, size ); } \
-  static inline void lion_net_links_s_clear( lion_net_links_s* o ) { bcore_array_t_set_space( TYPEOF_lion_net_links_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_net_links_s* lion_net_links_s_set_space( lion_net_links_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_net_links_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_net_links_s* lion_net_links_s_set_size( lion_net_links_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_net_links_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_net_links_s* lion_net_links_s_clear( lion_net_links_s* o ) { bcore_array_t_set_space( TYPEOF_lion_net_links_s, ( bcore_array* )o, 0 ); return o; } \
   static inline lion_net_link_s* lion_net_links_s_push_c( lion_net_links_s* o, const lion_net_link_s* v ) { bcore_array_t_push( TYPEOF_lion_net_links_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_net_link_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_net_link_s* lion_net_links_s_push_d( lion_net_links_s* o,       lion_net_link_s* v ) { bcore_array_t_push( TYPEOF_lion_net_links_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_net_link_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_net_link_s* lion_net_links_s_push( lion_net_links_s* o ) \
@@ -926,9 +926,9 @@
   BCORE_DECLARE_OBJECT( lion_net_nodes_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_net_node_s, );}; \
   lion_net_node_s* lion_net_nodes_s_get_by_id( lion_net_nodes_s* o, sz_t id ); \
-  static inline void lion_net_nodes_s_set_space( lion_net_nodes_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, size ); } \
-  static inline void lion_net_nodes_s_set_size( lion_net_nodes_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, size ); } \
-  static inline void lion_net_nodes_s_clear( lion_net_nodes_s* o ) { bcore_array_t_set_space( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, 0 ); } \
+  static inline lion_net_nodes_s* lion_net_nodes_s_set_space( lion_net_nodes_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_net_nodes_s* lion_net_nodes_s_set_size( lion_net_nodes_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_net_nodes_s* lion_net_nodes_s_clear( lion_net_nodes_s* o ) { bcore_array_t_set_space( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, 0 ); return o; } \
   static inline lion_net_node_s* lion_net_nodes_s_push_c( lion_net_nodes_s* o, const lion_net_node_s* v ) { bcore_array_t_push( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_net_node_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_net_node_s* lion_net_nodes_s_push_d( lion_net_nodes_s* o,       lion_net_node_s* v ) { bcore_array_t_push( TYPEOF_lion_net_nodes_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_net_node_s, v ) ); return o->data[ o->size - 1 ]; } \
   static inline lion_net_node_s* lion_net_nodes_s_push( lion_net_nodes_s* o ) \
