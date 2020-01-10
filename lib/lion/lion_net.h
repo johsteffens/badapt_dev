@@ -17,6 +17,20 @@
 
 /// Network Objects
 
+// TODO
+// - (done) use double-nested-frame
+// - (done) bhvm_value_s_fdev:   (allow all type variations)
+// - (done) finish htp dp pass
+// - replace '=<' by '<-'
+// - current holor literal syntax: is problematic  (() clashes with expression evaluation in brackets), spaces (as catenation) clashes with operator interpretation
+//        ... use same syntax as multidimensional arrays in C? {{1,2},{3,4}}
+//        ... use ':' to cat holors? {{1:2}:{3:4}:{5:6}}  (seems most appropriate)
+//        ... could holor opening '{' clash with cell block opening?  (looking ahead?)
+//        ... should {1:2}:3 be {1:2:3}? (seems necessary if 1:2:3 == (1:2):3)
+//                   problem: {#:#}:{#:#} == [2][2]# or [1][4]# ?
+//
+// - replace ':' with '<:' for cell-cell or cell-holor concatenation
+
 /**********************************************************************************************************************/
 
 #ifndef LION_NET_H
@@ -71,6 +85,7 @@ signature void solve( mutable );
 
 /// returns the uplink index pointing to node; returns -1 if not found
 signature sz_t up_index( const, const :node_s* node );
+signature void set_nop_d( mutable, lion_nop* nop );
 
 stamp :node = aware :
 {
@@ -113,6 +128,12 @@ stamp :node = aware :
     {
         BFOR_EACH( i, &o->upls ) if( o->upls.data[ i ]->node == node ) return i;
         return -1;
+    };
+
+    func : :set_nop_d =
+    {
+        ASSERT( o->result == NULL );
+        lion_nop_a_attach( &o->nop, nop );
     };
 };
 
@@ -167,6 +188,22 @@ stamp :cell = aware :
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/** Converts lion_sem_cell_s to lion_net_cell_s
+ *  Requires a double-nested frame to allow correct processing of input channels with assignments (checked).
+ */
+void lion_net_cell_s_from_sem_cell
+(
+    lion_net_cell_s* o,
+    lion_sem_cell_s* sem_cell,
+    lion_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name, const lion_nop* cur_nop ),
+    vd_t arg,
+    bcore_sink* log
+);
+
+void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink );
+void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf );
+void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf );
 
 #endif // TYPEOF_lion_net
 

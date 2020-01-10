@@ -57,6 +57,7 @@ name track_setup_ap;
 name track_setup_dp;
 name track_shelve_ap;
 name track_shelve_dp;
+name track_reset_dp; // zeros gradients on adaptive nodes
 
 feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o->_ ) ); return -1; };
 feature 'a' tp_t class( const ) = { return TYPEOF_nop_class_regular; };
@@ -98,7 +99,7 @@ stamp :solve_result = aware bcore_inst
     /// Output is settled: Triggers finalization and discards graph spanned by operation if reducible.
     bl_t settled = false;
 
-    /// Operation provides mcode generation
+    /// Non-codabe operators should not enter code generation.
     bl_t codable = true;
 
     /// If settled 'reducible' discards top-spanning graph
@@ -187,14 +188,17 @@ feature 'a' bl_t requires_solve_for_each_channel( const ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/** Finalizes holor.
+/** Settles operator.
  *  Default implementation turns it into a literal.
  **/
-feature 'a' :* create_final( const, lion_holor_s* h ) =
+feature 'a' void settle( const, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
 {
-    :ar0_literal_s* final = :ar0_literal_s_create();
-    final->h = lion_holor_s_clone( h );
-    return (:*)final;
+    :ar0_literal_s* literal = :ar0_literal_s_create();
+    literal->h = lion_holor_s_clone( result->h );
+    :solve_result_s* r = :solve_result_s_create();
+    r->h = bcore_fork( literal->h );
+    :solve_result_s_attach( out_result, r );
+    :a_attach( out_nop, (:*)literal );
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -208,20 +212,15 @@ feature 'a' tp_t type_vop_dp_c( const );
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// axon pass (output) holor + initialization code
-feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, bhvm_mcode_frame_s* mcf ) =
+feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     bhvm_holor_s* h = &result->h->h;
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     if( h->v.size == 0 )
     {
-        bhvm_vop* op;
-
-        bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ) )[ 0 ] = idx;
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, op );
-
-        bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ) )[ 0 ] = idx;
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, op );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     }
     return idx;
 };
@@ -229,26 +228,17 @@ feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, bhvm
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// dendrite pass (input) gradient holor + initialization code
-feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, bhvm_mcode_frame_s* mcf ) =
+feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     BLM_INIT();
 
     bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-    bhvm_vop* op;
 
-    /// determine holor in setup_dp track
-    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ) )[ 0 ] = idx;
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp, op );
-
-    /// zero holor in dp track
-    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ) )[ 0 ] = idx;
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, op );
-
-    /// clear holor in shelve_dp track
-    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ) )[ 0 ] = idx;
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, op );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
 
     BLM_RETURNV( sz_t, idx );
 };
@@ -257,9 +247,8 @@ feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, bhvm
 
 feature 'a' void mcode_push_ap_track( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
-    assert( result->type_vop_ap );
     tp_t type = ( :a_defines_type_vop_ap( o ) ) ? :a_type_vop_ap( o ) : result->type_vop_ap;
-    bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
+    if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -291,6 +280,9 @@ stamp :context = aware bcore_inst
     private bcore_mutex_s* randomizer_mutex;
     bl_t                   randomizer_is_locked = false;
     u2_t                   randomizer_rval = 0;
+
+    func bcore_inst_call : init_x = { o->randomizer_mutex = bcore_mutex_s_create(); };
+    func bcore_inst_call : down_e = { bcore_mutex_s_discard( o->randomizer_mutex ); };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -335,20 +327,18 @@ group :ar0 = retrievable
         {
             lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
             result->settled = true;
-            result->codable = false;
             return true;
         };
     };
 
-    /// formal input (used for resolving the network; not part of language syntax)
-    stamp :input =
+    /// parameter/variable (does not settle); used for cell-frame input and system accessible parameters
+    stamp :param =
     {
         lion_holor_s -> h;
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->settled = true;
-            result->codable = false;
+            result->settled = false;
             return true;
         };
     };
@@ -361,17 +351,24 @@ group :ar0 = retrievable
         {
             lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
             result->settled = false;
-            result->codable = false;
             return true;
         };
 
         func :: :mcode_push_ap_holor =
         {
-            bhvm_vop_ar0_randomize_s* randomize = bhvm_vop_ar0_randomize_s_create();
-            sz_t i = ::mcode_push_ap_holor__( ( lion_nop* )o, result, mcf );
-            randomize->i.v[ 0 ] = i;
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, ( bhvm_vop* )randomize );
-            return i;
+            sz_t idx = ::mcode_push_ap_holor__( ( lion_nop* )o, result, arr_ci, mcf );
+            if( result->h->h.v.size == 0 ) // ramdomize holor if result is vacant
+            {
+                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
+            }
+            return idx;
+        };
+
+        func :: :mcode_push_dp_holor =
+        {
+            sz_t idx = ::mcode_push_dp_holor__( ( lion_nop* )o, result, arr_ci, mcf );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_reset_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+            return idx;
         };
 
     };
@@ -525,7 +522,8 @@ group :ar1 = retrievable
         {
             lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
             result->settled = (result->h) && result->h->h.v.size > 0;
-            result->codable = false;
+            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
         };
     };
@@ -550,14 +548,16 @@ group :ar1 = retrievable
             return true;
         };
 
-        func :: :create_final =
+        func :: :settle =
         {
-            ::ar0_adaptive_s* final = ::ar0_adaptive_s_create();
-            final->h = lion_holor_s_clone( h );
-            final->h->m.name = o->name;
-            final->h->m.class = TYPEOF_holor_class_adaptive;
-            return (::*)final;
+            ::ar0_adaptive_s* adaptive = ::ar0_adaptive_s_create();
+            adaptive->h = lion_holor_s_clone( result->h );
+            ::solve_result_s* r = ::solve_result_s_create();
+            r->h = bcore_fork( adaptive->h );
+            ::solve_result_s_attach( out_result, r );
+            ::a_attach( out_nop, (::*)adaptive );
         };
+
     };
 
     /// returns leading dimension
@@ -620,9 +620,49 @@ group :ar1 = retrievable
                 result->h->m.htp = !a[0]->m.htp;
             }
             result->settled = result->h && result->h->h.v.size > 0;
-            result->codable = false;
             return true;
         };
+
+        func :: :mcode_push_ap_holor =
+        {
+            BLM_INIT();
+            bhvm_holor_s* h = &result->h->h;
+            lion_hmeta_s* m = &result->h->m;
+            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+            bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
+            bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'y', idx );
+
+            bhvm_vop_ar1_fork_s* fork = bhvm_vop_ar1_fork_s_create();
+            fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'a' );
+            fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'y' );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, ( bhvm_vop* )fork );
+
+            bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_shelve_ap, ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create(), arr_ci_l );
+            BLM_RETURNV( sz_t, idx );
+        };
+
+        func :: :mcode_push_dp_holor =
+        {
+            BLM_INIT();
+
+            bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
+            lion_hmeta_s* m = &result->h->m;
+            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+            bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
+            bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'z', idx );
+
+            bhvm_vop_ar1_fork_s* fork = bhvm_vop_ar1_fork_s_create();
+            fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'f' );
+            fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp, ( bhvm_vop* )fork );
+
+            bhvm_vop_ar0_vacate_s* vacate = bhvm_vop_ar0_vacate_s_create();
+            vacate->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, ( bhvm_vop* )vacate );
+
+            BLM_RETURNV( sz_t, idx );
+        };
+
     };
 
 };

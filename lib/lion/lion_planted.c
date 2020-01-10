@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-01-06T11:02:25Z
+ *  Last File Update: 2020-01-09T21:22:52Z
  *
  *  Copyright and License of this File:
  *
@@ -12,6 +12,7 @@
  *  lion_nop_eval.h
  *  lion_sem.h
  *  lion_net.h
+ *  lion_net_eval.h
  *
  */
 
@@ -72,6 +73,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_context_s )
     "private bcore_mutex_s* randomizer_mutex;"
     "bl_t randomizer_is_locked = false;"
     "u2_t randomizer_rval = 0;"
+    "func bcore_inst_call:init_x;"
+    "func bcore_inst_call:down_e;"
 "}";
 
 BCORE_DEFINE_SPECT( bcore_inst, lion_nop )
@@ -84,7 +87,7 @@ BCORE_DEFINE_SPECT( bcore_inst, lion_nop )
     "feature aware lion_nop : create_op_of_arn = lion_nop_create_op_of_arn__;"
     "feature aware lion_nop : solve = lion_nop_solve__;"
     "feature aware lion_nop : requires_solve_for_each_channel = lion_nop_requires_solve_for_each_channel__;"
-    "feature aware lion_nop : create_final = lion_nop_create_final__;"
+    "feature aware lion_nop : settle = lion_nop_settle__;"
     "feature aware lion_nop : type_vop_ap;"
     "feature aware lion_nop : type_vop_dp_a;"
     "feature aware lion_nop : type_vop_dp_b;"
@@ -158,60 +161,48 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
     BLM_RETURNV( bl_t, true );
 }
 
-lion_nop* lion_nop_create_final__( const lion_nop* o, lion_holor_s* h )
+void lion_nop_settle__( const lion_nop* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result )
 {
-    lion_nop_ar0_literal_s* final = lion_nop_ar0_literal_s_create();
-    final->h = lion_holor_s_clone( h );
-    return (lion_nop*)final;
+    lion_nop_ar0_literal_s* literal = lion_nop_ar0_literal_s_create();
+    literal->h = lion_holor_s_clone( result->h );
+    lion_nop_solve_result_s* r = lion_nop_solve_result_s_create();
+    r->h = bcore_fork( literal->h );
+    lion_nop_solve_result_s_attach( out_result, r );
+    lion_nop_a_attach( out_nop, (lion_nop*)literal );
 }
 
-sz_t lion_nop_mcode_push_ap_holor__( const lion_nop* o, const lion_nop_solve_result_s* result, bhvm_mcode_frame_s* mcf )
+sz_t lion_nop_mcode_push_ap_holor__( const lion_nop* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
 {
     bhvm_holor_s* h = &result->h->h;
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     if( h->v.size == 0 )
     {
-        bhvm_vop* op;
-    
-        bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ) )[ 0 ] = idx;
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, op );
-    
-        bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ) )[ 0 ] = idx;
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, op );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     }
     return idx;
 }
 
-sz_t lion_nop_mcode_push_dp_holor__( const lion_nop* o, const lion_nop_solve_result_s* result, bhvm_mcode_frame_s* mcf )
+sz_t lion_nop_mcode_push_dp_holor__( const lion_nop* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
 {
     BLM_INIT();
     
     bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-    bhvm_vop* op;
     
-    /// determine holor in setup_dp track
-    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ) )[ 0 ] = idx;
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp, op );
-    
-    /// zero holor in dp track
-    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ) )[ 0 ] = idx;
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, op );
-    
-    /// clear holor in shelve_dp track
-    bhvm_vop_a_get_index( ( op = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ) )[ 0 ] = idx;
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, op );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     
     BLM_RETURNV( sz_t, idx );
 }
 
 void lion_nop_mcode_push_ap_track__( const lion_nop* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
 {
-    assert( result->type_vop_ap );
     tp_t type = ( lion_nop_a_defines_type_vop_ap( o ) ) ? lion_nop_a_type_vop_ap( o ) : result->type_vop_ap;
-    bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
+    if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
 }
 
 void lion_nop_mcode_push_dp_track__( const lion_nop* o, const lion_nop_solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
@@ -277,11 +268,10 @@ bl_t lion_nop_ar0_literal_s_solve( const lion_nop_ar0_literal_s* o, lion_holor_s
 {
     lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
     result->settled = true;
-    result->codable = false;
     return true;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar0_input_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar0_param_s )
 "aware lion_nop_ar0"
 "{"
     "func lion_nop:arity;"
@@ -289,11 +279,10 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar0_input_s )
     "func lion_nop:solve;"
 "}";
 
-bl_t lion_nop_ar0_input_s_solve( const lion_nop_ar0_input_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+bl_t lion_nop_ar0_param_s_solve( const lion_nop_ar0_param_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
 {
     lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
-    result->settled = true;
-    result->codable = false;
+    result->settled = false;
     return true;
 }
 
@@ -304,23 +293,31 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar0_adaptive_s )
     "lion_holor_s -> h;"
     "func lion_nop:solve;"
     "func lion_nop:mcode_push_ap_holor;"
+    "func lion_nop:mcode_push_dp_holor;"
 "}";
 
 bl_t lion_nop_ar0_adaptive_s_solve( const lion_nop_ar0_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
 {
     lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
     result->settled = false;
-    result->codable = false;
     return true;
 }
 
-sz_t lion_nop_ar0_adaptive_s_mcode_push_ap_holor( const lion_nop_ar0_adaptive_s* o, const lion_nop_solve_result_s* result, bhvm_mcode_frame_s* mcf )
+sz_t lion_nop_ar0_adaptive_s_mcode_push_ap_holor( const lion_nop_ar0_adaptive_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
 {
-    bhvm_vop_ar0_randomize_s* randomize = bhvm_vop_ar0_randomize_s_create();
-    sz_t i = lion_nop_mcode_push_ap_holor__( ( lion_nop* )o, result, mcf );
-    randomize->i.v[ 0 ] = i;
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, ( bhvm_vop* )randomize );
-    return i;
+    sz_t idx = lion_nop_mcode_push_ap_holor__( ( lion_nop* )o, result, arr_ci, mcf );
+    if( result->h->h.v.size == 0 ) // ramdomize holor if result is vacant
+    {
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
+    }
+    return idx;
+}
+
+sz_t lion_nop_ar0_adaptive_s_mcode_push_dp_holor( const lion_nop_ar0_adaptive_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
+{
+    sz_t idx = lion_nop_mcode_push_dp_holor__( ( lion_nop* )o, result, arr_ci, mcf );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_reset_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+    return idx;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -502,7 +499,8 @@ bl_t lion_nop_ar1_output_s_solve( const lion_nop_ar1_output_s* o, lion_holor_s**
 {
     lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
     result->settled = (result->h) && result->h->h.v.size > 0;
-    result->codable = false;
+    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+    result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
     return true;
 }
 
@@ -514,7 +512,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_adaptive_s )
     "func lion_nop:symbol;"
     "func lion_nop:priority;"
     "func lion_nop:solve;"
-    "func lion_nop:create_final;"
+    "func lion_nop:settle;"
 "}";
 
 bl_t lion_nop_ar1_adaptive_s_solve( const lion_nop_ar1_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
@@ -526,13 +524,14 @@ bl_t lion_nop_ar1_adaptive_s_solve( const lion_nop_ar1_adaptive_s* o, lion_holor
     return true;
 }
 
-lion_nop* lion_nop_ar1_adaptive_s_create_final( const lion_nop_ar1_adaptive_s* o, lion_holor_s* h )
+void lion_nop_ar1_adaptive_s_settle( const lion_nop_ar1_adaptive_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result )
 {
-    lion_nop_ar0_adaptive_s* final = lion_nop_ar0_adaptive_s_create();
-    final->h = lion_holor_s_clone( h );
-    final->h->m.name = o->name;
-    final->h->m.class = TYPEOF_holor_class_adaptive;
-    return (lion_nop*)final;
+    lion_nop_ar0_adaptive_s* adaptive = lion_nop_ar0_adaptive_s_create();
+    adaptive->h = lion_holor_s_clone( result->h );
+    lion_nop_solve_result_s* r = lion_nop_solve_result_s_create();
+    r->h = bcore_fork( adaptive->h );
+    lion_nop_solve_result_s_attach( out_result, r );
+    lion_nop_a_attach( out_nop, (lion_nop*)adaptive );
 }
 
 BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_dimof_s )
@@ -588,6 +587,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_cast_htp_s )
     "func lion_nop:class;"
     "func lion_nop:priority;"
     "func lion_nop:solve;"
+    "func lion_nop:mcode_push_ap_holor;"
+    "func lion_nop:mcode_push_dp_holor;"
 "}";
 
 bl_t lion_nop_ar1_cast_htp_s_solve( const lion_nop_ar1_cast_htp_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
@@ -599,8 +600,47 @@ bl_t lion_nop_ar1_cast_htp_s_solve( const lion_nop_ar1_cast_htp_s* o, lion_holor
         result->h->m.htp = !a[0]->m.htp;
     }
     result->settled = result->h && result->h->h.v.size > 0;
-    result->codable = false;
     return true;
+}
+
+sz_t lion_nop_ar1_cast_htp_s_mcode_push_ap_holor( const lion_nop_ar1_cast_htp_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
+{
+    BLM_INIT();
+    bhvm_holor_s* h = &result->h->h;
+    lion_hmeta_s* m = &result->h->m;
+    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+    bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
+    bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'y', idx );
+    
+    bhvm_vop_ar1_fork_s* fork = bhvm_vop_ar1_fork_s_create();
+    fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'a' );
+    fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'y' );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, ( bhvm_vop* )fork );
+    
+    bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_shelve_ap, ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create(), arr_ci_l );
+    BLM_RETURNV( sz_t, idx );
+}
+
+sz_t lion_nop_ar1_cast_htp_s_mcode_push_dp_holor( const lion_nop_ar1_cast_htp_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
+{
+    BLM_INIT();
+    
+    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
+    lion_hmeta_s* m = &result->h->m;
+    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+    bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
+    bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'z', idx );
+    
+    bhvm_vop_ar1_fork_s* fork = bhvm_vop_ar1_fork_s_create();
+    fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'f' );
+    fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp, ( bhvm_vop* )fork );
+    
+    bhvm_vop_ar0_vacate_s* vacate = bhvm_vop_ar0_vacate_s_create();
+    vacate->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, ( bhvm_vop* )vacate );
+    
+    BLM_RETURNV( sz_t, idx );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1241,6 +1281,12 @@ sz_t lion_net_node_s_up_index( const lion_net_node_s* o, const lion_net_node_s* 
     return -1;
 }
 
+void lion_net_node_s_set_nop_d( lion_net_node_s* o, lion_nop* nop )
+{
+    ASSERT( o->result == NULL );
+    lion_nop_a_attach( &o->nop, nop );
+}
+
 BCORE_DEFINE_OBJECT_INST_P( lion_net_nodes_s )
 "aware bcore_array"
 "{"
@@ -1280,6 +1326,137 @@ void lion_net_cell_s_clear_downlinks( lion_net_cell_s* o )
 }
 
 /**********************************************************************************************************************/
+// source: lion_net_eval.h
+#include "lion_net_eval.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_net_eval
+
+BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_result_s )
+"aware bcore_inst"
+"{"
+    "bl_t error = false;"
+    "st_s msg;"
+"}";
+
+void lion_net_eval_result_s_resolve( lion_net_eval_result_s* o )
+{
+    if( !o ) return;
+    if( o->error )
+    {
+        bcore_sink_a_push_fa( BCORE_STDERR, "#<sc_t>\n", o->msg.sc );
+    }
+    else if( o->msg.size > 0 )
+    {
+        bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o->msg.sc );
+    }
+    lion_net_eval_result_s_discard( o );
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_param_s )
+"aware bcore_inst"
+"{"
+    "hidden aware bcore_sink -> log;"
+    "sz_t verbosity = 1;"
+    "u2_t rval = 1234;"
+    "st_s name;"
+    "aware => src;"
+    "bhvm_holor_adl_s => in;"
+    "bhvm_holor_adl_s => out;"
+    "f3_t max_dev = 1E-5;"
+    "func bcore_inst_call:init_x;"
+"}";
+
+void lion_net_eval_param_s_set( lion_net_eval_param_s* o, const lion_net_eval_param_s* src )
+{
+    o->verbosity = sz_max( o->verbosity, src->verbosity );
+    o->rval      = bcore_xsg3_u2( o->rval + src->rval );
+    bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
+    
+    if( o->name.size == 0 )
+    {
+        st_s_copy( &o->name, &src->name );
+    }
+    else if( src->name.size > 0 )
+    {
+        st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
+        st_s_copy( &o->name, new_name );
+        st_s_discard( new_name );
+    }
+    
+    if( !o->src ) o->src = bcore_fork( src->src );
+    if( !o->in  ) o->in  = bcore_fork( src->in );
+    if( !o->out ) o->out = bcore_fork( src->out );
+    
+    o->max_dev = f3_max( o->max_dev, src->max_dev );
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_show_param_s )
+"aware lion_net_eval"
+"{"
+    "lion_net_eval_param_s param;"
+    "func ^:set_param;"
+    "func ^:run;"
+    "func bcore_main:main;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_arr_s )
+"aware bcore_array"
+"{"
+    "aware lion_net_eval* [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_set_s )
+"aware lion_net_eval"
+"{"
+    "lion_net_eval_param_s param;"
+    "lion_net_eval_arr_s arr;"
+    "func ^:set_param;"
+    "func ^:run;"
+    "func bcore_main:main;"
+"}";
+
+lion_net_eval_result_s* lion_net_eval_set_s_run( const lion_net_eval_set_s* o )
+{
+    BFOR_EACH( i, &o->arr )
+    {
+        BLM_INIT();
+        lion_net_eval* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+        lion_net_eval_a_set_param( eval, &o->param );
+        lion_net_eval_result_s* r = BLM_A_PUSH( lion_net_eval_a_run( eval ) );
+        if( r && r->error )
+        {
+            st_s* s = BLM_A_PUSH( st_s_clone( &r->msg ) );
+            st_s_copy_fa( &r->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
+            BLM_RETURNV( lion_net_eval_result_s*, lion_net_eval_result_s_clone( r ) );
+        }
+        BLM_DOWN();
+    };
+    return NULL;
+}
+
+s2_t lion_net_eval_set_s_main( lion_net_eval_set_s* o, const bcore_arr_st_s* args )
+{
+    lion_net_eval_result_s_resolve( lion_net_eval_set_s_run( o ) ); return 0;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_e2e_s )
+"aware lion_net_eval"
+"{"
+    "lion_net_eval_param_s param;"
+    "func ^:run;"
+    "func ^:set_param;"
+    "func bcore_main:main;"
+"}";
+
+BCORE_DEFINE_SPECT( bcore_inst, lion_net_eval )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware lion_net_eval : run;"
+    "feature aware lion_net_eval : set_param;"
+"}";
+
+/**********************************************************************************************************************/
 
 vd_t lion_planted_signal_handler( const bcore_signal_s* o )
 {
@@ -1288,7 +1465,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 217599379 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2991363339 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1316,6 +1493,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_NAME( track_setup_dp );
             BCORE_REGISTER_NAME( track_shelve_ap );
             BCORE_REGISTER_NAME( track_shelve_dp );
+            BCORE_REGISTER_NAME( track_reset_dp );
             BCORE_REGISTER_FEATURE( lion_nop_arity );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_arity__ );
             BCORE_REGISTER_FEATURE( lion_nop_class );
@@ -1331,8 +1509,8 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_solve__ );
             BCORE_REGISTER_FEATURE( lion_nop_requires_solve_for_each_channel );
             BCORE_REGISTER_FFUNC( lion_nop_requires_solve_for_each_channel, lion_nop_requires_solve_for_each_channel__ );
-            BCORE_REGISTER_FEATURE( lion_nop_create_final );
-            BCORE_REGISTER_FFUNC( lion_nop_create_final, lion_nop_create_final__ );
+            BCORE_REGISTER_FEATURE( lion_nop_settle );
+            BCORE_REGISTER_FFUNC( lion_nop_settle, lion_nop_settle__ );
             BCORE_REGISTER_FEATURE( lion_nop_type_vop_ap );
             BCORE_REGISTER_FEATURE( lion_nop_type_vop_dp_a );
             BCORE_REGISTER_FEATURE( lion_nop_type_vop_dp_b );
@@ -1345,6 +1523,8 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_mcode_push_ap_track, lion_nop_mcode_push_ap_track__ );
             BCORE_REGISTER_FEATURE( lion_nop_mcode_push_dp_track );
             BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_track, lion_nop_mcode_push_dp_track__ );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_nop_context_s_init_x );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_down_e, lion_nop_context_s_down_e );
             BCORE_REGISTER_OBJECT( lion_nop_context_s );
             BCORE_REGISTER_SPECT( lion_nop );
 
@@ -1360,18 +1540,19 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar0_literal_s_arity );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar0_literal_s_solve );
             BCORE_REGISTER_OBJECT( lion_nop_ar0_literal_s );
-            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar0_input_s_arity );
-            BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar0_input_s_solve );
-            BCORE_REGISTER_OBJECT( lion_nop_ar0_input_s );
+            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar0_param_s_arity );
+            BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar0_param_s_solve );
+            BCORE_REGISTER_OBJECT( lion_nop_ar0_param_s );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar0_adaptive_s_arity );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar0_adaptive_s_solve );
             BCORE_REGISTER_FFUNC( lion_nop_mcode_push_ap_holor, lion_nop_ar0_adaptive_s_mcode_push_ap_holor );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_holor, lion_nop_ar0_adaptive_s_mcode_push_dp_holor );
             BCORE_REGISTER_OBJECT( lion_nop_ar0_adaptive_s );
             BCORE_REGISTER_TRAIT( lion_nop_ar0, lion_nop );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar0_zro_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar0_one_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar0_literal_s );
-            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar0_input_s );
+            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar0_param_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar0_adaptive_s );
 
             // group: lion_nop_ar1
@@ -1471,7 +1652,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_adaptive_s_symbol );
             BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_adaptive_s_priority );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar1_adaptive_s_solve );
-            BCORE_REGISTER_FFUNC( lion_nop_create_final, lion_nop_ar1_adaptive_s_create_final );
+            BCORE_REGISTER_FFUNC( lion_nop_settle, lion_nop_ar1_adaptive_s_settle );
             BCORE_REGISTER_OBJECT( lion_nop_ar1_adaptive_s );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar1_dimof_s_arity );
             BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_dimof_s_symbol );
@@ -1487,6 +1668,8 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_class, lion_nop_ar1_cast_htp_s_class );
             BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_cast_htp_s_priority );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar1_cast_htp_s_solve );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_ap_holor, lion_nop_ar1_cast_htp_s_mcode_push_ap_holor );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_holor, lion_nop_ar1_cast_htp_s_mcode_push_dp_holor );
             BCORE_REGISTER_OBJECT( lion_nop_ar1_cast_htp_s );
             BCORE_REGISTER_TRAIT( lion_nop_ar1, lion_nop );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_identity_s );
@@ -1707,6 +1890,30 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_net_cell_s_mutated );
             BCORE_REGISTER_OBJECT( lion_net_cell_s );
             BCORE_REGISTER_TRAIT( lion_net, bcore_inst );
+
+            // --------------------------------------------------------------------
+            // source: lion_net_eval.h
+
+            // group: lion_net_eval
+            BCORE_REGISTER_OBJECT( lion_net_eval_result_s );
+            BCORE_REGISTER_FEATURE( lion_net_eval_run );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_net_eval_param_s_init_x );
+            BCORE_REGISTER_OBJECT( lion_net_eval_param_s );
+            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_show_param_s_set_param );
+            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_show_param_s_run );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_show_param_s_main );
+            BCORE_REGISTER_OBJECT( lion_net_eval_show_param_s );
+            BCORE_REGISTER_FEATURE( lion_net_eval_set_param );
+            BCORE_REGISTER_OBJECT( lion_net_eval_arr_s );
+            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_set_s_set_param );
+            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_set_s_run );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_set_s_main );
+            BCORE_REGISTER_OBJECT( lion_net_eval_set_s );
+            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_e2e_s_run );
+            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_e2e_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_e2e_s_main );
+            BCORE_REGISTER_OBJECT( lion_net_eval_e2e_s );
+            BCORE_REGISTER_SPECT( lion_net_eval );
         }
         break;
         default: break;

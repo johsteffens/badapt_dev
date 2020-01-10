@@ -236,7 +236,7 @@ static void net_node_s_nop_solve( lion_net_node_s* o, lion_holor_s** arg_h )
  *  If a holor can be computed (vacant or determined), the solve-route is considered finished
  *  and will not be processed again. A detached result (o->h == NULL) causes a route to be reentered.
  *  If operator->solve returns 1, the operation is considered settled, in which case all uplinks
- *  are removed and the operator is switched to a final arity0 version via lion_op_a_create_final.
+ *  are removed and the operator is switched to a final arity0 version via lion_op_a_settle.
  *  After settling, the graph can be run through an optimizer minimizing its structure.
  */
 void lion_net_node_s_solve( lion_net_node_s* o )
@@ -247,42 +247,41 @@ void lion_net_node_s_solve( lion_net_node_s* o )
 
     if( o->result ) return;
 
-    if( o->nop )
+    if( !o->nop ) lion_net_node_s_err_fa( o, "Node has no operator." );
+
+    sz_t arity = lion_nop_a_arity( o->nop );
+    if( arity != o->upls.size )
     {
-        sz_t arity = lion_nop_a_arity( o->nop );
-        if( arity != o->upls.size )
+        lion_net_node_s_err_fa( o, "Operator arity #<sz_t> differs from node arity #<sz_t>", arity, o->upls.size );
+    }
+
+    #define lion_MAX_ARITY 4 /* increase this number when assertion below fails */
+    ASSERT( arity <= lion_MAX_ARITY );
+    lion_holor_s* arg_h[ lion_MAX_ARITY ] = { NULL };
+
+    bl_t solve_each_channel = lion_nop_a_requires_solve_for_each_channel( o->nop );
+
+    for( sz_t i = 0; i < arity; i++ )
+    {
+        lion_net_node_s* arg_n = o->upls.data[ i ]->node;
+        if( arg_n )
         {
-            lion_net_node_s_err_fa( o, "Operator arity #<sz_t> differs from node arity #<sz_t>", arity, o->upls.size );
+            lion_net_node_s_solve( arg_n );
+            arg_h[ i ] = arg_n->result->h;
         }
+        if( solve_each_channel ) net_node_s_nop_solve( o, arg_h );
+    }
 
-        #define lion_MAX_ARITY 4 /* increase this number when assertion below fails */
-        ASSERT( arity <= lion_MAX_ARITY );
-        lion_holor_s* arg_h[ lion_MAX_ARITY ] = { NULL };
+    if( !solve_each_channel ) net_node_s_nop_solve( o, arg_h );
 
-        bl_t solve_each_channel = lion_nop_a_requires_solve_for_each_channel( o->nop );
-
-        for( sz_t i = 0; i < arity; i++ )
+    if( o->result->settled )
+    {
+        if( !o->result->reducible )
         {
-            lion_net_node_s* arg_n = o->upls.data[ i ]->node;
-            if( arg_n )
-            {
-                lion_net_node_s_solve( arg_n );
-                arg_h[ i ] = arg_n->result->h;
-            }
-            if( solve_each_channel ) net_node_s_nop_solve( o, arg_h );
+            if( o->result->h ) bhvm_value_s_clear( &o->result->h->h.v );
         }
-
-        if( !solve_each_channel ) net_node_s_nop_solve( o, arg_h );
-
-        if( o->result->settled )
-        {
-            lion_nop_a_attach( &o->nop, lion_nop_a_create_final( o->nop, o->result->h ) );
-            lion_net_links_s_clear( &o->upls );
-            if( !o->result->reducible )
-            {
-                if( o->result->h ) bhvm_value_s_clear( &o->result->h->h.v );
-            }
-        }
+        lion_nop_a_settle( o->nop, o->result, &o->nop, &o->result );
+        lion_net_links_s_clear( &o->upls );
     }
 
     o->flag = false;
@@ -331,6 +330,7 @@ void lion_net_node_s_skip_identities( lion_net_node_s* o )
         o->upls.data[ i ]->node = node;
         lion_net_node_s_skip_identities( node );
     }
+    o->flag = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -343,85 +343,6 @@ void lion_net_node_s_set_flags( lion_net_node_s* o )
     if( o->flag ) return;
     o->flag = true;
     BFOR_EACH( i, &o->upls ) lion_net_node_s_set_flags( o->upls.data[ i ]->node );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void lion_net_node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
-{
-    BLM_INIT();
-    ASSERT( o );
-
-    if( o->flag ) BLM_RETURN();
-    o->flag = true;
-    if( !o->nop ) ERR_fa( "Operator is missing." );
-    if( !o->result ) ERR_fa( "Result is missing." );
-
-    bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
-
-    BFOR_EACH( i, &o->upls )
-    {
-        lion_net_node_s* node = o->upls.data[ i ]->node;
-        lion_net_node_s_mcode_push_ap( node, mcf );
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
-    }
-
-    o->hidx = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, mcf );
-    bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->hidx );
-    lion_nop_a_mcode_push_ap_track( o->nop, o->result, arr_ci, mcf );
-
-    BLM_DOWN();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
-{
-    ASSERT( o );
-    if( !o->nop ) ERR_fa( "Operator is missing." );
-    if( !o->result ) ERR_fa( "Result is missing." );
-
-    BLM_INIT();
-
-    if( !o->flag ) // build gradient computation for this node
-    {
-        o->gidx = lion_nop_a_mcode_push_dp_holor( o->nop, o->result, mcf );
-
-        // build this gradient from all downlinks ...
-        BFOR_EACH( i, &o->dnls )
-        {
-            lion_net_node_s* node = o->dnls.data[ i ]->node;
-            sz_t node_up_index = lion_net_node_s_up_index( node, o );
-            ASSERT( node_up_index >= 0 );
-            lion_net_node_s_mcode_push_dp( node, node_up_index, mcf );
-        }
-
-        o->flag = true;
-    }
-
-    // update uplink gradient ...
-    if( up_index >= 0 )
-    {
-        bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
-
-        sz_t up_gidx = -1;
-        BFOR_EACH( i, &o->upls )
-        {
-            lion_net_node_s* node = o->upls.data[ i ]->node;
-            bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
-            if( i == up_index ) up_gidx = node->gidx;
-        }
-
-        ASSERT( up_gidx >= 0 );
-
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->hidx );
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'z', o->gidx );
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + up_index, up_gidx );
-
-        lion_nop_a_mcode_push_dp_track( o->nop, o->result, 'a' + up_index, arr_ci, mcf );
-    }
-
-    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -679,7 +600,7 @@ static void net_cell_s_from_sem_recursive
             {
                 net_node_up = lion_net_nodes_s_push( &o->body );
                 net_node_up->id = ctr_node->id;
-                net_node_up->nop = bcore_fork( cell->nop );
+                lion_net_node_s_set_nop_d( net_node_up, bcore_fork( cell->nop ) );
 
                 bcore_source_point_s_attach( &net_node_up->source_point, bcore_fork( lion_ctr_node_s_get_nearest_source_point( ctr_node ) ) );
 
@@ -701,7 +622,7 @@ static void net_cell_s_from_sem_recursive
                     if( arg0->result->h->h.v.size > 0 ) // determined holor
                     {
                         lion_net_links_s_clear( &net_node_up->upls );
-                        lion_nop_a_attach( &net_node_up->nop, ( lion_nop* )lion_nop_ar1_identity_s_create() );
+                        lion_net_node_s_set_nop_d( net_node_up, ( lion_nop* )lion_nop_ar1_identity_s_create() );
                         if( log ) bcore_sink_a_push_fa( log, "Condition check result: #<f3_t>. Identity to channel ", bhvm_value_s_get_f3( &arg0->result->h->h.v, 0 ) );
                         if( bhvm_value_s_get_f3( &arg0->result->h->h.v, 0 ) > 0 )
                         {
@@ -816,6 +737,36 @@ void lion_net_cell_s_finalize( lion_net_cell_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+void lion_holor_s_from_sem_link( lion_holor_s* o, lion_sem_link_s* link, lion_sem_cell_s* root, bcore_sink* log )
+{
+    BLM_INIT();
+    ASSERT( link->up );
+    ASSERT( link->cell );
+    ASSERT( root );
+    if( !root->parent ) ERR_fa( "(root->parent == NULL) Root is not nested. Using semantic context as root is discouraged. Preferably use a double-nested semantic frame." );
+    lion_sem_cell_s* cell = link->cell;
+    lion_ctr_tree_s* tree = BLM_CREATE( lion_ctr_tree_s );
+    lion_ctr_node_s* ctr_node = NULL;
+    lion_ctr_tree_s_tree_process( tree, root, true, ctr_node, &ctr_node );
+    lion_net_cell_s* net_frame = BLM_CREATE( lion_net_cell_s );
+    lion_net_node_s* up_node = BLM_CREATE( lion_net_node_s );
+    up_node->name = link->name;
+    up_node->id = tree->id_base++;
+    up_node->source_point = bcore_fork( &cell->source_point );
+    lion_net_node_s_set_nop_d( up_node, ( lion_nop* )lion_nop_ar1_output_s_create() );
+    net_cell_s_from_sem_recursive( net_frame, link->up, tree, ctr_node, up_node, 0, log );
+    lion_net_node_s_solve( up_node );
+
+    if( !up_node->result ) bcore_source_point_s_parse_err_fa( up_node->source_point, "Could not solve expression." );
+    if( !up_node->result->h ) bcore_source_point_s_parse_err_fa( up_node->source_point, "Expression does not yield a holor." );
+
+    lion_holor_s_copy( o, up_node->result->h );
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 /** Builds a net cell from a semantic cell
  *  This function locks and initializes the randomizer to ensure a deterministic sequence of random values.
  */
@@ -823,17 +774,12 @@ void lion_net_cell_s_from_sem_cell
 (
     lion_net_cell_s* o,
     lion_sem_cell_s* sem_cell,
-    lion_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name ),
+    lion_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name, const lion_nop* cur_nop ),
     vd_t arg,
     bcore_sink* log
 )
 {
     ASSERT( sem_cell );
-    lion_nop_context_s* nop_context = lion_nop_get_context();
-    bcore_mutex_s_lock( nop_context->randomizer_mutex );
-    ASSERT( !nop_context->randomizer_is_locked );
-    nop_context->randomizer_is_locked = true;
-    nop_context->randomizer_rval = 0; // rval == 0 causes randomizer to be seeded by functions using it.
 
     lion_ctr_tree_s* tree = lion_ctr_tree_s_create();
     for( sz_t i = 0; i < sem_cell->encs.size; i++ )
@@ -843,8 +789,32 @@ void lion_net_cell_s_from_sem_cell
         net_node->name = sem_link->name;
         net_node->id   = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
-        net_node->nop = input_nop_create ? input_nop_create( arg, i, sem_link->name ) : NULL;
+
+        if( sem_link->up )
+        {
+            if( log ) bcore_sink_a_push_fa( log, "Evaluating literal in root entry channel '#<sz_t>' ... \n", i );
+            lion_nop_ar0_param_s* param = lion_nop_ar0_param_s_create();
+            param->h = lion_holor_s_create();
+
+            lion_holor_s_from_sem_link( param->h, sem_link, sem_cell->parent, log );
+            lion_net_node_s_set_nop_d( net_node, (lion_nop*)param );
+            if( log )
+            {
+                bcore_sink_a_push_fa( log, "Evaluating literal in root entry channel '#<sz_t>' finished. Resulting Holor: ", i );
+                lion_holor_s_brief_to_sink( param->h, log );
+                bcore_sink_a_push_fa( log, "\n" );
+            }
+        }
+
+        lion_nop* new_nop = input_nop_create ? input_nop_create( arg, i, sem_link->name, net_node->nop ) : NULL;
+        if( new_nop ) lion_net_node_s_set_nop_d( net_node, new_nop );
     }
+
+    lion_nop_context_s* nop_context = lion_nop_get_context();
+    bcore_mutex_s_lock( nop_context->randomizer_mutex );
+    ASSERT( !nop_context->randomizer_is_locked );
+    nop_context->randomizer_is_locked = true;
+    nop_context->randomizer_rval = 0; // rval == 0 causes randomizer to be seeded by functions using it.
 
     for( sz_t i = 0; i < sem_cell->excs.size; i++ )
     {
@@ -853,8 +823,7 @@ void lion_net_cell_s_from_sem_cell
         net_node->name = sem_link->name;
         net_node->id = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
-        lion_nop_ar1_output_s* nop_ar1_output = lion_nop_ar1_output_s_create();
-        net_node->nop = ( lion_nop* )nop_ar1_output;
+        lion_net_node_s_set_nop_d( net_node, ( lion_nop* )lion_nop_ar1_output_s_create() );
         net_cell_s_from_sem_recursive( o, sem_link, tree, NULL, net_node, 0, log );
     }
 
@@ -877,184 +846,132 @@ void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink )
     BFOR_EACH( i, &o->excs ) lion_net_node_s_graph_to_sink( o->excs.data[ i ], sink );
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-
-// builds main vm procedure
-//void haptive_cell_s_vm_build_infer( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
-//{
-//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_infer );
-//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_setup );
-//    ASSERT( haptive_net_cell_s_is_consistent( o ) );
-//
-//    bhvm_hf3_vm_arr_holor_s_set_size( &vmf->arr_holor, o->body.size );
-//
-//    for( sz_t i = 0; i < o->excs.size; i++ )
-//    {
-//        haptive_net_node_s* node = o->excs.data[ i ];
-//        if( !node->h ) ERR_fa( "Unsolved node '#<sc_t>'\n", haptive_ifnameof( node->name ) );
-//        net_node_s_vm_build_infer( node, vmf );
-//    }
-//
-//    haptive_net_cell_s_clear_flags( o );
-//}
-//
-//// ---------------------------------------------------------------------------------------------------------------------
-//
-//// builds bp_grad vm procedure
-//void haptive_cell_s_vm_build_bp_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
-//{
-//    if( !bhvm_hf3_vm_frame_s_mcode_exists( vmf, TYPEOF_mcode_name_infer ) )
-//    {
-//        ERR_fa( "Procedure 'infer' missing. Call 'build_infer' first." );
-//    }
-//
-//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_bp_grad );
-//    for( sz_t i = 0; i < o->body.size; i++ )
-//    {
-//        haptive_net_node_s* node = o->body.data[ i ];
-//        if( !node->op ) continue;
-//        if( node->op->_ != TYPEOF_haptive_op_ar0_adaptive_s ) continue;
-//        node_s_vm_build_bp_grad( node, -1, vmf );
-//    }
-//    haptive_net_cell_s_clear_flags( o );
-//}
-//
-//// ---------------------------------------------------------------------------------------------------------------------
-//
-//void haptive_vm_build_setup( bhvm_hf3_vm_frame_s* o, u2_t rseed )
-//{
-//    const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
-//    for( sz_t i = 0; i < arr_holor->size; i++ )
-//    {
-//        const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
-//        switch( holor->p.type )
-//        {
-//            case TYPEOF_holor_type_depletable:
-//            case TYPEOF_holor_type_adaptive_grad:
-//            {
-//                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
-//            }
-//            break;
-//
-//            case TYPEOF_holor_type_adaptive:
-//            {
-//                if( holor->h.v_size == 0 )
-//                {
-//                    bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_determine_s_csetup( NULL, i ) );
-//                    bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_setup, bhvm_hf3_vm_op_ar0_randomize_s_csetup_randomize( NULL, i, rseed, 1.0, -0.5, 0.5 ) );
-//                }
-//            }
-//            break;
-//
-//            default: break;
-//        }
-//    }
-//
-//    // moving init subroutines to setup ...
-//
-//    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_cast ) )
-//    {
-//        bhvm_hf3_vm_frame_s_mcode_push( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_cast );
-//        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_cast );
-//    }
-//
-//    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_cast_reverse ) )
-//    {
-//        bhvm_hf3_vm_frame_s_mcode_push_reverse( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_cast_reverse );
-//        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_cast_reverse );
-//    }
-//
-//    if( bhvm_hf3_vm_frame_s_mcode_exists( o, TYPEOF_mcode_name_ap_init ) )
-//    {
-//        bhvm_hf3_vm_frame_s_mcode_push( o, TYPEOF_mcode_name_setup, TYPEOF_mcode_name_ap_init );
-//        bhvm_hf3_vm_frame_s_mcode_remove( o, TYPEOF_mcode_name_ap_init );
-//    }
-//
-//    o->mcode_setup = TYPEOF_mcode_name_setup;
-//}
-//
-//// ---------------------------------------------------------------------------------------------------------------------
-//
-//// builds vm procedure shelve for all holors
-//void haptive_vm_build_shelve( bhvm_hf3_vm_frame_s* o )
-//{
-//    bhvm_hf3_vm_frame_s_mcode_reset( o, TYPEOF_mcode_name_shelve );
-//
-//    const bhvm_hf3_vm_arr_holor_s* arr_holor = &o->arr_holor;
-//    for( sz_t i = 0; i < arr_holor->size; i++ )
-//    {
-//        const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
-//        switch( holor->p.type )
-//        {
-//            case TYPEOF_holor_type_depletable:
-//            {
-//                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_shelve, bhvm_hf3_vm_op_ar0_vacate_s_csetup( NULL, i ) );
-//            }
-//            break;
-//
-//            case TYPEOF_holor_type_cast:
-//            {
-//                bhvm_hf3_vm_frame_s_mcode_op_push_d( o, TYPEOF_mcode_name_shelve, bhvm_hf3_vm_op_ar0_clear_s_csetup( NULL, i ) );
-//            }
-//            break;
-//
-//            default: break;
-//        }
-//    }
-//    o->mcode_shelve = TYPEOF_mcode_name_shelve;
-//}
-//
-//// ---------------------------------------------------------------------------------------------------------------------
-//
-//// sets adaptive gradients to zero
-//void haptive_net_cell_s_vm_build_zero_adaptive_grad( haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
-//{
-//    bhvm_hf3_vm_frame_s_mcode_reset( vmf, TYPEOF_mcode_name_zero_adaptive_grad );
-//
-//    const bhvm_hf3_vm_arr_holor_s* arr_holor = &vmf->arr_holor;
-//    for( sz_t i = 0; i < arr_holor->size; i++ )
-//    {
-//        const bhvm_hf3_vm_holor_s* holor = &arr_holor->data[ i ];
-//        switch( holor->p.type )
-//        {
-//            case TYPEOF_holor_type_adaptive_grad:
-//            {
-//                bhvm_hf3_vm_frame_s_mcode_op_push_d( vmf, TYPEOF_mcode_name_zero_adaptive_grad, bhvm_hf3_vm_op_ar0_zro_s_csetup( NULL, i ) );
-//            }
-//            break;
-//
-//            default: break;
-//        }
-//    }
-//}
-//
-//// ---------------------------------------------------------------------------------------------------------------------
-//
-//void haptive_net_cell_s_vm_set_input( const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
-//{
-//    bcore_arr_sz_s_clear( &vmf->input );
-//    for( sz_t i = 0; i < o->encs.size; i++ )
-//    {
-//        const haptive_net_node_s* node = o->encs.data[ i ];
-//        bhvm_hf3_vm_frame_s_input_push( vmf, node->id );
-//    }
-//}
-//
-//// ---------------------------------------------------------------------------------------------------------------------
-//
-//void haptive_net_cell_s_vm_set_output( const haptive_net_cell_s* o, bhvm_hf3_vm_frame_s* vmf )
-//{
-//    bcore_arr_sz_s_clear( &vmf->output );
-//    for( sz_t i = 0; i < o->excs.size; i++ )
-//    {
-//        const haptive_net_node_s* node = o->excs.data[ i ];
-//        bhvm_hf3_vm_frame_s_output_push( vmf, node->id );
-//    }
-//}
-//
-//// ---------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------net_-------------------------------------
 
 /**********************************************************************************************************************/
+// node, cell: building mcode tracks
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+{
+    BLM_INIT();
+    ASSERT( o );
+
+    if( o->flag ) BLM_RETURN();
+    o->flag = true;
+    if( !o->nop ) ERR_fa( "Operator is missing." );
+    if( !o->result ) ERR_fa( "Result is missing." );
+
+    if( !o->result->codable )
+    {
+        bcore_source_point_s_parse_err_fa( o->source_point, "Operator '#<sc_t>': Not codable.", ifnameof( o->nop->_ ) );
+    }
+
+    bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
+
+    BFOR_EACH( i, &o->upls )
+    {
+        lion_net_node_s* node = o->upls.data[ i ]->node;
+        lion_net_node_s_mcode_push_ap( node, mcf );
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
+    }
+
+    o->hidx = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, arr_ci, mcf );
+    bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->hidx );
+
+    lion_nop_a_mcode_push_ap_track( o->nop, o->result, arr_ci, mcf );
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
+{
+    ASSERT( o );
+    if( !o->nop ) ERR_fa( "Operator is missing." );
+    if( !o->result ) ERR_fa( "Result is missing." );
+
+    BLM_INIT();
+
+    bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
+
+    sz_t up_gidx = -1;
+    BFOR_EACH( i, &o->upls )
+    {
+        lion_net_node_s* node = o->upls.data[ i ]->node;
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
+        if( i == up_index ) up_gidx = node->gidx;
+    }
+    bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->hidx );
+
+    if( !o->flag ) // build gradient computation for this node
+    {
+        o->gidx = lion_nop_a_mcode_push_dp_holor( o->nop, o->result, arr_ci, mcf );
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'z', o->gidx );
+
+        // build this gradient from all downlinks ...
+        BFOR_EACH( i, &o->dnls )
+        {
+            lion_net_node_s* node = o->dnls.data[ i ]->node;
+            sz_t node_up_index = lion_net_node_s_up_index( node, o );
+            ASSERT( node_up_index >= 0 );
+            lion_net_node_s_mcode_push_dp( node, node_up_index, mcf );
+        }
+
+        o->flag = true;
+    }
+
+    // update uplink gradient ... (up_index == -1 means no uplink present)
+    if( up_index >= 0 )
+    {
+        ASSERT( up_gidx >= 0 );
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + up_index, up_gidx );
+        lion_nop_a_mcode_push_dp_track( o->nop, o->result, 'a' + up_index, arr_ci, mcf );
+    }
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf )
+{
+    ASSERT( lion_net_cell_s_is_consistent( o ) );
+
+    for( sz_t i = 0; i < o->excs.size; i++ )
+    {
+        lion_net_node_s* node = o->excs.data[ i ];
+        if( !node->result ) ERR_fa( "Unsolved node '#<sc_t>'\n", lion_ifnameof( node->name ) );
+        lion_net_node_s_mcode_push_ap( node, mcf );
+    }
+
+    lion_net_cell_s_clear_flags( o );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf )
+{
+    ASSERT( lion_net_cell_s_is_consistent( o ) );
+
+    for( sz_t i = 0; i < o->body.size; i++ )
+    {
+        lion_net_node_s* node = o->body.data[ i ];
+        if( !node->nop ) continue;
+        if( node->nop->_ != TYPEOF_lion_nop_ar0_adaptive_s ) continue;
+        lion_net_node_s_mcode_push_dp( node, -1, mcf );
+    }
+
+    lion_net_cell_s_clear_flags( o );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 vd_t lion_net_signal_handler( const bcore_signal_s* o )
 {

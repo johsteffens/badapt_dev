@@ -488,7 +488,14 @@ lion_sem_cell_s* lion_sem_cell_s_push_cell_scalar( lion_sem_cell_s* o, f3_t* v )
 {
     lion_nop_ar0_literal_s* literal = lion_nop_ar0_literal_s_create();
     literal->h = lion_holor_s_create();
-    bhvm_holor_s_set_scalar_f3( &literal->h->h, *v );
+    if( v )
+    {
+        bhvm_holor_s_set_scalar_f3( &literal->h->h, *v );
+    }
+    else
+    {
+        bhvm_holor_s_set_scalar_pf( &literal->h->h, TYPEOF_f3_t, NULL );
+    }
     return lion_sem_cell_s_push_cell_nop_d_reset_name( o, ( lion_nop* )literal );
 }
 
@@ -526,7 +533,7 @@ void lion_sem_cell_s_assert_identifier_not_yet_defined( const lion_sem_cell_s* o
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_sem_cell_s* lion_sem_cell_s_create_frame()
+lion_sem_cell_s* lion_sem_cell_s_create_frame( void )
 {
     if( !context_g ) lion_sem_context_setup();
     lion_sem_cell_s* o = lion_sem_cell_s_create();
@@ -536,7 +543,7 @@ lion_sem_cell_s* lion_sem_cell_s_create_frame()
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// parses ( ... => ... )
+/// parses ( ... <- ... )
 void lion_sem_cell_s_parse_signature( lion_sem_cell_s* o, bcore_source* source )
 {
     bcore_source_a_parse_fa( source, " (" );
@@ -545,7 +552,7 @@ void lion_sem_cell_s_parse_signature( lion_sem_cell_s* o, bcore_source* source )
     {
         ASSERT( o->excs.size == 0 );
         bl_t first = true;
-        while( !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
+        while( !bcore_source_a_parse_bl_fa( source, " #?'<-'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
             lion_sem_link_s* link = lion_sem_link_s_create_setup( lion_parse_name( source ), NULL, NULL, o, true );
@@ -588,7 +595,7 @@ void lion_sem_cell_s_parse( lion_sem_cell_s* o, bcore_source* source )
 
     bcore_source_point_s_set( &o->source_point, source );
 
-    //  ( <args_out> => <args_in> ) { <body> }
+    //  ( <args_out> <- <args_in> ) { <body> }
     if( bcore_source_a_parse_bl_fa( source, " #=?'('" ) )
     {
         lion_sem_cell_s_parse_signature( o, source );
@@ -611,7 +618,7 @@ st_s* lion_sem_cell_s_create_signature( const lion_sem_cell_s* o )
     st_s* s = st_s_create();
     st_s_push_fa( s, "(" );
     BFOR_EACH( i, &o->excs ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", lion_ifnameof( o->excs.data[ i ]->name ) );
-    st_s_push_fa( s, "=>" );
+    st_s_push_fa( s, "<-" );
     BFOR_EACH( i, &o->encs ) st_s_push_fa( s, "#<sc_t>#<sc_t>", i > 0 ? "," : "", lion_ifnameof( o->encs.data[ i ]->name ) );
     st_s_push_fa( s, ")" );
     return s;
@@ -628,7 +635,7 @@ void lion_sem_cell_s_parse_verify_signature( const lion_sem_cell_s* o, bcore_sou
         bl_t first = true;
         sz_t index = 0;
         bl_t err = false;
-        while( !err && !bcore_source_a_parse_bl_fa( source, " #?'=>'" ) )
+        while( !err && !bcore_source_a_parse_bl_fa( source, " #?'<-'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
             tp_t name = lion_parse_name( source );

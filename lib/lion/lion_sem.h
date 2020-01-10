@@ -356,6 +356,11 @@ tp_t lion_entypeof_fa( sc_t format, ... );
 
 lion_sem_link_s* lion_sem_link_s_trace_to_cell_membrane( lion_sem_link_s* o );
 
+void lion_sem_cell_s_parse( lion_sem_cell_s* o, bcore_source* source );
+void lion_sem_cell_s_parse_signature( lion_sem_cell_s* o, bcore_source* source );
+void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source );
+lion_sem_cell_s* lion_sem_cell_s_create_frame( void );
+
 #endif // TYPEOF_lion_sem
 
 /**********************************************************************************************************************/
