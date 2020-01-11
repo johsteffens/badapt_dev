@@ -128,15 +128,23 @@ TODO:
  *
  *  Available binary operators
  *  Symbol  Notation Priority  Type
- *   +      Infix    8     (elementwise) addition
- *   -      Infix    8     (elementwise) subtraction
- *   *      Infix    9     (elementwise) multiplication (hadamard product); multiplication of holor with scalar
- *  **,     Infix    9     holor-product for holors up to order 2; transposition state is considered
- *  ***     Infix    9     convolution?
+ *   :      Infix      6     Concatenation  (Assiociative)
+ *   [      Infix     21     order-increment bin operator (l-value: dim). (Yielding) Example: 2[# = (#:#), 2[2[# = (#:#):(#:#)
+ *   ]      Infix     20     order-decrement bin operator (r-value: idx). Example: (1:2:3)[1 = 2
+ *   +      Infix      8     (elementwise) addition
+ *   -      Infix      8     (elementwise) subtraction
+ *   *      Infix     10     (elementwise) multiplication (hadamard product); multiplication of holor with scalar
+ *   /      Infix     10     (elementwise) division
+ *  **,     Infix     10     holor-product for holors up to order 2; transposition state is considered
+ *  ***     Infix     10     convolution?
  *
  *  Unary operators
  *   -          8     negates holor
  *  ^t,        10     toggles transposition state (represents a reinterpret cast) (priority must be above multiplication)
+ *
+ *  Holors
+ *    #   Vacant scalar
+ *    7   Determined Scalar
  *
  *  Possible name ?
  *     haptive (synonym to haptic) (no trademark (!) )

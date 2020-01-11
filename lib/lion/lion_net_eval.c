@@ -24,9 +24,17 @@ static lion_nop* input_op_create( vd_t arg, sz_t in_idx, tp_t in_name, const lio
     BLM_INIT();
     assert( *(aware_t*)arg == TYPEOF_lion_net_eval_e2e_s );
     lion_net_eval_e2e_s* o = arg;
-    if( !o->param.in ) return NULL;
-    if( in_idx < 0 && in_idx >= o->param.in->size ) return NULL;
 
+    if( !o->param.in )
+    {
+        if( current_nop ) return NULL;
+        ERR_fa( "No input holor specified." );
+    }
+    if( in_idx < 0 || in_idx >= o->param.in->size )
+    {
+        if( current_nop ) return NULL;
+        ERR_fa( "Insufficient input holors specified." );
+    }
     const bhvm_holor_s* h_in = o->param.in->data[ in_idx ];
 
     lion_nop_ar0_param_s* param = lion_nop_ar0_param_s_create();
@@ -100,7 +108,7 @@ lion_net_eval_result_s* lion_net_eval_e2e_s_run( const lion_net_eval_e2e_s* o )
     f3_t time_build_net = 0;
 
     /// semantic cell
-    bcore_source_a_parse_fa( source, "cell " );
+    bcore_source_a_parse_fa( source, " cell" );
 
     /// We use a double-nested frame because the body of sem_frame->parent could be used
     lion_sem_cell_s* sem_frame = BLM_CREATE( lion_sem_cell_s );

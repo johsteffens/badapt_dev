@@ -1026,7 +1026,7 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                     }
                     else
                     {
-                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Successive binary operator. Right operand expected.", lion_ifnameof( op2_symbol ) );
+                        bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': This is a successive binary operator. Right operand expected instead.", lion_ifnameof( op2_symbol ) );
                     }
                 }
             }
@@ -1084,27 +1084,28 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             stack_push( stack, link );
         }
 
-        // array operator
-        else if( bcore_source_a_parse_bl_fa( source, " #?'['" ) )
-        {
-            lion_sem_link_s* link = lion_sem_cell_s_evaluate_link( o, source );
-            bcore_source_a_parse_bl_fa( source, " ]" );
-
-            if( stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) )
-            {
-                lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar2_index_s_create(), source );
-                cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_lion_sem_link_s, source );
-                cell->encs.data[ 1 ]->up = link;
-                stack_push( stack, cell->excs.data[ 0 ] );
-            }
-            else
-            {
-                lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar2_inc_order_s_create(), source );
-                cell->encs.data[ 0 ]->up = link;
-                stack_push( stack, cell );
-                stack_push( stack, flag_inc_order );
-            }
-        }
+//        // increment order operator (deprecated)
+//        else if( bcore_source_a_parse_bl_fa( source, " #?'['" ) )
+//        {
+//            lion_sem_link_s* link = lion_sem_cell_s_evaluate_link( o, source );
+//            bcore_source_a_parse_bl_fa( source, " ]" );
+//
+//            // use [x] for indexing is deprecated (dedicated operator symbol)
+////            if( stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) )
+////            {
+////                lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar2_index_s_create(), source );
+////                cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_lion_sem_link_s, source );
+////                cell->encs.data[ 1 ]->up = link;
+////                stack_push( stack, cell->excs.data[ 0 ] );
+////            }
+////            else
+//            {
+//                lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar2_inc_order_s_create(), source );
+//                cell->encs.data[ 0 ]->up = link;
+//                stack_push( stack, cell );
+//                stack_push( stack, flag_inc_order );
+//            }
+//        }
 
         // postfix htp
         else if( bcore_source_a_parse_bl_fa( source, " #?'^t'" ) )
@@ -1124,12 +1125,12 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
             else
             {
-                bcore_source_a_parse_err_fa( source, "transposition ':': invalid l-value." );
+                bcore_source_a_parse_err_fa( source, "transposition '^t': invalid l-value." );
             }
         }
 
         // cell catenation
-        else if( bcore_source_a_parse_bl_fa( source, " #?':'" ) )
+        else if( bcore_source_a_parse_bl_fa( source, " #?'<:'" ) )
         {
             if( stack_of_type( stack, 1, TYPEOF_lion_sem_cell_s ) )
             {
@@ -1137,7 +1138,7 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
             else
             {
-                bcore_source_a_parse_err_fa( source, "Cell catenation ':': l-value is not a cell." );
+                bcore_source_a_parse_err_fa( source, "Cell catenation '<:': l-value is not a cell." );
             }
         }
 
@@ -1275,18 +1276,11 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             sz_t prior_priority = lion_sem_cell_s_get_priority( prior_cell );
             sz_t cell_priority  = lion_sem_cell_s_get_priority( cell );
 
-            if( prior_priority >= cell_priority  )
-            {
-                lion_sem_cell_s_get_enc_by_open( cell )->up = prior_out;
-                lion_sem_cell_s_get_enc_by_open( cell )->up = link2;
+            /// on equality: odd priority yields
+            bl_t yield = ( prior_priority < cell_priority )
+                           || ( ( prior_priority == cell_priority ) && ( ( prior_priority & 1 ) == 1 ) );
 
-                stack_push( stack, prior_link1 );
-                stack_push( stack, flag_bin_op );
-                stack_push( stack, prior_cell );
-                stack_push( stack, out );
-                stack_push( stack, link1 );
-            }
-            else
+            if( yield )
             {
                 lion_sem_cell_s_get_enc_by_open( cell )->up = link1;
                 lion_sem_cell_s_get_enc_by_open( cell )->up = link2;
@@ -1297,6 +1291,17 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 stack_push( stack, prior_out );
                 stack_push( stack, out );           // out becomes right argument for prior_cell
             }
+            else
+            {
+                lion_sem_cell_s_get_enc_by_open( cell )->up = prior_out;
+                lion_sem_cell_s_get_enc_by_open( cell )->up = link2;
+
+                stack_push( stack, prior_link1 );
+                stack_push( stack, flag_bin_op );
+                stack_push( stack, prior_cell );
+                stack_push( stack, out );
+                stack_push( stack, link1 );
+            }
         }
         else // fully resolve operation
         {
@@ -1306,6 +1311,8 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
         }
     }
 
+    /// Catenating adjacent holors is deprecated; use operator ':' instead
+/*
     /// Adjacent holors
     while( stack->size >= 2 && stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) && stack_of_type( stack, 2, TYPEOF_lion_sem_link_s ) )
     {
@@ -1316,6 +1323,7 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
         cell->encs.data[ 1 ]->up = link2;
         stack_push( stack, cell->excs.data[ 0 ] );
     }
+*/
 
     BLM_DOWN();
 }

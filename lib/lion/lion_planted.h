@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-01-09T21:22:52Z
+ *  Last File Update: 2020-01-11T19:01:45Z
  *
  *  Copyright and License of this File:
  *
@@ -72,7 +72,7 @@
 #define TYPEOF_lion_nop_solve_result_s 490117549
 #define BETH_EXPAND_ITEM_lion_nop_solve_result_s \
   BCORE_DECLARE_OBJECT( lion_nop_solve_result_s ) \
-    {aware_t _;lion_holor_s* h;st_s* msg;bl_t settled;bl_t codable;bl_t reducible;tp_t type_vop_ap;tp_t type_vop_dp_a;tp_t type_vop_dp_b;tp_t type_vop_dp_c;};
+    {aware_t _;lion_holor_s* h;st_s* msg;bl_t settled;bl_t codable;bl_t reducible;tp_t type_vop_ap;tp_t type_vop_dp_a;tp_t type_vop_dp_b;tp_t type_vop_dp_c;vd_t attached;};
 #define TYPEOF_lion_nop_context_s 1954113275
 #define BETH_EXPAND_ITEM_lion_nop_context_s \
   BCORE_DECLARE_OBJECT( lion_nop_context_s ) \
@@ -279,6 +279,15 @@
   static inline sc_t lion_nop_ar1_exp_s_symbol( const lion_nop_ar1_exp_s* o ){return "exp";} \
   static inline tp_t lion_nop_ar1_exp_s_type_vop_ap( const lion_nop_ar1_exp_s* o ){return TYPEOF_bhvm_vop_ar1_exp_s;} \
   static inline tp_t lion_nop_ar1_exp_s_type_vop_dp_a( const lion_nop_ar1_exp_s* o ){return TYPEOF_bhvm_vop_ar2_exp_dp_s;}
+#define TYPEOF_lion_nop_ar1_log_s 4247310423
+#define BETH_EXPAND_ITEM_lion_nop_ar1_log_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_log_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar1_log_s_arity( const lion_nop_ar1_log_s* o ){return 1;} \
+  static inline sz_t lion_nop_ar1_log_s_priority( const lion_nop_ar1_log_s* o ){return 8;} \
+  static inline sc_t lion_nop_ar1_log_s_symbol( const lion_nop_ar1_log_s* o ){return "log";} \
+  static inline tp_t lion_nop_ar1_log_s_type_vop_ap( const lion_nop_ar1_log_s* o ){return TYPEOF_bhvm_vop_ar1_log_s;} \
+  static inline tp_t lion_nop_ar1_log_s_type_vop_dp_a( const lion_nop_ar1_log_s* o ){return TYPEOF_bhvm_vop_ar2_log_dp_s;}
 #define TYPEOF_lion_nop_ar1_inv_s 2310849958
 #define BETH_EXPAND_ITEM_lion_nop_ar1_inv_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar1_inv_s ) \
@@ -417,6 +426,7 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar1_floor_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_ceil_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_exp_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_log_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_inv_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_lgst_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_lgst_hard_s ); \
@@ -437,6 +447,7 @@
   BETH_EXPAND_ITEM_lion_nop_ar1_floor_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_ceil_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_exp_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_log_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_inv_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_lgst_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_lgst_hard_s \
@@ -575,27 +586,33 @@
   static inline tp_t lion_nop_ar2_logic_or_s_type_vop_ap( const lion_nop_ar2_logic_or_s* o ){return TYPEOF_bhvm_vop_ar2_logic_or_s;} \
   static inline tp_t lion_nop_ar2_logic_or_s_type_vop_dp_a( const lion_nop_ar2_logic_or_s* o ){return 0;} \
   static inline tp_t lion_nop_ar2_logic_or_s_type_vop_dp_b( const lion_nop_ar2_logic_or_s* o ){return 0;}
-#define TYPEOF_lion_nop_ar2_index_s 1705523628
-#define BETH_EXPAND_ITEM_lion_nop_ar2_index_s \
-  BCORE_DECLARE_OBJECT( lion_nop_ar2_index_s ) \
-    {aware_t _;}; \
-  static inline sz_t lion_nop_ar2_index_s_arity( const lion_nop_ar2_index_s* o ){return 2;} \
-  static inline sz_t lion_nop_ar2_index_s_priority( const lion_nop_ar2_index_s* o ){return 20;} \
-  bl_t lion_nop_ar2_index_s_solve( const lion_nop_ar2_index_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
-#define TYPEOF_lion_nop_ar2_inc_order_s 928704479
-#define BETH_EXPAND_ITEM_lion_nop_ar2_inc_order_s \
-  BCORE_DECLARE_OBJECT( lion_nop_ar2_inc_order_s ) \
-    {aware_t _;}; \
-  static inline sz_t lion_nop_ar2_inc_order_s_arity( const lion_nop_ar2_inc_order_s* o ){return 2;} \
-  static inline sz_t lion_nop_ar2_inc_order_s_priority( const lion_nop_ar2_inc_order_s* o ){return 20;} \
-  bl_t lion_nop_ar2_inc_order_s_solve( const lion_nop_ar2_inc_order_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
 #define TYPEOF_lion_nop_ar2_cat_s 2494514940
 #define BETH_EXPAND_ITEM_lion_nop_ar2_cat_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar2_cat_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_cat_s_arity( const lion_nop_ar2_cat_s* o ){return 2;} \
   static inline sz_t lion_nop_ar2_cat_s_priority( const lion_nop_ar2_cat_s* o ){return 6;} \
-  bl_t lion_nop_ar2_cat_s_solve( const lion_nop_ar2_cat_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
+  static inline sc_t lion_nop_ar2_cat_s_symbol( const lion_nop_ar2_cat_s* o ){return ":";} \
+  bl_t lion_nop_ar2_cat_s_solve( const lion_nop_ar2_cat_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  static inline tp_t lion_nop_ar2_cat_s_type_vop_ap( const lion_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar2_cat_s;}
+#define TYPEOF_lion_nop_ar2_order_inc_s 2250225947
+#define BETH_EXPAND_ITEM_lion_nop_ar2_order_inc_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar2_order_inc_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar2_order_inc_s_arity( const lion_nop_ar2_order_inc_s* o ){return 2;} \
+  static inline sz_t lion_nop_ar2_order_inc_s_priority( const lion_nop_ar2_order_inc_s* o ){return 21;} \
+  static inline sc_t lion_nop_ar2_order_inc_s_symbol( const lion_nop_ar2_order_inc_s* o ){return "[";} \
+  bl_t lion_nop_ar2_order_inc_s_solve( const lion_nop_ar2_order_inc_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  void lion_nop_ar2_order_inc_s_mcode_push_ap_track( const lion_nop_ar2_order_inc_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
+#define TYPEOF_lion_nop_ar2_order_dec_s 3205562379
+#define BETH_EXPAND_ITEM_lion_nop_ar2_order_dec_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar2_order_dec_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar2_order_dec_s_arity( const lion_nop_ar2_order_dec_s* o ){return 2;} \
+  static inline sz_t lion_nop_ar2_order_dec_s_priority( const lion_nop_ar2_order_dec_s* o ){return 20;} \
+  static inline sc_t lion_nop_ar2_order_dec_s_symbol( const lion_nop_ar2_order_dec_s* o ){return "]";} \
+  bl_t lion_nop_ar2_order_dec_s_solve( const lion_nop_ar2_order_dec_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  sz_t lion_nop_ar2_order_dec_s_mcode_push_ap_holor( const lion_nop_ar2_order_dec_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
 #define TYPEOF_lion_nop_ar2_recurrent_s 912007342
 #define BETH_EXPAND_ITEM_lion_nop_ar2_recurrent_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar2_recurrent_s ) \
@@ -621,9 +638,9 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar2_smaller_equal_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_logic_and_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_logic_or_s ); \
-  BCORE_FORWARD_OBJECT( lion_nop_ar2_index_s ); \
-  BCORE_FORWARD_OBJECT( lion_nop_ar2_inc_order_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_cat_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar2_order_inc_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar2_order_dec_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_recurrent_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar2_add_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_sub_s \
@@ -637,9 +654,9 @@
   BETH_EXPAND_ITEM_lion_nop_ar2_smaller_equal_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_logic_and_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_logic_or_s \
-  BETH_EXPAND_ITEM_lion_nop_ar2_index_s \
-  BETH_EXPAND_ITEM_lion_nop_ar2_inc_order_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_cat_s \
+  BETH_EXPAND_ITEM_lion_nop_ar2_order_inc_s \
+  BETH_EXPAND_ITEM_lion_nop_ar2_order_dec_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_recurrent_s
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -652,7 +669,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar3_branch_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar3_branch_s_arity( const lion_nop_ar3_branch_s* o ){return 3;} \
-  static inline sz_t lion_nop_ar3_branch_s_priority( const lion_nop_ar3_branch_s* o ){return  5;} \
+  static inline sz_t lion_nop_ar3_branch_s_priority( const lion_nop_ar3_branch_s* o ){return 4;} \
   bl_t lion_nop_ar3_branch_s_solve( const lion_nop_ar3_branch_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
 #define BETH_EXPAND_GROUP_lion_nop_ar3 \
   BCORE_FORWARD_OBJECT( lion_nop_ar3 ); \

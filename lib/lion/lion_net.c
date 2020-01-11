@@ -531,7 +531,7 @@ void lion_net_cell_s_remove_unreachable_nodes( lion_net_cell_s* o )
     BFOR_EACH( i, &o->body ) if( !o->body.data[ i ]->flag ) lion_net_node_s_detach( &o->body.data[ i ] );
     lion_net_cell_s_normalize( o );
 
-    assert( lion_net_cell_s_is_consistent( o ) );
+    ASSERT( lion_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

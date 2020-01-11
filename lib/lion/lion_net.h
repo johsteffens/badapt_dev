@@ -21,15 +21,17 @@
 // - (done) use double-nested-frame
 // - (done) bhvm_value_s_fdev:   (allow all type variations)
 // - (done) finish htp dp pass
-// - replace '=<' by '<-'
-// - current holor literal syntax: is problematic  (() clashes with expression evaluation in brackets), spaces (as catenation) clashes with operator interpretation
+// - (done) replace '=<' by '<-'
+// - (done) current holor literal syntax: is problematic  (() clashes with expression evaluation in brackets), spaces (as catenation) clashes with operator interpretation
 //        ... use same syntax as multidimensional arrays in C? {{1,2},{3,4}}
 //        ... use ':' to cat holors? {{1:2}:{3:4}:{5:6}}  (seems most appropriate)
 //        ... could holor opening '{' clash with cell block opening?  (looking ahead?)
 //        ... should {1:2}:3 be {1:2:3}? (seems necessary if 1:2:3 == (1:2):3)
 //                   problem: {#:#}:{#:#} == [2][2]# or [1][4]# ?
 //
-// - replace ':' with '<:' for cell-cell or cell-holor concatenation
+//
+// - (done) replace ':' with '<:' for cell-cell or cell-holor concatenation
+// - (done) use     ':' for holor concatenation
 
 /**********************************************************************************************************************/
 
