@@ -589,12 +589,23 @@ group :ar2 = retrievable
         func :: :type_vop_dp_b = { return TYPEOF_bhvm_vop_ar3_div_dp_b_s; };
     };
 
+//    stamp :mul =
+//    {
+//        func :: :priority = { return 10; };
+//        func :: :symbol   = { return "*"; };
+//        func :: :solve;
+//    };
+
     stamp :mul =
     {
-        func :: :priority = { return 10; };
-        func :: :symbol   = { return "*"; };
-        func :: :solve;
+        func :: :priority      = { return 10; };
+        func :: :eci           = { return true; };
+        func :: :symbol        = { return "*"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_mul_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_mul_dp_a_s; };
+        func :: :type_vop_dp_b = { return TYPEOF_bhvm_vop_ar2_mul_dp_b_s; };
     };
+
 
     stamp :bmul =
     {

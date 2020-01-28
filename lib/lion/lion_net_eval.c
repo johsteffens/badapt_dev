@@ -374,7 +374,7 @@ lion_net_eval_result_s* lion_net_eval_dp_s_run( const lion_net_eval_dp_s* o, lio
         bhvm_hop_ar1_sqr_s_f(       h_fin, h_scl );
         bhvm_holor_s_set_scalar_f3( h_scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &h_scl->v, 0 ) ) );
         bhvm_hop_ar2_mul_vsv_s_f(   h_fin, h_scl, h_fin );
-        bhvm_hop_ar2_add_s_f(       h_hbo, h_fin, h_fin );
+        bhvm_hop_ar2_add_s_f(   h_hbo, h_fin, h_fin );
 
         /// compute out gradient
         bhvm_hop_ar2_sub_s_f( h_hbo, h_fin, h_hbg );
