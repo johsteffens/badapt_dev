@@ -491,6 +491,7 @@ lion_sem_cell_s* lion_sem_cell_s_push_cell_scalar( lion_sem_cell_s* o, f3_t* v )
     if( v )
     {
         bhvm_holor_s_set_scalar_f3( &literal->h->h, *v );
+        literal->h->m.active = false;
     }
     else
     {

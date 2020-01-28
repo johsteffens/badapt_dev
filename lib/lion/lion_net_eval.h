@@ -34,6 +34,8 @@ PLANT_GROUP( lion_net_eval, bcore_inst )
 
 signature void resolve( mutable );
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 stamp :result = aware bcore_inst
 {
     bl_t error = false;
@@ -50,11 +52,14 @@ stamp :result = aware bcore_inst
         {
             bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o->msg.sc );
         }
-        :result_s_discard( o );
     };
 };
 
-feature 'a' :result_s* run( const ); // creates result or returns NULL
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+feature 'a' :result_s* run( const, :result_s* result ); // returns result
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void set( mutable, const :param_s* src );
 stamp :param = aware bcore_inst
@@ -97,12 +102,26 @@ stamp :param = aware bcore_inst
     };
 };
 
-stamp :show_param = aware :
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stump :std = aware :
 {
     :param_s param;
+    func : :run;
     func : :set_param = { :param_s_set( &o->param, param ); };
-    func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return NULL; };
-    func bcore_main : main = { :result_s_resolve( @_run( o ) ); return 0; };
+    func bcore_main :main =
+    {
+        BLM_INIT();
+        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        BLM_RETURNV( s2_t, 0 );
+    };
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :show_param = extending :std
+{
+    func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,12 +130,9 @@ feature 'a' void set_param( mutable, const :param_s* param );
 
 stamp :arr = aware bcore_array { aware :* []; };
 
-stamp :set = aware :
+stamp :set = extending :std
 {
-    :param_s param;
     :arr_s arr;
-
-    func : :set_param = { :param_s_set( &o->param, param ); };
     func : :run =
     {
         BFOR_EACH( i, &o->arr )
@@ -124,32 +140,24 @@ stamp :set = aware :
             BLM_INIT();
             :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
             :a_set_param( eval, &o->param );
-            :result_s* r = BLM_A_PUSH( :a_run( eval ) );
-            if( r && r->error )
+            :a_run( eval, result );
+            if( result->error )
             {
-                st_s* s = BLM_A_PUSH( st_s_clone( &r->msg ) );
-                st_s_copy_fa( &r->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
-                BLM_RETURNV( :result_s*, :result_s_clone( r ) );
+                st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, BLM_CLONE( st_s, &result->msg ) );
+                BLM_RETURNV( :result_s*, result );
             }
             BLM_DOWN();
         };
-        return NULL;
-    };
-    func bcore_main : main =
-    {
-        :result_s_resolve( @_run( o ) ); return 0;
+        return result;
     };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :e2e = aware :
-{
-    :param_s param;
-    func : :run;
-    func : :set_param = { :param_s_set( &o->param, param ); };
-    func bcore_main :main = { :result_s_resolve( @_run( o ) ); return 0; };
-};
+stamp :ap     = extending :std {};
+stamp :dp     = extending :std {};
+stamp :frame  = extending :std {};
+stamp :timing = extending :std {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

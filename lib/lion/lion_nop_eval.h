@@ -34,10 +34,14 @@
 PLANT_GROUP( lion_nop_eval, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-signature void resolve( mutable );
+signature void resolve( const );
 
 stamp :result = aware bcore_inst
 {
+    sz_t total_tests = 0;
+    sz_t solvable_tests = 0;
+    sz_t tolerated_errors = 0;
+
     bl_t error = false;
     st_s msg;
 
@@ -52,11 +56,16 @@ stamp :result = aware bcore_inst
         {
             bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o->msg.sc );
         }
-        :result_s_discard( o );
+        if( o->total_tests > 0 )
+        {
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Total tests ...... #<sz_t>\n", o->total_tests );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o->solvable_tests, ( o->solvable_tests * 100 ) / o->total_tests );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Tolerated errors . #<sz_t>\n", o->tolerated_errors );
+        }
     };
 };
 
-feature 'a' :result_s* run( const ); // creates result or returns NULL
+feature 'a' :result_s* run( const, :result_s* result ); // creates result or returns NULL
 
 signature void set( mutable, const :param_s* src );
 stamp :param = aware bcore_inst
@@ -108,15 +117,25 @@ stamp :generator = aware :
 
     func : :set_param = { :param_s_set( &o->param, param ); };
     func : :run;
-    func bcore_main : main = { :result_s_resolve( @_run( o ) ); return 0; };
+    func bcore_main : main =
+    {
+        BLM_INIT();
+        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        BLM_RETURNV( s2_t, 0 );
+    };
 };
 
 stamp :show_param = aware :
 {
     :param_s param;
     func : :set_param = { :param_s_set( &o->param, param ); };
-    func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return NULL; };
-    func bcore_main : main = { :result_s_resolve( @_run( o ) ); return 0; };
+    func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
+    func bcore_main : main =
+    {
+        BLM_INIT();
+        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        BLM_RETURNV( s2_t, 0 );
+    };
 };
 
 feature 'a' void set_param( mutable, const :param_s* param );
@@ -136,20 +155,23 @@ stamp :set = aware :
             BLM_INIT();
             :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
             :a_set_param( eval, &o->param );
-            :result_s* r = BLM_A_PUSH( :a_run( eval ) );
-            if( r && r->error )
+            :a_run( eval, result );
+            if( result->error )
             {
-                st_s* s = BLM_A_PUSH( st_s_clone( &r->msg ) );
-                st_s_copy_fa( &r->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
-                BLM_RETURNV( :result_s*, :result_s_clone( r ) );
+                st_s* s = BLM_A_PUSH( st_s_clone( &result->msg ) );
+                st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
+                BLM_RETURNV( :result_s*, result );
             }
             BLM_DOWN();
         };
-        return NULL;
+        return result;
     };
+
     func bcore_main : main =
     {
-        :result_s_resolve( @_run( o ) ); return 0;
+        BLM_INIT();
+        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        BLM_RETURNV( s2_t, 0 );
     };
 };
 
@@ -158,7 +180,12 @@ stamp :ar1 = aware :
     :param_s param;
     func : :run;
     func : :set_param = { :param_s_set( &o->param, param ); };
-    func bcore_main :main = { :result_s_resolve( @_run( o ) ); return 0; };
+    func bcore_main : main =
+    {
+        BLM_INIT();
+        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        BLM_RETURNV( s2_t, 0 );
+    };
 };
 
 stamp :ar2 = aware :
@@ -166,7 +193,12 @@ stamp :ar2 = aware :
     :param_s param;
     func : :run;
     func : :set_param = { :param_s_set( &o->param, param ); };
-    func bcore_main :main = { :result_s_resolve( @_run( o ) ); return 0; };
+    func bcore_main : main =
+    {
+        BLM_INIT();
+        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        BLM_RETURNV( s2_t, 0 );
+    };
 };
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

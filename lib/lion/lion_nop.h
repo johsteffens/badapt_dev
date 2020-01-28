@@ -39,17 +39,6 @@ lion_nop_context_s* lion_nop_get_context( void );
 PLANT_GROUP( lion_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// operator class
-name nop_class_regular;
-name nop_class_cast;
-
-// holor classes (possibly redundant)
-name holor_class_data;          // any type of data holder
-name holor_class_depletable;    // holor can be set to vacant before shelving
-name holor_class_adaptive;      // holor is adaptive
-name holor_class_adaptive_grad; // holor represents the gradient of an adaptive holor
-name holor_class_cast;          // holor is the result of a cast (such holors are setup by a cast operator and clear()-ed for shelving)
-
 /// tracks
 name track_ap;
 name track_dp;
@@ -60,7 +49,6 @@ name track_shelve_dp;
 name track_reset_dp; // zeros gradients on adaptive nodes
 
 feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o->_ ) ); return -1; };
-feature 'a' tp_t class( const ) = { return TYPEOF_nop_class_regular; };
 feature 'a' sz_t priority( const ) = { return 10; };
 feature 'a' sc_t symbol( const )   = { return NULL; };
 
@@ -74,18 +62,11 @@ feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n
   *   Vacant (dimensions are fully determined)
   *   Determined - This represents a holor computed from literals and can itself be treated as literal.
   *
-  *   Settled: The result is considered settled when the input was sufficient specific for computing a vm-operation
-  *
-  * Return: (deprecated)
-  *   0: A valid result could be computed
-  *   1: Output is settled. Triggers to finalize and discard graph spanned by operation.
-  *   2: Situation of 1, additionally sets node-holor vacant (forces top-spanning graph to remain intact).
-  *      E.g. This is required for adaptive operands, which stay in the graph even though they might
-  *           have a literal state at compile time.
-  *
-  *   Negative values indicate errors
-  *   -1: Incorrect operands for the given operation (this triggers a syntax error by the parser)
-  *       if( msg ) function can push a specific error text.
+  *   Settled:
+  *     The result is considered settled when the top-spanning graph of the result is not relevant for
+  *     the virtual machine. This is generally (not always) the case when the result is not active (e.g. a constant).
+  *     If the result is settled, the top-spanning graph is removed, which turn the node into and arity-0 node.
+  *     The feature 'settle' is triggered, which switches the operator to an arity0 operator. By default this is a literal.
   */
 
 stamp :solve_result = aware bcore_inst
@@ -96,13 +77,13 @@ stamp :solve_result = aware bcore_inst
     /// optional message in case of failure
     st_s => msg;
 
-    /// Output is settled: Triggers finalization and discards graph spanned by operation if reducible.
+    /// Output is settled: Triggers operator settling and removes top-spanning graph.
     bl_t settled = false;
 
     /// Non-codabe operators should not enter code generation.
     bl_t codable = true;
 
-    /// If settled 'reducible' discards top-spanning graph
+    /// If settled 'reducible' allows subsequent graph to be disconnected (solution needs not retain a reference to this node)
     bl_t reducible = true;
 
     /// preferred axon-pass vop type (0: not set)
@@ -117,70 +98,13 @@ stamp :solve_result = aware bcore_inst
     aware => attached;
 };
 
+/// returns true when the operator supports 'elementary cyclic indexing'
+feature 'a' bl_t eci( const ) = { return false; };
+
 /** Returns 'true' in case of success, otherwise check result->msg
   * The default implementation solves all elementary operators
   */
-feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) =
-{
-    BLM_INIT();
-    ASSERT( result );
-    lion_holor_s** r = &result->h;
-    lion_holor_s_detach( r );
-    sz_t arity = :a_arity( o );
-    bl_t settled = ( arity > 0 );
-    tp_t r_type = TYPEOF_f2_t;
-    bl_t r_htp  = false;
-    for( sz_t i = 0; i < arity; i++ )
-    {
-        if( !a[i] ) BLM_RETURNV( bl_t, false );
-        bhvm_holor_s* h = &a[ i ]->h;
-        if( h->v.type == TYPEOF_f3_t ) r_type = TYPEOF_f3_t;
-        if( h->v.size == 0 ) settled = false;
-        if( i > 0 )
-        {
-            lion_holor_s* lh0 = a[ 0 ];
-            lion_holor_s* lh1 = a[ i ];
-            if( !bhvm_shape_s_is_equal( &lh0->h.s, &lh1->h.s ) ) BLM_RETURNV( bl_t, false );
-            if( lh0->m.htp != lh1->m.htp ) BLM_RETURNV( bl_t, false );
-        }
-        r_htp = a[ i ]->m.htp;
-    }
-
-    lion_holor_s_attach( r, lion_holor_s_create() );
-    bhvm_holor_s* hr = &(*r)->h;
-    (*r)->m.htp = r_htp;
-
-    if( arity > 0 )
-    {
-        bhvm_holor_s* h0 = &a[ 0 ]->h;
-        bhvm_shape_s_copy( &hr->s, &h0->s );
-    }
-
-    if( settled )
-    {
-        bhvm_holor_s_set_type( hr, r_type );
-        bhvm_holor_s_fit_size( hr );
-
-        // We setup a mini frame and run vop_ap on it.
-        bhvm_mcode_hbase_s* hbase = BLM_CREATEC( bhvm_mcode_hbase_s, set_size, arity + 1 );
-        bhvm_vop_arr_ci_s* arr_ci = BLM_CREATEC( bhvm_vop_arr_ci_s,  set_size, arity + 1 );
-
-        for( sz_t i = 0; i <= arity; i++ )
-        {
-            bhvm_holor_s_init_weak_from_holor( &hbase->holor_ads.data[ i ], ( i < arity ) ? &a[ i ]->h : hr );
-            arr_ci->data[ i ].i = i;
-            arr_ci->data[ i ].c = ( i < arity ) ? 'a' + i : 'y';
-        }
-
-        result->type_vop_ap = :a_defines_type_vop_ap( o ) ? :a_type_vop_ap( o ) : 0;
-        assert( result->type_vop_ap );
-
-        bhvm_vop_a_run( bhvm_vop_a_set_args( BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) ), arr_ci ), hbase->holor_ads.data );
-    }
-
-    result->settled = settled;
-    BLM_RETURNV( bl_t, true );
-};
+feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) = solve__;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -191,7 +115,7 @@ feature 'a' bl_t requires_solve_for_each_channel( const ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/** Settles operator.
+/** Settles operator. (Creates an arity-0 operator)
  *  Default implementation turns it into a literal.
  **/
 feature 'a' void settle( const, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
@@ -220,7 +144,7 @@ feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, cons
     bhvm_holor_s* h = &result->h->h;
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-    if( h->v.size == 0 )
+    if( m->active )
     {
         bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
         bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
@@ -297,32 +221,6 @@ group :ar0 = retrievable
         func :: :arity = { return 0; };
     };
 
-    stamp :zro =
-    {
-        func :: :priority = { return 8; };
-        func :: :solve =
-        {
-            lion_holor_s_attach( &result->h, lion_holor_s_create() );
-            bhvm_holor_s_set_scalar_f3( &result->h->h, 0 );
-            result->type_vop_ap = TYPEOF_bhvm_vop_ar0_zro_s;
-            result->settled = true;
-            return true;
-        };
-    };
-
-    stamp :one =
-    {
-        func :: :priority = { return 8; };
-        func :: :solve =
-        {
-            lion_holor_s_attach( &result->h, lion_holor_s_create() );
-            bhvm_holor_s_set_scalar_f3( &result->h->h, 1 );
-            result->type_vop_ap = TYPEOF_bhvm_vop_ar0_one_s;
-            result->settled = true;
-            return true;
-        };
-    };
-
     stamp :literal =
     {
         lion_holor_s -> h;
@@ -359,10 +257,14 @@ group :ar0 = retrievable
 
         func :: :mcode_push_ap_holor =
         {
-            sz_t idx = ::mcode_push_ap_holor__( ( lion_nop* )o, result, arr_ci, mcf );
-            if( result->h->h.v.size == 0 ) // ramdomize holor if result is vacant
+            bhvm_holor_s* h = &result->h->h;
+            lion_hmeta_s* m = &result->h->m;
+            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+            if( result->h->h.v.size == 0 ) // randomize holor if result is vacant
             {
-                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
+                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
+                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
             }
             return idx;
         };
@@ -393,7 +295,7 @@ group :ar1 = retrievable
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
-            result->settled = (result->h) && result->h->h.v.size > 0;
+            result->settled = (result->h) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
@@ -452,6 +354,22 @@ group :ar1 = retrievable
         func :: :symbol        = { return "inv"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_inv_s; };
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_inv_dp_s; };
+    };
+
+    stamp :sqr =
+    {
+        func :: :priority      = { return 8; };
+        func :: :symbol        = { return "sqr"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_sqr_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sqr_dp_s; };
+    };
+
+    stamp :srt =
+    {
+        func :: :priority      = { return 8; };
+        func :: :symbol        = { return "srt"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_srt_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_srt_dp_s; };
     };
 
     stamp :lgst =
@@ -532,7 +450,7 @@ group :ar1 = retrievable
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
-            result->settled = (result->h) && result->h->h.v.size > 0;
+            result->settled = (result->h) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
@@ -553,6 +471,7 @@ group :ar1 = retrievable
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
+            if( result->h ) result->h->m.active = true;
             result->settled = ( result->h != NULL );
             result->reducible = false; // keep subsequent graph intact
             result->codable = false;
@@ -571,6 +490,8 @@ group :ar1 = retrievable
 
     };
 
+    /// special operators ------------------------------------------------------
+
     /// returns leading dimension
     stamp :dimof =
     {
@@ -578,9 +499,12 @@ group :ar1 = retrievable
         func :: :priority = { return 8; };
         func :: :solve  =
         {
-            lion_holor_s_attach( &result->h, a[0] ? lion_holor_s_create() : NULL );
-            if( result->h ) bhvm_holor_s_set_scalar_f3( &result->h->h, a[0]->h.s.size ? a[0]->h.s.data[ a[0]->h.s.size - 1 ] : 1 );
-            result->type_vop_ap = TYPEOF_bhvm_vop_ar0_one_s;
+            if( a[0] )
+            {
+                lion_holor_s_attach( &result->h, lion_holor_s_create() );
+                bhvm_holor_s_set_scalar_f3( &result->h->h, a[0]->h.s.size ? a[0]->h.s.data[ a[0]->h.s.size - 1 ] : 1 );
+                result->h->m.active = false;
+            }
             result->settled = result->h != NULL;
             result->codable = false;
             return true;
@@ -594,15 +518,15 @@ group :ar1 = retrievable
         func :: :priority = { return 8; };
         func :: :solve    =
         {
-            lion_holor_s_attach( &result->h, a[0] ? lion_holor_s_create() : NULL );
-            if( result->h )
+            if( a[0] )
             {
+                lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
                 ::context_s* context = ::get_context();
                 ASSERT( context->randomizer_is_locked );
                 if( context->randomizer_rval == 0 ) context->randomizer_rval = o->rseed;
-                lion_holor_s_copy( result->h, a[0] );
                 if( !result->h->h.v.size ) bhvm_holor_s_fit_size( &result->h->h );
                 bhvm_value_s_set_random( &result->h->h.v, 1.0, -0.5, 0.5, &context->randomizer_rval );
+                result->h->m.active = false;
                 result->settled = true;
             }
             result->codable = false;
@@ -610,70 +534,12 @@ group :ar1 = retrievable
         };
     };
 
-    /// cast -------------------------------------------------------------------
-
-    // Cast operators make the target weakly reference source data.
-    // Value data is always referenced; shape might be referenced.
-    // Cast operators are inert as far as actual vm-processing is concerned.
-    // They are not intended to actually execute in ap of dp tracks.
-    // They are typically placed in the setup track.
-
     stamp :cast_htp =
     {
-        func :: :class     = { return TYPEOF_nop_class_cast; };
         func :: :priority  = { return 8; };
-        func :: :solve =
-        {
-            lion_holor_s_attach( &result->h, a[0] ? lion_holor_s_create() : NULL );
-            if( result->h )
-            {
-                bhvm_holor_s_init_fork_from_holor( &result->h->h, &a[0]->h );
-                result->h->m.htp = !a[0]->m.htp;
-            }
-            result->settled = result->h && result->h->h.v.size > 0;
-            return true;
-        };
-
-        func :: :mcode_push_ap_holor =
-        {
-            BLM_INIT();
-            bhvm_holor_s* h = &result->h->h;
-            lion_hmeta_s* m = &result->h->m;
-            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-            bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
-            bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'y', idx );
-
-            bhvm_vop_ar1_fork_s* fork = bhvm_vop_ar1_fork_s_create();
-            fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'a' );
-            fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'y' );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, ( bhvm_vop* )fork );
-
-            bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_shelve_ap, ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create(), arr_ci_l );
-            BLM_RETURNV( sz_t, idx );
-        };
-
-        func :: :mcode_push_dp_holor =
-        {
-            BLM_INIT();
-
-            bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
-            lion_hmeta_s* m = &result->h->m;
-            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-            bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
-            bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'z', idx );
-
-            bhvm_vop_ar1_fork_s* fork = bhvm_vop_ar1_fork_s_create();
-            fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'f' );
-            fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp, ( bhvm_vop* )fork );
-
-            bhvm_vop_ar0_vacate_s* vacate = bhvm_vop_ar0_vacate_s_create();
-            vacate->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, ( bhvm_vop* )vacate );
-
-            BLM_RETURNV( sz_t, idx );
-        };
-
+        func :: :solve;
+        func :: :mcode_push_ap_holor;
+        func :: :mcode_push_dp_holor;
     };
 
 };
@@ -690,6 +556,7 @@ group :ar2 = retrievable
     stamp :add =
     {
         func :: :priority      = { return 8; };
+        func :: :eci           = { return true; };
         func :: :symbol        = { return "+"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_add_s; };
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar1_add_dp_a_s; };
@@ -699,6 +566,7 @@ group :ar2 = retrievable
     stamp :sub =
     {
         func :: :priority      = { return 8; };
+        func :: :eci           = { return true; };
         func :: :symbol        = { return "-"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_sub_s; };
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar1_sub_dp_a_s; };
@@ -714,6 +582,7 @@ group :ar2 = retrievable
     stamp :div =
     {
         func :: :priority      = { return 10; };
+        func :: :eci           = { return true; };
         func :: :symbol        = { return "/"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_div_s; };
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_div_dp_a_s; };
@@ -806,20 +675,7 @@ group :ar2 = retrievable
     {
         func :: :priority = { return 6; };
         func :: :symbol   = { return ":"; };
-        func :: :solve =
-        {
-            lion_holor_s_attach( &result->h, a[0] && a[1] ? lion_holor_s_create() : NULL );
-            if( result->h )
-            {
-                bhvm_holor_s* ha = &a[0]->h;
-                bhvm_holor_s* hb = &a[1]->h;
-                bhvm_holor_s* hr = &result->h->h;
-                if( !bhvm_holor_s_cat_can( ha, hb ) ) return false;
-                bhvm_holor_s_cat_set( ha, hb, hr );
-            }
-            result->settled = ( result->h && result->h->h.v.size );
-            return true;
-        };
+        func :: :solve;
         func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_cat_s; };
     };
 
@@ -827,33 +683,8 @@ group :ar2 = retrievable
     {
         func :: :priority = { return 21; };
         func :: :symbol   = { return "["; };
-        func :: :solve =
-        {
-            lion_holor_s_attach( &result->h, a[0] && a[1] ? lion_holor_s_create() : NULL );
-            if( result->h )
-            {
-                bhvm_holor_s* ha = &a[0]->h;
-                bhvm_holor_s* hb = &a[1]->h;
-                bhvm_holor_s* hr = &result->h->h;
-                if( ha->v.size != 1 ) return false;
-                sz_t dim = bhvm_holor_s_f3_get_scalar( ha );
-                if( dim <= 0 ) return false;
-                bhvm_holor_s_order_inc_set( hb, dim, hr );
-
-                bhvm_vop_ar1_order_inc_s* order_inc = bhvm_vop_ar1_order_inc_s_create();
-                order_inc->dim = dim;
-                bhvm_vop_arr_s* vop_arr = bhvm_vop_arr_s_create();
-                bhvm_vop_arr_s_push_d( vop_arr, ( bhvm_vop* )order_inc );
-                bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)vop_arr );
-            }
-            result->settled = ( result->h && result->h->h.v.size );
-            return true;
-        };
-
-        func :: :mcode_push_ap_track =
-        {
-            bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_a_clone( ( ( bhvm_vop_arr_s* )result->attached )->data[ 0 ] ), arr_ci );
-        };
+        func :: :solve;
+        func :: :mcode_push_ap_track;
     };
 
     // r-value is (scalar) index
@@ -861,55 +692,8 @@ group :ar2 = retrievable
     {
         func :: :priority = { return 20; };
         func :: :symbol   = { return "]"; };
-        func :: :solve = // r->v_data will be weak
-        {
-            lion_holor_s_detach( &result->h );
-            if( a[0] && a[0]->m.htp ) return false;
-            lion_holor_s_attach( &result->h, a[0] && a[1] ? lion_holor_s_create() : NULL );
-            if( result->h )
-            {
-                bhvm_holor_s* ha = &a[0]->h;
-                bhvm_holor_s* hb = &a[1]->h;
-                bhvm_holor_s* hr = &result->h->h;
-                if( hb->v.size != 1 ) return false;
-                sz_t index = bhvm_holor_s_f3_get_scalar( hb );
-                if( ha->s.size == 0 ) return false;
-                if( index < 0 || index >= ha->s.data[ ha->s.size - 1 ] ) return false;
-                bhvm_holor_s_order_dec_fork( ha, index, hr );
-
-                bhvm_vop_ar1_order_dec_fork_s* order_dec_fork = bhvm_vop_ar1_order_dec_fork_s_create();
-                order_dec_fork->idx = index;
-                bhvm_vop_arr_s* vop_arr = bhvm_vop_arr_s_create();
-                bhvm_vop_arr_s_push_d( vop_arr, ( bhvm_vop* )order_dec_fork );
-                bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)vop_arr );
-            }
-            result->settled = ( result->h && result->h->h.v.size );
-            return true;
-        };
-
-        func :: :mcode_push_ap_holor =
-        {
-            BLM_INIT();
-            bhvm_holor_s* h = &result->h->h;
-            lion_hmeta_s* m = &result->h->m;
-            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-            bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
-            bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'y', idx );
-
-            bhvm_vop_ar1_order_dec_fork_s* fork = bhvm_vop_ar1_order_dec_fork_s_clone( ( ( bhvm_vop_arr_s* )result->attached )->data[ 0 ] );
-            fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'a' );
-            fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'y' );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap, ( bhvm_vop* )fork );
-
-            bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_shelve_ap, ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create(), arr_ci_l );
-            BLM_RETURNV( sz_t, idx );
-        };
-
-//        func :: :mcode_push_ap_track =
-//        {
-//            bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_a_clone( ( ( bhvm_vop_arr_s* )result->attached )->data[ 0 ] ), arr_ci );
-//        };
-
+        func :: :solve;
+        func :: :mcode_push_ap_holor;
     };
 
     // first argument is initialization, second is normal input
@@ -919,46 +703,8 @@ group :ar2 = retrievable
 
         func :: :priority = { return 8; };
         func :: :requires_solve_for_each_channel = { return true; };
-
-        func :: :solve =
-        {
-            if( a[0] )
-            {
-                lion_holor_s_attach( &result->h, lion_holor_s_create() );
-                bhvm_holor_s* ha = &a[0]->h;
-                bhvm_holor_s* hr = &result->h->h;
-                bhvm_shape_s_copy( &hr->s, &ha->s );
-                if( a[1] )
-                {
-                    bhvm_holor_s* hb = &a[1]->h;
-                    if( !bhvm_shape_s_is_equal( &ha->s, &hb->s ) ) return false;
-                    result->settled = ha->v.size > 0 && hb->v.size > 0;
-                    return true;
-                }
-                else
-                {
-                    result->settled = false;
-                    return true;
-                }
-            }
-            else
-            {
-                if( a[1] ) return false;
-                lion_holor_s_attach( &result->h, NULL );
-                result->settled = false;
-                return true;
-            }
-        };
-
-        // TODO: implement dendrite pass
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
-
-        func :: :mcode_push_ap_track =
-        {
-            bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_setup_ap, bhvm_vop_t_create( TYPEOF_bhvm_vop_ar1_cpy_ay_s ), arr_ci );
-            bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap,       bhvm_vop_t_create( TYPEOF_bhvm_vop_ar1_cpy_by_s ), arr_ci );
-        };
+        func :: :solve;
+        func :: :mcode_push_ap_track;
     };
 };
 
@@ -975,26 +721,7 @@ group :ar3 = retrievable
     stamp :branch =
     {
         func :: :priority = { return 4; };
-        func :: :solve =
-        {
-            if( a[0] )
-            {
-                bhvm_holor_s* ha = &a[0]->h;
-                if( ha->v.size != 1 ) return false;
-                f3_t cond = bhvm_holor_s_f3_get_scalar( ha );
-                if( cond > 0 )
-                {
-                    lion_holor_s_attach( &result->h, bcore_fork( a[1] ) );
-                }
-                else
-                {
-                    lion_holor_s_attach( &result->h, bcore_fork( a[2] ) );
-                }
-            }
-            result->settled = ( result->h && result->h->h.v.size );
-            result->codable = false;
-            return true;
-        };
+        func :: :solve;
     };
 };
 

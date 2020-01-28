@@ -276,12 +276,12 @@ void lion_net_node_s_solve( lion_net_node_s* o )
 
     if( o->result->settled )
     {
+        lion_nop_a_settle( o->nop, o->result, &o->nop, &o->result );
+        lion_net_links_s_clear( &o->upls );
         if( !o->result->reducible )
         {
             if( o->result->h ) bhvm_value_s_clear( &o->result->h->h.v );
         }
-        lion_nop_a_settle( o->nop, o->result, &o->nop, &o->result );
-        lion_net_links_s_clear( &o->upls );
     }
 
     o->flag = false;
@@ -965,6 +965,186 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf 
     }
 
     lion_net_cell_s_clear_flags( o );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+/// frame
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static lion_nop* input_op_create( vd_t arg, sz_t in_idx, tp_t in_name, const lion_nop* current_nop )
+{
+    BLM_INIT();
+    const bhvm_holor_s** in = arg;
+
+    if( in ) ASSERT( *(aware_t*)in[ in_idx ] == TYPEOF_bhvm_holor_s );
+
+    const bhvm_holor_s* h_in = in ? in[ in_idx ] : NULL;
+
+    if( current_nop && current_nop->_ == TYPEOF_lion_nop_ar0_param_s )
+    {
+        const bhvm_holor_s* h_cur = &( ( lion_nop_ar0_param_s* )current_nop )->h->h;
+        if( !h_in )
+        {
+            h_in = h_cur;
+        }
+        else if( !bhvm_shape_s_is_equal( &h_cur->s, &h_in->s ) )
+        {
+            st_s* msg = BLM_CREATE( st_s );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "Shape deviation at input holor '#<sz_t>':", in_idx );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Passed input} " );
+            bhvm_holor_s_brief_to_sink( h_in, (bcore_sink*)msg );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Expected shape} " );
+            bhvm_holor_s_brief_to_sink( h_cur, (bcore_sink*)msg );
+            ERR_fa( "#<st_s*>\n", msg );
+        }
+    }
+
+    lion_nop_ar0_param_s* param = lion_nop_ar0_param_s_create();
+    param->h = lion_holor_s_create();
+    bhvm_holor_s_copy( &param->h->h, h_in );
+
+    BLM_RETURNV( lion_nop*, ( lion_nop* )param );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_net_frame_s* lion_net_frame_s_setup_st( lion_net_frame_s* o, const st_s* st, const bhvm_holor_s* in[] )
+{
+    BLM_INIT();
+    bcore_source* source = BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) );
+    lion_net_cell_s* cell = BLM_CREATE( lion_net_cell_s );
+
+    bhvm_mcode_frame_s_attach( &o->mcf, bhvm_mcode_frame_s_create() );
+    bcore_arr_sz_s_attach( &o->idx_ap_en, bcore_arr_sz_s_create() );
+    bcore_arr_sz_s_attach( &o->idx_dp_en, bcore_arr_sz_s_create() );
+    bcore_arr_sz_s_attach( &o->idx_ap_ex, bcore_arr_sz_s_create() );
+    bcore_arr_sz_s_attach( &o->idx_dp_ex, bcore_arr_sz_s_create() );
+
+    /// We use a double-nested frame because the body of sem_frame->parent could be used
+    lion_sem_cell_s* sem_frame = BLM_CREATE( lion_sem_cell_s );
+    sem_frame->parent = BLM_A_PUSH( lion_sem_cell_s_create_frame() ); // double nested
+
+    bcore_source_point_s_set( &sem_frame->source_point, source );
+    lion_sem_cell_s_parse( sem_frame, source );
+
+    /// network cell
+    lion_net_cell_s_from_sem_cell( cell, sem_frame, input_op_create, ( vd_t )in, NULL );
+
+    lion_net_cell_s_mcode_push_ap( cell, o->mcf );
+    lion_net_cell_s_mcode_push_dp( cell, o->mcf );
+
+    BFOR_EACH( i, &cell->encs )
+    {
+        lion_net_node_s* node = cell->encs.data[ i ];
+        if( node->hidx >= 0 ) bcore_arr_sz_s_push( o->idx_ap_en, node->hidx );
+        if( node->gidx >= 0 ) bcore_arr_sz_s_push( o->idx_dp_en, node->gidx );
+    }
+
+    BFOR_EACH( i, &cell->excs )
+    {
+        lion_net_node_s* node = cell->excs.data[ i ];
+        if( node->hidx >= 0 ) bcore_arr_sz_s_push( o->idx_ap_ex, node->hidx );
+        if( node->gidx >= 0 ) bcore_arr_sz_s_push( o->idx_dp_ex, node->gidx );
+    }
+
+    BLM_DOWN();
+
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_ap );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_dp );
+
+    return o;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_net_frame_s* lion_net_frame_s_setup_sc( lion_net_frame_s* o, sc_t sc, const bhvm_holor_s* in[] )
+{
+    st_s st;
+    st_s_init_weak_sc( &st, sc );
+    return lion_net_frame_s_setup_st( o, &st, in );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_net_frame_s* lion_net_frame_s_create_st( const st_s* st, const bhvm_holor_s* in[] )
+{
+    return lion_net_frame_s_setup_st( lion_net_frame_s_create(), st, in );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_net_frame_s* lion_net_frame_s_create_sc( sc_t  sc, const bhvm_holor_s* in[] )
+{
+    return lion_net_frame_s_setup_sc( lion_net_frame_s_create(), sc, in );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_frame_s_run_ap( lion_net_frame_s* o, const bhvm_holor_s* in[], bhvm_holor_s* out[] )
+{
+    BFOR_EACH( i, o->idx_ap_en )
+    {
+        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ i ] ];
+        const bhvm_holor_s* h_i = in[ i ];
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
+        bhvm_value_s_cpy( &h_i->v, &h_m->v );
+    }
+
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
+
+    BFOR_EACH( i, o->idx_ap_ex )
+    {
+        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ i ] ];
+        bhvm_holor_s* h_o = out[ i ];
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
+        if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
+        bhvm_value_s_cpy( &h_m->v, &h_o->v );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_frame_s_run_dp( lion_net_frame_s* o, const bhvm_holor_s* in[], bhvm_holor_s* out[] )
+{
+    BFOR_EACH( i, o->idx_dp_ex )
+    {
+        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ i ] ];
+        const bhvm_holor_s* h_i = in[ i ];
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
+        bhvm_value_s_cpy( &h_i->v, &h_m->v );
+    }
+
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp );
+
+    BFOR_EACH( i, o->idx_dp_en )
+    {
+        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ i ] ];
+        bhvm_holor_s* h_o = out[ i ];
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
+        if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
+        bhvm_value_s_cpy( &h_m->v, &h_o->v );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_frame_sc_run_ap( sc_t sc, const bhvm_holor_s* in[], bhvm_holor_s* out[] )
+{
+    BLM_INIT();
+    lion_net_frame_s_run_ap( BLM_A_PUSH( lion_net_frame_s_create_sc( sc, in ) ), in, out );
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_net_frame_sc_run_dp( sc_t sc, const bhvm_holor_s* in[], bhvm_holor_s* out[] )
+{
+    BLM_INIT();
+    lion_net_frame_s_run_dp( BLM_A_PUSH( lion_net_frame_s_create_sc( sc, in ) ), in, out );
+    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

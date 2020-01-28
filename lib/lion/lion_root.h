@@ -37,10 +37,19 @@ signature void clear( mutable );
 stamp :hmeta = aware bhvm_mcode_hmeta
 {
     tp_t name;
-    tp_t class;
-    bl_t htp;  // holor is transposed
+    bl_t htp;    // holor is transposed
 
-    func : :clear = { o->name = o->class = 0; o->htp = false; };
+    /** Holor is a active (mutable, not constant).
+     *  Active holors typically represent a variable in the virtual machine.
+     *  They are normally depleted during shelving and actively initialized during setup.
+     *  The opposite (passive) are holors carrying an immutable value (e.g a constant)
+     *  In a network a holor is active if it depends on at least one active holor in
+     *  such a manner that its change affects the resulting holor.
+     *  Computations among passive holors are generally solved in the network and not converted into microcode.
+     */
+    bl_t active = true;
+
+    func : :clear = { o->name = 0; o->htp = false; };
 };
 
 stamp :holor = aware :

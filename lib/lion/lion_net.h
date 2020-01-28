@@ -122,7 +122,7 @@ stamp :node = aware :
 
     lion_nop_solve_result_s => result;
 
-    bcore_source_point_s -> source_point;
+    hidden bcore_source_point_s -> source_point;
 
     func : :solve;
 
@@ -189,7 +189,22 @@ stamp :cell = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// A frame is a self contained operator on holors for axon- and dendrite pass
+stamp :frame = aware :
+{
+    bhvm_mcode_frame_s => mcf;
+    bcore_arr_sz_s => idx_ap_en;
+    bcore_arr_sz_s => idx_dp_en;
+    bcore_arr_sz_s => idx_ap_ex;
+    bcore_arr_sz_s => idx_dp_ex;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/**********************************************************************************************************************/
+/// cell
 
 /** Converts lion_sem_cell_s to lion_net_cell_s
  *  Requires a double-nested frame to allow correct processing of input channels with assignments (checked).
@@ -206,6 +221,21 @@ void lion_net_cell_s_from_sem_cell
 void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink );
 void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf );
 void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf );
+
+/**********************************************************************************************************************/
+/// frame
+
+/// frame setup from string; in can be NULL
+lion_net_frame_s* lion_net_frame_s_setup_st( lion_net_frame_s* o, const st_s* st, const bhvm_holor_s* in[] );
+lion_net_frame_s* lion_net_frame_s_setup_sc( lion_net_frame_s* o,       sc_t  sc, const bhvm_holor_s* in[] );
+
+lion_net_frame_s* lion_net_frame_s_create_st( const st_s* st, const bhvm_holor_s* in[] );
+lion_net_frame_s* lion_net_frame_s_create_sc(       sc_t  sc, const bhvm_holor_s* in[] );
+
+void lion_net_frame_s_run_ap( lion_net_frame_s* o, const bhvm_holor_s* in[], bhvm_holor_s* out[] );
+void lion_net_frame_s_run_dp( lion_net_frame_s* o, const bhvm_holor_s* in[], bhvm_holor_s* out[] );
+void lion_net_frame_sc_run_ap( sc_t sc,            const bhvm_holor_s* in[], bhvm_holor_s* out[] );
+void lion_net_frame_sc_run_dp( sc_t sc,            const bhvm_holor_s* in[], bhvm_holor_s* out[] );
 
 #endif // TYPEOF_lion_net
 

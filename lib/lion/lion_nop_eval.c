@@ -68,7 +68,7 @@ void lion_nop_eval_generator_s_randomize_holor( const lion_nop_eval_generator_s*
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_nop_eval_result_s* lion_nop_eval_generator_s_run( const lion_nop_eval_generator_s* o )
+lion_nop_eval_result_s* lion_nop_eval_generator_s_run( const lion_nop_eval_generator_s* o, lion_nop_eval_result_s* result )
 {
     ASSERT( o->eval );
     u2_t rval = o->param.rval;
@@ -81,29 +81,39 @@ lion_nop_eval_result_s* lion_nop_eval_generator_s_run( const lion_nop_eval_gener
         if( param->hb ) lion_nop_eval_generator_s_randomize_holor( o, &rval, param->hb );
         if( param->hc ) lion_nop_eval_generator_s_randomize_holor( o, &rval, param->hc );
         if( param->hr ) lion_nop_eval_generator_s_randomize_holor( o, &rval, param->hr );
-        lion_nop_eval* eval =  BLM_A_PUSH( lion_nop_eval_a_clone( o->eval ) );
+        lion_nop_eval* eval = BLM_A_PUSH( lion_nop_eval_a_clone( o->eval ) );
         lion_nop_eval_a_set_param( eval, param );
-        lion_nop_eval_result_s* r = BLM_A_PUSH( lion_nop_eval_a_run( eval ) );
-        if( r && r->error )
+        lion_nop_eval_a_run( eval, result );
+        if( result )
         {
-            if( bcore_arr_uz_s_find( &o->tolerated_cycles, 0, -1, i ) == o->tolerated_cycles.size )
+            if( result->error )
             {
-                st_s* s = BLM_A_PUSH( st_s_clone( &r->msg ) );
-                st_s_copy_fa( &r->msg, "At cycle #<sz_t>:\n#<st_s*>", i, s );
-                BLM_RETURNV( lion_nop_eval_result_s*, lion_nop_eval_result_s_clone( r ) );
+                if( bcore_arr_uz_s_find( &o->tolerated_cycles, 0, -1, i ) == o->tolerated_cycles.size )
+                {
+                    st_s* s = BLM_A_PUSH( st_s_clone( &result->msg ) );
+                    st_s_copy_fa( &result->msg, "At cycle #<sz_t>:\n#<st_s*>", i, s );
+                    BLM_RETURNV( lion_nop_eval_result_s*, result );
+                }
+
+                result->error = false;
+                result->tolerated_errors++;
+                st_s_clear( &result->msg );
             }
         }
         BLM_DOWN();
     }
-    return NULL;
+
+    return result;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
+lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o, lion_nop_eval_result_s* result )
 {
     BLM_INIT();
     if( !o->param.nop ) ERR_fa( "Operator missing." );
+
+    result->total_tests++;
 
     lion_nop* nop = o->param.nop;
 
@@ -130,16 +140,17 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
         bcore_sink_a_push_fa( o->param.log, " )\n" );
     }
 
-    lion_nop_solve_result_s* result = BLM_CREATE( lion_nop_solve_result_s );
+    lion_nop_solve_result_s* solve_result = BLM_CREATE( lion_nop_solve_result_s );
 
     lion_holor_s* a[ 1 ] = { ha };
 
-    bl_t success = lion_nop_a_solve( nop, a, result );
-    lion_holor_s* r = result->h;
+    bl_t success = lion_nop_a_solve( nop, a, solve_result );
+    lion_holor_s* r = solve_result->h;
+
+    result->solvable_tests += success;
 
     if( !success )
     {
-        lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
         if( ( hr ) || o->param.verbosity > 5 )
         {
             st_s* msg = BLM_CREATE( st_s );
@@ -150,12 +161,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
                 lion_holor_s_brief_to_sink( ha, (bcore_sink*)msg );
             }
 
-            if( result->msg ) st_s_push_fa( msg, "\n#<sc_t>", result->msg->sc );
+            if( solve_result->msg ) st_s_push_fa( msg, "\n#<sc_t>", solve_result->msg->sc );
 
             if( hr )
             {
-                st_s_push_fa( &r->msg, "Cannot solve (a)->r operation '#<sc_t>':#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
-                r->error = true;
+                st_s_push_fa( &result->msg, "Cannot solve (a)->r operation '#<sc_t>':#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
+                result->error = true;
             }
             else
             {
@@ -163,7 +174,7 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
             }
         }
 
-        BLM_RETURNV( lion_nop_eval_result_s*, r );
+        BLM_RETURNV( lion_nop_eval_result_s*, result );
     }
 
     if( hr )
@@ -177,11 +188,9 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
             st_s_push_fa( msg, "\n:expected : " );
             lion_holor_s_brief_to_sink( hr, (bcore_sink*)msg );
 
-
-            lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
-            st_s_push_fa( &r->msg, "Operation '#<sc_t>' solve: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
-            r->error = true;
-            BLM_RETURNV( lion_nop_eval_result_s*, r );
+            st_s_push_fa( &result->msg, "Operation '#<sc_t>' solve: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
+            result->error = true;
+            BLM_RETURNV( lion_nop_eval_result_s*, result );
         }
     }
     else
@@ -194,7 +203,7 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
         }
     }
 
-    if( result->codable )
+    if( solve_result->codable )
     {
         bhvm_mcode_frame_s* frame = BLM_CREATE( bhvm_mcode_frame_s );
         bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
@@ -213,8 +222,8 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
         bhvm_holor_s*  scl = BLM_CREATE( bhvm_holor_s );
         bhvm_holor_s_set_scalar_f3( scl, 1.0 );
 
-        lion_nop_a_mcode_push_ap_track( nop, result,      arr_ci, frame );
-        lion_nop_a_mcode_push_dp_track( nop, result, 'a', arr_ci, frame );
+        lion_nop_a_mcode_push_ap_track( nop, solve_result,      arr_ci, frame );
+        lion_nop_a_mcode_push_dp_track( nop, solve_result, 'a', arr_ci, frame );
 
         bhvm_hop_ar0_zro_s_f( out );
 
@@ -227,7 +236,7 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
 
         /// choose fin such that energy is 1.0
         bhvm_value_s_set_random( &fin->v, 1.0, -1.0, 1.0, &rval );
-        bhvm_hop_ar1_sqr_s_f( fin, scl );
+        bhvm_hop_ar1_sqrsum_s_f( fin, scl );
         bhvm_holor_s_set_scalar_f3( scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &scl->v, 0 ) ) );
         bhvm_hop_ar2_mul_vsv_s_f( fin, scl, fin );
         bhvm_hop_ar2_add_s_f( out, fin, fin );
@@ -245,13 +254,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
             st_s_push_fa( msg, "\n:expected : " );
             bhvm_holor_s_brief_to_sink( &r->h, (bcore_sink*)msg );
 
-            lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
-            st_s_push_fa( &r->msg, "Operation '#<sc_t>' mcode ap: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
-            r->error = true;
-            BLM_RETURNV( lion_nop_eval_result_s*, r );
+            st_s_push_fa( &result->msg, "Operation '#<sc_t>' mcode ap: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
+            result->error = true;
+            BLM_RETURNV( lion_nop_eval_result_s*, result );
         }
 
-        bhvm_hop_ar2_sub_sqr_s_f( out, fin, scl );
+        bhvm_hop_ar2_sub_sqrsum_s_f( out, fin, scl );
         f3_t e0 = bhvm_value_s_get_f3( &scl->v, 0 );
 
         // test gradients
@@ -273,10 +281,10 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
                 bhvm_value_s_set_f3( &in->v, i, v0 + in_eps );
                 bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_ap );
 
-                bhvm_hop_ar1_sqr_s_f( out, scl );
+                bhvm_hop_ar1_sqrsum_s_f( out, scl );
                 f3_t o0 = bhvm_value_s_get_f3( &scl->v, 0 );
 
-                bhvm_hop_ar2_sub_sqr_s_f( out, fin, scl );
+                bhvm_hop_ar2_sub_sqrsum_s_f( out, fin, scl );
                 f3_t e1 = bhvm_value_s_get_f3( &scl->v, 0 );
                 f3_t de = e1 - e0;
                 f3_t g1 = de / in_eps;  // approximate grad
@@ -303,10 +311,9 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
                     st_s_pushf(   msg, "\nApproximation  : %+5.3g", g1 );
                     st_s_pushf(   msg, "\nDifferentiation: %+5.3g", g0 );
 
-                    lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
-                    st_s_push_fa( &r->msg, "#<sc_t>\n", msg->sc );
-                    r->error = true;
-                    BLM_RETURNV( lion_nop_eval_result_s*, r );
+                    st_s_push_fa( &result->msg, "#<sc_t>\n", msg->sc );
+                    result->error = true;
+                    BLM_RETURNV( lion_nop_eval_result_s*, result );
                 }
 
                 bhvm_value_s_set_f3( &in->v, i, v0 );
@@ -319,10 +326,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
+lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o, lion_nop_eval_result_s* result )
 {
     BLM_INIT();
     if( !o->param.nop ) ERR_fa( "Operator missing." );
+
+    result->total_tests++;
 
     lion_nop* nop = o->param.nop;
 
@@ -351,16 +360,17 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
         bcore_sink_a_push_fa( o->param.log, "\n" );
     }
 
-    lion_nop_solve_result_s* result = BLM_CREATE( lion_nop_solve_result_s );
+    lion_nop_solve_result_s* solve_result = BLM_CREATE( lion_nop_solve_result_s );
 
     lion_holor_s* a[ 2 ] = { ha, hb };
 
-    bl_t success = lion_nop_a_solve( nop, a, result );
-    lion_holor_s* r = result->h;
+    bl_t success = lion_nop_a_solve( nop, a, solve_result );
+    lion_holor_s* r = solve_result->h;
+
+    result->solvable_tests += success;
 
     if( !success )
     {
-        lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
         if( ( hr ) || o->param.verbosity > 5 )
         {
             st_s* msg = BLM_CREATE( st_s );
@@ -376,12 +386,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
                 lion_holor_s_brief_to_sink( hb, (bcore_sink*)msg );
             }
 
-            if( result->msg ) st_s_push_fa( msg, "\n#<sc_t>", result->msg->sc );
+            if( solve_result->msg ) st_s_push_fa( msg, "\n#<sc_t>", solve_result->msg->sc );
 
             if( hr )
             {
-                st_s_push_fa( &r->msg, "Cannot solve (a,b)->r operation '#<sc_t>':#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
-                r->error = true;
+                st_s_push_fa( &result->msg, "Cannot solve (a,b)->r operation '#<sc_t>':#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
+                result->error = true;
             }
             else
             {
@@ -389,7 +399,7 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
             }
         }
 
-        BLM_RETURNV( lion_nop_eval_result_s*, r );
+        BLM_RETURNV( lion_nop_eval_result_s*, result );
     }
 
     if( hr )
@@ -403,11 +413,9 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
             st_s_push_fa( msg, "\n:expected : " );
             lion_holor_s_brief_to_sink( hr, (bcore_sink*)msg );
 
-
-            lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
-            st_s_push_fa( &r->msg, "Operation '#<sc_t>' solve: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
-            r->error = true;
-            BLM_RETURNV( lion_nop_eval_result_s*, r );
+            st_s_push_fa( &result->msg, "Operation '#<sc_t>' solve: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
+            result->error = true;
+            BLM_RETURNV( lion_nop_eval_result_s*, result );
         }
     }
     else
@@ -420,7 +428,7 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
         }
     }
 
-    if( result->codable )
+    if( solve_result->codable )
     {
         bhvm_mcode_frame_s* frame = BLM_CREATE( bhvm_mcode_frame_s );
         bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
@@ -443,9 +451,9 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
         bhvm_holor_s*  scl = BLM_CREATE( bhvm_holor_s );
         bhvm_holor_s_set_scalar_f3( scl, 1.0 );
 
-        lion_nop_a_mcode_push_ap_track( nop, result,      arr_ci, frame );
-        lion_nop_a_mcode_push_dp_track( nop, result, 'a', arr_ci, frame );
-        lion_nop_a_mcode_push_dp_track( nop, result, 'b', arr_ci, frame );
+        lion_nop_a_mcode_push_ap_track( nop, solve_result,      arr_ci, frame );
+        lion_nop_a_mcode_push_dp_track( nop, solve_result, 'a', arr_ci, frame );
+        lion_nop_a_mcode_push_dp_track( nop, solve_result, 'b', arr_ci, frame );
 
         bhvm_hop_ar0_zro_s_f( out );
 
@@ -459,7 +467,7 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
 
         /// choose fin such that energy is 1.0
         bhvm_value_s_set_random( &fin->v, 1.0, -1.0, 1.0, &rval );
-        bhvm_hop_ar1_sqr_s_f( fin, scl );
+        bhvm_hop_ar1_sqrsum_s_f( fin, scl );
         bhvm_holor_s_set_scalar_f3( scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &scl->v, 0 ) ) );
         bhvm_hop_ar2_mul_vsv_s_f( fin, scl, fin );
         bhvm_hop_ar2_add_s_f( out, fin, fin );
@@ -477,13 +485,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
             st_s_push_fa( msg, "\n:expected : " );
             bhvm_holor_s_brief_to_sink( &r->h, (bcore_sink*)msg );
 
-            lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
-            st_s_push_fa( &r->msg, "Operation '#<sc_t>' mcode ap: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
-            r->error = true;
-            BLM_RETURNV( lion_nop_eval_result_s*, r );
+            st_s_push_fa( &result->msg, "Operation '#<sc_t>' mcode ap: Result failure.#<sc_t>\n", ifnameof( nop->_ ), msg->sc );
+            result->error = true;
+            BLM_RETURNV( lion_nop_eval_result_s*, result );
         }
 
-        bhvm_hop_ar2_sub_sqr_s_f( out, fin, scl );
+        bhvm_hop_ar2_sub_sqrsum_s_f( out, fin, scl );
         f3_t e0 = bhvm_value_s_get_f3( &scl->v, 0 );
 
         // test gradients
@@ -506,21 +513,24 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
                 bhvm_value_s_set_f3( &in->v, i, v0 + in_eps );
                 bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_ap );
 
-                bhvm_hop_ar1_sqr_s_f( out, scl );
+                bhvm_hop_ar1_sqrsum_s_f( out, scl );
                 f3_t o0 = bhvm_value_s_get_f3( &scl->v, 0 );
 
-                bhvm_hop_ar2_sub_sqr_s_f( out, fin, scl );
+                bhvm_hop_ar2_sub_sqrsum_s_f( out, fin, scl );
                 f3_t e1 = bhvm_value_s_get_f3( &scl->v, 0 );
                 f3_t de = e1 - e0;
                 f3_t g1 = de / in_eps;  // approximate grad
 
-                if
+                bl_t error =
                 (
                     f3_abs( g0 - g1 ) > f3_max( f3_abs( g0 ), f3_abs( g1 ) ) * gr_dev &&
                     f3_abs( de ) > en_min_dev &&
                     f3_abs( de ) < en_max_dev &&
                     o0 < o0_max
-                )
+                );
+
+
+                if( error || ( o->param.verbosity >= 10 ) )
                 {
                     st_s* msg = BLM_CREATE( st_s );
                     st_s_push_fa( msg, "\nGradient test: Operation '#<sc_t>', 'dp_#<char>' element '#<sz_t>':", ifnameof( nop->_ ), ( char )( 'a' + ch ), i );
@@ -538,10 +548,16 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o )
                     st_s_pushf(   msg, "\nApproximation  : %+5.3g", g1 );
                     st_s_pushf(   msg, "\nDifferentiation: %+5.3g", g0 );
 
-                    lion_nop_eval_result_s* r = lion_nop_eval_result_s_create();
-                    st_s_push_fa( &r->msg, "#<sc_t>\n", msg->sc );
-                    r->error = true;
-                    BLM_RETURNV( lion_nop_eval_result_s*, r );
+                    if( error )
+                    {
+                        st_s_push_fa( &result->msg, "#<sc_t>\n", msg->sc );
+                        result->error = true;
+                        BLM_RETURNV( lion_nop_eval_result_s*, result );
+                    }
+                    else
+                    {
+                        bcore_sink_a_push_fa( o->param.log, " #<sc_t>\n", msg->sc );
+                    }
                 }
 
                 bhvm_value_s_set_f3( &in->v, i, v0 );
