@@ -238,12 +238,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o, l
         bhvm_value_s_set_random( &fin->v, 1.0, -1.0, 1.0, &rval );
         bhvm_hop_ar1_sqrsum_s_f( fin, scl );
         bhvm_holor_s_set_scalar_f3( scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &scl->v, 0 ) ) );
-        bhvm_hop_ar2_mul_vsv_s_f( fin, scl, fin );
-        bhvm_hop_ar2_add_s_f( out, fin, fin );
+        bhvm_hop_ar2_eci_mul_s_f( fin, scl, fin );
+        bhvm_hop_ar2_eci_add_s_f( out, fin, fin );
 
-        bhvm_hop_ar2_sub_s_f( out, fin, gout );
+        bhvm_hop_ar2_eci_sub_s_f( out, fin, gout );
         bhvm_holor_s_set_scalar_f3( scl, 2.0 );
-        bhvm_hop_ar2_mul_vsv_s_f( gout, scl, gout );
+        bhvm_hop_ar2_eci_mul_s_f( gout, scl, gout );
         bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_dp );
 
         if( !bhvm_holor_s_is_equal( out, &r->h ) )
@@ -469,12 +469,12 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o, l
         bhvm_value_s_set_random( &fin->v, 1.0, -1.0, 1.0, &rval );
         bhvm_hop_ar1_sqrsum_s_f( fin, scl );
         bhvm_holor_s_set_scalar_f3( scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &scl->v, 0 ) ) );
-        bhvm_hop_ar2_mul_vsv_s_f( fin, scl, fin );
-        bhvm_hop_ar2_add_s_f( out, fin, fin );
+        bhvm_hop_ar2_eci_mul_s_f( fin, scl, fin );
+        bhvm_hop_ar2_eci_add_s_f( out, fin, fin );
 
-        bhvm_hop_ar2_sub_s_f( out, fin, gout );
+        bhvm_hop_ar2_eci_sub_s_f( out, fin, gout );
         bhvm_holor_s_set_scalar_f3( scl, 2.0 );
-        bhvm_hop_ar2_mul_vsv_s_f( gout, scl, gout );
+        bhvm_hop_ar2_eci_mul_s_f( gout, scl, gout );
         bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_dp );
 
         if( !bhvm_holor_s_is_equal( out, &r->h ) )

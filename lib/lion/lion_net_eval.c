@@ -373,13 +373,13 @@ lion_net_eval_result_s* lion_net_eval_dp_s_run( const lion_net_eval_dp_s* o, lio
 
         bhvm_hop_ar1_sqr_s_f(       h_fin, h_scl );
         bhvm_holor_s_set_scalar_f3( h_scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &h_scl->v, 0 ) ) );
-        bhvm_hop_ar2_mul_vsv_s_f(   h_fin, h_scl, h_fin );
-        bhvm_hop_ar2_add_s_f(   h_hbo, h_fin, h_fin );
+        bhvm_hop_ar2_eci_mul_s_f(   h_fin, h_scl, h_fin );
+        bhvm_hop_ar2_eci_add_s_f(   h_hbo, h_fin, h_fin );
 
         /// compute out gradient
-        bhvm_hop_ar2_sub_s_f( h_hbo, h_fin, h_hbg );
+        bhvm_hop_ar2_eci_sub_s_f( h_hbo, h_fin, h_hbg );
         bhvm_holor_s_set_scalar_f3( h_scl, 2.0 );
-        bhvm_hop_ar2_mul_vsv_s_f( h_hbg, h_scl, h_hbg );
+        bhvm_hop_ar2_eci_mul_s_f( h_hbg, h_scl, h_hbg );
 
         /// dendrite pass
         bhvm_mcode_frame_s_track_run( mcf, TYPEOF_track_dp );
@@ -424,12 +424,12 @@ lion_net_eval_result_s* lion_net_eval_timing_s_run( const lion_net_eval_timing_s
 //    bhvm_holor_s* hb = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "<f3_t>10000000[2" ) );
 //    bhvm_holor_s* hr = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "<f3_t>1000000000[0" ) );
 
-    bhvm_holor_s* ha = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "100[1" ) );
-    bhvm_holor_s* hb = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "100[2" ) );
-    bhvm_holor_s* hr = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "100[0" ) );
+//    bhvm_holor_s* ha = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "100[1" ) );
+//    bhvm_holor_s* hb = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "100[2" ) );
+//    bhvm_holor_s* hr = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "100[0" ) );
 
 //    CPU_TIME_TO_STDOUT( bhvm_lop_ar2_add_s_f_x( BKNIT_FA3( ha->v.type, hb->v.type, hr->v.type ), ha->v.data, hb->v.data, hr->v.data, ha->v.size, hb->v.size, hr->v.size ) );
-    CPU_TIME_TO_STDOUT( bhvm_lop_ar2_add_s_f( BKNIT_FA3( ha->v.type, hb->v.type, hr->v.type ), ha->v.data, hb->v.data, hr->v.data, hr->v.size ) );
+//    CPU_TIME_TO_STDOUT( bhvm_lop_ar2_eci_add_s_f( BKNIT_FA3( ha->v.type, hb->v.type, hr->v.type ), ha->v.data, hb->v.data, hr->v.data, hr->v.size ) );
 
 //    gcd( -2, 2236 );
 
