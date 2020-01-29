@@ -185,10 +185,13 @@ sz_t lion_nop_ar1_cast_htp_s_mcode_push_dp_holor
     bhvm_vop_ar1_fork_s* fork = bhvm_vop_ar1_fork_s_create();
     fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'f' );
     fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+    ASSERT( fork->i.v[ 0 ] >= 0 );
+    ASSERT( fork->i.v[ 1 ] >= 0 );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp, ( bhvm_vop* )fork );
 
     bhvm_vop_ar0_vacate_s* vacate = bhvm_vop_ar0_vacate_s_create();
     vacate->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+    ASSERT( vacate->i.v[ 0 ] >= 0 );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, ( bhvm_vop* )vacate );
 
     BLM_RETURNV( sz_t, idx );
@@ -198,74 +201,6 @@ sz_t lion_nop_ar1_cast_htp_s_mcode_push_dp_holor
 
 /**********************************************************************************************************************/
 // lion_nop_ar2_mul_s
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-//bl_t lion_nop_ar2_mul_s_solve( const lion_nop_ar2_mul_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
-//{
-//    BLM_INIT();
-//    ASSERT( result );
-//    lion_holor_s** r = &result->h;
-//    lion_holor_s_attach( r, ( a[0] && a[1] ) ? lion_holor_s_create() : NULL );
-//
-//    void (*f)( const bhvm_holor_s* a, const bhvm_holor_s* b, bhvm_holor_s* r );
-//    f = NULL;
-//
-//    if( *r )
-//    {
-//        result->h->m.active = a[0]->m.active || a[1]->m.active;
-//
-//        lion_holor_s* lha = a[0];
-//        lion_holor_s* lhb = a[1];
-//        lion_holor_s* lhr = (*r);
-//        bhvm_holor_s* ha = &lha->h;
-//        bhvm_holor_s* hb = &lhb->h;
-//        bhvm_holor_s* hr = &lhr->h;
-//        bhvm_holor_s_set_type( hr, ha->v.type == TYPEOF_f2_t && hb->v.type == TYPEOF_f2_t ? TYPEOF_f2_t : TYPEOF_f3_t );
-//
-//        if( hb->s.size == 0 )
-//        {
-//            result->type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_vsv_s;
-//            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_vsv_dp_a_s;
-//            result->type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_vsv_dp_b_s;
-//            f = bhvm_hop_ar2_mul_vsv_s_f;
-//            bhvm_shape_s_copy( &hr->s, &ha->s );
-//            lhr->m.htp = ( ha->s.size > 0 ) ? lha->m.htp : false;
-//        }
-//        else if( ha->s.size == 0 )
-//        {
-//            result->type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_svv_s;
-//            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_svv_dp_a_s;
-//            result->type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_svv_dp_b_s;
-//            f = bhvm_hop_ar2_mul_svv_s_f;
-//            bhvm_shape_s_copy( &hr->s, &hb->s );
-//            lhr->m.htp = ( hb->s.size > 0 ) ? lhb->m.htp : false;
-//        }
-//        else if( bhvm_shape_s_is_equal( &ha->s, &hb->s ) )
-//        {
-//            if( lha->m.htp != lhb->m.htp ) BLM_RETURNV( bl_t, false );
-//            result->type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_vvv_s;
-//            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_vvv_dp_a_s;
-//            result->type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_vvv_dp_b_s;
-//            f = bhvm_hop_ar2_mul_vvv_s_f;
-//            bhvm_shape_s_copy( &hr->s, &ha->s );
-//            lhr->m.htp = lha->m.htp;
-//        }
-//        else
-//        {
-//            BLM_RETURNV( bl_t, false );
-//        }
-//
-//        if( ( ha->v.size > 0 ) && ( hb->v.size > 0 ) )
-//        {
-//            bhvm_holor_s_fit_size( hr );
-//            f( ha, hb, hr );
-//        }
-//    }
-//
-//    result->settled = ( result->h && !result->h->m.active );
-//    BLM_RETURNV( bl_t, true );
-//}
 
 // ---------------------------------------------------------------------------------------------------------------------
 

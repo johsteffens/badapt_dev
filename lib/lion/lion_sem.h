@@ -128,19 +128,21 @@ TODO:
  *
  *  Available binary operators
  *  Symbol  Notation Priority  Type
- *   :      Infix      6     Concatenation  (Assiociative)
+ *   :      Infix      6     Constructive Concatenation
+ *  ::      Infix      8     Conservative Concatenation
  *   [      Infix     21     order-increment bin operator (l-value: dim). (Yielding) Example: 2[# = (#:#), 2[2[# = (#:#):(#:#)
- *   ]      Infix     20     order-decrement bin operator (r-value: idx). Example: (1:2:3)[1 = 2
- *   +      Infix      8     (elementwise) addition
- *   -      Infix      8     (elementwise) subtraction
- *   *      Infix     10     (elementwise) multiplication (hadamard product); multiplication of holor with scalar
- *   /      Infix     10     (elementwise) division
+ *   ]      Infix     20     order-decrement bin operator (r-value: idx). Example: (1:2:3)]1 = 2
+ *   +      Infix      8     (ECI) addition
+ *   -      Infix      8     (ECI) subtraction
+ *   *      Infix     10     (ECI) multiplication
+ *   /      Infix     10     (ECI) division
+ *   ^      Infix     12     (ECI) power
  *  **,     Infix     10     holor-product for holors up to order 2; transposition state is considered
  *  ***     Infix     10     convolution?
  *
  *  Unary operators
- *   -          8     negates holor
- *  ^t,        10     toggles transposition state (represents a reinterpret cast) (priority must be above multiplication)
+ *  -     Prefix       8     negates holor
+ *  ~     Postfix     10     toggles transposition state (represents a reinterpret cast) (priority must be above multiplication)
  *
  *  Holors
  *    #   Vacant scalar

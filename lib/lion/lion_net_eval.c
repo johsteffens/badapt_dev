@@ -148,8 +148,8 @@ void lion_net_eval_build( const lion_net_eval_param_s* o, lion_net_cell_s* ntf, 
     f3_t time_push_ap = 0;
     f3_t time_push_dp = 0;
 
-    CPU_TIME_OF( lion_net_cell_s_mcode_push_ap( ntf, mcf ), time_push_ap );
-    CPU_TIME_OF( lion_net_cell_s_mcode_push_dp( ntf, mcf ), time_push_dp );
+    CPU_TIME_OF( lion_net_cell_s_mcode_push_ap( ntf, mcf        ), time_push_ap );
+    CPU_TIME_OF( lion_net_cell_s_mcode_push_dp( ntf, mcf, false ), time_push_dp );
 
     tp_t track_types [] =
     {
@@ -397,11 +397,11 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
 {
     BLM_INIT();
 
-    bhvm_holor_s* ha = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "(1:2)" ) );
+    bhvm_holor_s* ha = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "(1:1)" ) );
     bhvm_holor_s* hb = BLM_A_PUSH( bhvm_holor_s_create_parse_sc( "(1:1)" ) );
     bhvm_holor_s* hr = BLM_A_PUSH( bhvm_holor_s_create() );
 
-    lion_net_frame_sc_run_ap( "( y <- a,b ) { y=b+a*(1/srt(a^t**a)); };", ( const bhvm_holor_s*[] ){ ha, hb }, ( bhvm_holor_s*[] ){ hr } );
+    lion_net_frame_sc_run_ap( "( y <- a, b ) { y = b + a / (a~**a)^(1/2); };", ( const bhvm_holor_s*[] ){ ha, hb }, ( bhvm_holor_s*[] ){ hr } );
 
     bhvm_holor_s_to_stdout_nl( hr );
 

@@ -27,7 +27,15 @@
 //        ... use ':' to cat holors? {{1:2}:{3:4}:{5:6}}  (seems most appropriate)
 //        ... could holor opening '{' clash with cell block opening?  (looking ahead?)
 //        ... should {1:2}:3 be {1:2:3}? (seems necessary if 1:2:3 == (1:2):3)
-//                   problem: {#:#}:{#:#} == [2][2]# or [1][4]# ?
+//                   problem: {#:#}:{#:#} == 2[2[# or 1[4[# ?
+//        Solution: Use two catenation operators: constructive ':', conservative '::' (keeps order only increases leading dim)
+//                      (#:#) :(#:#) == 2[2[#
+//                      (#:#:#)      == 3[#
+//                      (#:#) :#     == 3[#
+//                      (#:#)::(#:#) == 4[#
+//       With constructive catenation one can build any holor from scalars.
+//       No dedicated rule of holor-bracing required because ':', '::' are just regular binary operators.
+//
 //
 //
 // - (done) replace ':' with '<:' for cell-cell or cell-holor concatenation
@@ -184,7 +192,9 @@ stamp :cell = aware :
     func : :set_downlinks;
 
     func bcore_inst_call : copy_x; // cell is copyable
-    func bcore_via_call  : mutated = { ERR_fa( "Cannot reconstitute." ); }; // cell is not transferable
+
+    // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
+    func bcore_via_call  : mutated = { ERR_fa( "Cannot reconstitute." ); };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,12 +230,12 @@ void lion_net_cell_s_from_sem_cell
 
 void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink );
 void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf );
-void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf );
+void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf, bl_t entry_channels );
 
 /**********************************************************************************************************************/
 /// frame
 
-/// frame setup from string; in can be NULL
+/// frame setup from string; it can be NULL
 lion_net_frame_s* lion_net_frame_s_setup_st( lion_net_frame_s* o, const st_s* st, const bhvm_holor_s* in[] );
 lion_net_frame_s* lion_net_frame_s_setup_sc( lion_net_frame_s* o,       sc_t  sc, const bhvm_holor_s* in[] );
 

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-01-28T12:06:17Z
+ *  Last File Update: 2020-01-28T17:09:19Z
  *
  *  Copyright and License of this File:
  *
@@ -488,17 +488,6 @@
   static inline tp_t lion_nop_ar2_sub_s_type_vop_dp_a( const lion_nop_ar2_sub_s* o ){return TYPEOF_bhvm_vop_ar1_sub_dp_a_s;} \
   static inline tp_t lion_nop_ar2_sub_s_type_vop_dp_b( const lion_nop_ar2_sub_s* o ){return TYPEOF_bhvm_vop_ar1_sub_dp_b_s;} \
   lion_nop* lion_nop_ar2_sub_s_create_op_of_arn( const lion_nop_ar2_sub_s* o, sz_t n );
-#define TYPEOF_lion_nop_ar2_div_s 4076606099
-#define BETH_EXPAND_ITEM_lion_nop_ar2_div_s \
-  BCORE_DECLARE_OBJECT( lion_nop_ar2_div_s ) \
-    {aware_t _;}; \
-  static inline sz_t lion_nop_ar2_div_s_arity( const lion_nop_ar2_div_s* o ){return 2;} \
-  static inline sz_t lion_nop_ar2_div_s_priority( const lion_nop_ar2_div_s* o ){return 10;} \
-  static inline bl_t lion_nop_ar2_div_s_eci( const lion_nop_ar2_div_s* o ){return true;} \
-  static inline sc_t lion_nop_ar2_div_s_symbol( const lion_nop_ar2_div_s* o ){return "/";} \
-  static inline tp_t lion_nop_ar2_div_s_type_vop_ap( const lion_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar2_div_s;} \
-  static inline tp_t lion_nop_ar2_div_s_type_vop_dp_a( const lion_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar2_div_dp_a_s;} \
-  static inline tp_t lion_nop_ar2_div_s_type_vop_dp_b( const lion_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar3_div_dp_b_s;}
 #define TYPEOF_lion_nop_ar2_mul_s 2245955362
 #define BETH_EXPAND_ITEM_lion_nop_ar2_mul_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar2_mul_s ) \
@@ -510,6 +499,28 @@
   static inline tp_t lion_nop_ar2_mul_s_type_vop_ap( const lion_nop_ar2_mul_s* o ){return TYPEOF_bhvm_vop_ar2_mul_s;} \
   static inline tp_t lion_nop_ar2_mul_s_type_vop_dp_a( const lion_nop_ar2_mul_s* o ){return TYPEOF_bhvm_vop_ar2_mul_dp_a_s;} \
   static inline tp_t lion_nop_ar2_mul_s_type_vop_dp_b( const lion_nop_ar2_mul_s* o ){return TYPEOF_bhvm_vop_ar2_mul_dp_b_s;}
+#define TYPEOF_lion_nop_ar2_div_s 4076606099
+#define BETH_EXPAND_ITEM_lion_nop_ar2_div_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar2_div_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar2_div_s_arity( const lion_nop_ar2_div_s* o ){return 2;} \
+  static inline sz_t lion_nop_ar2_div_s_priority( const lion_nop_ar2_div_s* o ){return 10;} \
+  static inline bl_t lion_nop_ar2_div_s_eci( const lion_nop_ar2_div_s* o ){return true;} \
+  static inline sc_t lion_nop_ar2_div_s_symbol( const lion_nop_ar2_div_s* o ){return "/";} \
+  static inline tp_t lion_nop_ar2_div_s_type_vop_ap( const lion_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar2_div_s;} \
+  static inline tp_t lion_nop_ar2_div_s_type_vop_dp_a( const lion_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar2_div_dp_a_s;} \
+  static inline tp_t lion_nop_ar2_div_s_type_vop_dp_b( const lion_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar3_div_dp_b_s;}
+#define TYPEOF_lion_nop_ar2_pow_s 470395698
+#define BETH_EXPAND_ITEM_lion_nop_ar2_pow_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar2_pow_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar2_pow_s_arity( const lion_nop_ar2_pow_s* o ){return 2;} \
+  static inline sz_t lion_nop_ar2_pow_s_priority( const lion_nop_ar2_pow_s* o ){return 12;} \
+  static inline bl_t lion_nop_ar2_pow_s_eci( const lion_nop_ar2_pow_s* o ){return true;} \
+  static inline sc_t lion_nop_ar2_pow_s_symbol( const lion_nop_ar2_pow_s* o ){return "^";} \
+  static inline tp_t lion_nop_ar2_pow_s_type_vop_ap( const lion_nop_ar2_pow_s* o ){return TYPEOF_bhvm_vop_ar2_pow_s;} \
+  static inline tp_t lion_nop_ar2_pow_s_type_vop_dp_a( const lion_nop_ar2_pow_s* o ){return TYPEOF_bhvm_vop_ar3_pow_dp_a_s;} \
+  static inline tp_t lion_nop_ar2_pow_s_type_vop_dp_b( const lion_nop_ar2_pow_s* o ){return TYPEOF_bhvm_vop_ar3_pow_dp_b_s;}
 #define TYPEOF_lion_nop_ar2_bmul_s 2813275964
 #define BETH_EXPAND_ITEM_lion_nop_ar2_bmul_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar2_bmul_s ) \
@@ -628,8 +639,9 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar2 ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_add_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_sub_s ); \
-  BCORE_FORWARD_OBJECT( lion_nop_ar2_div_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_mul_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar2_div_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar2_pow_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_bmul_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_equal_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_larger_s ); \
@@ -644,8 +656,9 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar2_recurrent_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar2_add_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_sub_s \
-  BETH_EXPAND_ITEM_lion_nop_ar2_div_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_mul_s \
+  BETH_EXPAND_ITEM_lion_nop_ar2_div_s \
+  BETH_EXPAND_ITEM_lion_nop_ar2_pow_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_bmul_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_equal_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_larger_s \

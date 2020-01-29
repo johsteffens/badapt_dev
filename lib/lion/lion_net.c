@@ -902,6 +902,7 @@ void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcod
     {
         lion_net_node_s* node = o->upls.data[ i ]->node;
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, node->gidx );
         if( i == up_index ) up_gidx = node->gidx;
     }
     bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->hidx );
@@ -927,7 +928,6 @@ void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcod
     if( up_index >= 0 )
     {
         ASSERT( up_gidx >= 0 );
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + up_index, up_gidx );
         lion_nop_a_mcode_push_dp_track( o->nop, o->result, 'a' + up_index, arr_ci, mcf );
     }
 
@@ -948,15 +948,27 @@ void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf 
     }
 
     lion_net_cell_s_clear_flags( o );
+
+    bhvm_mcode_frame_s_check_integrity( mcf );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf )
+void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf, bl_t entry_channels )
 {
     ASSERT( lion_net_cell_s_is_consistent( o ) );
 
-    for( sz_t i = 0; i < o->body.size; i++ )
+    if( entry_channels )
+    {
+        BFOR_EACH( i, &o->encs )
+        {
+            lion_net_node_s* node = o->encs.data[ i ];
+            if( !node->nop ) continue;
+            lion_net_node_s_mcode_push_dp( node, -1, mcf );
+        }
+    }
+
+    BFOR_EACH( i, &o->body )
     {
         lion_net_node_s* node = o->body.data[ i ];
         if( !node->nop ) continue;
@@ -965,6 +977,8 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf 
     }
 
     lion_net_cell_s_clear_flags( o );
+
+    bhvm_mcode_frame_s_check_integrity( mcf );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1034,7 +1048,7 @@ lion_net_frame_s* lion_net_frame_s_setup_st( lion_net_frame_s* o, const st_s* st
     lion_net_cell_s_from_sem_cell( cell, sem_frame, input_op_create, ( vd_t )in, NULL );
 
     lion_net_cell_s_mcode_push_ap( cell, o->mcf );
-    lion_net_cell_s_mcode_push_dp( cell, o->mcf );
+    lion_net_cell_s_mcode_push_dp( cell, o->mcf, true );
 
     BFOR_EACH( i, &cell->encs )
     {

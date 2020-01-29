@@ -1085,31 +1085,8 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             stack_push( stack, link );
         }
 
-//        // increment order operator (deprecated)
-//        else if( bcore_source_a_parse_bl_fa( source, " #?'['" ) )
-//        {
-//            lion_sem_link_s* link = lion_sem_cell_s_evaluate_link( o, source );
-//            bcore_source_a_parse_bl_fa( source, " ]" );
-//
-//            // use [x] for indexing is deprecated (dedicated operator symbol)
-////            if( stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) )
-////            {
-////                lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar2_index_s_create(), source );
-////                cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_lion_sem_link_s, source );
-////                cell->encs.data[ 1 ]->up = link;
-////                stack_push( stack, cell->excs.data[ 0 ] );
-////            }
-////            else
-//            {
-//                lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar2_inc_order_s_create(), source );
-//                cell->encs.data[ 0 ]->up = link;
-//                stack_push( stack, cell );
-//                stack_push( stack, flag_inc_order );
-//            }
-//        }
-
         // postfix htp
-        else if( bcore_source_a_parse_bl_fa( source, " #?'^t'" ) )
+        else if( bcore_source_a_parse_bl_fa( source, " #?'~'" ) )
         {
             lion_sem_cell_s* htp_cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar1_cast_htp_s_create(), source );
             if( stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) )
@@ -1126,7 +1103,7 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
             else
             {
-                bcore_source_a_parse_err_fa( source, "transposition '^t': invalid l-value." );
+                bcore_source_a_parse_err_fa( source, "transposition '~': invalid l-value." );
             }
         }
 
