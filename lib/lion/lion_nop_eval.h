@@ -65,8 +65,6 @@ stamp :result = aware bcore_inst
     };
 };
 
-feature 'a' :result_s* run( const, :result_s* result ); // creates result or returns NULL
-
 signature void set( mutable, const :param_s* src );
 stamp :param = aware bcore_inst
 {
@@ -94,10 +92,28 @@ stamp :param = aware bcore_inst
     };
 };
 
-/// randomizes holors defined in param; undefined holors stay undefined
-stamp :generator = aware :
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+feature 'a' void set_param( mutable, const :param_s* param );
+feature 'a' :result_s* run( const, :result_s* result ); // creates result or returns NULL
+
+/// template
+stump :std = aware :
 {
     :param_s param;
+    func : :run;
+    func : :set_param = { :param_s_set( &o->param, param ); };
+    func bcore_main : main =
+    {
+        BLM_INIT();
+        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        BLM_RETURNV( s2_t, 0 );
+    };
+};
+
+/// randomizes holors defined in param; undefined holors stay undefined
+stamp :generator = extending :std
+{
     bl_t set_htp    = false;  // changes htp-state
     bl_t set_value  = false;  // sets/changes values
     bl_t set_shape  = false;  // sets/changes shape
@@ -114,40 +130,19 @@ stamp :generator = aware :
     // are not marked as error if listed in tolerated_cycles.
     bcore_arr_uz_s tolerated_cycles;
     aware : => eval;
-
-    func : :set_param = { :param_s_set( &o->param, param ); };
-    func : :run;
-    func bcore_main : main =
-    {
-        BLM_INIT();
-        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
-        BLM_RETURNV( s2_t, 0 );
-    };
 };
 
-stamp :show_param = aware :
+stamp :show_param = extending :std
 {
-    :param_s param;
-    func : :set_param = { :param_s_set( &o->param, param ); };
     func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
-    func bcore_main : main =
-    {
-        BLM_INIT();
-        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
-        BLM_RETURNV( s2_t, 0 );
-    };
 };
-
-feature 'a' void set_param( mutable, const :param_s* param );
 
 stamp :arr = aware bcore_array { aware :* []; };
 
-stamp :set = aware :
+stamp :set = extending :std
 {
-    :param_s param;
     :arr_s arr;
 
-    func : :set_param = { :param_s_set( &o->param, param ); };
     func : :run =
     {
         BFOR_EACH( i, &o->arr )
@@ -166,40 +161,10 @@ stamp :set = aware :
         };
         return result;
     };
-
-    func bcore_main : main =
-    {
-        BLM_INIT();
-        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
-        BLM_RETURNV( s2_t, 0 );
-    };
 };
 
-stamp :ar1 = aware :
-{
-    :param_s param;
-    func : :run;
-    func : :set_param = { :param_s_set( &o->param, param ); };
-    func bcore_main : main =
-    {
-        BLM_INIT();
-        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
-        BLM_RETURNV( s2_t, 0 );
-    };
-};
-
-stamp :ar2 = aware :
-{
-    :param_s param;
-    func : :run;
-    func : :set_param = { :param_s_set( &o->param, param ); };
-    func bcore_main : main =
-    {
-        BLM_INIT();
-        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
-        BLM_RETURNV( s2_t, 0 );
-    };
-};
+stamp :ar1 = extending :std {};
+stamp :ar2 = extending :std {};
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

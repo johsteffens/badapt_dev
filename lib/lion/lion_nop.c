@@ -121,6 +121,27 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+// lion_nop_ar1_output_s
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+sz_t lion_nop_ar1_output_s_mcode_push_dp_holor( const lion_nop_ar1_output_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
+{
+    BLM_INIT();
+
+    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
+    lion_hmeta_s* m = &result->h->m;
+    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+
+    BLM_RETURNV( sz_t, idx );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
 // lion_nop_ar1_cast_htp_s
 
 // ---------------------------------------------------------------------------------------------------------------------

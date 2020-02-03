@@ -182,7 +182,6 @@ feature 'a' void mcode_push_ap_track( const, const :solve_result_s* result, cons
 
 feature 'a' void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
-    if( ch_id < 'a' || ch_id > 'c' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     if( ch_id >= :a_arity( o ) + 'a' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     tp_t type = 0;
     switch( ch_id )
@@ -190,7 +189,7 @@ feature 'a' void mcode_push_dp_track( const, const :solve_result_s* result, u0_t
         case 'a': type = ( :a_defines_type_vop_dp_a( o ) ) ? :a_type_vop_dp_a( o ) : result->type_vop_dp_a; break;
         case 'b': type = ( :a_defines_type_vop_dp_b( o ) ) ? :a_type_vop_dp_b( o ) : result->type_vop_dp_b; break;
         case 'c': type = ( :a_defines_type_vop_dp_c( o ) ) ? :a_type_vop_dp_c( o ) : result->type_vop_dp_c; break;
-        default: break;
+        default: ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     }
     if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_dp, bhvm_vop_t_create( type ), arr_ci );
 };
@@ -455,6 +454,7 @@ group :ar1 = retrievable
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
         };
+        func :: :mcode_push_dp_holor;
     };
 
     /** marks a holor or expression to be adaptive

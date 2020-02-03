@@ -200,6 +200,42 @@ stamp :cell = aware :
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// A frame is a self contained operator on holors for axon- and dendrite pass
+
+/// frame member functions
+
+signature @* mutab_from_source( mutable, bcore_source* source );
+signature @* mutab_from_st(     mutable, const st_s* st );
+signature @* mutab_from_sc(     mutable,       sc_t  sc );
+signature @* plain_from_source(   plain,  bcore_source* source );
+signature @* plain_from_st(       plain,  const st_s* st );
+signature @* plain_from_sc(       plain,        sc_t  sc );
+
+signature :mutab_from_source setup_from_source(  const bhvm_holor_s** in );
+signature :mutab_from_st     setup_from_st(      const bhvm_holor_s** in );
+signature :mutab_from_sc     setup_from_sc(      const bhvm_holor_s** in );
+signature :plain_from_source create_from_source( const bhvm_holor_s** in );
+signature :plain_from_st     create_from_st(     const bhvm_holor_s** in );
+signature :plain_from_sc     create_from_sc(     const bhvm_holor_s** in );
+signature :mutab_from_source setup_from_source_adl(  const bhvm_holor_adl_s* in );
+signature :mutab_from_st     setup_from_st_adl(      const bhvm_holor_adl_s* in );
+signature :mutab_from_sc     setup_from_sc_adl(      const bhvm_holor_adl_s* in );
+signature :plain_from_source create_from_source_adl( const bhvm_holor_adl_s* in );
+signature :plain_from_st     create_from_st_adl(     const bhvm_holor_adl_s* in );
+signature :plain_from_sc     create_from_sc_adl(     const bhvm_holor_adl_s* in );
+
+signature sz_t get_size_en( const ); // number of entry channels
+signature sz_t get_size_ex( const ); // number of exit channels
+
+signature bhvm_holor_s* get_ap_en( mutable, sz_t index ); // ap entry holor
+signature bhvm_holor_s* get_ap_ex( mutable, sz_t index ); // ap exit holor
+signature bhvm_holor_s* get_dp_en( mutable, sz_t index ); // dp entry holor
+signature bhvm_holor_s* get_dp_ex( mutable, sz_t index ); // dp exit holor
+
+signature @* run_ap(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
+signature @* run_dp(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
+signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); // allocates out
+signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); // allocates out
+
 stamp :frame = aware :
 {
     bhvm_mcode_frame_s => mcf;
@@ -207,6 +243,36 @@ stamp :frame = aware :
     bcore_arr_sz_s => idx_dp_en;
     bcore_arr_sz_s => idx_ap_ex;
     bcore_arr_sz_s => idx_dp_ex;
+
+    /// microcode disassembly (set log to be populated during setup)
+    hidden aware bcore_sink -> mcode_log;
+
+    /// frame setup from string or source; 'in' can be NULL
+    func : :setup_from_source;
+    func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), in ) ); };
+    func : :setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, in ); };
+    func : :create_from_source     = { @* o = @_create(); return @_setup_from_source( o, source, in ); };
+    func : :create_from_st         = { @* o = @_create(); return @_setup_from_st(     o, st,     in ); };
+    func : :create_from_sc         = { @* o = @_create(); return @_setup_from_sc(     o, sc,     in ); };
+    func : :setup_from_source_adl  = { return @_setup_from_source( o, source, in ? ( const bhvm_holor_s** )in->data : NULL ); };
+    func : :setup_from_st_adl      = { return @_setup_from_st(     o, st,     in ? ( const bhvm_holor_s** )in->data : NULL ); };
+    func : :setup_from_sc_adl      = { return @_setup_from_sc(     o, sc,     in ? ( const bhvm_holor_s** )in->data : NULL ); };
+    func : :create_from_source_adl = { return @_create_from_source( source,   in ? ( const bhvm_holor_s** )in->data : NULL ); };
+    func : :create_from_st_adl     = { return @_create_from_st( st,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
+    func : :create_from_sc_adl     = { return @_create_from_sc( sc,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
+
+    func : :get_size_en = { return o->idx_ap_en ? o->idx_ap_en->size : 0; };
+    func : :get_size_ex = { return o->idx_ap_ex ? o->idx_ap_ex->size : 0; };
+
+    func : :get_ap_en = { assert( o->idx_ap_en ); assert( index >= 0 && index < o->idx_ap_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ index ] ]; };
+    func : :get_ap_ex = { assert( o->idx_ap_ex ); assert( index >= 0 && index < o->idx_ap_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ index ] ]; };
+    func : :get_dp_en = { assert( o->idx_dp_en ); assert( index >= 0 && index < o->idx_dp_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ index ] ]; };
+    func : :get_dp_ex = { assert( o->idx_dp_ex ); assert( index >= 0 && index < o->idx_dp_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ index ] ]; };
+
+    func : :run_ap;
+    func : :run_dp;
+    func : :run_ap_adl;
+    func : :run_dp_adl;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -235,17 +301,18 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf,
 /**********************************************************************************************************************/
 /// frame
 
-/// frame setup from string; it can be NULL
-lion_net_frame_s* lion_net_frame_s_setup_st( lion_net_frame_s* o, const st_s* st, const bhvm_holor_s* in[] );
-lion_net_frame_s* lion_net_frame_s_setup_sc( lion_net_frame_s* o,       sc_t  sc, const bhvm_holor_s* in[] );
+bhvm_holor_s* lion_net_frame_s_get_ap_en( lion_net_frame_s* o, sz_t index ); // ap entry holor
+bhvm_holor_s* lion_net_frame_s_get_ap_ex( lion_net_frame_s* o, sz_t index ); // ap exit holor
+bhvm_holor_s* lion_net_frame_s_get_dp_en( lion_net_frame_s* o, sz_t index ); // dp entry holor
+bhvm_holor_s* lion_net_frame_s_get_dp_ex( lion_net_frame_s* o, sz_t index ); // dp exit holor
 
-lion_net_frame_s* lion_net_frame_s_create_st( const st_s* st, const bhvm_holor_s* in[] );
-lion_net_frame_s* lion_net_frame_s_create_sc(       sc_t  sc, const bhvm_holor_s* in[] );
+void lion_net_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
+void lion_net_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
 
-void lion_net_frame_s_run_ap( lion_net_frame_s* o, const bhvm_holor_s* in[], bhvm_holor_s* out[] );
-void lion_net_frame_s_run_dp( lion_net_frame_s* o, const bhvm_holor_s* in[], bhvm_holor_s* out[] );
-void lion_net_frame_sc_run_ap( sc_t sc,            const bhvm_holor_s* in[], bhvm_holor_s* out[] );
-void lion_net_frame_sc_run_dp( sc_t sc,            const bhvm_holor_s* in[], bhvm_holor_s* out[] );
+/** Estimates jacobians for input and output of last axon pass, given epsilon.
+ *  jac_mdl stores jacobians in the form [in-channels][out-channels]
+ */
+void lion_net_frame_s_estimate_jacobian( const lion_net_frame_s* o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl );
 
 #endif // TYPEOF_lion_net
 
