@@ -32,7 +32,7 @@ void badapt_dev_ern_s_run_training( badapt_supplier* problem, badapt_builder* bu
     badapt_training_state_a_set_guide( state, ( badapt_guide* )BLM_A_PUSH( badapt_guide_char_encode_s_create() ) );
     badapt_adaptive_a_arc_to_sink( badapt_training_state_a_get_adaptive( state ), BCORE_STDOUT );
     badapt_trainer_batch_s_run( trainer, ( badapt_training_state* )state );
-    BCORE_LIFE_RETURN();
+    BLM_RETURN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -40,9 +40,9 @@ void badapt_dev_ern_s_run_training( badapt_supplier* problem, badapt_builder* bu
 void badapt_ern_test_recurrent_abc()
 {
     BLM_INIT();
-    BCORE_LIFE_CREATE( badapt_problem_recurrent_abc_s, problem );
-    BCORE_LIFE_CREATE( badapt_ern_builder_s,           builder );
-    BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );
+    badapt_problem_recurrent_abc_s * problem = BLM_CREATE( badapt_problem_recurrent_abc_s );
+    badapt_ern_builder_s *           builder = BLM_CREATE( badapt_ern_builder_s );
+    badapt_trainer_batch_s*          trainer = BLM_CREATE( badapt_trainer_batch_s );
 
     builder->random_seed        = 111;
     builder->size_unfolded      = 25;
@@ -60,7 +60,7 @@ void badapt_ern_test_recurrent_abc()
     trainer->max_iterations = 10;
 
     badapt_dev_ern_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
-    BCORE_LIFE_RETURN();
+    BLM_RETURN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -68,9 +68,9 @@ void badapt_ern_test_recurrent_abc()
 void badapt_ern_test_recurrent_kjv()
 {
     BLM_INIT();
-    BCORE_LIFE_CREATE( badapt_problem_recurrent_kjv_s, problem );
-    BCORE_LIFE_CREATE( badapt_ern_builder_s,           builder );
-    BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );
+    badapt_problem_recurrent_kjv_s* problem = BLM_CREATE( badapt_problem_recurrent_kjv_s );
+    badapt_ern_builder_s*           builder = BLM_CREATE( badapt_ern_builder_s );
+    badapt_trainer_batch_s*         trainer = BLM_CREATE( badapt_trainer_batch_s );
 
     builder->random_seed = 111;
     builder->size_unfolded = 25;
@@ -90,7 +90,7 @@ void badapt_ern_test_recurrent_kjv()
     trainer->max_iterations = 10;
 
     badapt_dev_ern_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
-    BCORE_LIFE_RETURN();
+    BLM_RETURN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

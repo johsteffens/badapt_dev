@@ -227,8 +227,8 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
     badapt_adaptive* adaptive = BLM_A_PUSH( badapt_adaptive_a_clone( badapt_training_state_a_get_adaptive( state ) ) );
     if( badapt_adaptive_a_defines_reset( adaptive ) ) badapt_adaptive_a_reset( adaptive );
     sz_t vec_size = bcore_strlen( encode_charset );
-    BCORE_LIFE_CREATE( bmath_vf3_s, vin );
-    BCORE_LIFE_CREATE( bmath_vf3_s, vout );
+    bmath_vf3_s* vin = BLM_CREATE( bmath_vf3_s );
+    bmath_vf3_s* vout = BLM_CREATE( bmath_vf3_s );
     bmath_vf3_s_set_size( vin, vec_size );
     bmath_vf3_s_set_size( vout, vec_size );
 

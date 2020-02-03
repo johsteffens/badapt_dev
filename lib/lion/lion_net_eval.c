@@ -515,6 +515,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
                 {
                     st_s_push_fa( &result->msg, "\nJacobian test failure:\n#<sc_t>\n", st->sc );
                     result->error = true;
+                    BLM_RETURNV( lion_net_eval_result_s*, result );
                 }
                 else
                 {

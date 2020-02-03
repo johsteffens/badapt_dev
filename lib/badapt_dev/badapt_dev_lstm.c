@@ -41,7 +41,7 @@ void badapt_dev_lstm_s_run_training
     badapt_training_state_a_set_guide( state, guide );
     badapt_adaptive_a_arc_to_sink( badapt_training_state_a_get_adaptive( state ), BCORE_STDOUT );
     badapt_trainer_batch_s_run( trainer, ( badapt_training_state* )state );
-    BCORE_LIFE_RETURN();
+    BLM_RETURN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -49,10 +49,10 @@ void badapt_dev_lstm_s_run_training
 void badapt_dev_lstm_test_recurrent_abc()
 {
     BLM_INIT();
-    BCORE_LIFE_CREATE( badapt_problem_recurrent_abc_s, problem );
-    BCORE_LIFE_CREATE( badapt_lstm_builder_s,          builder );
-    BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );
-    BCORE_LIFE_CREATE( badapt_guide_char_encode_s,     guide );
+    badapt_problem_recurrent_abc_s* problem = BLM_CREATE( badapt_problem_recurrent_abc_s );
+    badapt_lstm_builder_s*          builder = BLM_CREATE( badapt_lstm_builder_s );
+    badapt_trainer_batch_s*         trainer = BLM_CREATE( badapt_trainer_batch_s );
+    badapt_guide_char_encode_s*     guide   = BLM_CREATE( badapt_guide_char_encode_s );
 
     st_s_copy_sc( &guide->txt_trigger, "abc" );
     builder->random_seed        = 111;
@@ -64,7 +64,7 @@ void badapt_dev_lstm_test_recurrent_abc()
     trainer->max_iterations = 5;
 
     badapt_dev_lstm_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, ( badapt_guide* )guide, trainer );
-    BCORE_LIFE_RETURN();
+    BLM_RETURN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -72,10 +72,10 @@ void badapt_dev_lstm_test_recurrent_abc()
 void badapt_lstm_test_recurrent_abc()
 {
     BLM_INIT();
-    BCORE_LIFE_CREATE( badapt_problem_recurrent_abc_s, problem );
-    BCORE_LIFE_CREATE( badapt_lstm_builder_s,          builder );
-    BCORE_LIFE_CREATE( badapt_trainer_batch_s,         trainer );
-    BCORE_LIFE_CREATE( badapt_guide_char_encode_s,     guide );
+    badapt_problem_recurrent_abc_s* problem = BLM_CREATE( badapt_problem_recurrent_abc_s );
+    badapt_lstm_builder_s*          builder = BLM_CREATE( badapt_lstm_builder_s );
+    badapt_trainer_batch_s*         trainer = BLM_CREATE( badapt_trainer_batch_s );
+    badapt_guide_char_encode_s*     guide   = BLM_CREATE( badapt_guide_char_encode_s );
 
     st_s_copy_sc( &guide->txt_trigger, "abc" );
     builder->random_seed        = 111;
@@ -87,7 +87,7 @@ void badapt_lstm_test_recurrent_abc()
     trainer->max_iterations = 5;
 
     badapt_dev_lstm_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, ( badapt_guide* )guide, trainer );
-    BCORE_LIFE_RETURN();
+    BLM_RETURN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -95,10 +95,10 @@ void badapt_lstm_test_recurrent_abc()
 void badapt_dev_lstm_test_recurrent_kjv()
 {
     BLM_INIT();
-    BCORE_LIFE_CREATE( badapt_trainer_main_s, trainer_main );
+    badapt_trainer_main_s* trainer_main = BLM_CREATE( badapt_trainer_main_s );
     bcore_txt_ml_a_from_file( trainer_main, "dev/kjv/v0.cfg" );
     badapt_trainer_main_s_main( trainer_main, NULL );
-    BCORE_LIFE_RETURN();
+    BLM_RETURN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
