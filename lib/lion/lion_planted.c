@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-03T13:57:17Z
+ *  Last File Update: 2020-02-04T20:34:12Z
  *
  *  Copyright and License of this File:
  *
@@ -1169,7 +1169,24 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_frame_s )
     "bcore_arr_sz_s => idx_ap_ex;"
     "bcore_arr_sz_s => idx_dp_ex;"
     "hidden aware bcore_sink -> mcode_log;"
+    "func bcore_via_call:shelve;"
+    "func bcore_via_call:mutated;"
+    "func bcore_inst_call:copy_x;"
 "}";
+
+void lion_net_frame_s_shelve( lion_net_frame_s* o )
+{
+    if( !o->mcf ) return;
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_ap );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_dp );
+}
+
+void lion_net_frame_s_mutated( lion_net_frame_s* o )
+{
+    if( !o->mcf ) return;
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_ap );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_dp );
+}
 
 /**********************************************************************************************************************/
 // source: lion_net_eval.h
@@ -1209,6 +1226,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_param_s )
     "bhvm_holor_adl_s => in;"
     "bhvm_holor_adl_s => out;"
     "f3_t max_dev = 1E-5;"
+    "f3_t epsilon = 1E-5;"
     "func bcore_inst_call:init_x;"
 "}";
 
@@ -1332,7 +1350,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_s )
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
-    "bl_t jacobian_test = false;"
+    "bl_t jacobian_test = true;"
 "}";
 
 s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args )
@@ -1374,7 +1392,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2476838448 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2297857322 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1821,6 +1839,9 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, lion_net_cell_s_copy_x );
             BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_net_cell_s_mutated );
             BCORE_REGISTER_OBJECT( lion_net_cell_s );
+            BCORE_REGISTER_FFUNC( bcore_via_call_shelve, lion_net_frame_s_shelve );
+            BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_net_frame_s_mutated );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, lion_net_frame_s_copy_x );
             BCORE_REGISTER_OBJECT( lion_net_frame_s );
             BCORE_REGISTER_TRAIT( lion_net, bcore_inst );
 

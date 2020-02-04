@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-03T13:57:17Z
+ *  Last File Update: 2020-02-04T20:34:12Z
  *
  *  Copyright and License of this File:
  *
@@ -991,6 +991,9 @@
 #define BETH_EXPAND_ITEM_lion_net_frame_s \
   BCORE_DECLARE_OBJECT( lion_net_frame_s ) \
     {aware_t _;bhvm_mcode_frame_s* mcf;bcore_arr_sz_s* idx_ap_en;bcore_arr_sz_s* idx_dp_en;bcore_arr_sz_s* idx_ap_ex;bcore_arr_sz_s* idx_dp_ex;bcore_sink* mcode_log;}; \
+  void lion_net_frame_s_shelve( lion_net_frame_s* o ); \
+  void lion_net_frame_s_mutated( lion_net_frame_s* o ); \
+  static inline void lion_net_frame_s_copy_x( lion_net_frame_s* o ){lion_net_frame_s_mutated( o );} \
   lion_net_frame_s* lion_net_frame_s_setup_from_source( lion_net_frame_s* o, bcore_source* source, const bhvm_holor_s** in ); \
   static inline lion_net_frame_s* lion_net_frame_s_setup_from_st( lion_net_frame_s* o, const st_s* st, const bhvm_holor_s** in ){BLM_INIT(); BLM_RETURNV( lion_net_frame_s*, lion_net_frame_s_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), in ) );} \
   static inline lion_net_frame_s* lion_net_frame_s_setup_from_sc( lion_net_frame_s* o, sc_t sc, const bhvm_holor_s** in ){st_s st; st_s_init_weak_sc( &st, sc ); return lion_net_frame_s_setup_from_st( o, &st, in );} \
@@ -1044,7 +1047,7 @@
 #define TYPEOF_lion_net_eval_param_s 2216106526
 #define BETH_EXPAND_ITEM_lion_net_eval_param_s \
   BCORE_DECLARE_OBJECT( lion_net_eval_param_s ) \
-    {aware_t _;bcore_sink* log;sz_t verbosity;u2_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;f3_t max_dev;}; \
+    {aware_t _;bcore_sink* log;sz_t verbosity;u2_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;f3_t max_dev;f3_t epsilon;}; \
   static inline void lion_net_eval_param_s_init_x( lion_net_eval_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   void lion_net_eval_param_s_set( lion_net_eval_param_s* o, const lion_net_eval_param_s* src );
 #define TYPEOF_lion_net_eval_show_param_s 507841254

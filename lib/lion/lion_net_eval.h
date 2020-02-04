@@ -73,7 +73,8 @@ stamp :param = aware bcore_inst
 
     bhvm_holor_adl_s => in;  // input holors
     bhvm_holor_adl_s => out; // expected output holors (if NULL, output is sent to log)
-    f3_t max_dev   = 1E-5;   // if output deviation exceeds this value, an error is generated
+    f3_t max_dev = 1E-5;   // if output deviation exceeds this value, an error is generated
+    f3_t epsilon = 1E-5;   // for Jacobian estimation
 
     func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
 
@@ -156,7 +157,7 @@ stamp :set = extending :std
 
 stamp :ap     = extending :std {};
 stamp :dp     = extending :std {};
-stamp :frame  = extending :std { bl_t jacobian_test = false; };
+stamp :frame  = extending :std { bl_t jacobian_test = true; };
 stamp :timing = extending :std {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

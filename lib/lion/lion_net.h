@@ -247,6 +247,23 @@ stamp :frame = aware :
     /// microcode disassembly (set log to be populated during setup)
     hidden aware bcore_sink -> mcode_log;
 
+    /// shelving/reconstitution
+    func bcore_via_call : shelve =
+    {
+        if( !o->mcf ) return;
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_ap );
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_dp );
+    };
+
+    func bcore_via_call : mutated =
+    {
+        if( !o->mcf ) return;
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_ap );
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_dp );
+    };
+
+    func bcore_inst_call : copy_x = { @_mutated( o ); };
+
     /// frame setup from string or source; 'in' can be NULL
     func : :setup_from_source;
     func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), in ) ); };

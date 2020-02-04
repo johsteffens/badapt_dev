@@ -464,8 +464,12 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
     if( o->jacobian_test )
     {
         bhvm_holor_mdl_s* mdl_jc = BLM_CREATE( bhvm_holor_mdl_s );
-        f3_t epsilon = 1E-5;
-        lion_net_frame_s_estimate_jacobian( frame, epsilon, mdl_jc );
+        lion_net_frame_s_estimate_jacobian( frame, o->param.epsilon, mdl_jc );
+
+        if( o->param.verbosity >= 10 )
+        {
+            bcore_sink_a_push_fa( o->param.log, "Jacobian DP Test:\n" );
+        }
 
         sz_t size_en = lion_net_frame_s_get_size_en( frame );
         sz_t size_ex = lion_net_frame_s_get_size_ex( frame );
@@ -473,28 +477,43 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
         bhvm_holor_adl_s* adl_dp_en = BLM_CLONE( bhvm_holor_adl_s, adl_ap_en );
         bhvm_holor_adl_s* adl_dp_ex = BLM_CLONE( bhvm_holor_adl_s, adl_ap_ex );
 
-        BFOR_EACH( i, adl_dp_ex ) bhvm_value_s_set_random( &adl_dp_ex->data[ i ]->v, 1.0, -1, 1, &rval );
+        BFOR_EACH( i, adl_dp_ex )
+        {
+            bhvm_value_s_set_random( &adl_dp_ex->data[ i ]->v, 1.0, -1, 1, &rval );
+            if( o->param.verbosity >= 10 )
+            {
+                bcore_sink_a_push_fa( o->param.log, "Gradient exc #<sz_t>: ", i );
+                bhvm_holor_s_to_sink_nl( adl_dp_ex->data[ i ], o->param.log );
+            }
+        }
 
         lion_net_frame_s_run_dp_adl( frame, adl_dp_ex, adl_dp_en );
-
-        if( o->param.verbosity >= 10 )
-        {
-            bcore_sink_a_push_fa( o->param.log, "Jacobian DP Test:\n" );
-        }
 
         BFOR_SIZE( i, size_en )
         {
             BLM_INIT();
+            if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "enc #<sz_t>:\n", i );
+
             bhvm_holor_s* dp_en1 = adl_dp_en->data[ i ];
-            bhvm_holor_s* dp_en2 = BLM_CLONE( bhvm_holor_s, dp_en1 );
-            bhvm_shape_s_to_vector( &dp_en2->s, &dp_en2->s );
+            bhvm_holor_s* dp_en2 = bhvm_holor_s_copy_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_en1 );
             bhvm_value_s_zro( &dp_en2->v );
 
             BFOR_SIZE( j, size_ex )
             {
+                BLM_INIT();
+                if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "exc #<sz_t>:\n", j );
+
                 bhvm_holor_s* h_jc = mdl_jc->data[ i ]->data[ j ];
-                bhvm_holor_s* h_ex = adl_dp_ex->data[ j ];
-                lion_net_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, h_ex }, &dp_en2 );
+                if( o->param.verbosity >= 10 )
+                {
+                    bcore_sink_a_push_fa( o->param.log, "Jacobian: " );
+                    bhvm_holor_s_to_sink_nl( h_jc, o->param.log );
+                }
+
+                bhvm_holor_s* dp_ex1 = adl_dp_ex->data[ j ];
+                bhvm_holor_s* dp_ex2 = bhvm_holor_s_fork_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_ex1 );
+                lion_net_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }, &dp_en2 );
+                BLM_DOWN();
             }
 
             f3_t dev = bhvm_value_s_fdev_equ( &dp_en1->v, &dp_en2->v );
@@ -506,9 +525,9 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
                 st_s* st = BLM_CREATE( st_s );
                 st_s_push_fa( st, "dp-channel: #<sz_t>", i );
                 st_s_push_fa( st, ", dev: #<f3_t>", dev );
-                st_s_push_fa( st, "\ngradient (dp)      : " );
+                st_s_push_fa( st, "\ngradient (dp)          : " );
                 bhvm_holor_s_to_sink( dp_en1, ( bcore_sink* )st );
-                st_s_push_fa( st, "\ngradient (jacobian): " );
+                st_s_push_fa( st, "\ngradient (via jacobian): " );
                 bhvm_holor_s_to_sink( dp_en2, ( bcore_sink* )st );
                 st_s_push_fa( st, "\n" );
                 if( error )
