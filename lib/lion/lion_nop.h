@@ -482,6 +482,7 @@ group :ar1 = retrievable
         {
             ::ar0_adaptive_s* adaptive = ::ar0_adaptive_s_create();
             adaptive->h = lion_holor_s_clone( result->h );
+            adaptive->h->m.name = o->name;
             ::solve_result_s* r = ::solve_result_s_create();
             r->h = bcore_fork( adaptive->h );
             ::solve_result_s_attach( out_result, r );

@@ -155,8 +155,6 @@ stamp :set = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :ap     = extending :std {};
-stamp :dp     = extending :std {};
 stamp :frame  = extending :std { bl_t jacobian_test = true; };
 stamp :timing = extending :std {};
 

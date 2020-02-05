@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-04T20:34:12Z
+ *  Last File Update: 2020-02-05T19:07:45Z
  *
  *  Copyright and License of this File:
  *
@@ -990,7 +990,7 @@
 #define TYPEOF_lion_net_frame_s 3070468819
 #define BETH_EXPAND_ITEM_lion_net_frame_s \
   BCORE_DECLARE_OBJECT( lion_net_frame_s ) \
-    {aware_t _;bhvm_mcode_frame_s* mcf;bcore_arr_sz_s* idx_ap_en;bcore_arr_sz_s* idx_dp_en;bcore_arr_sz_s* idx_ap_ex;bcore_arr_sz_s* idx_dp_ex;bcore_sink* mcode_log;}; \
+    {aware_t _;bhvm_mcode_frame_s* mcf;bcore_arr_sz_s* idx_ap_en;bcore_arr_sz_s* idx_dp_en;bcore_arr_sz_s* idx_ap_ex;bcore_arr_sz_s* idx_dp_ex;bcore_arr_sz_s* idx_ap_ada;bcore_arr_sz_s* idx_dp_ada;bcore_sink* mcode_log;}; \
   void lion_net_frame_s_shelve( lion_net_frame_s* o ); \
   void lion_net_frame_s_mutated( lion_net_frame_s* o ); \
   static inline void lion_net_frame_s_copy_x( lion_net_frame_s* o ){lion_net_frame_s_mutated( o );} \
@@ -1008,10 +1008,13 @@
   static inline lion_net_frame_s* lion_net_frame_s_create_from_sc_adl( sc_t sc, const bhvm_holor_adl_s* in ){return lion_net_frame_s_create_from_sc( sc,           in ? ( const bhvm_holor_s** )in->data : NULL );} \
   static inline sz_t lion_net_frame_s_get_size_en( const lion_net_frame_s* o ){return o->idx_ap_en ? o->idx_ap_en->size : 0;} \
   static inline sz_t lion_net_frame_s_get_size_ex( const lion_net_frame_s* o ){return o->idx_ap_ex ? o->idx_ap_ex->size : 0;} \
+  static inline sz_t lion_net_frame_s_get_size_ada( const lion_net_frame_s* o ){return o->idx_ap_ada ? o->idx_ap_ada->size : 0;} \
   static inline bhvm_holor_s* lion_net_frame_s_get_ap_en( lion_net_frame_s* o, sz_t index ){assert( o->idx_ap_en ); assert( index >= 0 && index < o->idx_ap_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ index ] ];} \
-  static inline bhvm_holor_s* lion_net_frame_s_get_ap_ex( lion_net_frame_s* o, sz_t index ){assert( o->idx_ap_ex ); assert( index >= 0 && index < o->idx_ap_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ index ] ];} \
   static inline bhvm_holor_s* lion_net_frame_s_get_dp_en( lion_net_frame_s* o, sz_t index ){assert( o->idx_dp_en ); assert( index >= 0 && index < o->idx_dp_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ index ] ];} \
+  static inline bhvm_holor_s* lion_net_frame_s_get_ap_ex( lion_net_frame_s* o, sz_t index ){assert( o->idx_ap_ex ); assert( index >= 0 && index < o->idx_ap_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ index ] ];} \
   static inline bhvm_holor_s* lion_net_frame_s_get_dp_ex( lion_net_frame_s* o, sz_t index ){assert( o->idx_dp_ex ); assert( index >= 0 && index < o->idx_dp_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ index ] ];} \
+  static inline bhvm_holor_s* lion_net_frame_s_get_ap_ada( lion_net_frame_s* o, sz_t index ){assert( o->idx_ap_ada ); assert( index >= 0 && index < o->idx_ap_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ada->data[ index ] ];} \
+  static inline bhvm_holor_s* lion_net_frame_s_get_dp_ada( lion_net_frame_s* o, sz_t index ){assert( o->idx_dp_ada ); assert( index >= 0 && index < o->idx_dp_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ada->data[ index ] ];} \
   lion_net_frame_s* lion_net_frame_s_run_ap( lion_net_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
   lion_net_frame_s* lion_net_frame_s_run_dp( lion_net_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
   lion_net_frame_s* lion_net_frame_s_run_ap_adl( lion_net_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); \
@@ -1079,20 +1082,6 @@
   static inline void lion_net_eval_set_s_set_param( lion_net_eval_set_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
   s2_t lion_net_eval_set_s_main( lion_net_eval_set_s* o, const bcore_arr_st_s* args ); \
   lion_net_eval_result_s* lion_net_eval_set_s_run( const lion_net_eval_set_s* o, lion_net_eval_result_s* result );
-#define TYPEOF_lion_net_eval_ap_s 1061562352
-#define BETH_EXPAND_ITEM_lion_net_eval_ap_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_ap_s ) \
-    {aware_t _;lion_net_eval_param_s param;}; \
-  lion_net_eval_result_s* lion_net_eval_ap_s_run( const lion_net_eval_ap_s* o, lion_net_eval_result_s* result ); \
-  static inline void lion_net_eval_ap_s_set_param( lion_net_eval_ap_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_ap_s_main( lion_net_eval_ap_s* o, const bcore_arr_st_s* args );
-#define TYPEOF_lion_net_eval_dp_s 4012580533
-#define BETH_EXPAND_ITEM_lion_net_eval_dp_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_dp_s ) \
-    {aware_t _;lion_net_eval_param_s param;}; \
-  lion_net_eval_result_s* lion_net_eval_dp_s_run( const lion_net_eval_dp_s* o, lion_net_eval_result_s* result ); \
-  static inline void lion_net_eval_dp_s_set_param( lion_net_eval_dp_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_dp_s_main( lion_net_eval_dp_s* o, const bcore_arr_st_s* args );
 #define TYPEOF_lion_net_eval_frame_s 3846669574
 #define BETH_EXPAND_ITEM_lion_net_eval_frame_s \
   BCORE_DECLARE_OBJECT( lion_net_eval_frame_s ) \
@@ -1114,8 +1103,6 @@
   BCORE_FORWARD_OBJECT( lion_net_eval_show_param_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_arr_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_set_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_ap_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_dp_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_frame_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_timing_s ); \
   typedef lion_net_eval_result_s* (*lion_net_eval_run)( const lion_net_eval* o, lion_net_eval_result_s* result ); \
@@ -1139,8 +1126,6 @@
   static inline bl_t lion_net_eval_a_defines_set_param( const lion_net_eval* o ) { return lion_net_eval_s_get_aware( o )->set_param != NULL; } \
   BETH_EXPAND_ITEM_lion_net_eval_arr_s \
   BETH_EXPAND_ITEM_lion_net_eval_set_s \
-  BETH_EXPAND_ITEM_lion_net_eval_ap_s \
-  BETH_EXPAND_ITEM_lion_net_eval_dp_s \
   BETH_EXPAND_ITEM_lion_net_eval_frame_s \
   BETH_EXPAND_ITEM_lion_net_eval_timing_s
 

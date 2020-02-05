@@ -225,11 +225,14 @@ signature :plain_from_sc     create_from_sc_adl(     const bhvm_holor_adl_s* in 
 
 signature sz_t get_size_en( const ); // number of entry channels
 signature sz_t get_size_ex( const ); // number of exit channels
+signature sz_t get_size_ada( const ); // number of adaptive channels
 
-signature bhvm_holor_s* get_ap_en( mutable, sz_t index ); // ap entry holor
-signature bhvm_holor_s* get_ap_ex( mutable, sz_t index ); // ap exit holor
-signature bhvm_holor_s* get_dp_en( mutable, sz_t index ); // dp entry holor
-signature bhvm_holor_s* get_dp_ex( mutable, sz_t index ); // dp exit holor
+signature bhvm_holor_s* get_ap_en( mutable, sz_t index );
+signature bhvm_holor_s* get_dp_en( mutable, sz_t index );
+signature bhvm_holor_s* get_ap_ex( mutable, sz_t index );
+signature bhvm_holor_s* get_dp_ex( mutable, sz_t index );
+signature bhvm_holor_s* get_ap_ada( mutable, sz_t index );
+signature bhvm_holor_s* get_dp_ada( mutable, sz_t index );
 
 signature @* run_ap(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
 signature @* run_dp(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
@@ -239,10 +242,14 @@ signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* 
 stamp :frame = aware :
 {
     bhvm_mcode_frame_s => mcf;
-    bcore_arr_sz_s => idx_ap_en;
-    bcore_arr_sz_s => idx_dp_en;
-    bcore_arr_sz_s => idx_ap_ex;
-    bcore_arr_sz_s => idx_dp_ex;
+    bcore_arr_sz_s => idx_ap_en; // ap entry-holors
+    bcore_arr_sz_s => idx_dp_en; // dp entry-holors (gradients)
+
+    bcore_arr_sz_s => idx_ap_ex; // ap exit-holors
+    bcore_arr_sz_s => idx_dp_ex; // dp exit-holors (gradients)
+
+    bcore_arr_sz_s => idx_ap_ada; // ap adaptive-holors
+    bcore_arr_sz_s => idx_dp_ada; // dp adaptive-holors
 
     /// microcode disassembly (set log to be populated during setup)
     hidden aware bcore_sink -> mcode_log;
@@ -278,13 +285,17 @@ stamp :frame = aware :
     func : :create_from_st_adl     = { return @_create_from_st( st,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
     func : :create_from_sc_adl     = { return @_create_from_sc( sc,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
 
-    func : :get_size_en = { return o->idx_ap_en ? o->idx_ap_en->size : 0; };
-    func : :get_size_ex = { return o->idx_ap_ex ? o->idx_ap_ex->size : 0; };
+    func : :get_size_en  = { return o->idx_ap_en ? o->idx_ap_en->size : 0; };
+    func : :get_size_ex  = { return o->idx_ap_ex ? o->idx_ap_ex->size : 0; };
+    func : :get_size_ada = { return o->idx_ap_ada ? o->idx_ap_ada->size : 0; };
 
     func : :get_ap_en = { assert( o->idx_ap_en ); assert( index >= 0 && index < o->idx_ap_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ index ] ]; };
-    func : :get_ap_ex = { assert( o->idx_ap_ex ); assert( index >= 0 && index < o->idx_ap_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ index ] ]; };
     func : :get_dp_en = { assert( o->idx_dp_en ); assert( index >= 0 && index < o->idx_dp_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ index ] ]; };
+    func : :get_ap_ex = { assert( o->idx_ap_ex ); assert( index >= 0 && index < o->idx_ap_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ index ] ]; };
     func : :get_dp_ex = { assert( o->idx_dp_ex ); assert( index >= 0 && index < o->idx_dp_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ index ] ]; };
+
+    func : :get_ap_ada = { assert( o->idx_ap_ada ); assert( index >= 0 && index < o->idx_ap_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ada->data[ index ] ]; };
+    func : :get_dp_ada = { assert( o->idx_dp_ada ); assert( index >= 0 && index < o->idx_dp_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ada->data[ index ] ]; };
 
     func : :run_ap;
     func : :run_dp;
@@ -318,18 +329,18 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf,
 /**********************************************************************************************************************/
 /// frame
 
-bhvm_holor_s* lion_net_frame_s_get_ap_en( lion_net_frame_s* o, sz_t index ); // ap entry holor
-bhvm_holor_s* lion_net_frame_s_get_ap_ex( lion_net_frame_s* o, sz_t index ); // ap exit holor
-bhvm_holor_s* lion_net_frame_s_get_dp_en( lion_net_frame_s* o, sz_t index ); // dp entry holor
-bhvm_holor_s* lion_net_frame_s_get_dp_ex( lion_net_frame_s* o, sz_t index ); // dp exit holor
-
 void lion_net_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
 void lion_net_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
 
-/** Estimates jacobians for input and output of last axon pass, given epsilon.
+/** Estimates jacobians for entry and exit channels of last axon pass, given epsilon.
  *  jac_mdl stores jacobians in the form [in-channels][out-channels]
  */
-void lion_net_frame_s_estimate_jacobian( const lion_net_frame_s* o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl );
+void lion_net_frame_s_estimate_jacobian_en( const lion_net_frame_s* o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl );
+
+/** Estimates jacobians for adaptive and exit channels of last axon pass, given epsilon.
+ *  jac_mdl stores jacobians in the form [ada-channels][out-channels]
+ */
+void lion_net_frame_s_estimate_jacobian_ada( const lion_net_frame_s* o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl );
 
 #endif // TYPEOF_lion_net
 

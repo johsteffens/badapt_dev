@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-04T20:34:12Z
+ *  Last File Update: 2020-02-05T19:07:45Z
  *
  *  Copyright and License of this File:
  *
@@ -468,6 +468,7 @@ void lion_nop_ar1_adaptive_s_settle( const lion_nop_ar1_adaptive_s* o, const lio
 {
     lion_nop_ar0_adaptive_s* adaptive = lion_nop_ar0_adaptive_s_create();
     adaptive->h = lion_holor_s_clone( result->h );
+    adaptive->h->m.name = o->name;
     lion_nop_solve_result_s* r = lion_nop_solve_result_s_create();
     r->h = bcore_fork( adaptive->h );
     lion_nop_solve_result_s_attach( out_result, r );
@@ -1168,6 +1169,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_frame_s )
     "bcore_arr_sz_s => idx_dp_en;"
     "bcore_arr_sz_s => idx_ap_ex;"
     "bcore_arr_sz_s => idx_dp_ex;"
+    "bcore_arr_sz_s => idx_ap_ada;"
+    "bcore_arr_sz_s => idx_dp_ada;"
     "hidden aware bcore_sink -> mcode_log;"
     "func bcore_via_call:shelve;"
     "func bcore_via_call:mutated;"
@@ -1311,38 +1314,6 @@ lion_net_eval_result_s* lion_net_eval_set_s_run( const lion_net_eval_set_s* o, l
     return result;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_ap_s )
-"aware lion_net_eval"
-"{"
-    "lion_net_eval_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
-    "func bcore_main:main;"
-"}";
-
-s2_t lion_net_eval_ap_s_main( lion_net_eval_ap_s* o, const bcore_arr_st_s* args )
-{
-    BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_ap_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
-    BLM_RETURNV( s2_t, 0 );
-}
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_dp_s )
-"aware lion_net_eval"
-"{"
-    "lion_net_eval_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
-    "func bcore_main:main;"
-"}";
-
-s2_t lion_net_eval_dp_s_main( lion_net_eval_dp_s* o, const bcore_arr_st_s* args )
-{
-    BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_dp_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
-    BLM_RETURNV( s2_t, 0 );
-}
-
 BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_s )
 "aware lion_net_eval"
 "{"
@@ -1392,7 +1363,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2297857322 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 912294399 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1863,14 +1834,6 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_set_s_main );
             BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_set_s_run );
             BCORE_REGISTER_OBJECT( lion_net_eval_set_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_ap_s_run );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_ap_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_ap_s_main );
-            BCORE_REGISTER_OBJECT( lion_net_eval_ap_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_dp_s_run );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_dp_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_dp_s_main );
-            BCORE_REGISTER_OBJECT( lion_net_eval_dp_s );
             BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_frame_s_run );
             BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_frame_s_set_param );
             BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_frame_s_main );
