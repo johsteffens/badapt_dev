@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-05T19:07:45Z
+ *  Last File Update: 2020-02-05T20:28:43Z
  *
  *  Copyright and License of this File:
  *
@@ -608,7 +608,9 @@
   static inline sz_t lion_nop_ar2_cat_s_priority( const lion_nop_ar2_cat_s* o ){return 6;} \
   static inline sc_t lion_nop_ar2_cat_s_symbol( const lion_nop_ar2_cat_s* o ){return ":";} \
   bl_t lion_nop_ar2_cat_s_solve( const lion_nop_ar2_cat_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
-  static inline tp_t lion_nop_ar2_cat_s_type_vop_ap( const lion_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar2_cat_s;}
+  static inline tp_t lion_nop_ar2_cat_s_type_vop_ap( const lion_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar2_cat_s;} \
+  static inline tp_t lion_nop_ar2_cat_s_type_vop_dp_a( const lion_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar1_cat_dp_a_s;} \
+  static inline tp_t lion_nop_ar2_cat_s_type_vop_dp_b( const lion_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar1_cat_dp_b_s;}
 #define TYPEOF_lion_nop_ar2_order_inc_s 2250225947
 #define BETH_EXPAND_ITEM_lion_nop_ar2_order_inc_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar2_order_inc_s ) \

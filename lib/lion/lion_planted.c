@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-05T19:07:45Z
+ *  Last File Update: 2020-02-05T20:28:43Z
  *
  *  Copyright and License of this File:
  *
@@ -699,6 +699,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar2_cat_s )
     "func lion_nop:symbol;"
     "func lion_nop:solve;"
     "func lion_nop:type_vop_ap;"
+    "func lion_nop:type_vop_dp_a;"
+    "func lion_nop:type_vop_dp_b;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar2_order_inc_s )
@@ -1363,7 +1365,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 912294399 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 3249965432 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1696,6 +1698,8 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar2_cat_s_symbol );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar2_cat_s_solve );
             BCORE_REGISTER_FFUNC( lion_nop_type_vop_ap, lion_nop_ar2_cat_s_type_vop_ap );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_dp_a, lion_nop_ar2_cat_s_type_vop_dp_a );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_dp_b, lion_nop_ar2_cat_s_type_vop_dp_b );
             BCORE_REGISTER_OBJECT( lion_nop_ar2_cat_s );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar2_order_inc_s_arity );
             BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar2_order_inc_s_priority );

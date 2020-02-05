@@ -690,7 +690,9 @@ group :ar2 = retrievable
         func :: :priority = { return 6; };
         func :: :symbol   = { return ":"; };
         func :: :solve;
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_cat_s; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_cat_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar1_cat_dp_a_s; };
+        func :: :type_vop_dp_b = { return TYPEOF_bhvm_vop_ar1_cat_dp_b_s; };
     };
 
     stamp :order_inc =
