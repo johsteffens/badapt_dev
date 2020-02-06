@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-05T20:28:43Z
+ *  Last File Update: 2020-02-06T11:16:59Z
  *
  *  Copyright and License of this File:
  *
@@ -619,7 +619,9 @@
   static inline sz_t lion_nop_ar2_order_inc_s_priority( const lion_nop_ar2_order_inc_s* o ){return 21;} \
   static inline sc_t lion_nop_ar2_order_inc_s_symbol( const lion_nop_ar2_order_inc_s* o ){return "[";} \
   bl_t lion_nop_ar2_order_inc_s_solve( const lion_nop_ar2_order_inc_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
-  void lion_nop_ar2_order_inc_s_mcode_push_ap_track( const lion_nop_ar2_order_inc_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
+  void lion_nop_ar2_order_inc_s_mcode_push_ap_track( const lion_nop_ar2_order_inc_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
+  static inline tp_t lion_nop_ar2_order_inc_s_type_vop_dp_a( const lion_nop_ar2_order_inc_s* o ){return 0;} \
+  static inline tp_t lion_nop_ar2_order_inc_s_type_vop_dp_b( const lion_nop_ar2_order_inc_s* o ){return TYPEOF_bhvm_vop_ar1_add_dp_b_s;}
 #define TYPEOF_lion_nop_ar2_order_dec_s 3205562379
 #define BETH_EXPAND_ITEM_lion_nop_ar2_order_dec_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar2_order_dec_s ) \
@@ -628,7 +630,8 @@
   static inline sz_t lion_nop_ar2_order_dec_s_priority( const lion_nop_ar2_order_dec_s* o ){return 20;} \
   static inline sc_t lion_nop_ar2_order_dec_s_symbol( const lion_nop_ar2_order_dec_s* o ){return "]";} \
   bl_t lion_nop_ar2_order_dec_s_solve( const lion_nop_ar2_order_dec_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
-  sz_t lion_nop_ar2_order_dec_s_mcode_push_ap_holor( const lion_nop_ar2_order_dec_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
+  sz_t lion_nop_ar2_order_dec_s_mcode_push_ap_holor( const lion_nop_ar2_order_dec_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
+  sz_t lion_nop_ar2_order_dec_s_mcode_push_dp_holor( const lion_nop_ar2_order_dec_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
 #define TYPEOF_lion_nop_ar2_recurrent_s 912007342
 #define BETH_EXPAND_ITEM_lion_nop_ar2_recurrent_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar2_recurrent_s ) \

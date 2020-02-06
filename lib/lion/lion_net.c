@@ -1128,7 +1128,7 @@ void lion_net_frame_s_disassemble_to_sink( const lion_net_frame_s* o, const lion
         if( info_holors->data[ i ]->size > 0 )
         {
             st_s_push_char_n( msg, ' ', 1 );
-            st_s_push_char_n( msg, '.', uz_max( 0, 48 - msg->size ) );
+            st_s_push_char_n( msg, '.', sz_max( 0, 48 - msg->size ) );
             st_s_push_fa( msg, " #<st_s*>", info_holors->data[ i ] );
         }
         bcore_sink_a_push_fa( sink, "#<st_s*>\n", msg );

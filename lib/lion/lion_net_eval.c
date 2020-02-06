@@ -72,7 +72,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
     BFOR_EACH( i, adl_ap_ex )
     {
         bhvm_holor_s* h_hbo = adl_ap_ex->data[ i ];
-        if( o->param.out )
+        if( o->param.out && o->param.out->size > i )
         {
             bhvm_holor_s* h_out = o->param.out->data[ i ];
             bl_t shape_dev = !bhvm_shape_s_is_equal( &h_out->s, &h_hbo->s );

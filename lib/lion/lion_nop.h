@@ -701,6 +701,8 @@ group :ar2 = retrievable
         func :: :symbol   = { return "["; };
         func :: :solve;
         func :: :mcode_push_ap_track;
+        func :: :type_vop_dp_a = { return 0; };
+        func :: :type_vop_dp_b = { return TYPEOF_bhvm_vop_ar1_add_dp_b_s; };
     };
 
     // r-value is (scalar) index
@@ -710,6 +712,7 @@ group :ar2 = retrievable
         func :: :symbol   = { return "]"; };
         func :: :solve;
         func :: :mcode_push_ap_holor;
+        func :: :mcode_push_dp_holor;
     };
 
     // first argument is initialization, second is normal input
