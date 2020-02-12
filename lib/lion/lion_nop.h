@@ -270,9 +270,19 @@ group :ar0 = retrievable
 
         func :: :mcode_push_dp_holor =
         {
-            sz_t idx = ::mcode_push_dp_holor__( ( lion_nop* )o, result, arr_ci, mcf );
+//            sz_t idx = ::mcode_push_dp_holor__( ( lion_nop* )o, result, arr_ci, mcf );
+//            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_reset_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+//            return idx;
+
+            BLM_INIT();
+            bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
+            lion_hmeta_s* m = &result->h->m;
+            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
             bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_reset_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
-            return idx;
+            BLM_RETURNV( sz_t, idx );
         };
 
     };
@@ -295,6 +305,36 @@ group :ar1 = retrievable
         {
             lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
             result->settled = (result->h) && !result->h->m.active;
+            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
+            return true;
+        };
+    };
+
+    stamp :f3 =
+    {
+        func :: :priority = { return 8; };
+        func :: :symbol   = { return "f3"; };
+        func :: :solve =
+        {
+            lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+            bhvm_holor_s_set_type( &result->h->h, TYPEOF_f3_t );
+            result->settled = ( result->h ) && !result->h->m.active;
+            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
+            return true;
+        };
+    };
+
+    stamp :f2 =
+    {
+        func :: :priority = { return 8; };
+        func :: :symbol   = { return "f2"; };
+        func :: :solve =
+        {
+            lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+            bhvm_holor_s_set_type( &result->h->h, TYPEOF_f2_t );
+            result->settled = ( result->h ) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
@@ -329,6 +369,14 @@ group :ar1 = retrievable
         func :: :symbol        = { return "ceil"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_ceil_s; };
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar0_nul_dp_s; };
+    };
+
+    stamp :abs =
+    {
+        func :: :priority      = { return 8; };
+        func :: :symbol        = { return "abs"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_abs_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_abs_dp_s; };
     };
 
     stamp :exp =

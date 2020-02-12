@@ -1000,6 +1000,19 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             }
         }
 
+        // cell catenation
+        else if( bcore_source_a_parse_bl_fa( source, " #?'<:'" ) )
+        {
+            if( stack_of_type( stack, 1, TYPEOF_lion_sem_cell_s ) )
+            {
+                stack_push( stack, flag_cell_cat );
+            }
+            else
+            {
+                bcore_source_a_parse_err_fa( source, "Cell catenation '<:': l-value is not a cell." );
+            }
+        }
+
         // binary operator from predefined symbols
         else if( ( op2_symbol = lion_parse_op2_symbol( source ) ) )
         {
@@ -1104,19 +1117,6 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             else
             {
                 bcore_source_a_parse_err_fa( source, "transposition '~': invalid l-value." );
-            }
-        }
-
-        // cell catenation
-        else if( bcore_source_a_parse_bl_fa( source, " #?'<:'" ) )
-        {
-            if( stack_of_type( stack, 1, TYPEOF_lion_sem_cell_s ) )
-            {
-                stack_push( stack, flag_cell_cat );
-            }
-            else
-            {
-                bcore_source_a_parse_err_fa( source, "Cell catenation '<:': l-value is not a cell." );
             }
         }
 
@@ -1288,20 +1288,6 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             stack_push( stack, out );
         }
     }
-
-    /// Catenating adjacent holors is deprecated; use operator ':' instead
-/*
-    /// Adjacent holors
-    while( stack->size >= 2 && stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) && stack_of_type( stack, 2, TYPEOF_lion_sem_link_s ) )
-    {
-        lion_sem_link_s* link2 = stack_pop_link( stack, source );
-        lion_sem_link_s* link1 = stack_pop_link( stack, source );
-        lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar2_cat_s_create(), source );
-        cell->encs.data[ 0 ]->up = link1;
-        cell->encs.data[ 1 ]->up = link2;
-        stack_push( stack, cell->excs.data[ 0 ] );
-    }
-*/
 
     BLM_DOWN();
 }

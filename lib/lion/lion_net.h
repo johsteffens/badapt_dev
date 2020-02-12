@@ -234,6 +234,7 @@ signature bhvm_holor_s* get_dp_ex( mutable, sz_t index );
 signature bhvm_holor_s* get_ap_ada( mutable, sz_t index );
 signature bhvm_holor_s* get_dp_ada( mutable, sz_t index );
 
+signature @* run( mutable, tp_t track);
 signature @* run_ap(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
 signature @* run_dp(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
 signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); // allocates out
@@ -297,6 +298,7 @@ stamp :frame = aware :
     func : :get_ap_ada = { assert( o->idx_ap_ada ); assert( index >= 0 && index < o->idx_ap_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ada->data[ index ] ]; };
     func : :get_dp_ada = { assert( o->idx_dp_ada ); assert( index >= 0 && index < o->idx_dp_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ada->data[ index ] ]; };
 
+    func : :run;
     func : :run_ap;
     func : :run_dp;
     func : :run_ap_adl;

@@ -92,9 +92,10 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
 
     if( arity > 0 ) bhvm_shape_s_copy( &hr->s, base_shape );
 
+    bhvm_holor_s_set_type( hr, r_type );
+
     if( !vacant )
     {
-        bhvm_holor_s_set_type( hr, r_type );
         bhvm_holor_s_fit_size( hr );
 
         // We setup a mini frame and run vop_ap on it.

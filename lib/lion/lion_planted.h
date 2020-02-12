@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-06T11:16:59Z
+ *  Last File Update: 2020-02-11T19:44:05Z
  *
  *  Copyright and License of this File:
  *
@@ -13,6 +13,7 @@
  *  lion_sem.h
  *  lion_net.h
  *  lion_net_eval.h
+ *  lion_adaptive.h
  *
  */
 
@@ -217,6 +218,22 @@
   static inline sz_t lion_nop_ar1_identity_s_arity( const lion_nop_ar1_identity_s* o ){return 1;} \
   static inline sz_t lion_nop_ar1_identity_s_priority( const lion_nop_ar1_identity_s* o ){return 8;} \
   bl_t lion_nop_ar1_identity_s_solve( const lion_nop_ar1_identity_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
+#define TYPEOF_lion_nop_ar1_f3_s 259552180
+#define BETH_EXPAND_ITEM_lion_nop_ar1_f3_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_f3_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar1_f3_s_arity( const lion_nop_ar1_f3_s* o ){return 1;} \
+  static inline sz_t lion_nop_ar1_f3_s_priority( const lion_nop_ar1_f3_s* o ){return 8;} \
+  static inline sc_t lion_nop_ar1_f3_s_symbol( const lion_nop_ar1_f3_s* o ){return "f3";} \
+  bl_t lion_nop_ar1_f3_s_solve( const lion_nop_ar1_f3_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
+#define TYPEOF_lion_nop_ar1_f2_s 1811978703
+#define BETH_EXPAND_ITEM_lion_nop_ar1_f2_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_f2_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar1_f2_s_arity( const lion_nop_ar1_f2_s* o ){return 1;} \
+  static inline sz_t lion_nop_ar1_f2_s_priority( const lion_nop_ar1_f2_s* o ){return 8;} \
+  static inline sc_t lion_nop_ar1_f2_s_symbol( const lion_nop_ar1_f2_s* o ){return "f2";} \
+  bl_t lion_nop_ar1_f2_s_solve( const lion_nop_ar1_f2_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
 #define TYPEOF_lion_nop_ar1_neg_s 594087751
 #define BETH_EXPAND_ITEM_lion_nop_ar1_neg_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar1_neg_s ) \
@@ -245,6 +262,15 @@
   static inline sc_t lion_nop_ar1_ceil_s_symbol( const lion_nop_ar1_ceil_s* o ){return "ceil";} \
   static inline tp_t lion_nop_ar1_ceil_s_type_vop_ap( const lion_nop_ar1_ceil_s* o ){return TYPEOF_bhvm_vop_ar1_ceil_s;} \
   static inline tp_t lion_nop_ar1_ceil_s_type_vop_dp_a( const lion_nop_ar1_ceil_s* o ){return TYPEOF_bhvm_vop_ar0_nul_dp_s;}
+#define TYPEOF_lion_nop_ar1_abs_s 292167937
+#define BETH_EXPAND_ITEM_lion_nop_ar1_abs_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_abs_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar1_abs_s_arity( const lion_nop_ar1_abs_s* o ){return 1;} \
+  static inline sz_t lion_nop_ar1_abs_s_priority( const lion_nop_ar1_abs_s* o ){return 8;} \
+  static inline sc_t lion_nop_ar1_abs_s_symbol( const lion_nop_ar1_abs_s* o ){return "abs";} \
+  static inline tp_t lion_nop_ar1_abs_s_type_vop_ap( const lion_nop_ar1_abs_s* o ){return TYPEOF_bhvm_vop_ar1_abs_s;} \
+  static inline tp_t lion_nop_ar1_abs_s_type_vop_dp_a( const lion_nop_ar1_abs_s* o ){return TYPEOF_bhvm_vop_ar2_abs_dp_s;}
 #define TYPEOF_lion_nop_ar1_exp_s 4255037934
 #define BETH_EXPAND_ITEM_lion_nop_ar1_exp_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar1_exp_s ) \
@@ -415,9 +441,12 @@
 #define BETH_EXPAND_GROUP_lion_nop_ar1 \
   BCORE_FORWARD_OBJECT( lion_nop_ar1 ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_identity_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_f3_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_f2_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_neg_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_floor_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_ceil_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_abs_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_exp_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_log_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_inv_s ); \
@@ -438,9 +467,12 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar1_random_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_cast_htp_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar1_identity_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_f3_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_f2_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_neg_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_floor_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_ceil_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_abs_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_exp_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_log_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_inv_s \
@@ -1020,6 +1052,7 @@
   static inline bhvm_holor_s* lion_net_frame_s_get_dp_ex( lion_net_frame_s* o, sz_t index ){assert( o->idx_dp_ex ); assert( index >= 0 && index < o->idx_dp_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ index ] ];} \
   static inline bhvm_holor_s* lion_net_frame_s_get_ap_ada( lion_net_frame_s* o, sz_t index ){assert( o->idx_ap_ada ); assert( index >= 0 && index < o->idx_ap_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ada->data[ index ] ];} \
   static inline bhvm_holor_s* lion_net_frame_s_get_dp_ada( lion_net_frame_s* o, sz_t index ){assert( o->idx_dp_ada ); assert( index >= 0 && index < o->idx_dp_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ada->data[ index ] ];} \
+  lion_net_frame_s* lion_net_frame_s_run( lion_net_frame_s* o, tp_t track ); \
   lion_net_frame_s* lion_net_frame_s_run_ap( lion_net_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
   lion_net_frame_s* lion_net_frame_s_run_dp( lion_net_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
   lion_net_frame_s* lion_net_frame_s_run_ap_adl( lion_net_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); \
@@ -1133,6 +1166,41 @@
   BETH_EXPAND_ITEM_lion_net_eval_set_s \
   BETH_EXPAND_ITEM_lion_net_eval_frame_s \
   BETH_EXPAND_ITEM_lion_net_eval_timing_s
+
+/**********************************************************************************************************************/
+// source: lion_adaptive.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_adaptive
+
+#define TYPEOF_lion_adaptive 789795542
+#define TYPEOF_lion_adaptive_s 2891213576
+#define TYPEOF_lion_adaptive_s 2891213576
+#define BETH_EXPAND_ITEM_lion_adaptive_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_s ) \
+    {aware_t _;vd_t src;lion_net_frame_s frame;badapt_dynamics_std_s dynamics;sz_t in_size;sz_t out_size;}; \
+  static inline sz_t lion_adaptive_s_get_in_size( const lion_adaptive_s* o ){return o->in_size;} \
+  static inline sz_t lion_adaptive_s_get_out_size( const lion_adaptive_s* o ){return o->out_size;} \
+  static inline void lion_adaptive_s_get_dynamics_std( const lion_adaptive_s* o, badapt_dynamics_std_s* dynamics ){badapt_dynamics_std_s_copy( dynamics, &o->dynamics );} \
+  static inline void lion_adaptive_s_set_dynamics_std( lion_adaptive_s* o, const badapt_dynamics_std_s* dynamics ){badapt_dynamics_std_s_copy( &o->dynamics, dynamics );} \
+  void lion_adaptive_s_arc_to_sink( const lion_adaptive_s* o, bcore_sink* sink ); \
+  void lion_adaptive_s_minfer( lion_adaptive_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
+  void lion_adaptive_s_bgrad_adapt( lion_adaptive_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out );
+#define TYPEOF_lion_adaptive_builder_s 937777220
+#define BETH_EXPAND_ITEM_lion_adaptive_builder_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_builder_s ) \
+    {aware_t _;vd_t src;sz_t in_size;sz_t out_size;badapt_dynamics_std_s dynamics;}; \
+  static inline sz_t lion_adaptive_builder_s_get_in_size( const lion_adaptive_builder_s* o ){return o->in_size;} \
+  static inline void lion_adaptive_builder_s_set_in_size( lion_adaptive_builder_s* o, sz_t size ){o->in_size = size;} \
+  static inline sz_t lion_adaptive_builder_s_get_out_size( const lion_adaptive_builder_s* o ){return o->out_size;} \
+  static inline void lion_adaptive_builder_s_set_out_size( lion_adaptive_builder_s* o, sz_t size ){o->out_size = size;} \
+  badapt_adaptive* lion_adaptive_builder_s_build( const lion_adaptive_builder_s* o );
+#define BETH_EXPAND_GROUP_lion_adaptive \
+  BCORE_FORWARD_OBJECT( lion_adaptive ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_s ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_builder_s ); \
+  BETH_EXPAND_ITEM_lion_adaptive_s \
+  BETH_EXPAND_ITEM_lion_adaptive_builder_s
 
 /**********************************************************************************************************************/
 

@@ -512,7 +512,7 @@ void lion_net_cell_s_set_downlinks( lion_net_cell_s* o )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /** Removes all body-nodes not reachable via uplink from exit channels
- *  Creates an warning in case an entry channel is unreachable.
+ *  Creates a warning in case an entry channel is unreachable.
  */
 void lion_net_cell_s_remove_unreachable_nodes( lion_net_cell_s* o )
 {
@@ -528,7 +528,12 @@ void lion_net_cell_s_remove_unreachable_nodes( lion_net_cell_s* o )
         node->flag = true;
     }
 
-    BFOR_EACH( i, &o->body ) if( !o->body.data[ i ]->flag ) lion_net_node_s_detach( &o->body.data[ i ] );
+    BFOR_EACH( i, &o->body ) if( !o->body.data[ i ]->flag )
+    {
+//        lion_net_node_s* node = o->body.data[ i ];
+//        bcore_source_point_s_parse_msg_to_sink_fa( node->source_point, BCORE_STDOUT, "Unreachable: '#<sc_t>'.", lion_ifnameof( node->name ) );
+        lion_net_node_s_detach( &o->body.data[ i ] );
+    }
     lion_net_cell_s_normalize( o );
 
     ASSERT( lion_net_cell_s_is_consistent( o ) );
@@ -1228,6 +1233,15 @@ lion_net_frame_s* lion_net_frame_s_setup_from_source( lion_net_frame_s* o, bcore
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+lion_net_frame_s* lion_net_frame_s_run( lion_net_frame_s* o, tp_t track )
+{
+    ASSERT( o->mcf );
+    bhvm_mcode_frame_s_track_run( o->mcf, track );
+    return o;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 lion_net_frame_s* lion_net_frame_s_run_ap( lion_net_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out )
 {
     ASSERT( o->mcf );
@@ -1243,15 +1257,19 @@ lion_net_frame_s* lion_net_frame_s_run_ap( lion_net_frame_s* o, const bhvm_holor
 
     bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
 
-    BFOR_EACH( i, o->idx_ap_ex )
+    if( out )
     {
-        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ i ] ];
-        bhvm_holor_s* h_o = out[ i ];
-        ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
-        if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
-        if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
-        bhvm_value_s_cpy( &h_m->v, &h_o->v );
+        BFOR_EACH( i, o->idx_ap_ex )
+        {
+            bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ i ] ];
+            bhvm_holor_s* h_o = out[ i ];
+            ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
+            if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
+            if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
+            bhvm_value_s_cpy( &h_m->v, &h_o->v );
+        }
     }
+
 
     return o;
 }
@@ -1273,14 +1291,17 @@ lion_net_frame_s* lion_net_frame_s_run_dp( lion_net_frame_s* o, const bhvm_holor
 
     bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp );
 
-    BFOR_EACH( i, o->idx_dp_en )
+    if( out )
     {
-        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ i ] ];
-        bhvm_holor_s* h_o = out[ i ];
-        ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
-        if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
-        if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
-        bhvm_value_s_cpy( &h_m->v, &h_o->v );
+        BFOR_EACH( i, o->idx_dp_en )
+        {
+            bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ i ] ];
+            bhvm_holor_s* h_o = out[ i ];
+            ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
+            if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
+            if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
+            bhvm_value_s_cpy( &h_m->v, &h_o->v );
+        }
     }
 
     return o;

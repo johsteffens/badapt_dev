@@ -25,10 +25,10 @@
 /** Syntax
     MLP
 
-    cell layer( y => hidden_nodes, a )
+    cell layer( y <- hidden_nodes, a )
     {
-        w = adaptive : random : ( [ hidden_nodes ][ dimof( a ) ]# );
-        b = adaptive : ( [ hidden_nodes ]0 );
+        w = adaptive <: random <: ( [ hidden_nodes ][ dimof( a ) ]# );
+        b = adaptive <: ( [ hidden_nodes ]0 );
         y = b + w ** a;
     };
 
@@ -130,6 +130,7 @@ TODO:
  *  Symbol  Notation Priority  Type
  *   :      Infix      6     Constructive Concatenation
  *  ::      Infix      8     Conservative Concatenation
+ *  <:      Infix            Cell Catenation
  *   [      Infix     21     order-increment bin operator (l-value: dim). (Yielding) Example: 2[# = (#:#), 2[2[# = (#:#):(#:#)
  *   ]      Infix     20     order-decrement bin operator (r-value: idx). Example: (1:2:3)]1 = 2
  *   +      Infix      8     (ECI) addition
@@ -138,7 +139,7 @@ TODO:
  *   /      Infix     10     (ECI) division
  *   ^      Infix     12     (ECI) power
  *  **,     Infix     10     holor-product for holors up to order 2; transposition state is considered
- *  ***     Infix     10     convolution?
+ *  *~      Infix     10     convolution?
  *
  *  Unary operators
  *  -     Prefix       8     negates holor
