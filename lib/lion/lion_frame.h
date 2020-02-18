@@ -145,16 +145,6 @@ stamp : = aware :
 void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
 void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
 
-/** Estimates jacobians for entry and exit channels of last axon pass, given epsilon.
- *  jac_mdl stores jacobians in the form [in-channels][out-channels]
- */
-void lion_frame_s_estimate_jacobian_en( const lion_frame_s* o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl );
-
-/** Estimates jacobians for adaptive and exit channels of last axon pass, given epsilon.
- *  jac_mdl stores jacobians in the form [ada-channels][out-channels]
- */
-void lion_frame_s_estimate_jacobian_ada( const lion_frame_s* o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl );
-
 #endif // TYPEOF_lion_frame
 
 /**********************************************************************************************************************/
