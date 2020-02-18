@@ -27,12 +27,12 @@
 
     cell layer( y <- hidden_nodes, a )
     {
-        w = adaptive <: random <: ( [ hidden_nodes ][ dimof( a ) ]# );
-        b = adaptive <: ( [ hidden_nodes ]0 );
+        w = adaptive <: random <: ( hidden_nodes [ dimof( a ) [ # );
+        b = adaptive <: ( hidden_nodes [ 0 );
         y = b + w ** a;
     };
 
-    cell mlp( y => a )
+    cell mlp( y <- a )
     {
         l1 = layer( 10, a );
         l2 = layer( 20, relu( a ) );
@@ -43,22 +43,22 @@
     ========================================
     LSTM
 
-    cell layer( co, ho => dim_h, x, ci, hi )
+    cell layer( co, ho <- dim_h, x, ci, hi )
     {
         // adaptive holors
-        w_fx = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        w_fh = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        w_ix = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        w_ih = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        w_ox = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        w_oh = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        w_qx = adaptive : random( [ dim_h ][ dimof( x ) ]# );
-        w_qh = adaptive : random( [ dim_h ][ dimof( x ) ]# );
+        w_fx = adaptive : random( dim_h [ dimof( x ) [ # );
+        w_fh = adaptive : random( dim_h [ dimof( x ) [ # );
+        w_ix = adaptive : random( dim_h [ dimof( x ) [ # );
+        w_ih = adaptive : random( dim_h [ dimof( x ) [ # );
+        w_ox = adaptive : random( dim_h [ dimof( x ) [ # );
+        w_oh = adaptive : random( dim_h [ dimof( x ) [ # );
+        w_qx = adaptive : random( dim_h [ dimof( x ) [ # );
+        w_qh = adaptive : random( dim_h [ dimof( x ) [ # );
 
-        b_f = adaptive( [ dim_h ]0 );
-        b_i = adaptive( [ dim_h ]0 );
-        b_o = adaptive( [ dim_h ]0 );
-        b_q = adaptive( [ dim_h ]0 );
+        b_f = adaptive( dim_h [ 0 );
+        b_i = adaptive( dim_h [ 0 );
+        b_o = adaptive( dim_h [ 0 );
+        b_q = adaptive( dim_h [ 0 );
 
         v_f = lgst( ( w_fx ** x ) + ( w_fh ** hi ) + b_f );
         v_i = lgst( ( w_ix ** x ) + ( w_ih ** hi ) + b_i );
@@ -70,13 +70,13 @@
         ho  = ( v_o * v_d );
     };
 
-    cell lstm( y => dim_h, x )
+    cell lstm( y <- dim_h, x )
     {
-        adaptive w_r = random( [ dim_h ][ dimof( x ) ]# );
-        adaptive b_r = [ dim_h ]#;
+        adaptive w_r = random( dim_h [ dimof( x ) [ # );
+        adaptive b_r = dim_h [ #;
 
-        recurrent c = [ dim_h ]0;
-        recurrent h = [ dim_h ]0;
+        recurrent c = dim_h [ 0;
+        recurrent h = dim_h [ 0;
 
         l1 = layer( dim_h, x, ci = c, hi = h );
 
@@ -143,7 +143,7 @@ TODO:
  *
  *  Unary operators
  *  -     Prefix       8     negates holor
- *  ~     Postfix     10     toggles transposition state (represents a reinterpret cast) (priority must be above multiplication)
+ *  ~     Postfix     12     toggles transposition state (represents a reinterpret cast) (priority must be above multiplication)
  *
  *  Holors
  *    #   Vacant scalar

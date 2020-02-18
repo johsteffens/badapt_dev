@@ -108,10 +108,17 @@ feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) = sol
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/** Normally, the node solver calls solve after all arguments have been obtained.
- *  Certain (potentially cyclic) operators require a solve for each input channel.
+/** Indicates a cyclic operator (e.g. recurrent)
+ *
+ *  Normally, the node solver calls nop_solve and associates resulting holor
+ *  after all arguments have been obtained.
+ *
+ *  Cyclic operators need to provide an output before all arguments have been evaluated.
+ *  Therefore nop_solve is called once for each channel and mcode_push_ap_holor before
+ *  processing all channels.
+ *
  **/
-feature 'a' bl_t requires_solve_for_each_channel( const ) = { return false; };
+feature 'a' bl_t cyclic( const ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -314,7 +321,7 @@ group :ar1 = retrievable
     stamp :f3 =
     {
         func :: :priority = { return 8; };
-        func :: :symbol   = { return "f3"; };
+        func :: :symbol   = { return "f3_t"; };
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
@@ -329,7 +336,7 @@ group :ar1 = retrievable
     stamp :f2 =
     {
         func :: :priority = { return 8; };
-        func :: :symbol   = { return "f2"; };
+        func :: :symbol   = { return "f2_t"; };
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
@@ -585,7 +592,7 @@ group :ar1 = retrievable
 
     stamp :cast_htp =
     {
-        func :: :priority  = { return 8; };
+        func :: :priority  = { return 12; };
         func :: :solve;
         func :: :mcode_push_ap_holor;
         func :: :mcode_push_dp_holor;
@@ -732,7 +739,7 @@ group :ar2 = retrievable
 
     /// special operators ------------------------------------------------------
 
-    // concatenates two holors according to cat-rule defined in bhvm_holor_s_cat_set
+    // constructive concatenation defined in bhvm_holor_s_cat_set
     stamp :cat =
     {
         func :: :priority = { return 6; };
@@ -741,6 +748,17 @@ group :ar2 = retrievable
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_cat_s; };
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar1_cat_dp_a_s; };
         func :: :type_vop_dp_b = { return TYPEOF_bhvm_vop_ar1_cat_dp_b_s; };
+    };
+
+    // conservative concatenation defined in bhvm_holor_s_ccat_set
+    stamp :ccat =
+    {
+        func :: :priority = { return 8; };
+        func :: :symbol   = { return "::"; };
+        func :: :solve;
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_ccat_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar1_ccat_dp_a_s; };
+        func :: :type_vop_dp_b = { return TYPEOF_bhvm_vop_ar1_ccat_dp_b_s; };
     };
 
     stamp :order_inc =
@@ -769,7 +787,7 @@ group :ar2 = retrievable
         tp_t name;
 
         func :: :priority = { return 8; };
-        func :: :requires_solve_for_each_channel = { return true; };
+        func :: :cyclic = { return true; };
         func :: :solve;
         func :: :mcode_push_ap_track;
     };

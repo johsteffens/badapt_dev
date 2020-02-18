@@ -113,8 +113,9 @@ void lion_holor_s_brief_to_stdout( const lion_holor_s* o )
 void lion_holor_s_formatted_to_sink( const lion_holor_s* o, bcore_sink* sink )
 {
     if( !o->m.active ) bcore_sink_a_push_fa( sink, "<passive>" );
-    if( o->m.htp ) bcore_sink_a_push_fa( sink, "<htp>" );
+    if( o->m.htp ) bcore_sink_a_push_fa( sink, "(" );
     bhvm_holor_s_formatted_to_sink( &o->h, sink );
+    if( o->m.htp ) bcore_sink_a_push_fa( sink, ")~" );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -135,15 +136,17 @@ void lion_holor_s_parse( lion_holor_s* o, bcore_source* source )
         lion_holor_s_parse( o, source );
         o->m.active = false;
     }
-    else if( bcore_source_a_parse_bl_fa( source, " #?'<htp>'" ) )
-    {
-        lion_holor_s_parse( o, source );
-        o->m.htp = !o->m.htp;
-    }
     else
     {
         bhvm_holor_s_parse( &o->h, source );
     }
+
+    // postfix
+    while( bcore_source_a_parse_bl_fa( source, " #?'~'" ) )
+    {
+        o->m.htp = !o->m.htp;
+    }
+
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

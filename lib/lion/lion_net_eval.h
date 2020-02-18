@@ -23,6 +23,7 @@
 #define LION_NET_EVAL_H
 
 #include "lion_net.h"
+#include "lion_frame.h"
 #include "lion_planted.h"
 
 /**********************************************************************************************************************/
@@ -155,7 +156,7 @@ stamp :set = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :frame  = extending :std { bl_t jacobian_test = true; };
+stamp :frame  = extending :std { bl_t jacobian_test = true; sz_t recurrent_cycles = 1; };
 stamp :timing = extending :std {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -29,7 +29,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
 
     if( !o->param.src ) ERR_fa( "Source missing." );
 
-    lion_net_frame_s* frame = BLM_CREATE( lion_net_frame_s );
+    lion_frame_s* frame = BLM_CREATE( lion_frame_s );
 
     bcore_source* source = NULL;
 
@@ -64,10 +64,10 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
         bcore_sink_a_attach( &frame->mcode_log, bcore_fork( o->param.log ) );
         bcore_sink_a_push_fa( o->param.log, "Begin microcode disassembly\n\n" );
     }
-    lion_net_frame_s_setup_from_source_adl( frame, source, adl_ap_en );
+    lion_frame_s_setup_from_source_adl( frame, source, adl_ap_en );
     if( o->param.log && o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "End microcode disassembly\n\n" );
 
-    lion_net_frame_s_run_ap_adl( frame, adl_ap_en, adl_ap_ex );
+    for( sz_t i = 0; i < o->recurrent_cycles; i++ ) lion_frame_s_run_ap_adl( frame, adl_ap_en, adl_ap_ex );
 
     BFOR_EACH( i, adl_ap_ex )
     {
@@ -114,19 +114,19 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
             }
         }
 
-        lion_net_frame_s_run_dp_adl( frame, adl_dp_ex, adl_dp_en );
+        lion_frame_s_run_dp_adl( frame, adl_dp_ex, adl_dp_en );
 
-        sz_t size_ex = lion_net_frame_s_get_size_ex( frame );
+        sz_t size_ex = lion_frame_s_get_size_ex( frame );
         bhvm_holor_mdl_s* mdl_jc = BLM_CREATE( bhvm_holor_mdl_s );
 
         /// testing entry channels
-        if( lion_net_frame_s_get_size_en( frame ) )
+        if( lion_frame_s_get_size_en( frame ) )
         {
-            if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "\nTesting #<sz_t> entry channels:\n", lion_net_frame_s_get_size_en( frame ) );
+            if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "\nTesting #<sz_t> entry channels:\n", lion_frame_s_get_size_en( frame ) );
 
-            lion_net_frame_s_estimate_jacobian_en( frame, o->param.epsilon, mdl_jc );
+            lion_frame_s_estimate_jacobian_en( frame, o->param.epsilon, mdl_jc );
 
-            BFOR_SIZE( i, lion_net_frame_s_get_size_en( frame ) )
+            BFOR_SIZE( i, lion_frame_s_get_size_en( frame ) )
             {
                 BLM_INIT();
                 if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "enc #<sz_t>:\n", i );
@@ -149,7 +149,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex->data[ j ];
                     bhvm_holor_s* dp_ex2 = bhvm_holor_s_fork_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_ex1 );
-                    lion_net_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }, &dp_en2 );
+                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }, &dp_en2 );
                     BLM_DOWN();
                 }
 
@@ -185,17 +185,17 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
         }
 
         /// testing adaptive channels
-        if( lion_net_frame_s_get_size_ada( frame ) )
+        if( lion_frame_s_get_size_ada( frame ) )
         {
-            if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "\nTesting #<sz_t> adaptive  channels:\n", lion_net_frame_s_get_size_ada( frame ) );
+            if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "\nTesting #<sz_t> adaptive  channels:\n", lion_frame_s_get_size_ada( frame ) );
 
-            lion_net_frame_s_estimate_jacobian_ada( frame, o->param.epsilon, mdl_jc );
-            BFOR_SIZE( i, lion_net_frame_s_get_size_ada( frame ) )
+            lion_frame_s_estimate_jacobian_ada( frame, o->param.epsilon, mdl_jc );
+            BFOR_SIZE( i, lion_frame_s_get_size_ada( frame ) )
             {
                 BLM_INIT();
                 if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "adc #<sz_t>:\n", i );
 
-                const bhvm_holor_s* dp_ada1 = lion_net_frame_s_get_dp_ada( frame, i );
+                const bhvm_holor_s* dp_ada1 = lion_frame_s_get_dp_ada( frame, i );
                 bhvm_holor_s* dp_ada2 = bhvm_holor_s_copy_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_ada1 );
                 bhvm_value_s_zro( &dp_ada2->v );
 
@@ -213,7 +213,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex->data[ j ];
                     bhvm_holor_s* dp_ex2 = bhvm_holor_s_fork_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_ex1 );
-                    lion_net_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_ada2, h_jc, dp_ex2 }, &dp_ada2 );
+                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_ada2, h_jc, dp_ex2 }, &dp_ada2 );
                     BLM_DOWN();
                 }
 

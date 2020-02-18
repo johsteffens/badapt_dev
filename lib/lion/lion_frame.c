@@ -1,0 +1,547 @@
+/** Author and Copyright 2020 Johannes Bernhard Steffens
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+/**********************************************************************************************************************/
+
+#include "lion_frame.h"
+
+/**********************************************************************************************************************/
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static lion_nop* input_op_create( vd_t arg, sz_t in_idx, tp_t in_name, const lion_nop* current_nop )
+{
+    BLM_INIT();
+    const bhvm_holor_s** in = arg;
+
+    if( in ) ASSERT( *(aware_t*)in[ in_idx ] == TYPEOF_bhvm_holor_s );
+
+    const bhvm_holor_s* h_in = in ? in[ in_idx ] : NULL;
+
+    if( current_nop && current_nop->_ == TYPEOF_lion_nop_ar0_param_s )
+    {
+        const bhvm_holor_s* h_cur = &( ( lion_nop_ar0_param_s* )current_nop )->h->h;
+        if( !h_in )
+        {
+            h_in = h_cur;
+        }
+        else if( !bhvm_shape_s_is_equal( &h_cur->s, &h_in->s ) )
+        {
+            st_s* msg = BLM_CREATE( st_s );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "Shape deviation at input holor '#<sz_t>':", in_idx );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Passed input} " );
+            bhvm_holor_s_brief_to_sink( h_in, (bcore_sink*)msg );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Expected shape} " );
+            bhvm_holor_s_brief_to_sink( h_cur, (bcore_sink*)msg );
+            ERR_fa( "#<st_s*>\n", msg );
+        }
+    }
+
+    if( h_in )
+    {
+        lion_nop_ar0_param_s* param = lion_nop_ar0_param_s_create();
+        param->h = lion_holor_s_create();
+        bhvm_holor_s_copy( &param->h->h, h_in );
+        BLM_RETURNV( lion_nop*, ( lion_nop* )param );
+    }
+    else
+    {
+        BLM_RETURNV( lion_nop*, NULL );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, const lion_net_cell_s* cell, bcore_sink* sink )
+{
+    BLM_INIT();
+    tp_t track_types [] =
+    {
+        TYPEOF_track_ap,
+        TYPEOF_track_dp,
+        TYPEOF_track_setup_ap,
+        TYPEOF_track_setup_dp,
+        TYPEOF_track_shelve_ap,
+        TYPEOF_track_shelve_dp,
+        TYPEOF_track_reset_dp
+    };
+
+    bhvm_mcode_frame_s* mcf = o->mcf;
+    bcore_arr_st_s* info_holors = BLM_CREATE( bcore_arr_st_s );
+    bcore_arr_st_s_set_size( info_holors, mcf->hbase->holor_ads.size );
+    BFOR_EACH( i, info_holors ) info_holors->data[ i ] = st_s_create();
+
+    bcore_sink_a_push_fa( sink, "Holorbase size: #<sz_t>\n", mcf->hbase ? bhvm_mcode_hbase_s_get_size( mcf->hbase ) : 0 );
+    bcore_sink_a_push_fa( sink, "Entry channels:\n" );
+    BFOR_EACH( i, &cell->encs )
+    {
+        lion_net_node_s* node = cell->encs.data[ i ];
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( node->name ) );
+        if( node->hidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap enc #<sz_t>", i );
+        }
+
+        if( node->gidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp enc #<sz_t>", i );
+        }
+
+        bcore_sink_a_push_fa( sink, "\n" );
+    }
+
+    bcore_sink_a_push_fa( sink, "\n" );
+    bcore_sink_a_push_fa( sink, "Exit channels:\n" );
+    BFOR_EACH( i, &cell->excs )
+    {
+        lion_net_node_s* node = cell->excs.data[ i ];
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( node->name ) );
+        if( node->hidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap exc #<sz_t>", i );
+        }
+
+        if( node->gidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp exc #<sz_t>", i );
+        }
+        bcore_sink_a_push_fa( sink, "\n" );
+    }
+
+    bcore_sink_a_push_fa( sink, "\n" );
+    bcore_sink_a_push_fa( sink, "Adaptive channels:\n" );
+    BFOR_EACH( i, &cell->body )
+    {
+        lion_net_node_s* node = cell->body.data[ i ];
+        if( !node->nop || node->nop->_ != TYPEOF_lion_nop_ar0_adaptive_s ) continue;
+        lion_nop_ar0_adaptive_s* ar0_adaptive = ( lion_nop_ar0_adaptive_s* )node->nop;
+
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( ar0_adaptive->h->m.name ) );
+        if( node->hidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap adc #<sz_t>", i );
+        }
+
+        if( node->gidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp adc #<sz_t>", i );
+        }
+        bcore_sink_a_push_fa( sink, "\n" );
+    }
+
+    bcore_sink_a_push_fa( sink, "\n" );
+    bcore_sink_a_push_fa( sink, "Recurrent channels:\n" );
+    BFOR_EACH( i, &cell->body )
+    {
+        lion_net_node_s* node = cell->body.data[ i ];
+        if( !node->nop || node->nop->_ != TYPEOF_lion_nop_ar2_recurrent_s ) continue;
+        lion_nop_ar2_recurrent_s* ar2_recurrent = ( lion_nop_ar2_recurrent_s* )node->nop;
+
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( ar2_recurrent->name ) );
+        if( node->hidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap rcc #<sz_t>", i );
+        }
+
+        if( node->gidx >= 0 )
+        {
+            bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp rcc #<sz_t>", i );
+        }
+        bcore_sink_a_push_fa( sink, "\n" );
+    }
+
+    bcore_sink_a_push_fa( sink, "\n" );
+
+    bcore_sink_a_push_fa( sink, "Holorbase:\n" );
+    BFOR_EACH( i, &mcf->hbase->holor_ads )
+    {
+        BLM_INIT();
+        st_s* msg = BLM_CREATE( st_s );
+        bhvm_holor_s* h = &mcf->hbase->holor_ads.data[ i ];
+        st_s_push_fa( msg, "  #pl3 {#<sz_t>}: ", i );
+        bhvm_holor_s_brief_to_sink( h, ( bcore_sink* )msg );
+        if( info_holors->data[ i ]->size > 0 )
+        {
+            st_s_push_char_n( msg, ' ', 1 );
+            st_s_push_char_n( msg, '.', sz_max( 0, 48 - msg->size ) );
+            st_s_push_fa( msg, " #<st_s*>", info_holors->data[ i ] );
+        }
+        bcore_sink_a_push_fa( sink, "#<st_s*>\n", msg );
+        BLM_DOWN();
+    }
+    bcore_sink_a_push_fa( sink, "\n" );
+
+    for( sz_t i = 0; i < sizeof( track_types ) / sizeof( tp_t ); i++ )
+    {
+        tp_t track_type = track_types[ i ];
+        bhvm_mcode_track_s* track = bhvm_mcode_frame_s_track_get( mcf, track_type );
+        if( track )
+        {
+            bcore_sink_a_push_fa( sink, "#<sc_t>:\n", ifnameof( track_type ) );
+            BFOR_EACH( i, track )
+            {
+                bcore_sink_a_push_fa( sink, "  " );
+                bhvm_vop* vop = track->data[ i ].vop;
+                bhvm_vop_a_to_sink( vop, sink );
+                bcore_sink_a_push_fa( sink, "\n" );
+            }
+            bcore_sink_a_push_fa( sink, "\n" );
+        }
+    }
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bcore_arr_sz_s* lion_frame_push_idx( bcore_arr_sz_s** o, sz_t idx )
+{
+    if( !*o ) bcore_arr_sz_s_attach( o, bcore_arr_sz_s_create() );
+    bcore_arr_sz_s_push( *o, idx );
+    return *o;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* source, const bhvm_holor_s** in )
+{
+    BLM_INIT();
+    bcore_arr_sz_s_detach( &o->idx_ap_en );
+    bcore_arr_sz_s_detach( &o->idx_dp_en );
+    bcore_arr_sz_s_detach( &o->idx_ap_ex );
+    bcore_arr_sz_s_detach( &o->idx_dp_ex );
+    bcore_arr_sz_s_detach( &o->idx_ap_ada );
+    bcore_arr_sz_s_detach( &o->idx_dp_ada );
+
+    lion_net_cell_s* cell = BLM_CREATE( lion_net_cell_s );
+
+    bhvm_mcode_frame_s_attach( &o->mcf, bhvm_mcode_frame_s_create() );
+
+    /// We use a double-nested frame because the body of sem_frame->parent could be used
+    lion_sem_cell_s* sem_frame = BLM_CREATE( lion_sem_cell_s );
+    sem_frame->parent = BLM_A_PUSH( lion_sem_cell_s_create_frame() ); // double nested
+
+    bcore_source_point_s_set( &sem_frame->source_point, source );
+    lion_sem_cell_s_parse( sem_frame, source );
+
+    /// network cell
+    lion_net_cell_s_from_sem_cell( cell, sem_frame, input_op_create, ( vd_t )in, NULL );
+
+    lion_net_cell_s_mcode_push_ap( cell, o->mcf );
+    lion_net_cell_s_mcode_push_dp( cell, o->mcf, true );
+
+    BFOR_EACH( i, &cell->encs )
+    {
+        lion_net_node_s* node = cell->encs.data[ i ];
+        if( node->hidx >= 0 ) lion_frame_push_idx( &o->idx_ap_en, node->hidx );
+        if( node->gidx >= 0 ) lion_frame_push_idx( &o->idx_dp_en, node->gidx );
+    }
+
+    BFOR_EACH( i, &cell->excs )
+    {
+        lion_net_node_s* node = cell->excs.data[ i ];
+        if( node->hidx >= 0 ) lion_frame_push_idx( &o->idx_ap_ex, node->hidx );
+        if( node->gidx >= 0 ) lion_frame_push_idx( &o->idx_dp_ex, node->gidx );
+    }
+
+    BFOR_EACH( i, &cell->body )
+    {
+        lion_net_node_s* node = cell->body.data[ i ];
+        if( node->nop && node->nop->_ == TYPEOF_lion_nop_ar0_adaptive_s )
+        {
+            if( node->hidx >= 0 ) lion_frame_push_idx( &o->idx_ap_ada, node->hidx );
+            if( node->gidx >= 0 ) lion_frame_push_idx( &o->idx_dp_ada, node->gidx );
+        }
+    }
+
+    if( o->mcode_log ) lion_frame_s_disassemble_to_sink( o, cell, o->mcode_log );
+
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_ap );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_dp );
+
+    BLM_RETURNV( lion_frame_s*, o );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_frame_s* lion_frame_s_run( lion_frame_s* o, tp_t track )
+{
+    ASSERT( o->mcf );
+    bhvm_mcode_frame_s_track_run( o->mcf, track );
+    return o;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out )
+{
+    ASSERT( o->mcf );
+
+    BFOR_EACH( i, o->idx_ap_en )
+    {
+        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ i ] ];
+        const bhvm_holor_s* h_i = in[ i ];
+        ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
+        bhvm_value_s_cpy( &h_i->v, &h_m->v );
+    }
+
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
+
+    if( out )
+    {
+        BFOR_EACH( i, o->idx_ap_ex )
+        {
+            bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ i ] ];
+            bhvm_holor_s* h_o = out[ i ];
+            ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
+            if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
+            if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
+            bhvm_value_s_cpy( &h_m->v, &h_o->v );
+        }
+    }
+
+
+    return o;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out )
+{
+    ASSERT( o->mcf );
+
+    BFOR_EACH( i, o->idx_dp_ex )
+    {
+        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ i ] ];
+        const bhvm_holor_s* h_i = in[ i ];
+        ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
+        bhvm_value_s_cpy( &h_i->v, &h_m->v );
+    }
+
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp );
+
+    if( out )
+    {
+        BFOR_EACH( i, o->idx_dp_en )
+        {
+            bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ i ] ];
+            bhvm_holor_s* h_o = out[ i ];
+            ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
+            if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
+            if( h_o->v.size == 0 ) bhvm_holor_s_fit_size( h_o );
+            bhvm_value_s_cpy( &h_m->v, &h_o->v );
+        }
+    }
+
+    return o;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_frame_s* lion_frame_s_run_ap_adl( lion_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out )
+{
+    if( out && out->size != lion_frame_s_get_size_ex( o ) ) bhvm_holor_adl_s_set_size( out, lion_frame_s_get_size_ex( o ) );
+    BFOR_EACH( i, out ) if( !out->data[ i ] ) out->data[ i ] = bhvm_holor_s_create();
+    return lion_frame_s_run_ap( o, in ? ( const bhvm_holor_s** )in->data : NULL, out ? ( bhvm_holor_s** ) out->data : NULL );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_frame_s* lion_frame_s_run_dp_adl( lion_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out )
+{
+    if( out && out->size != lion_frame_s_get_size_en( o ) ) bhvm_holor_adl_s_set_size( out, lion_frame_s_get_size_en( o ) );
+    BFOR_EACH( i, out ) if( !out->data[ i ] ) out->data[ i ] = bhvm_holor_s_create();
+    return lion_frame_s_run_dp( o, in ? ( const bhvm_holor_s** )in->data : NULL, out ? ( bhvm_holor_s** ) out->data : NULL );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out )
+{
+    BLM_INIT();
+    lion_frame_s_run_ap( BLM_A_PUSH( lion_frame_s_create_from_sc( sc, in ) ), in, out );
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out )
+{
+    BLM_INIT();
+    lion_frame_s_run_dp( BLM_A_PUSH( lion_frame_s_create_from_sc( sc, in ) ), in, out );
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_frame_s_estimate_jacobian_en( const lion_frame_s* const_o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl )
+{
+    BLM_INIT();
+    lion_frame_s* o = BLM_CLONE( lion_frame_s, const_o );
+
+    bhvm_holor_adl_s* ref = BLM_CREATE( bhvm_holor_adl_s );
+    bhvm_holor_adl_s_set_size( ref, o->idx_ap_ex->size );
+    BFOR_EACH( k, o->idx_ap_ex ) ref->data[ k ] = bhvm_holor_s_clone( lion_frame_s_get_ap_ex( o, k ) );
+
+    bhvm_holor_mdl_s_clear( jac_mdl );
+    bhvm_holor_mdl_s_set_size( jac_mdl, o->idx_ap_en->size );
+
+    BFOR_EACH( i, o->idx_ap_en )
+    {
+        bhvm_holor_s* h_en = lion_frame_s_get_ap_en( o, i );
+
+        bhvm_holor_adl_s* jac_adl = jac_mdl->data[ i ] = bhvm_holor_adl_s_create();
+        bhvm_holor_adl_s_set_size( jac_adl, o->idx_ap_ex->size );
+
+        BFOR_EACH( j, &h_en->v )
+        {
+            f3_t v_en = bhvm_value_s_get_f3( &h_en->v, j );
+            bhvm_value_s_set_f3( &h_en->v, j, v_en + epsilon );
+            bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
+            BFOR_EACH( k, o->idx_ap_ex )
+            {
+                bhvm_holor_s* h_ex = lion_frame_s_get_ap_ex( o, k );
+                bhvm_holor_s* h_rf = ref->data[ k ];
+
+                if( !jac_adl->data[ k ] ) jac_adl->data[ k ] = bhvm_holor_s_create();
+                bhvm_holor_s* h_jc = jac_adl->data[ k ];
+                if( h_jc->v.size == 0 )
+                {
+                    bhvm_shape_s_set_data_na( &h_jc->s, 2, h_ex->v.size, h_en->v.size );
+                    bhvm_holor_s_set_type( h_jc, TYPEOF_f3_t );
+                    bhvm_holor_s_fit_size( h_jc );
+                }
+
+                BFOR_EACH( l, &h_ex->v )
+                {
+                    f3_t v_ex = bhvm_value_s_get_f3( &h_ex->v, l );
+                    f3_t v_rf = bhvm_value_s_get_f3( &h_rf->v, l );
+                    f3_t v_gr = ( v_ex - v_rf ) / epsilon;
+                    bhvm_value_s_set_f3( &h_jc->v, j * h_jc->s.data[ 0 ] + l, v_gr );
+                }
+            }
+            bhvm_value_s_set_f3( &h_en->v, j, v_en );
+        }
+    }
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_frame_s_estimate_jacobian_ada( const lion_frame_s* const_o, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl )
+{
+    BLM_INIT();
+    lion_frame_s* o = BLM_CLONE( lion_frame_s, const_o );
+
+    bhvm_holor_adl_s* ref = BLM_CREATE( bhvm_holor_adl_s );
+    bhvm_holor_adl_s_set_size( ref, o->idx_ap_ex->size );
+    BFOR_EACH( k, o->idx_ap_ex ) ref->data[ k ] = bhvm_holor_s_clone( lion_frame_s_get_ap_ex( o, k ) );
+
+    bhvm_holor_mdl_s_clear( jac_mdl );
+    bhvm_holor_mdl_s_set_size( jac_mdl, o->idx_ap_ada->size );
+
+    BFOR_EACH( i, o->idx_ap_ada )
+    {
+        bhvm_holor_s* h_ada = lion_frame_s_get_ap_ada( o, i );
+
+        bhvm_holor_adl_s* jac_adl = jac_mdl->data[ i ] = bhvm_holor_adl_s_create();
+        bhvm_holor_adl_s_set_size( jac_adl, o->idx_ap_ex->size );
+
+        BFOR_EACH( j, &h_ada->v )
+        {
+            f3_t v_ada = bhvm_value_s_get_f3( &h_ada->v, j );
+            bhvm_value_s_set_f3( &h_ada->v, j, v_ada + epsilon );
+            bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
+            BFOR_EACH( k, o->idx_ap_ex )
+            {
+                bhvm_holor_s* h_ex = lion_frame_s_get_ap_ex( o, k );
+                bhvm_holor_s* h_rf = ref->data[ k ];
+
+                if( !jac_adl->data[ k ] ) jac_adl->data[ k ] = bhvm_holor_s_create();
+                bhvm_holor_s* h_jc = jac_adl->data[ k ];
+                if( h_jc->v.size == 0 )
+                {
+                    bhvm_shape_s_set_data_na( &h_jc->s, 2, h_ex->v.size, h_ada->v.size );
+                    bhvm_holor_s_set_type( h_jc, TYPEOF_f3_t );
+                    bhvm_holor_s_fit_size( h_jc );
+                }
+
+                BFOR_EACH( l, &h_ex->v )
+                {
+                    f3_t v_ex = bhvm_value_s_get_f3( &h_ex->v, l );
+                    f3_t v_rf = bhvm_value_s_get_f3( &h_rf->v, l );
+                    f3_t v_gr = ( v_ex - v_rf ) / epsilon;
+                    bhvm_value_s_set_f3( &h_jc->v, j * h_jc->s.data[ 0 ] + l, v_gr );
+                }
+            }
+            bhvm_value_s_set_f3( &h_ada->v, j, v_ada );
+        }
+    }
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+vd_t lion_frame_signal_handler( const bcore_signal_s* o )
+{
+    switch( bcore_signal_s_handle_type( o, typeof( "lion_frame" ) ) )
+    {
+        case TYPEOF_init1:
+        {
+        }
+        break;
+
+        case TYPEOF_down1:
+        {
+        }
+        break;
+
+        case TYPEOF_selftest:
+        {
+        }
+        break;
+
+        case TYPEOF_plant:
+        {
+            bcore_plant_compile( "lion_planted", __FILE__ );
+        }
+        break;
+
+        default: break;
+    }
+
+    return NULL;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+
+

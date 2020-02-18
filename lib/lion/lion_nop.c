@@ -459,7 +459,7 @@ bl_t lion_nop_ar2_bmul_s_solve( const lion_nop_ar2_bmul_s* o, lion_holor_s** a, 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-// lion_nop_ar2_cat_s
+// lion_nop_ar2_(c)cat_s
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -474,6 +474,24 @@ bl_t lion_nop_ar2_cat_s_solve( const lion_nop_ar2_cat_s* o, lion_holor_s** a, li
         bhvm_holor_s* hr = &result->h->h;
         if( !bhvm_holor_s_cat_can( ha, hb ) ) return false;
         bhvm_holor_s_cat_set( ha, hb, hr );
+    }
+    result->settled = ( result->h && !result->h->m.active );
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bl_t lion_nop_ar2_ccat_s_solve( const lion_nop_ar2_ccat_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    lion_holor_s_attach( &result->h, ( a[0] && a[1] ) ? lion_holor_s_create() : NULL );
+    if( result->h )
+    {
+        result->h->m.active = a[0]->m.active || a[1]->m.active;
+        bhvm_holor_s* ha = &a[0]->h;
+        bhvm_holor_s* hb = &a[1]->h;
+        bhvm_holor_s* hr = &result->h->h;
+        if( !bhvm_holor_s_ccat_can( ha, hb ) ) return false;
+        bhvm_holor_s_ccat_set( ha, hb, hr );
     }
     result->settled = ( result->h && !result->h->m.active );
     return true;
@@ -618,7 +636,7 @@ bl_t lion_nop_ar2_recurrent_s_solve( const lion_nop_ar2_recurrent_s* o, lion_hol
         {
             bhvm_holor_s* hb = &a[1]->h;
             if( !bhvm_shape_s_is_equal( &ha->s, &hb->s ) ) return false;
-            result->settled = ha->v.size > 0 && hb->v.size > 0;
+            result->settled = ( !a[0]->m.active ) && ( !a[1]->m.active );
             return true;
         }
         else

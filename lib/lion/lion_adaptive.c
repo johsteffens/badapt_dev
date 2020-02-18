@@ -45,7 +45,7 @@ void lion_adaptive_s_minfer( lion_adaptive_s* o, const bmath_vf3_s* in, bmath_vf
     bhvm_value_s_fork_data( &h_in->v,  TYPEOF_f3_t, in->data,  in->size );
     bhvm_value_s_fork_data( &h_out->v, TYPEOF_f3_t, out->data, out->size );
 
-    lion_net_frame_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, &h_out );
+    lion_frame_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, &h_out );
 
     BLM_DOWN();
 }
@@ -65,16 +65,16 @@ void lion_adaptive_s_bgrad_adapt( lion_adaptive_s* o, bmath_vf3_s* grad_in, cons
     if( h_grad_in ) bhvm_value_s_fork_data( &h_grad_in->v, TYPEOF_f3_t, grad_in->data, grad_in->size );
     bhvm_value_s_fork_data( &h_grad_out->v, TYPEOF_f3_t, grad_out->data, grad_out->size );
 
-    lion_net_frame_s* frame = &o->frame;
-    lion_net_frame_s_run_dp( frame, ( const bhvm_holor_s** )&h_grad_out, ( h_grad_in ) ? &h_grad_in : NULL );
+    lion_frame_s* frame = &o->frame;
+    lion_frame_s_run_dp( frame, ( const bhvm_holor_s** )&h_grad_out, ( h_grad_in ) ? &h_grad_in : NULL );
 
     f3_t l2_reg_factor = ( 1.0 - o->dynamics.lambda_l2 * o->dynamics.epsilon );
     f3_t l1_reg_offset = o->dynamics.lambda_l1 * o->dynamics.epsilon;
 
-    BFOR_SIZE( i, lion_net_frame_s_get_size_ada( frame ) )
+    BFOR_SIZE( i, lion_frame_s_get_size_ada( frame ) )
     {
-        bhvm_value_s* v_ap_ada = &lion_net_frame_s_get_ap_ada( frame, i )->v;
-        bhvm_value_s* v_dp_ada = &lion_net_frame_s_get_dp_ada( frame, i )->v;
+        bhvm_value_s* v_ap_ada = &lion_frame_s_get_ap_ada( frame, i )->v;
+        bhvm_value_s* v_dp_ada = &lion_frame_s_get_dp_ada( frame, i )->v;
         bhvm_value_s_mul_scl_f3_acc( v_dp_ada, o->dynamics.epsilon, v_ap_ada );
         if( l2_reg_factor < 1.0 ) bhvm_value_s_mul_scl_f3( v_ap_ada, l2_reg_factor, v_ap_ada );
         if( l1_reg_offset > 0 )
@@ -129,17 +129,17 @@ badapt_adaptive* lion_adaptive_builder_s_build( const lion_adaptive_builder_s* o
         break;
     }
 
-    lion_net_frame_s* frame = &adaptive->frame;
+    lion_frame_s* frame = &adaptive->frame;
 
     bcore_sink_a_attach( &frame->mcode_log, ( bcore_sink* )st_s_create() );
 
-    lion_net_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&h_in );
+    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&h_in );
 
-    ASSERT( lion_net_frame_s_get_size_en( frame ) == 1 );
-    ASSERT( lion_net_frame_s_get_size_ex( frame ) == 1 );
+    ASSERT( lion_frame_s_get_size_en( frame ) == 1 );
+    ASSERT( lion_frame_s_get_size_ex( frame ) == 1 );
 
-    adaptive->in_size  = bhvm_shape_s_get_volume( &lion_net_frame_s_get_ap_en( frame, 0 )->s );
-    adaptive->out_size = bhvm_shape_s_get_volume( &lion_net_frame_s_get_ap_ex( frame, 0 )->s );
+    adaptive->in_size  = bhvm_shape_s_get_volume( &lion_frame_s_get_ap_en( frame, 0 )->s );
+    adaptive->out_size = bhvm_shape_s_get_volume( &lion_frame_s_get_ap_ex( frame, 0 )->s );
 
     badapt_dynamics_std_s_copy( &adaptive->dynamics, &o->dynamics );
 

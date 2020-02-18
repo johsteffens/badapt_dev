@@ -26,6 +26,7 @@
 #include "badapt_std.h"
 #include "bhvm_mcode.h"
 #include "lion_net.h"
+#include "lion_frame.h"
 #include "lion_planted.h"
 
 /**********************************************************************************************************************/
@@ -40,7 +41,7 @@ stamp : = aware badapt_adaptive
     // === architecture parameters ================================
 
     aware =>               src;      // source (bcore_file_path_s or st_s with inline code)  (just for reference)
-    lion_net_frame_s       frame;
+    lion_frame_s           frame;
     badapt_dynamics_std_s  dynamics;
     sz_t                   in_size;  // input vector size
     sz_t                   out_size; // output vector size

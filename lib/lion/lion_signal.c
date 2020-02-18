@@ -21,6 +21,7 @@
 #include "lion_sem.h"
 #include "lion_net.h"
 #include "lion_net_eval.h"
+#include "lion_frame.h"
 #include "lion_adaptive.h"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -48,6 +49,7 @@ vd_t lion_signal_handler( const bcore_signal_s* o )
             lion_sem_signal_handler,
             lion_net_signal_handler,
             lion_net_eval_signal_handler,
+            lion_frame_signal_handler,
             lion_adaptive_signal_handler,
         };
 
