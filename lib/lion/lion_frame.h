@@ -77,7 +77,23 @@ signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* 
 
 stamp : = aware :
 {
+    /// pre-setup parameters
+
+    /// number of unrolled cycles (useful for recurrent networks)
+    sz_t unrolled_cycles = 1;
+
+    /// microcode disassembly (set log to be populated during setup)
+    hidden aware bcore_sink -> mcode_log;
+
+    /// post-setup data
     bhvm_mcode_frame_s => mcf;
+
+    sz_t size_en; // number of entry holors (per ap/dp cycle)
+    sz_t size_ex; // number of exit holors (per ap/dp cycle)
+
+    /// current unroll_cycle (in case unrolled_cycles > 1)
+    sz_t unroll_cycle = 0;
+
     bcore_arr_sz_s => idx_ap_en; // ap entry-holors
     bcore_arr_sz_s => idx_dp_en; // dp entry-holors (gradients)
 
@@ -86,9 +102,6 @@ stamp : = aware :
 
     bcore_arr_sz_s => idx_ap_ada; // ap adaptive-holors
     bcore_arr_sz_s => idx_dp_ada; // dp adaptive-holors
-
-    /// microcode disassembly (set log to be populated during setup)
-    hidden aware bcore_sink -> mcode_log;
 
     /// shelving/reconstitution
     func bcore_via_call : shelve =

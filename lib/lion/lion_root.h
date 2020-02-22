@@ -49,6 +49,12 @@ stamp :hmeta = aware bhvm_mcode_hmeta
      */
     bl_t active = true;
 
+    /// Holor is axon or gradient of an adaptive node
+    bl_t adaptive;
+
+    /// Holor is axon or gradient of a recurrent node
+    bl_t recurrent;
+
     func : :clear = { o->name = 0; o->htp = false; };
 };
 

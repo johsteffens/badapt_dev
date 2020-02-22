@@ -88,17 +88,17 @@ void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, const lion_net_cel
     BFOR_EACH( i, &cell->encs )
     {
         lion_net_node_s* node = cell->encs.data[ i ];
-        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( node->name ) );
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sc_t>}:", lion_ifnameof( node->name ) );
         if( node->hidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
-            st_s_push_fa( info_holors->data[ node->hidx ], "ap enc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap enc (#<sc_t>)", lion_ifnameof( node->name ) );
         }
 
         if( node->gidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
-            st_s_push_fa( info_holors->data[ node->gidx ], "dp enc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp enc (#<sc_t>)", lion_ifnameof( node->name ) );
         }
 
         bcore_sink_a_push_fa( sink, "\n" );
@@ -109,17 +109,17 @@ void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, const lion_net_cel
     BFOR_EACH( i, &cell->excs )
     {
         lion_net_node_s* node = cell->excs.data[ i ];
-        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( node->name ) );
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sc_t>}:", lion_ifnameof( node->name ) );
         if( node->hidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
-            st_s_push_fa( info_holors->data[ node->hidx ], "ap exc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap exc (#<sc_t>)", lion_ifnameof( node->name ) );
         }
 
         if( node->gidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
-            st_s_push_fa( info_holors->data[ node->gidx ], "dp exc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp exc (#<sc_t>)", lion_ifnameof( node->name ) );
         }
         bcore_sink_a_push_fa( sink, "\n" );
     }
@@ -132,17 +132,17 @@ void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, const lion_net_cel
         if( !node->nop || node->nop->_ != TYPEOF_lion_nop_ar0_adaptive_s ) continue;
         lion_nop_ar0_adaptive_s* ar0_adaptive = ( lion_nop_ar0_adaptive_s* )node->nop;
 
-        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( ar0_adaptive->h->m.name ) );
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sc_t>}:", lion_ifnameof( ar0_adaptive->h->m.name ) );
         if( node->hidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
-            st_s_push_fa( info_holors->data[ node->hidx ], "ap adc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap adc (#<sc_t>)", lion_ifnameof( ar0_adaptive->h->m.name ) );
         }
 
         if( node->gidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
-            st_s_push_fa( info_holors->data[ node->gidx ], "dp adc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp adc (#<sc_t>)", lion_ifnameof( ar0_adaptive->h->m.name ) );
         }
         bcore_sink_a_push_fa( sink, "\n" );
     }
@@ -155,18 +155,20 @@ void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, const lion_net_cel
         if( !node->nop || node->nop->_ != TYPEOF_lion_nop_ar2_recurrent_s ) continue;
         lion_nop_ar2_recurrent_s* ar2_recurrent = ( lion_nop_ar2_recurrent_s* )node->nop;
 
-        bcore_sink_a_push_fa( sink, "  #pl3 {#<sz_t>} (#<sc_t>):", i, lion_ifnameof( ar2_recurrent->name ) );
+        bcore_sink_a_push_fa( sink, "  #pl3 {#<sc_t>}:", lion_ifnameof( ar2_recurrent->name ) );
+
         if( node->hidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", node->hidx );
-            st_s_push_fa( info_holors->data[ node->hidx ], "ap rcc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->hidx ], "ap rcc (#<sc_t>)", lion_ifnameof( ar2_recurrent->name ) );
         }
 
         if( node->gidx >= 0 )
         {
             bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", node->gidx );
-            st_s_push_fa( info_holors->data[ node->gidx ], "dp rcc #<sz_t>", i );
+            st_s_push_fa( info_holors->data[ node->gidx ], "dp rcc (#<sc_t>)", lion_ifnameof( ar2_recurrent->name ) );
         }
+
         bcore_sink_a_push_fa( sink, "\n" );
     }
 
@@ -249,6 +251,9 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
     lion_net_cell_s_mcode_push_ap( cell, o->mcf );
     lion_net_cell_s_mcode_push_dp( cell, o->mcf, true );
 
+    o->size_en = cell->encs.size;
+    o->size_ex = cell->excs.size;
+
     BFOR_EACH( i, &cell->encs )
     {
         lion_net_node_s* node = cell->encs.data[ i ];
@@ -271,6 +276,73 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
             if( node->hidx >= 0 ) lion_frame_push_idx( &o->idx_ap_ada, node->hidx );
             if( node->gidx >= 0 ) lion_frame_push_idx( &o->idx_dp_ada, node->gidx );
         }
+    }
+
+    /// unrolling
+    if( o->unrolled_cycles > 1 )
+    {
+        BLM_INIT();
+        bhvm_mcode_track_s* ap_track = bhvm_mcode_frame_s_track_get( o->mcf, TYPEOF_track_ap );
+        bhvm_mcode_sub_ads_s* sub_arr = ( ap_track->sub_arr = bhvm_mcode_sub_ads_s_create() );
+        bhvm_mcode_sub_s* sub0 = bhvm_mcode_sub_ads_s_push( sub_arr );
+        sub0->start = 0;
+        sub0->size  = ap_track->size;
+
+        bcore_arr_bl_s* ap_flags = BLM_CREATE( bcore_arr_bl_s );
+        bcore_arr_bl_s_fill( ap_flags, o->mcf->hbase->holor_ads.size, false );
+
+        BFOR_EACH( i, ap_track )
+        {
+            bhvm_vop* vop = ap_track->data[ i ].vop;
+            sz_t arity = bhvm_vop_a_arity( vop );
+            sz_t* index_arr = bhvm_vop_a_get_index_arr( vop );
+
+            BFOR_SIZE( i, arity + 1 )
+            {
+                sz_t h_index = index_arr[ i ];
+                if( !ap_flags->data[ h_index ] )
+                {
+                    lion_hmeta_s* hmeta = ( lion_hmeta_s* )o->mcf->hbase->hmeta_adl.data[ h_index ];
+                    assert( hmeta );
+                    ap_flags->data[ h_index ] = ( hmeta->active && !hmeta->adaptive );
+                }
+            }
+        }
+
+        bcore_arr_sz_s* ap_holors = BLM_CREATE( bcore_arr_sz_s );
+        BFOR_EACH( i, ap_flags ) if( ap_flags->data[ i ] ) bcore_arr_sz_s_push( ap_holors, i );
+
+        for( sz_t i = 1; i < o->unrolled_cycles; i++ )
+        {
+            BLM_INIT();
+
+            bcore_arr_sz_s* ap_map = BLM_CREATE( bcore_arr_sz_s );
+            bcore_arr_sz_s_fill( ap_map, o->mcf->hbase->holor_ads.size, -1 );
+
+            BFOR_EACH( i, ap_holors )
+            {
+                sz_t index0 = ap_holors->data[ i ];
+                sz_t index1 = bhvm_mcode_hbase_s_push_copy_from_index( o->mcf->hbase, index0 );
+                ap_map->data[ index0 ] = index1;
+            }
+
+            bhvm_mcode_sub_s* sub = bhvm_mcode_sub_ads_s_push( sub_arr );
+            sub->start = ap_track->size;
+            sub->size  = sub0->size;
+
+            BFOR_SIZE( i, sub0->size )
+            {
+                sz_t index = bhvm_mcode_track_s_push_copy_from_index( ap_track, i );
+                bhvm_vop* vop = ap_track->data[ index ].vop;
+                sz_t arity = bhvm_vop_a_arity( vop );
+                sz_t* index_arr = bhvm_vop_a_get_index_arr( vop );
+                BFOR_SIZE( i, arity + 1 ) if( ap_map->data[ index_arr[ i ] ] != -1 ) index_arr[ i ] = ap_map->data[ index_arr[ i ] ];
+            }
+
+            BLM_DOWN();
+        }
+
+        BLM_DOWN();
     }
 
     if( o->mcode_log ) lion_frame_s_disassemble_to_sink( o, cell, o->mcode_log );
@@ -296,22 +368,29 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** in, bhv
 {
     ASSERT( o->mcf );
 
-    BFOR_EACH( i, o->idx_ap_en )
+    for( sz_t i = 0; i < o->size_en; i++ )
     {
-        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ i ] ];
+        bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ i + o->unroll_cycle * o->size_en ] ];
         const bhvm_holor_s* h_i = in[ i ];
         ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
         if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
         bhvm_value_s_cpy( &h_i->v, &h_m->v );
     }
 
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
+    if( o->unrolled_cycles == 1 )
+    {
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
+    }
+    else
+    {
+        bhvm_mcode_frame_s_track_run_isub( o->mcf, TYPEOF_track_ap, o->unroll_cycle );
+    }
 
     if( out )
     {
-        BFOR_EACH( i, o->idx_ap_ex )
+        for( sz_t i = 0; i < o->size_ex; i++ )
         {
-            bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ i ] ];
+            bhvm_holor_s* h_m = &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ i + o->unroll_cycle * o->size_ex ] ];
             bhvm_holor_s* h_o = out[ i ];
             ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
             if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
@@ -320,6 +399,7 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** in, bhv
         }
     }
 
+    o->unroll_cycle = ( o->unroll_cycle + 1 ) % o->unrolled_cycles;
 
     return o;
 }

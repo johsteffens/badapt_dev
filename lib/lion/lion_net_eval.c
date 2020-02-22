@@ -146,6 +146,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
     if( !o->param.src ) ERR_fa( "Source missing." );
 
     lion_frame_s* frame = BLM_CREATE( lion_frame_s );
+    frame->unrolled_cycles = o->unrolled_cycles;
 
     bcore_source* source = NULL;
 
@@ -363,16 +364,6 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
             }
         }
     }
-
-    BLM_RETURNV( lion_net_eval_result_s*, result );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-lion_net_eval_result_s* lion_net_eval_timing_s_run( const lion_net_eval_timing_s* o, lion_net_eval_result_s* result )
-{
-    BLM_INIT();
-
 
     BLM_RETURNV( lion_net_eval_result_s*, result );
 }

@@ -257,6 +257,7 @@ group :ar0 = retrievable
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
+            result->h->m.adaptive = true;
             result->settled = false;
             return true;
         };

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-18T09:20:40Z
+ *  Last File Update: 2020-02-18T18:46:11Z
  *
  *  Copyright and License of this File:
  *
@@ -38,6 +38,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_hmeta_s )
     "tp_t name;"
     "bl_t htp;"
     "bl_t active = true;"
+    "bl_t adaptive;"
+    "bl_t recurrent;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_holor_s )
@@ -205,6 +207,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar0_adaptive_s )
 bl_t lion_nop_ar0_adaptive_s_solve( const lion_nop_ar0_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
 {
     lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
+    result->h->m.adaptive = true;
     result->settled = false;
     return true;
 }
@@ -1369,6 +1372,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_s )
     "func ^:set_param;"
     "func bcore_main:main;"
     "bl_t jacobian_test = true;"
+    "sz_t unrolled_cycles = 1;"
     "sz_t recurrent_cycles = 1;"
 "}";
 
@@ -1376,22 +1380,6 @@ s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s*
 {
     BLM_INIT();
     lion_net_eval_result_s_resolve( lion_net_eval_frame_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
-    BLM_RETURNV( s2_t, 0 );
-}
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_timing_s )
-"aware lion_net_eval"
-"{"
-    "lion_net_eval_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
-    "func bcore_main:main;"
-"}";
-
-s2_t lion_net_eval_timing_s_main( lion_net_eval_timing_s* o, const bcore_arr_st_s* args )
-{
-    BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_timing_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
@@ -1412,14 +1400,18 @@ BCORE_DEFINE_SPECT( bcore_inst, lion_net_eval )
 BCORE_DEFINE_OBJECT_INST_P( lion_frame_s )
 "aware lion_frame"
 "{"
+    "sz_t unrolled_cycles = 1;"
+    "hidden aware bcore_sink -> mcode_log;"
     "bhvm_mcode_frame_s => mcf;"
+    "sz_t size_en;"
+    "sz_t size_ex;"
+    "sz_t unroll_cycle = 0;"
     "bcore_arr_sz_s => idx_ap_en;"
     "bcore_arr_sz_s => idx_dp_en;"
     "bcore_arr_sz_s => idx_ap_ex;"
     "bcore_arr_sz_s => idx_dp_ex;"
     "bcore_arr_sz_s => idx_ap_ada;"
     "bcore_arr_sz_s => idx_dp_ada;"
-    "hidden aware bcore_sink -> mcode_log;"
     "func bcore_via_call:shelve;"
     "func bcore_via_call:mutated;"
     "func bcore_inst_call:copy_x;"
@@ -1486,7 +1478,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2794270474 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1795752332 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1990,10 +1982,6 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_frame_s_set_param );
             BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_frame_s_main );
             BCORE_REGISTER_OBJECT( lion_net_eval_frame_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_timing_s_run );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_timing_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_timing_s_main );
-            BCORE_REGISTER_OBJECT( lion_net_eval_timing_s );
             BCORE_REGISTER_SPECT( lion_net_eval );
 
             // --------------------------------------------------------------------

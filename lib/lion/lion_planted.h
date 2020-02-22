@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-18T09:20:40Z
+ *  Last File Update: 2020-02-18T18:46:11Z
  *
  *  Copyright and License of this File:
  *
@@ -35,7 +35,7 @@
 #define TYPEOF_lion_hmeta_s 2700535167
 #define BETH_EXPAND_ITEM_lion_hmeta_s \
   BCORE_DECLARE_OBJECT( lion_hmeta_s ) \
-    {aware_t _;tp_t name;bl_t htp;bl_t active;}; \
+    {aware_t _;tp_t name;bl_t htp;bl_t active;bl_t adaptive;bl_t recurrent;}; \
   static inline void lion_hmeta_s_clear( lion_hmeta_s* o ){o->name = 0; o->htp = false;}
 #define TYPEOF_lion_holor_s 3848175284
 #define BETH_EXPAND_ITEM_lion_holor_s \
@@ -1102,17 +1102,10 @@
 #define TYPEOF_lion_net_eval_frame_s 3846669574
 #define BETH_EXPAND_ITEM_lion_net_eval_frame_s \
   BCORE_DECLARE_OBJECT( lion_net_eval_frame_s ) \
-    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t recurrent_cycles;}; \
+    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t unrolled_cycles;sz_t recurrent_cycles;}; \
   lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* o, lion_net_eval_result_s* result ); \
   static inline void lion_net_eval_frame_s_set_param( lion_net_eval_frame_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
   s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args );
-#define TYPEOF_lion_net_eval_timing_s 2634836739
-#define BETH_EXPAND_ITEM_lion_net_eval_timing_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_timing_s ) \
-    {aware_t _;lion_net_eval_param_s param;}; \
-  lion_net_eval_result_s* lion_net_eval_timing_s_run( const lion_net_eval_timing_s* o, lion_net_eval_result_s* result ); \
-  static inline void lion_net_eval_timing_s_set_param( lion_net_eval_timing_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_timing_s_main( lion_net_eval_timing_s* o, const bcore_arr_st_s* args );
 #define BETH_EXPAND_GROUP_lion_net_eval \
   BCORE_FORWARD_OBJECT( lion_net_eval ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_result_s ); \
@@ -1121,7 +1114,6 @@
   BCORE_FORWARD_OBJECT( lion_net_eval_arr_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_set_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_frame_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_timing_s ); \
   typedef lion_net_eval_result_s* (*lion_net_eval_run)( const lion_net_eval* o, lion_net_eval_result_s* result ); \
   typedef void (*lion_net_eval_set_param)( lion_net_eval* o, const lion_net_eval_param_s* param ); \
   BCORE_DECLARE_SPECT( lion_net_eval ) \
@@ -1143,8 +1135,7 @@
   static inline bl_t lion_net_eval_a_defines_set_param( const lion_net_eval* o ) { return lion_net_eval_s_get_aware( o )->set_param != NULL; } \
   BETH_EXPAND_ITEM_lion_net_eval_arr_s \
   BETH_EXPAND_ITEM_lion_net_eval_set_s \
-  BETH_EXPAND_ITEM_lion_net_eval_frame_s \
-  BETH_EXPAND_ITEM_lion_net_eval_timing_s
+  BETH_EXPAND_ITEM_lion_net_eval_frame_s
 
 /**********************************************************************************************************************/
 // source: lion_frame.h
@@ -1157,7 +1148,7 @@
 #define TYPEOF_lion_frame_s 1392811455
 #define BETH_EXPAND_ITEM_lion_frame_s \
   BCORE_DECLARE_OBJECT( lion_frame_s ) \
-    {aware_t _;bhvm_mcode_frame_s* mcf;bcore_arr_sz_s* idx_ap_en;bcore_arr_sz_s* idx_dp_en;bcore_arr_sz_s* idx_ap_ex;bcore_arr_sz_s* idx_dp_ex;bcore_arr_sz_s* idx_ap_ada;bcore_arr_sz_s* idx_dp_ada;bcore_sink* mcode_log;}; \
+    {aware_t _;sz_t unrolled_cycles;bcore_sink* mcode_log;bhvm_mcode_frame_s* mcf;sz_t size_en;sz_t size_ex;sz_t unroll_cycle;bcore_arr_sz_s* idx_ap_en;bcore_arr_sz_s* idx_dp_en;bcore_arr_sz_s* idx_ap_ex;bcore_arr_sz_s* idx_dp_ex;bcore_arr_sz_s* idx_ap_ada;bcore_arr_sz_s* idx_dp_ada;}; \
   void lion_frame_s_shelve( lion_frame_s* o ); \
   void lion_frame_s_mutated( lion_frame_s* o ); \
   static inline void lion_frame_s_copy_x( lion_frame_s* o ){lion_frame_s_mutated( o );} \
