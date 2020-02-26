@@ -36,6 +36,62 @@ PLANT_GROUP( lion_frame, bcore_inst )
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// holor indexing group
+group :hidx =
+{
+    signature @* clear( mutable );
+    signature @* push(  mutable, sz_t index );
+
+    signature sz_t get_idx( const, sz_t index );
+    signature sz_t get_pclass_idx( const, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature sz_t get_size( const );
+
+    signature bhvm_holor_s*     get_holor( const, const bhvm_mcode_hbase_s* hbase, sz_t index );
+    signature bhvm_mcode_hmeta* get_hmeta( const, const bhvm_mcode_hbase_s* hbase, sz_t index );
+
+    signature bhvm_holor_s*     get_pclass_holor( const, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature bhvm_mcode_hmeta* get_pclass_hmeta( const, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+
+    signature @* replace_index( mutable, bcore_arr_sz_s* index_map );
+
+    stamp : = aware :
+    {
+        bcore_arr_sz_s => arr;
+        func : :clear     = { if( o->arr ) bcore_arr_sz_s_clear( o->arr ); return o; };
+        func : :push      = { if( !o->arr ) o->arr = bcore_arr_sz_s_create(); bcore_arr_sz_s_push( o->arr, index ); return o; };
+
+        func : :get_idx   = { assert( o->arr ); assert( index >= 0 && index < o->arr->size ); return o->arr->data[ index ]; };
+        func : :get_size  = { return o->arr ? o->arr->size : 0; };
+        func : :get_holor = { return bhvm_mcode_hbase_s_get_holor( hbase, @_get_idx( o, index ) ); };
+        func : :get_hmeta = { return bhvm_mcode_hbase_s_get_hmeta( hbase, @_get_idx( o, index ) ); };
+
+        func : :get_pclass_idx =
+        {
+            const bhvm_mcode_hmeta* hmeta = @_get_hmeta( o, hbase, index );
+            if( hmeta ) return bhvm_mcode_hmeta_a_get_index_hbase( hmeta, pclass );
+            return -1;
+        };
+
+        func : :get_pclass_holor = { return bhvm_mcode_hbase_s_get_holor( hbase, @_get_pclass_idx( o, hbase, pclass, index ) ); };
+        func : :get_pclass_hmeta = { return bhvm_mcode_hbase_s_get_hmeta( hbase, @_get_pclass_idx( o, hbase, pclass, index ) ); };
+
+        func : :replace_index =
+        {
+            BFOR_EACH( i, o->arr )
+            {
+                sz_t old_index = o->arr->data[ i ];
+                assert( old_index >= 0 && old_index < index_map->size );
+                sz_t new_index = index_map->data[ old_index ];
+                if( new_index >= 0 ) o->arr->data[ i ] = new_index;
+            }
+            return o;
+        };
+
+    };
+
+    stamp :ads = aware bcore_array { :s []; };
+};
+
 /// frame member functions
 
 signature @* mutab_from_source( mutable, bcore_source* source );
@@ -44,6 +100,9 @@ signature @* mutab_from_sc(     mutable,       sc_t  sc );
 signature @* plain_from_source(   plain,  bcore_source* source );
 signature @* plain_from_st(       plain,  const st_s* st );
 signature @* plain_from_sc(       plain,        sc_t  sc );
+
+signature void reset( mutable );
+signature void setup( mutable );
 
 signature :mutab_from_source setup_from_source(  const bhvm_holor_s** in );
 signature :mutab_from_st     setup_from_st(      const bhvm_holor_s** in );
@@ -62,10 +121,10 @@ signature sz_t get_size_en( const ); // number of entry channels
 signature sz_t get_size_ex( const ); // number of exit channels
 signature sz_t get_size_ada( const ); // number of adaptive channels
 
-signature bhvm_holor_s* get_ap_en( mutable, sz_t index );
-signature bhvm_holor_s* get_dp_en( mutable, sz_t index );
-signature bhvm_holor_s* get_ap_ex( mutable, sz_t index );
-signature bhvm_holor_s* get_dp_ex( mutable, sz_t index );
+signature bhvm_holor_s* get_ap_en(  mutable, sz_t index );
+signature bhvm_holor_s* get_dp_en(  mutable, sz_t index );
+signature bhvm_holor_s* get_ap_ex(  mutable, sz_t index );
+signature bhvm_holor_s* get_dp_ex(  mutable, sz_t index );
 signature bhvm_holor_s* get_ap_ada( mutable, sz_t index );
 signature bhvm_holor_s* get_dp_ada( mutable, sz_t index );
 
@@ -79,46 +138,41 @@ stamp : = aware :
 {
     /// pre-setup parameters
 
-    /// number of unrolled cycles (useful for recurrent networks)
-    sz_t unrolled_cycles = 1;
-
-    /// microcode disassembly (set log to be populated during setup)
-    hidden aware bcore_sink -> mcode_log;
-
     /// post-setup data
     bhvm_mcode_frame_s => mcf;
+
+    /// frame has been setup
+    bl_t setup;
 
     sz_t size_en; // number of entry holors (per ap/dp cycle)
     sz_t size_ex; // number of exit holors (per ap/dp cycle)
 
-    /// current unroll_cycle (in case unrolled_cycles > 1)
-    sz_t unroll_cycle = 0;
+    :hidx_s hidx_en;  // entry index
+    :hidx_s hidx_ex;  // exit index
+    :hidx_s hidx_ada; // adaptive index
 
-    bcore_arr_sz_s => idx_ap_en; // ap entry-holors
-    bcore_arr_sz_s => idx_dp_en; // dp entry-holors (gradients)
-
-    bcore_arr_sz_s => idx_ap_ex; // ap exit-holors
-    bcore_arr_sz_s => idx_dp_ex; // dp exit-holors (gradients)
-
-    bcore_arr_sz_s => idx_ap_ada; // ap adaptive-holors
-    bcore_arr_sz_s => idx_dp_ada; // dp adaptive-holors
-
-    /// shelving/reconstitution
-    func bcore_via_call : shelve =
+    func : :reset =
     {
+        if( !o->setup ) return;
         if( !o->mcf ) return;
         bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_ap );
         bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_dp );
+        o->setup = false;
     };
 
-    func bcore_via_call : mutated =
+    func : :setup =
     {
+        if( o->setup ) return;
         if( !o->mcf ) return;
         bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_ap );
         bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_dp );
+        o->setup = true;
     };
 
-    func bcore_inst_call : copy_x = { @_mutated( o ); };
+    /// shelving/reconstitution
+    func bcore_via_call  : shelve  = { @_reset( o ); };
+    func bcore_via_call  : mutated = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
+    func bcore_inst_call : copy_x  = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
 
     /// frame setup from string or source; 'in' can be NULL
     func : :setup_from_source;
@@ -134,29 +188,84 @@ stamp : = aware :
     func : :create_from_st_adl     = { return @_create_from_st( st,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
     func : :create_from_sc_adl     = { return @_create_from_sc( sc,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
 
-    func : :get_size_en  = { return o->idx_ap_en ? o->idx_ap_en->size : 0; };
-    func : :get_size_ex  = { return o->idx_ap_ex ? o->idx_ap_ex->size : 0; };
-    func : :get_size_ada = { return o->idx_ap_ada ? o->idx_ap_ada->size : 0; };
+    func : :get_size_en  = { return :hidx_s_get_size( &o->hidx_en ); };
+    func : :get_size_ex  = { return :hidx_s_get_size( &o->hidx_ex ); };
+    func : :get_size_ada = { return :hidx_s_get_size( &o->hidx_ada ); };
 
-    func : :get_ap_en = { assert( o->idx_ap_en ); assert( index >= 0 && index < o->idx_ap_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ index ] ]; };
-    func : :get_dp_en = { assert( o->idx_dp_en ); assert( index >= 0 && index < o->idx_dp_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ index ] ]; };
-    func : :get_ap_ex = { assert( o->idx_ap_ex ); assert( index >= 0 && index < o->idx_ap_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ index ] ]; };
-    func : :get_dp_ex = { assert( o->idx_dp_ex ); assert( index >= 0 && index < o->idx_dp_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ index ] ]; };
+    func : :get_ap_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_ap, index ); };
+    func : :get_dp_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_dp, index ); };
+    func : :get_ap_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_ap, index ); };
+    func : :get_dp_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_dp, index ); };
+    func : :get_ap_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_ap, index ); };
+    func : :get_dp_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_dp, index ); };
 
-    func : :get_ap_ada = { assert( o->idx_ap_ada ); assert( index >= 0 && index < o->idx_ap_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ada->data[ index ] ]; };
-    func : :get_dp_ada = { assert( o->idx_dp_ada ); assert( index >= 0 && index < o->idx_dp_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ada->data[ index ] ]; };
-
-    func : :run;
     func : :run_ap;
     func : :run_dp;
     func : :run_ap_adl;
     func : :run_dp_adl;
 };
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// frame specialized in unrolling (e.g. for recurrent networks)
+stamp :ur = aware :
+{
+    /// setup parameters ...
+
+    :s => frame;
+
+    /// number of unrolled cycles (useful for recurrent networks)
+    sz_t unroll_size = 1;
+
+    /// state data ...
+
+    /// frame has been setup
+    bl_t setup = false;
+
+    /// number of holors in rolled state
+    sz_t rolled_hbase_size;
+
+    /// current unroll process index
+    sz_t unroll_index = 0;
+
+    /// unrolled ap tracks
+    bhvm_mcode_track_adl_s => track_adl_ap;
+    bhvm_mcode_track_adl_s => track_adl_setup_ap;
+    bhvm_mcode_track_adl_s => track_adl_shelve_ap;
+
+    /// unrolled hindex
+    :hidx_ads_s hidx_ads_en;  // entry index
+    :hidx_ads_s hidx_ads_ex;  // exit index
+
+    /// functions ...
+    func : :reset;
+    func : :setup;
+
+    /// shelving/reconstitution
+    func bcore_via_call  : shelve  = { @_reset( o ); };
+    func bcore_via_call  : mutated = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
+    func bcore_inst_call : copy_x  = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
+
+    func : :get_size_en  = { return :s_get_size_en(  o->frame ); };
+    func : :get_size_ex  = { return :s_get_size_ex(  o->frame ); };
+    func : :get_size_ada = { return :s_get_size_ada( o->frame ); };
+
+    func : :run_ap;
+    func : :run_ap_adl;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
 void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
+
+void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, bcore_sink* sink );
+
+void lion_frame_ur_s_setup_from_frame( lion_frame_ur_s* o, const lion_frame_s* frame, sz_t unroll_size );
+
+void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* sink );
 
 #endif // TYPEOF_lion_frame
 

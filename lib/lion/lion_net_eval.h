@@ -159,9 +159,19 @@ stamp :set = extending :std
 stamp :frame  = extending :std
 {
     bl_t jacobian_test = true;
-    sz_t unrolled_cycles  = 1; // frame parameter
     sz_t recurrent_cycles = 1; // for testing
 };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :frame_ur  = extending :std
+{
+    bl_t jacobian_test = true;
+    sz_t recurrent_cycles = 1;
+    sz_t unroll_size = 1;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //stamp :timing = extending :std {};
 

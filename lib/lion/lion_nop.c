@@ -629,6 +629,8 @@ bl_t lion_nop_ar2_recurrent_s_solve( const lion_nop_ar2_recurrent_s* o, lion_hol
         lion_holor_s_attach( &result->h, lion_holor_s_create() );
         result->h->m.active = true;
         result->h->m.recurrent = true;
+        result->h->m.name = o->name;
+
         bhvm_holor_s* ha = &a[0]->h;
         bhvm_holor_s* hr = &result->h->h;
         bhvm_shape_s_copy( &hr->s, &ha->s );

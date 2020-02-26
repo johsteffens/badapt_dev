@@ -36,8 +36,16 @@ signature void clear( mutable );
 
 stamp :hmeta = aware bhvm_mcode_hmeta
 {
+    sz_t index_ap = -1;
+    sz_t index_dp = -1;
+
     tp_t name;
-    bl_t htp;    // holor is transposed
+
+    /// pass-class (see bhvm_mcode_hmeta)
+    tp_t pclass;
+
+    // holor is transposed
+    bl_t htp;
 
     /** Holor is a active (mutable, not constant).
      *  Active holors typically represent a variable in the virtual machine.
@@ -56,6 +64,17 @@ stamp :hmeta = aware bhvm_mcode_hmeta
     bl_t recurrent;
 
     func : :clear = { o->name = 0; o->htp = false; };
+
+    func bhvm_mcode_hmeta : get_name     = { return o->name; };
+    func bhvm_mcode_hmeta : get_pclass   = { return o->pclass; };
+    func bhvm_mcode_hmeta : is_adaptive  = { return o->adaptive; };
+    func bhvm_mcode_hmeta : is_recurrent = { return o->recurrent; };
+    func bhvm_mcode_hmeta : is_rollable  = { return !o->active || o->adaptive; };
+
+    func bhvm_mcode_hmeta : get_index_hbase =
+    {
+        return ( pclass == TYPEOF_pclass_ap ) ? o->index_ap : ( pclass == TYPEOF_pclass_dp ) ? o->index_dp : -1;
+    };
 };
 
 stamp :holor = aware :

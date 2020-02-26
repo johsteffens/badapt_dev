@@ -278,10 +278,6 @@ group :ar0 = retrievable
 
         func :: :mcode_push_dp_holor =
         {
-//            sz_t idx = ::mcode_push_dp_holor__( ( lion_nop* )o, result, arr_ci, mcf );
-//            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_reset_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
-//            return idx;
-
             BLM_INIT();
             bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
             lion_hmeta_s* m = &result->h->m;
@@ -311,7 +307,10 @@ group :ar1 = retrievable
         func :: :priority = { return 8; };
         func :: :solve =
         {
-            lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
+            lion_holor_s_attach( &result->h, lion_holor_s_create() );
+            bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+            result->h->m.htp = a[0]->m.htp;
+            result->h->m.active = a[0]->m.active;
             result->settled = (result->h) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
@@ -504,7 +503,10 @@ group :ar1 = retrievable
     {
         func :: :solve =
         {
-            lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
+            lion_holor_s_attach( &result->h, lion_holor_s_create() );
+            bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+            result->h->m.htp = a[0]->m.htp;
+            result->h->m.active = a[0]->m.active;
             result->settled = (result->h) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
@@ -526,8 +528,12 @@ group :ar1 = retrievable
 
         func :: :solve =
         {
-            lion_holor_s_attach( &result->h, bcore_fork( a[0] ) );
-            if( result->h ) result->h->m.active = true;
+            lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+            if( result->h )
+            {
+                result->h->m.active = true;
+                result->h->m.adaptive = true;
+            }
             result->settled = ( result->h != NULL );
             result->reducible = false; // keep subsequent graph intact
             result->codable = false;

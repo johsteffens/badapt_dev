@@ -23,10 +23,7 @@
 
 void lion_adaptive_s_arc_to_sink( const lion_adaptive_s* o, bcore_sink* sink )
 {
-    if( o->frame.mcode_log && *( aware_t* )o->frame.mcode_log == TYPEOF_st_s )
-    {
-        bcore_sink_a_push_fa( sink, "#<sc_t>\n", ( ( st_s* )o->frame.mcode_log )->sc );
-    }
+    lion_frame_s_disassemble_to_sink( &o->frame, sink );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -130,8 +127,6 @@ badapt_adaptive* lion_adaptive_builder_s_build( const lion_adaptive_builder_s* o
     }
 
     lion_frame_s* frame = &adaptive->frame;
-
-    bcore_sink_a_attach( &frame->mcode_log, ( bcore_sink* )st_s_create() );
 
     lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&h_in );
 

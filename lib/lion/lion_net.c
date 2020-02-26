@@ -896,6 +896,14 @@ void lion_net_node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf 
 
     lion_nop_a_mcode_push_ap_track( o->nop, o->result, arr_ci, mcf );
 
+    if( o->hidx >= 0 )
+    {
+        lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->hidx ];
+        if( !hmeta->name ) hmeta->name = o->name;
+        hmeta->pclass = TYPEOF_pclass_ap;
+        hmeta->index_ap = o->hidx;
+    }
+
     BLM_DOWN();
 }
 
@@ -934,6 +942,21 @@ void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcod
             sz_t node_up_index = lion_net_node_s_up_index( node, o );
             ASSERT( node_up_index >= 0 );
             lion_net_node_s_mcode_push_dp( node, node_up_index, mcf );
+        }
+
+        if( o->gidx >= 0 )
+        {
+            lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->gidx ];
+            if( !hmeta->name ) hmeta->name = o->name;
+            hmeta->pclass = TYPEOF_pclass_dp;
+            hmeta->index_dp = o->gidx;
+            hmeta->index_ap = o->hidx;
+            if( o->hidx >= 0 )
+            {
+                hmeta->index_ap = o->hidx;
+                lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->hidx ];
+                hmeta->index_dp = o->gidx;
+            }
         }
     }
 

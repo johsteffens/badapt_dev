@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-18T18:46:11Z
+ *  Last File Update: 2020-02-26T17:24:13Z
  *
  *  Copyright and License of this File:
  *
@@ -35,8 +35,14 @@
 #define TYPEOF_lion_hmeta_s 2700535167
 #define BETH_EXPAND_ITEM_lion_hmeta_s \
   BCORE_DECLARE_OBJECT( lion_hmeta_s ) \
-    {aware_t _;tp_t name;bl_t htp;bl_t active;bl_t adaptive;bl_t recurrent;}; \
-  static inline void lion_hmeta_s_clear( lion_hmeta_s* o ){o->name = 0; o->htp = false;}
+    {aware_t _;sz_t index_ap;sz_t index_dp;tp_t name;tp_t pclass;bl_t htp;bl_t active;bl_t adaptive;bl_t recurrent;}; \
+  static inline void lion_hmeta_s_clear( lion_hmeta_s* o ){o->name = 0; o->htp = false;} \
+  static inline tp_t lion_hmeta_s_get_name( const lion_hmeta_s* o ){return o->name;} \
+  static inline tp_t lion_hmeta_s_get_pclass( const lion_hmeta_s* o ){return o->pclass;} \
+  static inline bl_t lion_hmeta_s_is_adaptive( const lion_hmeta_s* o ){return o->adaptive;} \
+  static inline bl_t lion_hmeta_s_is_recurrent( const lion_hmeta_s* o ){return o->recurrent;} \
+  static inline bl_t lion_hmeta_s_is_rollable( const lion_hmeta_s* o ){return !o->active || o->adaptive;} \
+  sz_t lion_hmeta_s_get_index_hbase( const lion_hmeta_s* o, tp_t pclass );
 #define TYPEOF_lion_holor_s 3848175284
 #define BETH_EXPAND_ITEM_lion_holor_s \
   BCORE_DECLARE_OBJECT( lion_holor_s ) \
@@ -1102,10 +1108,17 @@
 #define TYPEOF_lion_net_eval_frame_s 3846669574
 #define BETH_EXPAND_ITEM_lion_net_eval_frame_s \
   BCORE_DECLARE_OBJECT( lion_net_eval_frame_s ) \
-    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t unrolled_cycles;sz_t recurrent_cycles;}; \
+    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t recurrent_cycles;}; \
   lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* o, lion_net_eval_result_s* result ); \
   static inline void lion_net_eval_frame_s_set_param( lion_net_eval_frame_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
   s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args );
+#define TYPEOF_lion_net_eval_frame_ur_s 2096110884
+#define BETH_EXPAND_ITEM_lion_net_eval_frame_ur_s \
+  BCORE_DECLARE_OBJECT( lion_net_eval_frame_ur_s ) \
+    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t recurrent_cycles;sz_t unroll_size;}; \
+  lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_ur_s* o, lion_net_eval_result_s* result ); \
+  static inline void lion_net_eval_frame_ur_s_set_param( lion_net_eval_frame_ur_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
+  s2_t lion_net_eval_frame_ur_s_main( lion_net_eval_frame_ur_s* o, const bcore_arr_st_s* args );
 #define BETH_EXPAND_GROUP_lion_net_eval \
   BCORE_FORWARD_OBJECT( lion_net_eval ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_result_s ); \
@@ -1114,6 +1127,7 @@
   BCORE_FORWARD_OBJECT( lion_net_eval_arr_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_set_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_frame_s ); \
+  BCORE_FORWARD_OBJECT( lion_net_eval_frame_ur_s ); \
   typedef lion_net_eval_result_s* (*lion_net_eval_run)( const lion_net_eval* o, lion_net_eval_result_s* result ); \
   typedef void (*lion_net_eval_set_param)( lion_net_eval* o, const lion_net_eval_param_s* param ); \
   BCORE_DECLARE_SPECT( lion_net_eval ) \
@@ -1135,7 +1149,8 @@
   static inline bl_t lion_net_eval_a_defines_set_param( const lion_net_eval* o ) { return lion_net_eval_s_get_aware( o )->set_param != NULL; } \
   BETH_EXPAND_ITEM_lion_net_eval_arr_s \
   BETH_EXPAND_ITEM_lion_net_eval_set_s \
-  BETH_EXPAND_ITEM_lion_net_eval_frame_s
+  BETH_EXPAND_ITEM_lion_net_eval_frame_s \
+  BETH_EXPAND_ITEM_lion_net_eval_frame_ur_s
 
 /**********************************************************************************************************************/
 // source: lion_frame.h
@@ -1148,10 +1163,12 @@
 #define TYPEOF_lion_frame_s 1392811455
 #define BETH_EXPAND_ITEM_lion_frame_s \
   BCORE_DECLARE_OBJECT( lion_frame_s ) \
-    {aware_t _;sz_t unrolled_cycles;bcore_sink* mcode_log;bhvm_mcode_frame_s* mcf;sz_t size_en;sz_t size_ex;sz_t unroll_cycle;bcore_arr_sz_s* idx_ap_en;bcore_arr_sz_s* idx_dp_en;bcore_arr_sz_s* idx_ap_ex;bcore_arr_sz_s* idx_dp_ex;bcore_arr_sz_s* idx_ap_ada;bcore_arr_sz_s* idx_dp_ada;}; \
-  void lion_frame_s_shelve( lion_frame_s* o ); \
-  void lion_frame_s_mutated( lion_frame_s* o ); \
-  static inline void lion_frame_s_copy_x( lion_frame_s* o ){lion_frame_s_mutated( o );} \
+    {aware_t _;bhvm_mcode_frame_s* mcf;bl_t setup;sz_t size_en;sz_t size_ex;lion_frame_hidx_s hidx_en;lion_frame_hidx_s hidx_ex;lion_frame_hidx_s hidx_ada;}; \
+  void lion_frame_s_reset( lion_frame_s* o ); \
+  void lion_frame_s_setup( lion_frame_s* o ); \
+  static inline void lion_frame_s_shelve( lion_frame_s* o ){lion_frame_s_reset( o );} \
+  static inline void lion_frame_s_mutated( lion_frame_s* o ){if( o->setup ) { lion_frame_s_reset( o ); lion_frame_s_setup( o ); }} \
+  static inline void lion_frame_s_copy_x( lion_frame_s* o ){if( o->setup ) { lion_frame_s_reset( o ); lion_frame_s_setup( o ); }} \
   lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* source, const bhvm_holor_s** in ); \
   static inline lion_frame_s* lion_frame_s_setup_from_st( lion_frame_s* o, const st_s* st, const bhvm_holor_s** in ){BLM_INIT(); BLM_RETURNV( lion_frame_s*, lion_frame_s_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), in ) );} \
   static inline lion_frame_s* lion_frame_s_setup_from_sc( lion_frame_s* o, sc_t sc, const bhvm_holor_s** in ){st_s st; st_s_init_weak_sc( &st, sc ); return lion_frame_s_setup_from_st( o, &st, in );} \
@@ -1164,24 +1181,81 @@
   static inline lion_frame_s* lion_frame_s_create_from_source_adl( bcore_source* source, const bhvm_holor_adl_s* in ){return lion_frame_s_create_from_source( source,   in ? ( const bhvm_holor_s** )in->data : NULL );} \
   static inline lion_frame_s* lion_frame_s_create_from_st_adl( const st_s* st, const bhvm_holor_adl_s* in ){return lion_frame_s_create_from_st( st,           in ? ( const bhvm_holor_s** )in->data : NULL );} \
   static inline lion_frame_s* lion_frame_s_create_from_sc_adl( sc_t sc, const bhvm_holor_adl_s* in ){return lion_frame_s_create_from_sc( sc,           in ? ( const bhvm_holor_s** )in->data : NULL );} \
-  static inline sz_t lion_frame_s_get_size_en( const lion_frame_s* o ){return o->idx_ap_en ? o->idx_ap_en->size : 0;} \
-  static inline sz_t lion_frame_s_get_size_ex( const lion_frame_s* o ){return o->idx_ap_ex ? o->idx_ap_ex->size : 0;} \
-  static inline sz_t lion_frame_s_get_size_ada( const lion_frame_s* o ){return o->idx_ap_ada ? o->idx_ap_ada->size : 0;} \
-  static inline bhvm_holor_s* lion_frame_s_get_ap_en( lion_frame_s* o, sz_t index ){assert( o->idx_ap_en ); assert( index >= 0 && index < o->idx_ap_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_en->data[ index ] ];} \
-  static inline bhvm_holor_s* lion_frame_s_get_dp_en( lion_frame_s* o, sz_t index ){assert( o->idx_dp_en ); assert( index >= 0 && index < o->idx_dp_en->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_en->data[ index ] ];} \
-  static inline bhvm_holor_s* lion_frame_s_get_ap_ex( lion_frame_s* o, sz_t index ){assert( o->idx_ap_ex ); assert( index >= 0 && index < o->idx_ap_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ex->data[ index ] ];} \
-  static inline bhvm_holor_s* lion_frame_s_get_dp_ex( lion_frame_s* o, sz_t index ){assert( o->idx_dp_ex ); assert( index >= 0 && index < o->idx_dp_ex->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ex->data[ index ] ];} \
-  static inline bhvm_holor_s* lion_frame_s_get_ap_ada( lion_frame_s* o, sz_t index ){assert( o->idx_ap_ada ); assert( index >= 0 && index < o->idx_ap_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_ap_ada->data[ index ] ];} \
-  static inline bhvm_holor_s* lion_frame_s_get_dp_ada( lion_frame_s* o, sz_t index ){assert( o->idx_dp_ada ); assert( index >= 0 && index < o->idx_dp_ada->size ); return &o->mcf->hbase->holor_ads.data[ o->idx_dp_ada->data[ index ] ];} \
-  lion_frame_s* lion_frame_s_run( lion_frame_s* o, tp_t track ); \
+  static inline sz_t lion_frame_s_get_size_en( const lion_frame_s* o ){return lion_frame_hidx_s_get_size( &o->hidx_en );} \
+  static inline sz_t lion_frame_s_get_size_ex( const lion_frame_s* o ){return lion_frame_hidx_s_get_size( &o->hidx_ex );} \
+  static inline sz_t lion_frame_s_get_size_ada( const lion_frame_s* o ){return lion_frame_hidx_s_get_size( &o->hidx_ada );} \
+  static inline bhvm_holor_s* lion_frame_s_get_ap_en( lion_frame_s* o, sz_t index ){return lion_frame_hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_ap, index );} \
+  static inline bhvm_holor_s* lion_frame_s_get_dp_en( lion_frame_s* o, sz_t index ){return lion_frame_hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_dp, index );} \
+  static inline bhvm_holor_s* lion_frame_s_get_ap_ex( lion_frame_s* o, sz_t index ){return lion_frame_hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_ap, index );} \
+  static inline bhvm_holor_s* lion_frame_s_get_dp_ex( lion_frame_s* o, sz_t index ){return lion_frame_hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_dp, index );} \
+  static inline bhvm_holor_s* lion_frame_s_get_ap_ada( lion_frame_s* o, sz_t index ){return lion_frame_hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_ap, index );} \
+  static inline bhvm_holor_s* lion_frame_s_get_dp_ada( lion_frame_s* o, sz_t index ){return lion_frame_hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_dp, index );} \
   lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
   lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
   lion_frame_s* lion_frame_s_run_ap_adl( lion_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); \
   lion_frame_s* lion_frame_s_run_dp_adl( lion_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out );
+#define TYPEOF_lion_frame_ur_s 3391564507
+#define BETH_EXPAND_ITEM_lion_frame_ur_s \
+  BCORE_DECLARE_OBJECT( lion_frame_ur_s ) \
+    {aware_t _;lion_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t rolled_hbase_size;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_setup_ap;bhvm_mcode_track_adl_s* track_adl_shelve_ap;lion_frame_hidx_ads_s hidx_ads_en;lion_frame_hidx_ads_s hidx_ads_ex;}; \
+  void lion_frame_ur_s_reset( lion_frame_ur_s* o ); \
+  void lion_frame_ur_s_setup( lion_frame_ur_s* o ); \
+  static inline void lion_frame_ur_s_shelve( lion_frame_ur_s* o ){lion_frame_ur_s_reset( o );} \
+  static inline void lion_frame_ur_s_mutated( lion_frame_ur_s* o ){if( o->setup ) { lion_frame_ur_s_reset( o ); lion_frame_ur_s_setup( o ); }} \
+  static inline void lion_frame_ur_s_copy_x( lion_frame_ur_s* o ){if( o->setup ) { lion_frame_ur_s_reset( o ); lion_frame_ur_s_setup( o ); }} \
+  static inline sz_t lion_frame_ur_s_get_size_en( const lion_frame_ur_s* o ){return lion_frame_s_get_size_en(  o->frame );} \
+  static inline sz_t lion_frame_ur_s_get_size_ex( const lion_frame_ur_s* o ){return lion_frame_s_get_size_ex(  o->frame );} \
+  static inline sz_t lion_frame_ur_s_get_size_ada( const lion_frame_ur_s* o ){return lion_frame_s_get_size_ada( o->frame );} \
+  lion_frame_ur_s* lion_frame_ur_s_run_ap( lion_frame_ur_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
+  lion_frame_ur_s* lion_frame_ur_s_run_ap_adl( lion_frame_ur_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out );
 #define BETH_EXPAND_GROUP_lion_frame \
   BCORE_FORWARD_OBJECT( lion_frame ); \
+  BCORE_FORWARD_OBJECT( lion_frame_hidx ); \
   BCORE_FORWARD_OBJECT( lion_frame_s ); \
-  BETH_EXPAND_ITEM_lion_frame_s
+  BCORE_FORWARD_OBJECT( lion_frame_ur_s ); \
+  BETH_EXPAND_GROUP_lion_frame_hidx \
+  BETH_EXPAND_ITEM_lion_frame_s \
+  BETH_EXPAND_ITEM_lion_frame_ur_s
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_frame_hidx
+
+#define TYPEOF_lion_frame_hidx 1807719741
+#define TYPEOF_lion_frame_hidx_s 945563247
+#define TYPEOF_lion_frame_hidx_s 945563247
+#define BETH_EXPAND_ITEM_lion_frame_hidx_s \
+  BCORE_DECLARE_OBJECT( lion_frame_hidx_s ) \
+    {aware_t _;bcore_arr_sz_s* arr;}; \
+  static inline lion_frame_hidx_s* lion_frame_hidx_s_clear( lion_frame_hidx_s* o ){if( o->arr ) bcore_arr_sz_s_clear( o->arr ); return o;} \
+  static inline lion_frame_hidx_s* lion_frame_hidx_s_push( lion_frame_hidx_s* o, sz_t index ){if( !o->arr ) o->arr = bcore_arr_sz_s_create(); bcore_arr_sz_s_push( o->arr, index ); return o;} \
+  static inline sz_t lion_frame_hidx_s_get_idx( const lion_frame_hidx_s* o, sz_t index ){assert( o->arr ); assert( index >= 0 && index < o->arr->size ); return o->arr->data[ index ];} \
+  static inline sz_t lion_frame_hidx_s_get_size( const lion_frame_hidx_s* o ){return o->arr ? o->arr->size : 0;} \
+  static inline bhvm_holor_s* lion_frame_hidx_s_get_holor( const lion_frame_hidx_s* o, const bhvm_mcode_hbase_s* hbase, sz_t index ){return bhvm_mcode_hbase_s_get_holor( hbase, lion_frame_hidx_s_get_idx( o, index ) );} \
+  static inline bhvm_mcode_hmeta* lion_frame_hidx_s_get_hmeta( const lion_frame_hidx_s* o, const bhvm_mcode_hbase_s* hbase, sz_t index ){return bhvm_mcode_hbase_s_get_hmeta( hbase, lion_frame_hidx_s_get_idx( o, index ) );} \
+  sz_t lion_frame_hidx_s_get_pclass_idx( const lion_frame_hidx_s* o, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index ); \
+  static inline bhvm_holor_s* lion_frame_hidx_s_get_pclass_holor( const lion_frame_hidx_s* o, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index ){return bhvm_mcode_hbase_s_get_holor( hbase, lion_frame_hidx_s_get_pclass_idx( o, hbase, pclass, index ) );} \
+  static inline bhvm_mcode_hmeta* lion_frame_hidx_s_get_pclass_hmeta( const lion_frame_hidx_s* o, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index ){return bhvm_mcode_hbase_s_get_hmeta( hbase, lion_frame_hidx_s_get_pclass_idx( o, hbase, pclass, index ) );} \
+  lion_frame_hidx_s* lion_frame_hidx_s_replace_index( lion_frame_hidx_s* o, bcore_arr_sz_s* index_map );
+#define TYPEOF_lion_frame_hidx_ads_s 1065889082
+#define BETH_EXPAND_ITEM_lion_frame_hidx_ads_s \
+  BCORE_DECLARE_OBJECT( lion_frame_hidx_ads_s ) \
+    {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( lion_frame_hidx_s, );}; \
+  static inline lion_frame_hidx_ads_s* lion_frame_hidx_ads_s_set_space( lion_frame_hidx_ads_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_frame_hidx_ads_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_hidx_ads_s* lion_frame_hidx_ads_s_set_size( lion_frame_hidx_ads_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_frame_hidx_ads_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_hidx_ads_s* lion_frame_hidx_ads_s_clear( lion_frame_hidx_ads_s* o ) { bcore_array_t_set_space( TYPEOF_lion_frame_hidx_ads_s, ( bcore_array* )o, 0 ); return o; } \
+  static inline lion_frame_hidx_s* lion_frame_hidx_ads_s_push_c( lion_frame_hidx_ads_s* o, const lion_frame_hidx_s* v ) { bcore_array_t_push( TYPEOF_lion_frame_hidx_ads_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_frame_hidx_s, v ) ); return &o->data[ o->size - 1 ]; } \
+  static inline lion_frame_hidx_s* lion_frame_hidx_ads_s_push_d( lion_frame_hidx_ads_s* o,       lion_frame_hidx_s* v ) { bcore_array_t_push( TYPEOF_lion_frame_hidx_ads_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_frame_hidx_s, v ) ); return &o->data[ o->size - 1 ]; } \
+  static inline lion_frame_hidx_s* lion_frame_hidx_ads_s_push( lion_frame_hidx_ads_s* o ) \
+  { \
+      bcore_array_t_push( TYPEOF_lion_frame_hidx_ads_s, ( bcore_array* )o, sr_null() ); \
+      return &o->data[ o->size - 1 ]; \
+  }
+#define BETH_EXPAND_GROUP_lion_frame_hidx \
+  BCORE_FORWARD_OBJECT( lion_frame_hidx ); \
+  BCORE_FORWARD_OBJECT( lion_frame_hidx_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_hidx_ads_s ); \
+  BETH_EXPAND_ITEM_lion_frame_hidx_s \
+  BETH_EXPAND_ITEM_lion_frame_hidx_ads_s
 
 /**********************************************************************************************************************/
 // source: lion_adaptive.h
