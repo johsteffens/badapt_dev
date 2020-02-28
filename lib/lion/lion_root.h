@@ -36,6 +36,8 @@ signature void clear( mutable );
 
 stamp :hmeta = aware bhvm_mcode_hmeta
 {
+    aware bcore_inst => custom; // custom params
+
     sz_t index_ap = -1;
     sz_t index_dp = -1;
 
@@ -70,6 +72,10 @@ stamp :hmeta = aware bhvm_mcode_hmeta
     func bhvm_mcode_hmeta : is_adaptive  = { return o->adaptive; };
     func bhvm_mcode_hmeta : is_recurrent = { return o->recurrent; };
     func bhvm_mcode_hmeta : is_rollable  = { return !o->active || o->adaptive; };
+    func bhvm_mcode_hmeta : is_active    = { return  o->active; };
+
+    func bhvm_mcode_hmeta : get_custom = { return o->custom; };
+    func bhvm_mcode_hmeta : set_custom = { bcore_inst_a_attach( &o->custom, bcore_inst_a_clone( custom ) ); return o->custom; };
 
     func bhvm_mcode_hmeta : get_index_hbase =
     {

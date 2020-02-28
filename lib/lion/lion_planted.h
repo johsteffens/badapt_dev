@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-26T17:24:13Z
+ *  Last File Update: 2020-02-27T17:41:56Z
  *
  *  Copyright and License of this File:
  *
@@ -35,13 +35,16 @@
 #define TYPEOF_lion_hmeta_s 2700535167
 #define BETH_EXPAND_ITEM_lion_hmeta_s \
   BCORE_DECLARE_OBJECT( lion_hmeta_s ) \
-    {aware_t _;sz_t index_ap;sz_t index_dp;tp_t name;tp_t pclass;bl_t htp;bl_t active;bl_t adaptive;bl_t recurrent;}; \
+    {aware_t _;bcore_inst* custom;sz_t index_ap;sz_t index_dp;tp_t name;tp_t pclass;bl_t htp;bl_t active;bl_t adaptive;bl_t recurrent;}; \
   static inline void lion_hmeta_s_clear( lion_hmeta_s* o ){o->name = 0; o->htp = false;} \
   static inline tp_t lion_hmeta_s_get_name( const lion_hmeta_s* o ){return o->name;} \
   static inline tp_t lion_hmeta_s_get_pclass( const lion_hmeta_s* o ){return o->pclass;} \
   static inline bl_t lion_hmeta_s_is_adaptive( const lion_hmeta_s* o ){return o->adaptive;} \
   static inline bl_t lion_hmeta_s_is_recurrent( const lion_hmeta_s* o ){return o->recurrent;} \
   static inline bl_t lion_hmeta_s_is_rollable( const lion_hmeta_s* o ){return !o->active || o->adaptive;} \
+  static inline bl_t lion_hmeta_s_is_active( const lion_hmeta_s* o ){return  o->active;} \
+  static inline bcore_inst* lion_hmeta_s_get_custom( const lion_hmeta_s* o ){return o->custom;} \
+  static inline bcore_inst* lion_hmeta_s_set_custom( lion_hmeta_s* o, const bcore_inst* custom ){bcore_inst_a_attach( &o->custom, bcore_inst_a_clone( custom ) ); return o->custom;} \
   sz_t lion_hmeta_s_get_index_hbase( const lion_hmeta_s* o, tp_t pclass );
 #define TYPEOF_lion_holor_s 3848175284
 #define BETH_EXPAND_ITEM_lion_holor_s \
@@ -1194,6 +1197,38 @@
   lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** in, bhvm_holor_s** out ); \
   lion_frame_s* lion_frame_s_run_ap_adl( lion_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); \
   lion_frame_s* lion_frame_s_run_dp_adl( lion_frame_s* o, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out );
+#define TYPEOF_lion_frame_ur_custom_hmeta_s 3124701101
+#define BETH_EXPAND_ITEM_lion_frame_ur_custom_hmeta_s \
+  BCORE_DECLARE_OBJECT( lion_frame_ur_custom_hmeta_s ) \
+    {aware_t _;sz_t ur_slot;sz_t ur_src;};
+#define TYPEOF_lion_frame_ur_cross_idx_s 4020731920
+#define BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_s \
+  BCORE_DECLARE_OBJECT( lion_frame_ur_cross_idx_s ) \
+    {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( sz_t, );}; \
+  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_s_set_space( lion_frame_ur_cross_idx_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_s_set_size( lion_frame_ur_cross_idx_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_s_clear( lion_frame_ur_cross_idx_s* o ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, 0 ); return o; } \
+  static inline sz_t* lion_frame_ur_cross_idx_s_push_c( lion_frame_ur_cross_idx_s* o, const sz_t* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, sr_twc( TYPEOF_sz_t, v ) ); return &o->data[ o->size - 1 ]; } \
+  static inline sz_t* lion_frame_ur_cross_idx_s_push_d( lion_frame_ur_cross_idx_s* o,       sz_t* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, sr_tsd( TYPEOF_sz_t, v ) ); return &o->data[ o->size - 1 ]; } \
+  static inline sz_t* lion_frame_ur_cross_idx_s_push( lion_frame_ur_cross_idx_s* o ) \
+  { \
+      bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, sr_null() ); \
+      return &o->data[ o->size - 1 ]; \
+  }
+#define TYPEOF_lion_frame_ur_cross_idx_ads_s 3812010329
+#define BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_ads_s \
+  BCORE_DECLARE_OBJECT( lion_frame_ur_cross_idx_ads_s ) \
+    {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( lion_frame_ur_cross_idx_s, );}; \
+  static inline lion_frame_ur_cross_idx_ads_s* lion_frame_ur_cross_idx_ads_s_set_space( lion_frame_ur_cross_idx_ads_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_ur_cross_idx_ads_s* lion_frame_ur_cross_idx_ads_s_set_size( lion_frame_ur_cross_idx_ads_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_ur_cross_idx_ads_s* lion_frame_ur_cross_idx_ads_s_clear( lion_frame_ur_cross_idx_ads_s* o ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, 0 ); return o; } \
+  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_ads_s_push_c( lion_frame_ur_cross_idx_ads_s* o, const lion_frame_ur_cross_idx_s* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_frame_ur_cross_idx_s, v ) ); return &o->data[ o->size - 1 ]; } \
+  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_ads_s_push_d( lion_frame_ur_cross_idx_ads_s* o,       lion_frame_ur_cross_idx_s* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_frame_ur_cross_idx_s, v ) ); return &o->data[ o->size - 1 ]; } \
+  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_ads_s_push( lion_frame_ur_cross_idx_ads_s* o ) \
+  { \
+      bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, sr_null() ); \
+      return &o->data[ o->size - 1 ]; \
+  }
 #define TYPEOF_lion_frame_ur_s 3391564507
 #define BETH_EXPAND_ITEM_lion_frame_ur_s \
   BCORE_DECLARE_OBJECT( lion_frame_ur_s ) \
@@ -1212,9 +1247,15 @@
   BCORE_FORWARD_OBJECT( lion_frame ); \
   BCORE_FORWARD_OBJECT( lion_frame_hidx ); \
   BCORE_FORWARD_OBJECT( lion_frame_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_ur_custom_hmeta_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_ur_cross_idx_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_ur_cross_idx_ads_s ); \
   BCORE_FORWARD_OBJECT( lion_frame_ur_s ); \
   BETH_EXPAND_GROUP_lion_frame_hidx \
   BETH_EXPAND_ITEM_lion_frame_s \
+  BETH_EXPAND_ITEM_lion_frame_ur_custom_hmeta_s \
+  BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_s \
+  BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_ads_s \
   BETH_EXPAND_ITEM_lion_frame_ur_s
 
 //----------------------------------------------------------------------------------------------------------------------

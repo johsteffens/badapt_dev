@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-26T17:24:13Z
+ *  Last File Update: 2020-02-27T17:41:56Z
  *
  *  Copyright and License of this File:
  *
@@ -35,6 +35,7 @@
 BCORE_DEFINE_OBJECT_INST_P( lion_hmeta_s )
 "aware bhvm_mcode_hmeta"
 "{"
+    "aware bcore_inst => custom;"
     "sz_t index_ap = -1;"
     "sz_t index_dp = -1;"
     "tp_t name;"
@@ -48,6 +49,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_hmeta_s )
     "func ^:is_adaptive;"
     "func ^:is_recurrent;"
     "func ^:is_rollable;"
+    "func ^:is_active;"
+    "func ^:get_custom;"
+    "func ^:set_custom;"
     "func ^:get_index_hbase;"
 "}";
 
@@ -1468,6 +1472,25 @@ void lion_frame_s_setup( lion_frame_s* o )
     o->setup = true;
 }
 
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_custom_hmeta_s )
+"aware lion_frame"
+"{"
+    "sz_t ur_slot;"
+    "sz_t ur_src;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_cross_idx_s )
+"aware bcore_array"
+"{"
+    "sz_t [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_cross_idx_ads_s )
+"aware bcore_array"
+"{"
+    "lion_frame_ur_cross_idx_s [];"
+"}";
+
 BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_s )
 "aware lion_frame"
 "{"
@@ -1567,7 +1590,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2534103885 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 420311865 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1578,6 +1601,9 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhvm_mcode_hmeta_is_adaptive, lion_hmeta_s_is_adaptive );
             BCORE_REGISTER_FFUNC( bhvm_mcode_hmeta_is_recurrent, lion_hmeta_s_is_recurrent );
             BCORE_REGISTER_FFUNC( bhvm_mcode_hmeta_is_rollable, lion_hmeta_s_is_rollable );
+            BCORE_REGISTER_FFUNC( bhvm_mcode_hmeta_is_active, lion_hmeta_s_is_active );
+            BCORE_REGISTER_FFUNC( bhvm_mcode_hmeta_get_custom, lion_hmeta_s_get_custom );
+            BCORE_REGISTER_FFUNC( bhvm_mcode_hmeta_set_custom, lion_hmeta_s_set_custom );
             BCORE_REGISTER_FFUNC( bhvm_mcode_hmeta_get_index_hbase, lion_hmeta_s_get_index_hbase );
             BCORE_REGISTER_OBJECT( lion_hmeta_s );
             BCORE_REGISTER_FFUNC( bcore_fp_copy_typed, lion_holor_s_copy_typed );
@@ -2091,6 +2117,9 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_frame_s_mutated );
             BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, lion_frame_s_copy_x );
             BCORE_REGISTER_OBJECT( lion_frame_s );
+            BCORE_REGISTER_OBJECT( lion_frame_ur_custom_hmeta_s );
+            BCORE_REGISTER_OBJECT( lion_frame_ur_cross_idx_s );
+            BCORE_REGISTER_OBJECT( lion_frame_ur_cross_idx_ads_s );
             BCORE_REGISTER_FFUNC( bcore_via_call_shelve, lion_frame_ur_s_shelve );
             BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_frame_ur_s_mutated );
             BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, lion_frame_ur_s_copy_x );

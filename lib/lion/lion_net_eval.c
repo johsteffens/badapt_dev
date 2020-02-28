@@ -190,14 +190,15 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
           bhvm_holor_adl_s* adl_ap_ex = BLM_CREATE( bhvm_holor_adl_s );
 
     lion_frame_s_setup_from_source_adl( frame, source, adl_ap_en );
+
+    for( sz_t i = 0; i < o->recurrent_cycles; i++ ) lion_frame_s_run_ap_adl( frame, adl_ap_en, adl_ap_ex );
+
     if( o->param.verbosity >= 10 )
     {
         bcore_sink_a_push_fa( o->param.log, "Begin microcode disassembly\n\n" );
         lion_frame_s_disassemble_to_sink( frame, o->param.log );
         bcore_sink_a_push_fa( o->param.log, "End microcode disassembly\n\n" );
     }
-
-    for( sz_t i = 0; i < o->recurrent_cycles; i++ ) lion_frame_s_run_ap_adl( frame, adl_ap_en, adl_ap_ex );
 
     BFOR_EACH( i, adl_ap_ex )
     {
@@ -427,14 +428,14 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
 
     lion_frame_ur_s_setup_from_frame( frame_ur, frame, o->unroll_size );
 
+    for( sz_t i = 0; i < o->recurrent_cycles; i++ ) lion_frame_ur_s_run_ap_adl( frame_ur, adl_ap_en, adl_ap_ex );
+
     if( o->param.verbosity >= 10 )
     {
         bcore_sink_a_push_fa( o->param.log, "Begin microcode disassembly\n\n" );
         lion_frame_ur_s_disassemble_to_sink( frame_ur, o->param.log );
         bcore_sink_a_push_fa( o->param.log, "End microcode disassembly\n\n" );
     }
-
-    for( sz_t i = 0; i < o->recurrent_cycles; i++ ) lion_frame_ur_s_run_ap_adl( frame_ur, adl_ap_en, adl_ap_ex );
 
     BFOR_EACH( i, adl_ap_ex )
     {
