@@ -167,8 +167,6 @@ stamp :frame  = extending :std
 stamp :frame_ur  = extending :std
 {
     bl_t jacobian_test = true;
-    sz_t recurrent_cycles = 1;
-    sz_t unroll_size = 1;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

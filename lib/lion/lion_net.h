@@ -102,11 +102,17 @@ stamp :node = aware :
     :links_s upls; // uplinks
     :links_s dnls; // downlinks
 
-    /** Temporary flag used for various tracing routines.
+    /** Primary flag used for various tracing routines.
       * It is typically used to ensure a node is visited only once.
       * Normalized state: false
       */
     bl_t flag = false;
+
+    /** Secondary flag (probe) used for various tracing routines.
+      * It is typically used to to test for cycles/reentries in
+      * recursive routines where 'flag' is already in use
+      */
+    bl_t probe = false;
 
     /** Node ID.
      *  When the network cell is normalized, id is identical with the cell->body index.
@@ -124,6 +130,10 @@ stamp :node = aware :
      *  -1 means: Node needs no gradient or gradient is not specified;
      */
     sz_t gidx = -1;
+
+    /** Alternate Gradient index (used on cyclic nodes to resolve dp track)
+     */
+    sz_t gidx_alt = -1;
 
     tp_t name;
     aware lion_nop -> nop;
@@ -159,7 +169,8 @@ stamp :nodes = aware bcore_array
 };
 
 signature void normalize( mutable );
-signature void clear_flags( mutable );
+signature void clear_flags( mutable ); /// clears flags
+signature void clear_all_flags( mutable ); /// clears flags and probes
 signature bl_t is_consistent( const );
 signature void clear_downlinks( mutable );
 signature void set_downlinks( mutable );
@@ -177,6 +188,15 @@ stamp :cell = aware :
     func : :clear_flags =
     {
         BFOR_EACH( i, &o->body ) o->body.data[ i ]->flag = false;
+    };
+
+    func : :clear_all_flags =
+    {
+        BFOR_EACH( i, &o->body )
+        {
+            o->body.data[ i ]->flag = false;
+            o->body.data[ i ]->probe = false;
+        }
     };
 
     func : :solve =

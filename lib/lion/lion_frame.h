@@ -104,18 +104,18 @@ signature @* plain_from_sc(       plain,        sc_t  sc );
 signature void reset( mutable );
 signature void setup( mutable );
 
-signature :mutab_from_source setup_from_source(  const bhvm_holor_s** in );
-signature :mutab_from_st     setup_from_st(      const bhvm_holor_s** in );
-signature :mutab_from_sc     setup_from_sc(      const bhvm_holor_s** in );
-signature :plain_from_source create_from_source( const bhvm_holor_s** in );
-signature :plain_from_st     create_from_st(     const bhvm_holor_s** in );
-signature :plain_from_sc     create_from_sc(     const bhvm_holor_s** in );
-signature :mutab_from_source setup_from_source_adl(  const bhvm_holor_adl_s* in );
-signature :mutab_from_st     setup_from_st_adl(      const bhvm_holor_adl_s* in );
-signature :mutab_from_sc     setup_from_sc_adl(      const bhvm_holor_adl_s* in );
-signature :plain_from_source create_from_source_adl( const bhvm_holor_adl_s* in );
-signature :plain_from_st     create_from_st_adl(     const bhvm_holor_adl_s* in );
-signature :plain_from_sc     create_from_sc_adl(     const bhvm_holor_adl_s* in );
+signature :mutab_from_source setup_from_source(      const bhvm_holor_s** en );
+signature :mutab_from_st     setup_from_st(          const bhvm_holor_s** en );
+signature :mutab_from_sc     setup_from_sc(          const bhvm_holor_s** en );
+signature :plain_from_source create_from_source(     const bhvm_holor_s** en );
+signature :plain_from_st     create_from_st(         const bhvm_holor_s** en );
+signature :plain_from_sc     create_from_sc(         const bhvm_holor_s** en );
+signature :mutab_from_source setup_from_source_adl(  const bhvm_holor_adl_s* en );
+signature :mutab_from_st     setup_from_st_adl(      const bhvm_holor_adl_s* en );
+signature :mutab_from_sc     setup_from_sc_adl(      const bhvm_holor_adl_s* en );
+signature :plain_from_source create_from_source_adl( const bhvm_holor_adl_s* en );
+signature :plain_from_st     create_from_st_adl(     const bhvm_holor_adl_s* en );
+signature :plain_from_sc     create_from_sc_adl(     const bhvm_holor_adl_s* en );
 
 signature sz_t get_size_en( const ); // number of entry channels
 signature sz_t get_size_ex( const ); // number of exit channels
@@ -129,10 +129,10 @@ signature bhvm_holor_s* get_ap_ada( mutable, sz_t index );
 signature bhvm_holor_s* get_dp_ada( mutable, sz_t index );
 
 signature @* run( mutable, tp_t track);
-signature @* run_ap(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
-signature @* run_dp(     mutable, const bhvm_holor_s**    in, bhvm_holor_s**    out );
-signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); // allocates out
-signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* in, bhvm_holor_adl_s* out ); // allocates out
+signature @* run_ap(     mutable, const bhvm_holor_s**    en, bhvm_holor_s**    ex );
+signature @* run_dp(     mutable, const bhvm_holor_s**    ex, bhvm_holor_s**    en );
+signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex ); // allocates out
+signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en ); // allocates out
 
 stamp : = aware :
 {
@@ -155,8 +155,8 @@ stamp : = aware :
     {
         if( !o->setup ) return;
         if( !o->mcf ) return;
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_ap );
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_dp );
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_shelve );
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_shelve );
         o->setup = false;
     };
 
@@ -164,8 +164,8 @@ stamp : = aware :
     {
         if( o->setup ) return;
         if( !o->mcf ) return;
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_ap );
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_dp );
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_setup );
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_setup );
         o->setup = true;
     };
 
@@ -176,17 +176,17 @@ stamp : = aware :
 
     /// frame setup from string or source; 'in' can be NULL
     func : :setup_from_source;
-    func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), in ) ); };
-    func : :setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, in ); };
-    func : :create_from_source     = { @* o = @_create(); return @_setup_from_source( o, source, in ); };
-    func : :create_from_st         = { @* o = @_create(); return @_setup_from_st(     o, st,     in ); };
-    func : :create_from_sc         = { @* o = @_create(); return @_setup_from_sc(     o, sc,     in ); };
-    func : :setup_from_source_adl  = { return @_setup_from_source( o, source, in ? ( const bhvm_holor_s** )in->data : NULL ); };
-    func : :setup_from_st_adl      = { return @_setup_from_st(     o, st,     in ? ( const bhvm_holor_s** )in->data : NULL ); };
-    func : :setup_from_sc_adl      = { return @_setup_from_sc(     o, sc,     in ? ( const bhvm_holor_s** )in->data : NULL ); };
-    func : :create_from_source_adl = { return @_create_from_source( source,   in ? ( const bhvm_holor_s** )in->data : NULL ); };
-    func : :create_from_st_adl     = { return @_create_from_st( st,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
-    func : :create_from_sc_adl     = { return @_create_from_sc( sc,           in ? ( const bhvm_holor_s** )in->data : NULL ); };
+    func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en ) ); };
+    func : :setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en ); };
+    func : :create_from_source     = { @* o = @_create(); return @_setup_from_source( o, source, en ); };
+    func : :create_from_st         = { @* o = @_create(); return @_setup_from_st(     o, st,     en ); };
+    func : :create_from_sc         = { @* o = @_create(); return @_setup_from_sc(     o, sc,     en ); };
+    func : :setup_from_source_adl  = { return @_setup_from_source( o, source, en ? ( const bhvm_holor_s** )en->data : NULL ); };
+    func : :setup_from_st_adl      = { return @_setup_from_st(     o, st,     en ? ( const bhvm_holor_s** )en->data : NULL ); };
+    func : :setup_from_sc_adl      = { return @_setup_from_sc(     o, sc,     en ? ( const bhvm_holor_s** )en->data : NULL ); };
+    func : :create_from_source_adl = { return @_create_from_source( source,   en ? ( const bhvm_holor_s** )en->data : NULL ); };
+    func : :create_from_st_adl     = { return @_create_from_st( st,           en ? ( const bhvm_holor_s** )en->data : NULL ); };
+    func : :create_from_sc_adl     = { return @_create_from_sc( sc,           en ? ( const bhvm_holor_s** )en->data : NULL ); };
 
     func : :get_size_en  = { return :hidx_s_get_size( &o->hidx_en ); };
     func : :get_size_ex  = { return :hidx_s_get_size( &o->hidx_ex ); };
@@ -243,8 +243,10 @@ stamp :ur = aware :
 
     /// unrolled ap tracks
     bhvm_mcode_track_adl_s => track_adl_ap;
-    bhvm_mcode_track_adl_s => track_adl_setup_ap;
-    bhvm_mcode_track_adl_s => track_adl_shelve_ap;
+    bhvm_mcode_track_adl_s => track_adl_dp;
+    bhvm_mcode_track_adl_s => track_adl_ap_setup;
+    bhvm_mcode_track_adl_s => track_adl_ap_shelve;
+    bhvm_mcode_track_adl_s => track_adl_ap_recurrent_reset;
 
     /// unrolled hindex
     :hidx_ads_s hidx_ads_en;  // entry index
@@ -271,14 +273,23 @@ stamp :ur = aware :
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
-void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** in, bhvm_holor_s** out );
+void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, bhvm_holor_s** ex );
+void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, bhvm_holor_s** en );
 
 void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, bcore_sink* sink );
 
 void lion_frame_ur_s_setup_from_frame( lion_frame_ur_s* o, const lion_frame_s* frame, sz_t unroll_size );
 
 void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* sink );
+
+/// resets all recurrent values to the initialization
+void lion_frame_ur_s_recurrent_reset( lion_frame_ur_s* o );
+
+/// resets recurrent values; runs track_ap for all slots assuming all input/output holors are provided in sequence
+void lion_frame_ur_s_run_ap_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
+
+///  runs track_dp for all slots assuming all input/output holors are provided in sequence
+void lion_frame_ur_s_run_dp_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en );
 
 #endif // TYPEOF_lion_frame
 

@@ -858,7 +858,7 @@ void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
     BLM_INIT();
     ASSERT( o );
@@ -883,7 +883,7 @@ void lion_net_node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf 
     BFOR_EACH( i, &o->upls )
     {
         lion_net_node_s* node = o->upls.data[ i ]->node;
-        lion_net_node_s_mcode_push_ap( node, mcf );
+        node_s_mcode_push_ap( node, mcf );
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
     }
 
@@ -909,7 +909,27 @@ void lion_net_node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
+/// node occurs in the downtree of o
+static bl_t node_s_occurs_in_downtree( lion_net_node_s* o, const lion_net_node_s* node )
+{
+    if( o == node ) return true;
+
+    o->probe = true;
+    BFOR_EACH( i, &o->dnls )
+    {
+        if( node_s_occurs_in_downtree( o->dnls.data[ i ]->node, node ) )
+        {
+            o->probe = false;
+            return true;
+        }
+    }
+    o->probe = false;
+    return false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( o );
     if( !o->nop ) ERR_fa( "Operator is missing." );
@@ -919,29 +939,30 @@ void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcod
 
     bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
 
-    sz_t up_gidx = -1;
     BFOR_EACH( i, &o->upls )
     {
         lion_net_node_s* node = o->upls.data[ i ]->node;
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, node->gidx );
-        if( i == up_index ) up_gidx = node->gidx;
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, node->gidx_alt >= 0 ? node->gidx_alt : node->gidx );
     }
     bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->hidx );
 
     if( !o->flag ) // build gradient computation for this node
     {
         o->flag = true;
-
         o->gidx = lion_nop_a_mcode_push_dp_holor( o->nop, o->result, arr_ci, mcf );
 
         // build this gradient from all downlinks ...
         BFOR_EACH( i, &o->dnls )
         {
             lion_net_node_s* node = o->dnls.data[ i ]->node;
+
+            /// we do not accumulate downtree recurrences at this point
+            if( lion_nop_a_cyclic( o->nop ) ) if( node_s_occurs_in_downtree( node, o ) ) continue;
+
             sz_t node_up_index = lion_net_node_s_up_index( node, o );
             ASSERT( node_up_index >= 0 );
-            lion_net_node_s_mcode_push_dp( node, node_up_index, mcf );
+            node_s_mcode_push_dp( node, node_up_index, mcf );
         }
 
         if( o->gidx >= 0 )
@@ -960,16 +981,78 @@ void lion_net_node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcod
         }
     }
 
-    bhvm_vop_arr_ci_s_push_ci( arr_ci, 'z', o->gidx );
-
-    // update uplink gradient ... (up_index == -1 means no uplink present)
     if( up_index >= 0 )
     {
-        ASSERT( up_gidx >= 0 );
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'z', o->gidx );
         lion_nop_a_mcode_push_dp_track( o->nop, o->result, 'a' + up_index, arr_ci, mcf );
     }
 
     BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static void node_s_cyclic_mcode_push_dp( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+{
+    ASSERT( o );
+    if( !o->nop ) ERR_fa( "Operator is missing." );
+    if( !o->result ) ERR_fa( "Result is missing." );
+    ASSERT( lion_nop_a_cyclic( o->nop ) );
+
+    BLM_INIT();
+
+    bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
+
+    BFOR_EACH( i, &o->upls )
+    {
+        lion_net_node_s* node = o->upls.data[ i ]->node;
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->hidx );
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, node->gidx );
+    }
+    bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->hidx );
+
+    {
+        bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
+        lion_hmeta_s* m = BLM_CLONE( lion_hmeta_s, &o->result->h->m );
+        if( !m->name ) m->name = o->name;
+        m->pclass = TYPEOF_pclass_dp_alt;
+        m->index_dp = o->gidx;
+        m->index_ap = o->hidx;
+        sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
+        o->gidx_alt = idx;
+    }
+
+    // build this gradient from all downlinks ...
+    BFOR_EACH( i, &o->dnls )
+    {
+        lion_net_node_s* node = o->dnls.data[ i ]->node;
+
+        /// we only accumulate downtree recurrences at this point
+        if( !node_s_occurs_in_downtree( node, o ) ) continue;
+
+        sz_t node_up_index = lion_net_node_s_up_index( node, o );
+        ASSERT( node_up_index >= 0 );
+        node_s_mcode_push_dp( node, node_up_index, mcf );
+    }
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static void node_s_cyclic_mcode_push_dp_final( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+{
+    ASSERT( o );
+    if( !o->nop ) ERR_fa( "Operator is missing." );
+    if( !o->result ) ERR_fa( "Result is missing." );
+    ASSERT( lion_nop_a_cyclic( o->nop ) );
+    bhvm_vop* vop_cpy = ( bhvm_vop* )bhvm_vop_ar1_cpy_s_create();
+    bhvm_vop_a_set_index( vop_cpy, 0, o->gidx_alt );
+    bhvm_vop_a_set_index( vop_cpy, 1, o->gidx );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, vop_cpy );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -982,10 +1065,10 @@ void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf 
     {
         lion_net_node_s* node = o->excs.data[ i ];
         if( !node->result ) ERR_fa( "Unsolved node '#<sc_t>'\n", lion_ifnameof( node->name ) );
-        lion_net_node_s_mcode_push_ap( node, mcf );
+        node_s_mcode_push_ap( node, mcf );
     }
 
-    lion_net_cell_s_clear_flags( o );
+    lion_net_cell_s_clear_all_flags( o );
 
     bhvm_mcode_frame_s_check_integrity( mcf );
 }
@@ -1002,19 +1085,38 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf,
         {
             lion_net_node_s* node = o->encs.data[ i ];
             if( !node->nop ) continue;
-            lion_net_node_s_mcode_push_dp( node, -1, mcf );
+            node_s_mcode_push_dp( node, -1, mcf );
         }
     }
 
+    /// adaptive nodes
     BFOR_EACH( i, &o->body )
     {
         lion_net_node_s* node = o->body.data[ i ];
         if( !node->nop ) continue;
         if( node->nop->_ != TYPEOF_lion_nop_ar0_adaptive_s ) continue;
-        lion_net_node_s_mcode_push_dp( node, -1, mcf );
+        node_s_mcode_push_dp( node, -1, mcf );
     }
 
-    lion_net_cell_s_clear_flags( o );
+    /// cyclic nodes (grad update from cyclic downchannels)
+    BFOR_EACH( i, &o->body )
+    {
+        lion_net_node_s* node = o->body.data[ i ];
+        if( !node->nop ) continue;
+        if( !lion_nop_a_cyclic( node->nop ) ) continue;
+        node_s_cyclic_mcode_push_dp( node, mcf );
+    }
+
+    /// cyclic nodes (finalizing)
+    BFOR_EACH( i, &o->body )
+    {
+        lion_net_node_s* node = o->body.data[ i ];
+        if( !node->nop ) continue;
+        if( !lion_nop_a_cyclic( node->nop ) ) continue;
+        node_s_cyclic_mcode_push_dp_final( node, mcf );
+    }
+
+    lion_net_cell_s_clear_all_flags( o );
 
     bhvm_mcode_frame_s_check_integrity( mcf );
 }

@@ -227,8 +227,8 @@ lion_nop_eval_result_s* lion_nop_eval_ar1_s_run( const lion_nop_eval_ar1_s* o, l
 
         bhvm_hop_ar0_zro_s_f( out );
 
-        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_setup_ap );
-        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_setup_dp );
+        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_ap_setup );
+        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_dp_setup );
 
         bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_ap );
 
@@ -457,8 +457,8 @@ lion_nop_eval_result_s* lion_nop_eval_ar2_s_run( const lion_nop_eval_ar2_s* o, l
 
         bhvm_hop_ar0_zro_s_f( out );
 
-        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_setup_ap );
-        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_setup_dp );
+        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_ap_setup );
+        bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_dp_setup );
 
         bhvm_mcode_frame_s_track_run( frame, TYPEOF_track_ap );
 

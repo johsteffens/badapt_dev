@@ -39,14 +39,42 @@ lion_nop_context_s* lion_nop_get_context( void );
 PLANT_GROUP( lion_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// tracks
+/// tracks...
+
+/// normal ap track
 name track_ap;
+
+/// normal dp track
 name track_dp;
-name track_setup_ap;
-name track_setup_dp;
-name track_shelve_ap;
-name track_shelve_dp;
-name track_reset_dp; // zeros gradients on adaptive nodes
+
+/// setup if (if ap is used)
+name track_ap_setup;
+
+/// setup if (if dp is used)
+name track_dp_setup;
+
+/// shelving (if ap is used)
+name track_ap_shelve;
+
+/// shelving (if dp is used)
+name track_dp_shelve;
+
+/** Zeros gradient on recurrent node
+ *  Used on unrolled recurrent network
+ *  before applying dp on unrolled slots.
+ */
+name track_dp_recurrent_zero_grad;
+
+/** Resets recurrent value to initial state.
+ *  This operation is also part of ap_setup.
+ */
+name track_ap_recurrent_reset;
+
+/** Zeros gradients on adaptive nodes.
+ *  Used on adaptive frame after adaptive nodes have been
+ *  updated, completing a minibatch.
+ */
+name track_dp_adaptive_zero_grad;
 
 feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o->_ ) ); return -1; };
 feature 'a' sz_t priority( const ) = { return 10; };
@@ -153,8 +181,8 @@ feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, cons
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     if( m->active )
     {
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     }
     return idx;
 };
@@ -170,9 +198,9 @@ feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, cons
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
 
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
 
     BLM_RETURNV( sz_t, idx );
 };
@@ -269,9 +297,9 @@ group :ar0 = retrievable
             sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
             if( result->h->h.v.size == 0 ) // randomize holor if result is vacant
             {
-                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
-                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
+                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
             }
             return idx;
         };
@@ -283,9 +311,9 @@ group :ar0 = retrievable
             lion_hmeta_s* m = &result->h->m;
             sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
 
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_reset_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_adaptive_zero_grad,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
             BLM_RETURNV( sz_t, idx );
         };
 
@@ -788,7 +816,8 @@ group :ar2 = retrievable
         func :: :mcode_push_dp_holor;
     };
 
-    // first argument is initialization, second is normal input
+    // argument 'a' is initialization, 'b' is normal input
+    // dendrite-pass treats 'b' -> 'y' as identity
     stamp :recurrent =
     {
         tp_t name;
@@ -797,6 +826,8 @@ group :ar2 = retrievable
         func :: :cyclic = { return true; };
         func :: :solve;
         func :: :mcode_push_ap_track;
+        func :: :mcode_push_dp_track;
+        func :: :mcode_push_dp_holor;
     };
 };
 

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-02-27T17:41:56Z
+ *  Last File Update: 2020-03-06T16:25:30Z
  *
  *  Copyright and License of this File:
  *
@@ -139,8 +139,8 @@ sz_t lion_nop_mcode_push_ap_holor__( const lion_nop* o, const lion_nop_solve_res
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     if( m->active )
     {
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     }
     return idx;
 }
@@ -153,9 +153,9 @@ sz_t lion_nop_mcode_push_dp_holor__( const lion_nop* o, const lion_nop_solve_res
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     
     BLM_RETURNV( sz_t, idx );
 }
@@ -237,9 +237,9 @@ sz_t lion_nop_ar0_adaptive_s_mcode_push_ap_holor( const lion_nop_ar0_adaptive_s*
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     if( result->h->h.v.size == 0 ) // randomize holor if result is vacant
     {
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_ap,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_ap, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     }
     return idx;
 }
@@ -251,9 +251,9 @@ sz_t lion_nop_ar0_adaptive_s_mcode_push_dp_holor( const lion_nop_ar0_adaptive_s*
     lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_setup_dp,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_shelve_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_reset_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_adaptive_zero_grad,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
     BLM_RETURNV( sz_t, idx );
 }
 
@@ -834,6 +834,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar2_recurrent_s )
     "func lion_nop:cyclic;"
     "func lion_nop:solve;"
     "func lion_nop:mcode_push_ap_track;"
+    "func lion_nop:mcode_push_dp_track;"
+    "func lion_nop:mcode_push_dp_holor;"
 "}";
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1206,9 +1208,11 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_node_s )
     "lion_net_links_s upls;"
     "lion_net_links_s dnls;"
     "bl_t flag = false;"
+    "bl_t probe = false;"
     "sz_t id;"
     "sz_t hidx = -1;"
     "sz_t gidx = -1;"
+    "sz_t gidx_alt = -1;"
     "tp_t name;"
     "aware lion_nop -> nop;"
     "lion_nop_solve_result_s => result;"
@@ -1253,6 +1257,15 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_cell_s )
 void lion_net_cell_s_clear_flags( lion_net_cell_s* o )
 {
     BFOR_EACH( i, &o->body ) o->body.data[ i ]->flag = false;
+}
+
+void lion_net_cell_s_clear_all_flags( lion_net_cell_s* o )
+{
+    BFOR_EACH( i, &o->body )
+    {
+        o->body.data[ i ]->flag = false;
+        o->body.data[ i ]->probe = false;
+    }
 }
 
 void lion_net_cell_s_solve( lion_net_cell_s* o )
@@ -1414,8 +1427,6 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_ur_s )
     "func ^:set_param;"
     "func bcore_main:main;"
     "bl_t jacobian_test = true;"
-    "sz_t recurrent_cycles = 1;"
-    "sz_t unroll_size = 1;"
 "}";
 
 s2_t lion_net_eval_frame_ur_s_main( lion_net_eval_frame_ur_s* o, const bcore_arr_st_s* args )
@@ -1458,8 +1469,8 @@ void lion_frame_s_reset( lion_frame_s* o )
 {
     if( !o->setup ) return;
     if( !o->mcf ) return;
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_ap );
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_shelve_dp );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_shelve );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_shelve );
     o->setup = false;
 }
 
@@ -1467,8 +1478,8 @@ void lion_frame_s_setup( lion_frame_s* o )
 {
     if( o->setup ) return;
     if( !o->mcf ) return;
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_ap );
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_setup_dp );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_setup );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_setup );
     o->setup = true;
 }
 
@@ -1500,8 +1511,10 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_s )
     "sz_t rolled_hbase_size;"
     "sz_t unroll_index = 0;"
     "bhvm_mcode_track_adl_s => track_adl_ap;"
-    "bhvm_mcode_track_adl_s => track_adl_setup_ap;"
-    "bhvm_mcode_track_adl_s => track_adl_shelve_ap;"
+    "bhvm_mcode_track_adl_s => track_adl_dp;"
+    "bhvm_mcode_track_adl_s => track_adl_ap_setup;"
+    "bhvm_mcode_track_adl_s => track_adl_ap_shelve;"
+    "bhvm_mcode_track_adl_s => track_adl_ap_recurrent_reset;"
     "lion_frame_hidx_ads_s hidx_ads_en;"
     "lion_frame_hidx_ads_s hidx_ads_ex;"
     "func bcore_via_call:shelve;"
@@ -1590,7 +1603,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 420311865 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2329919959 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1616,11 +1629,13 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             // group: lion_nop
             BCORE_REGISTER_NAME( track_ap );
             BCORE_REGISTER_NAME( track_dp );
-            BCORE_REGISTER_NAME( track_setup_ap );
-            BCORE_REGISTER_NAME( track_setup_dp );
-            BCORE_REGISTER_NAME( track_shelve_ap );
-            BCORE_REGISTER_NAME( track_shelve_dp );
-            BCORE_REGISTER_NAME( track_reset_dp );
+            BCORE_REGISTER_NAME( track_ap_setup );
+            BCORE_REGISTER_NAME( track_dp_setup );
+            BCORE_REGISTER_NAME( track_ap_shelve );
+            BCORE_REGISTER_NAME( track_dp_shelve );
+            BCORE_REGISTER_NAME( track_dp_recurrent_zero_grad );
+            BCORE_REGISTER_NAME( track_ap_recurrent_reset );
+            BCORE_REGISTER_NAME( track_dp_adaptive_zero_grad );
             BCORE_REGISTER_FEATURE( lion_nop_arity );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_arity__ );
             BCORE_REGISTER_FEATURE( lion_nop_priority );
@@ -1982,6 +1997,8 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_cyclic, lion_nop_ar2_recurrent_s_cyclic );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar2_recurrent_s_solve );
             BCORE_REGISTER_FFUNC( lion_nop_mcode_push_ap_track, lion_nop_ar2_recurrent_s_mcode_push_ap_track );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_track, lion_nop_ar2_recurrent_s_mcode_push_dp_track );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_holor, lion_nop_ar2_recurrent_s_mcode_push_dp_holor );
             BCORE_REGISTER_OBJECT( lion_nop_ar2_recurrent_s );
             BCORE_REGISTER_TRAIT( lion_nop_ar2, lion_nop );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_add_s );
