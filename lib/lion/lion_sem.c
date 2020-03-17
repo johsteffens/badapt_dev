@@ -746,12 +746,14 @@ void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source )
                 if( !link->up       ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' is idle.", lion_ifnameof( tp_name ) );
                 if( !link->up->cell ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", lion_ifnameof( tp_name ) );
                 lion_sem_cell_s* cell = link->up->cell;
+
                 if( cell->nop && cell->nop->_ == TYPEOF_lion_nop_ar2_recurrent_s )
                 {
                     if( !cell->encs.data[ 1 ]->up )
                     {
                         bcore_source_a_parse_fa( source, " =" );
                         cell->encs.data[ 1 ]->up = lion_sem_cell_s_evaluate_link( o, source );
+                        link->visible = false;
                     }
                     else
                     {
@@ -948,19 +950,47 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 if( !item && o->body   ) item = lion_sem_body_s_get_sem_by_name( o->body, tp_name );
                 if( !item && o->parent ) item = lion_sem_cell_s_get_cell_by_name( o->parent, tp_name );
                 if( !item ) bcore_source_a_parse_err_fa( source, "Cannot evaluate identifier '#<sc_t>'.", name->sc );
+
+
                 tp_t tp_item = *(aware_t*)item;
 
                 switch( tp_item )
                 {
                     case TYPEOF_lion_sem_cell_s:
                     {
+                        if( !lion_sem_a_is_visible( item ) ) bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' is not visible at this point.", name->sc );
                         lion_sem_cell_s* cell = item;
                         stack_push( stack, cell );
                     }
                     break;
 
-                    case TYPEOF_lion_sem_link_s: stack_push( stack, item ); break;
-                    default: bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' represents invalid object '#<sc_t>'.", name->sc, ifnameof( tp_item ) );
+                    case TYPEOF_lion_sem_link_s:
+                    {
+                        if( !lion_sem_a_is_visible( item ) )
+                        {
+                            lion_sem_link_s* link = item;
+                            if( link->up && link->up->cell )
+                            {
+                                lion_sem_cell_s* cell = link->up->cell;
+                                if( cell->nop && cell->nop->_ == TYPEOF_lion_nop_ar2_recurrent_s )
+                                {
+                                    bcore_source_a_parse_err_fa( source, "Recurrent node '#<sc_t>' must not be used after updating.", name->sc );
+                                }
+                            }
+                            else
+                            {
+                                bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' is not visible at this point.", name->sc );
+                            }
+                        }
+                        stack_push( stack, item );
+                    }
+                    break;
+
+                    default:
+                    {
+                        bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' represents invalid object '#<sc_t>'.", name->sc, ifnameof( tp_item ) );
+                    }
+                    break;
                 }
             }
         }
@@ -1018,7 +1048,7 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
         {
             if
             (
-                stack->size == 0 ||
+                 stack->size == 0 ||
                ( stack->size >= 1 && stack_of_value( stack, 1, flag_una_op ) ) ||
                ( stack->size >= 3 && stack_of_value( stack, 3, flag_bin_op ) )
             )

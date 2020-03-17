@@ -627,8 +627,8 @@ bl_t lion_nop_ar2_recurrent_s_solve( const lion_nop_ar2_recurrent_s* o, lion_hol
     if( a[0] )
     {
         lion_holor_s_attach( &result->h, lion_holor_s_create() );
-        result->h->m.active = true;
-        result->h->m.recurrent = true;
+        result->settled        = false; // recurrent results never settle
+        result->h->m.active    = true;  // recurrent results are always active
         result->h->m.name = o->name;
 
         bhvm_holor_s* ha = &a[0]->h;
@@ -639,22 +639,14 @@ bl_t lion_nop_ar2_recurrent_s_solve( const lion_nop_ar2_recurrent_s* o, lion_hol
         {
             bhvm_holor_s* hb = &a[1]->h;
             if( !bhvm_shape_s_is_equal( &ha->s, &hb->s ) ) return false;
-            result->settled = ( !a[0]->m.active ) && ( !a[1]->m.active );
-            return true;
-        }
-        else
-        {
-            result->settled = false;
-            return true;
         }
     }
     else
     {
         if( a[1] ) return false;
         lion_holor_s_attach( &result->h, NULL );
-        result->settled = false;
-        return true;
     }
+    return true;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

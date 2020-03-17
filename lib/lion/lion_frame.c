@@ -89,34 +89,25 @@ static void disassemble_hbase_to_sink( const bhvm_mcode_hbase_s* hbase, sz_t ind
         BLM_INIT();
         st_s* msg = BLM_CREATE( st_s );
         bhvm_holor_s* h = &hbase->holor_ads.data[ i ];
-        bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ i ];
+        bhvm_mcode_hmeta* hmeta  = hbase->hmeta_adl.data[ i ];
+        bhvm_mcode_node_s* mnode = bhvm_mcode_hmeta_a_get_node( hmeta );
+        assert( mnode );
+
         tp_t pclass = bhvm_mcode_hmeta_a_get_pclass( hmeta );
         sc_t sc_name = lion_ifnameof( bhvm_mcode_hmeta_a_get_name( hmeta ) );
 
         st_s_push_fa( msg, "#rn{ }#pl3 {#<sz_t>}", indent, i );
 
-        if( pclass == TYPEOF_pclass_ap )
-        {
-            sz_t dual_idx = ( ( lion_hmeta_s* )hmeta )->index_dp;
-            st_s_push_fa( msg, " ap" );
-            if( dual_idx >= 0 ) st_s_push_fa( msg, " (dp#pl3 {#<sz_t>})", dual_idx );
-        }
-        else if( pclass == TYPEOF_pclass_dp )
-        {
-            sz_t dual_idx = ( ( lion_hmeta_s* )hmeta )->index_ap;
-            if( dual_idx >= 0 ) st_s_push_fa( msg, " dp (ap#pl3 {#<sz_t>})", dual_idx );
-        }
-        else if( pclass == TYPEOF_pclass_dp_alt )
-        {
-            sz_t dual_idx = ( ( lion_hmeta_s* )hmeta )->index_ap;
-            if( dual_idx >= 0 ) st_s_push_fa( msg, " dp2(ap#pl3 {#<sz_t>})", dual_idx );
-        }
+        if(      pclass == TYPEOF_pclass_ax0 ) st_s_push_fa( msg, " ax0" );
+        else if( pclass == TYPEOF_pclass_ax1 ) st_s_push_fa( msg, " ax1 #pl5 {[#<sz_t>]}", mnode->ax0 );
+        else if( pclass == TYPEOF_pclass_ag0 ) st_s_push_fa( msg, " ag0 #pl5 {[#<sz_t>]}", mnode->ax0 );
+        else if( pclass == TYPEOF_pclass_ag1 ) st_s_push_fa( msg, " ag1 #pl5 {[#<sz_t>]}", mnode->ax0 );
 
-        st_s_push_fa( msg, "#rn{ }", sz_max( 0, 16 - msg->size ) );
+        st_s_push_fa( msg, " #rn{.} ", sz_max( 0, 22 - msg->size ) );
 
         st_s_push_fa( msg, " #pln' '{#<sc_t>}", hname_length, sc_name );
-        if     ( bhvm_mcode_hmeta_a_is_adaptive(  hmeta ) ) st_s_push_fa( msg, " adaptive " );
-        else if( bhvm_mcode_hmeta_a_is_recurrent( hmeta ) ) st_s_push_fa( msg, " recurrent" );
+        if     ( mnode->adaptive  ) st_s_push_fa( msg, " adaptive " );
+        else if( mnode->recurrent ) st_s_push_fa( msg, " recurrent" );
         else if( bhvm_mcode_hmeta_a_is_active(    hmeta ) ) st_s_push_fa( msg, " active   " );
         else                                                st_s_push_fa( msg, "          " );
 
@@ -151,8 +142,9 @@ static void disassemble_hidx_to_sink( const bhvm_mcode_hbase_s* hbase, const bco
         sz_t idx_ap = hidx->data[ i ];
         bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ idx_ap ];
         assert( hmeta );
-        assert( bhvm_mcode_hmeta_a_get_index_hbase( hmeta, TYPEOF_pclass_ap ) == idx_ap );
-        sz_t idx_dp = bhvm_mcode_hmeta_a_get_index_hbase( hmeta, TYPEOF_pclass_dp );
+        bhvm_mcode_node_s* mnode = bhvm_mcode_hmeta_a_get_node( hmeta );
+        assert( mnode );
+        sz_t idx_dp = mnode->ag0;
         bcore_sink_a_push_fa( sink, "#rn{ }#pl3 {#<sc_t>}:", indent, lion_ifnameof( bhvm_mcode_hmeta_a_get_name( hmeta ) ) );
         if( idx_ap >= 0 ) bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", idx_ap );
         if( idx_dp >= 0 ) bcore_sink_a_push_fa( sink, " (dp)#<sz_t>", idx_dp );
@@ -182,6 +174,7 @@ void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, bcore_sink* sink )
     tp_t track_types [] =
     {
         TYPEOF_track_ap,
+        TYPEOF_track_ap_recurrent_update,
         TYPEOF_track_dp,
         TYPEOF_track_dp_recurrent_zero_grad,
         TYPEOF_track_ap_setup,
@@ -247,28 +240,42 @@ void lion_frame_s_check_integrity( const lion_frame_s* o )
     bhvm_mcode_hbase_s* hbase = o->mcf->hbase;
     BFOR_EACH( i, &hbase->hmeta_adl )
     {
-        bhvm_mcode_hmeta* hmeta = bhvm_mcode_hbase_s_get_hmeta( hbase, i );
-        sz_t idx_ap = bhvm_mcode_hmeta_a_get_index_hbase( hmeta, TYPEOF_pclass_ap );
-        sz_t idx_dp = bhvm_mcode_hmeta_a_get_index_hbase( hmeta, TYPEOF_pclass_dp );
+        bhvm_mcode_hmeta*  hmeta = bhvm_mcode_hbase_s_get_hmeta( hbase, i );
+        bhvm_mcode_node_s* mnode = bhvm_mcode_hmeta_a_get_node( hmeta );
+        ASSERT( mnode );
+
+        sz_t idx_ap = mnode->ax0;
+        sz_t idx_dp = mnode->ag0;
         tp_t pclass = bhvm_mcode_hmeta_a_get_pclass( hmeta );
 
-        ASSERT( pclass == TYPEOF_pclass_ap || pclass == TYPEOF_pclass_dp || pclass == TYPEOF_pclass_dp_alt );
-        if( pclass == TYPEOF_pclass_ap )
+        ASSERT
+        (
+            pclass == TYPEOF_pclass_ax0 ||
+            pclass == TYPEOF_pclass_ax1 ||
+            pclass == TYPEOF_pclass_ag0 ||
+            pclass == TYPEOF_pclass_ag1
+        );
+
+        if( pclass == TYPEOF_pclass_ax0 )
         {
             ASSERT( idx_ap == i );
             if( idx_dp >= 0 )
             {
-                bhvm_mcode_hmeta* hmeta2 = bhvm_mcode_hbase_s_get_hmeta( hbase, idx_dp );
-                ASSERT( bhvm_mcode_hmeta_a_get_index_hbase( hmeta2, TYPEOF_pclass_ap ) == i );
+                bhvm_mcode_hmeta* hmeta2  = bhvm_mcode_hbase_s_get_hmeta( hbase, idx_dp );
+                bhvm_mcode_node_s* mnode2 = bhvm_mcode_hmeta_a_get_node( hmeta2 );
+                ASSERT( mnode2 );
+                ASSERT( mnode2->ax0 == i );
             }
         }
-        else if( pclass == TYPEOF_pclass_dp )
+        else if( pclass == TYPEOF_pclass_ag0 )
         {
             ASSERT( idx_dp == i );
             if( idx_ap >= 0 )
             {
                 bhvm_mcode_hmeta* hmeta2 = bhvm_mcode_hbase_s_get_hmeta( hbase, idx_ap );
-                ASSERT( bhvm_mcode_hmeta_a_get_index_hbase( hmeta2, TYPEOF_pclass_dp ) == i );
+                bhvm_mcode_node_s* mnode2 = bhvm_mcode_hmeta_a_get_node( hmeta2 );
+                ASSERT( mnode2 );
+                ASSERT( mnode2->ag0 == i );
             }
         }
     }
@@ -308,13 +315,13 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
     {
         lion_net_node_s* node = cell->encs.data[ i ];
 
-        if( node->hidx >= 0 ) lion_frame_hidx_s_push( &o->hidx_en, node->hidx );
+        if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_en, node->mnode->ax0 );
     }
 
     BFOR_EACH( i, &cell->excs )
     {
         lion_net_node_s* node = cell->excs.data[ i ];
-        if( node->hidx >= 0 ) lion_frame_hidx_s_push( &o->hidx_ex, node->hidx );
+        if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_ex, node->mnode->ax0 );
     }
 
     BFOR_EACH( i, &cell->body )
@@ -322,7 +329,7 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
         lion_net_node_s* node = cell->body.data[ i ];
         if( node->nop && node->nop->_ == TYPEOF_lion_nop_ar0_adaptive_s )
         {
-            if( node->hidx >= 0 ) lion_frame_hidx_s_push( &o->hidx_ada, node->hidx );
+            if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_ada, node->mnode->ax0 );
         }
     }
 
@@ -357,7 +364,7 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhv
 
     for( sz_t i = 0; i < o->size_en; i++ )
     {
-        bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_en, hbase, TYPEOF_pclass_ap, i );
+        bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_en, hbase, TYPEOF_pclass_ax0, i );
         const bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
         if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
@@ -370,7 +377,7 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhv
     {
         for( sz_t i = 0; i < o->size_ex; i++ )
         {
-            bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_ex, hbase, TYPEOF_pclass_ap, i );
+            bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_ex, hbase, TYPEOF_pclass_ax0, i );
             bhvm_holor_s* h_o = ex[ i ];
             ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
             if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
@@ -395,7 +402,7 @@ lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhv
 
     BFOR_SIZE( i, o->size_ex )
     {
-        sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_ex, hbase, TYPEOF_pclass_dp, i );
+        sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_ex, hbase, TYPEOF_pclass_ag0, i );
         if( idx < 0 ) continue;
         bhvm_holor_s* h_m = bhvm_mcode_hbase_s_get_holor( hbase, idx );
         const bhvm_holor_s* h_i = ex[ i ];
@@ -410,7 +417,7 @@ lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhv
     {
         BFOR_SIZE( i, o->size_en )
         {
-            sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_en, hbase, TYPEOF_pclass_dp, i );
+            sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_en, hbase, TYPEOF_pclass_ag0, i );
             if( idx < 0 ) continue;
             bhvm_holor_s* h_m = bhvm_mcode_hbase_s_get_holor( hbase, idx );
             bhvm_holor_s* h_o = en[ i ];
@@ -545,7 +552,7 @@ void lion_frame_ur_s_setup( lion_frame_ur_s* o )
         bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ src_index ];
         if( !bhvm_mcode_hmeta_a_is_rollable( hmeta ) )
         {
-            bl_t is_rec = bhvm_mcode_hmeta_a_is_recurrent( hmeta );
+            bl_t is_rec = bhvm_mcode_hmeta_a_get_node( hmeta )->recurrent;
             bcore_arr_sz_s_push( index_arr, src_index );
             bcore_arr_sz_s_push( bkmap_rec, is_rec ? index_rec->size : -1 );
             if( is_rec ) bcore_arr_sz_s_push( index_rec, src_index );
@@ -575,7 +582,6 @@ void lion_frame_ur_s_setup( lion_frame_ur_s* o )
 
             index_map->data[ src_index ] = dst_index;
             bhvm_mcode_hmeta* dst_hmeta = hbase->hmeta_adl.data[ dst_index ];
-            ( ( lion_hmeta_s* )dst_hmeta )->index_ap = dst_index;
             custom->ur_src = src_index;
             bhvm_mcode_hmeta_a_set_custom( dst_hmeta, ( bcore_inst* )custom );
         }
@@ -680,7 +686,7 @@ lion_frame_ur_s* lion_frame_ur_s_run_ap( lion_frame_ur_s* o, const bhvm_holor_s*
 
     for( sz_t i = 0; i < frame->size_en; i++ )
     {
-        bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_en, hbase, TYPEOF_pclass_ap, i );
+        bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_en, hbase, TYPEOF_pclass_ax0, i );
         const bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
         if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
@@ -693,7 +699,7 @@ lion_frame_ur_s* lion_frame_ur_s_run_ap( lion_frame_ur_s* o, const bhvm_holor_s*
     {
         for( sz_t i = 0; i < frame->size_ex; i++ )
         {
-            bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_ex, hbase, TYPEOF_pclass_ap, i );
+            bhvm_holor_s* h_m = lion_frame_hidx_s_get_pclass_holor( hidx_ex, hbase, TYPEOF_pclass_ax0, i );
             bhvm_holor_s* h_o = ex[ i ];
             ASSERT( h_o && h_o->_ == TYPEOF_bhvm_holor_s );
             if( !bhvm_shape_s_is_equal( &h_m->s, &h_o->s ) ) bhvm_holor_s_copy_shape_type( h_o, h_m );
@@ -808,6 +814,10 @@ void lion_frame_ur_s_run_ap_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s
         ASSERT( ex ? ( i * size_ex < ex->size ) : true);
         lion_frame_ur_s_run_ap( o, ( const bhvm_holor_s** )( en->data + i * size_en ), ex ? ( ex->data + i * size_ex ) : NULL );
     }
+
+    bcore_sink_a_push_fa( BCORE_STDOUT, "Holorbase:\n" );
+    disassemble_hbase_to_sink( o->frame->mcf->hbase, 2, BCORE_STDOUT );
+    bcore_sink_a_push_fa( BCORE_STDOUT, "\n" );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -843,7 +853,7 @@ void lion_frame_ur_s_run_dp_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s
 
         BFOR_SIZE( i, size_ex )
         {
-            sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_ex, hbase, TYPEOF_pclass_dp, i );
+            sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_ex, hbase, TYPEOF_pclass_ag0, i );
             if( idx < 0 ) continue;
             bhvm_holor_s* h_m = bhvm_mcode_hbase_s_get_holor( hbase, idx );
             const bhvm_holor_s* h_i = p_ex[ i ];
@@ -858,7 +868,7 @@ void lion_frame_ur_s_run_dp_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s
         {
             BFOR_SIZE( i, size_en )
             {
-                sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_en, hbase, TYPEOF_pclass_dp, i );
+                sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_en, hbase, TYPEOF_pclass_ag0, i );
                 if( idx < 0 ) continue;
                 bhvm_holor_s* h_m = bhvm_mcode_hbase_s_get_holor( hbase, idx );
                 bhvm_holor_s* h_o = p_en[ i ];

@@ -97,10 +97,16 @@ signature void solve( mutable );
 signature sz_t up_index( const, const :node_s* node );
 signature void set_nop_d( mutable, lion_nop* nop );
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+feature 'a' bl_t is_recurrent( const ) = { return false; };
+
 stamp :node = aware :
 {
     :links_s upls; // uplinks
     :links_s dnls; // downlinks
+
+    tp_t name;
 
     /** Primary flag used for various tracing routines.
       * It is typically used to ensure a node is visited only once.
@@ -119,30 +125,16 @@ stamp :node = aware :
      */
     sz_t id;
 
-    /** Holor index.
-     *  Indicates the location of the axon-holor for the node in the mcode framework.
-     *  -1 means: Holor is not specified
-     */
-    sz_t hidx = -1;
+    /// mnode is externally stored in a given mcode_frame
+    hidden bhvm_mcode_node_s -> mnode;
 
-    /** Gradient index.
-     *  Indicates the location of the gradient holor for the node in the mcode framework.
-     *  -1 means: Node needs no gradient or gradient is not specified;
-     */
-    sz_t gidx = -1;
-
-    /** Alternate Gradient index (used on cyclic nodes to resolve dp track)
-     */
-    sz_t gidx_alt = -1;
-
-    tp_t name;
     aware lion_nop -> nop;
 
     lion_nop_solve_result_s => result;
 
     hidden bcore_source_point_s -> source_point;
 
-    func : :solve;
+    //func : :solve;
 
     func : :up_index =
     {
@@ -155,9 +147,14 @@ stamp :node = aware :
         ASSERT( o->result == NULL );
         lion_nop_a_attach( &o->nop, nop );
     };
+
+    func : :is_recurrent = { return ( o->mnode ) ? o->mnode->recurrent : lion_nop_a_is_recurrent( o->nop ); };
 };
 
+stamp :node_adl = aware bcore_array { :node_s => []; };
+
 signature :node_s* get_by_id( mutable, sz_t id );
+
 stamp :nodes = aware bcore_array
 {
     :node_s => [];
@@ -167,6 +164,8 @@ stamp :nodes = aware bcore_array
         return NULL;
     };
 };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void normalize( mutable );
 signature void clear_flags( mutable ); /// clears flags
@@ -199,10 +198,7 @@ stamp :cell = aware :
         }
     };
 
-    func : :solve =
-    {
-        BFOR_EACH( i, &o->excs ) :node_s_solve( o->excs.data[ i ] );
-    };
+    func : :solve;
 
     func : :clear_downlinks =
     {

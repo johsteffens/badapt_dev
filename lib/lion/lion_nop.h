@@ -32,6 +32,8 @@
 #ifdef TYPEOF_lion_nop
 
 BCORE_FORWARD_OBJECT( lion_nop_context_s );
+BCORE_FORWARD_OBJECT( lion_net_node_s );
+BCORE_FORWARD_OBJECT( lion_net_node_adl_s );
 
 /// returns global context
 lion_nop_context_s* lion_nop_get_context( void );
@@ -69,6 +71,11 @@ name track_dp_recurrent_zero_grad;
  *  This operation is also part of ap_setup.
  */
 name track_ap_recurrent_reset;
+
+/** Updates recurrent (ax0) value
+ *  This operation is usually just a copy from ax1
+ */
+name track_ap_recurrent_update;
 
 /** Zeros gradients on adaptive nodes.
  *  Used on adaptive frame after adaptive nodes have been
@@ -129,24 +136,19 @@ stamp :solve_result = aware bcore_inst
 /// returns true when the operator supports 'elementary cyclic indexing'
 feature 'a' bl_t eci( const ) = { return false; };
 
-/** Returns 'true' in case of success, otherwise check result->msg
+/** Low level solving.
+  * Returns 'true' in case of success, otherwise check result->msg
   * The default implementation solves all elementary operators
   */
 feature 'a' bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) = solve__;
 
+/** Node-level solving. */
+feature 'a' void solve_node( mutable, lion_net_node_s* node, lion_net_node_adl_s* deferred ) = solve_node__;
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/** Indicates a cyclic operator (e.g. recurrent)
- *
- *  Normally, the node solver calls nop_solve and associates resulting holor
- *  after all arguments have been obtained.
- *
- *  Cyclic operators need to provide an output before all arguments have been evaluated.
- *  Therefore nop_solve is called once for each channel and mcode_push_ap_holor before
- *  processing all channels.
- *
- **/
-feature 'a' bl_t cyclic( const ) = { return false; };
+feature 'a' bl_t is_recurrent( const ) = { return false; };
+feature 'a' bl_t is_adaptive(  const ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -282,10 +284,12 @@ group :ar0 = retrievable
     stamp :adaptive =
     {
         lion_holor_s -> h;
+
+        func :: :is_adaptive = { return true; };
+
         func :: :solve =
         {
             lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->h->m.adaptive = true;
             result->settled = false;
             return true;
         };
@@ -551,8 +555,9 @@ group :ar1 = retrievable
     {
         tp_t name;
 
-        func :: :symbol   = { return "adaptive"; };
-        func :: :priority = { return 8; };
+        func :: :symbol      = { return "adaptive"; };
+        func :: :priority    = { return 8; };
+        func :: :is_adaptive = { return true; };
 
         func :: :solve =
         {
@@ -560,7 +565,6 @@ group :ar1 = retrievable
             if( result->h )
             {
                 result->h->m.active = true;
-                result->h->m.adaptive = true;
             }
             result->settled = ( result->h != NULL );
             result->reducible = false; // keep subsequent graph intact
@@ -823,8 +827,9 @@ group :ar2 = retrievable
         tp_t name;
 
         func :: :priority = { return 8; };
-        func :: :cyclic = { return true; };
+        func :: :is_recurrent = { return true; };
         func :: :solve;
+        func :: :solve_node;
         func :: :mcode_push_ap_track;
         func :: :mcode_push_dp_track;
         func :: :mcode_push_dp_holor;

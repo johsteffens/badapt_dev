@@ -23,6 +23,7 @@
 #define LION_ROOT_H
 
 #include "bhvm_holor.h"
+#include "bhvm_mcode.h"
 #include "lion_planted.h"
 
 /**********************************************************************************************************************/
@@ -38,8 +39,8 @@ stamp :hmeta = aware bhvm_mcode_hmeta
 {
     aware bcore_inst => custom; // custom params
 
-    sz_t index_ap = -1;
-    sz_t index_dp = -1;
+    /// associated mnode
+    hidden bhvm_mcode_node_s -> mnode;
 
     tp_t name;
 
@@ -59,28 +60,18 @@ stamp :hmeta = aware bhvm_mcode_hmeta
      */
     bl_t active = true;
 
-    /// Holor is axon or gradient of an adaptive node
-    bl_t adaptive;
-
-    /// Holor is axon or gradient of a recurrent node
-    bl_t recurrent;
-
     func : :clear = { o->name = 0; o->htp = false; };
 
     func bhvm_mcode_hmeta : get_name     = { return o->name; };
     func bhvm_mcode_hmeta : get_pclass   = { return o->pclass; };
-    func bhvm_mcode_hmeta : is_adaptive  = { return o->adaptive; };
-    func bhvm_mcode_hmeta : is_recurrent = { return o->recurrent; };
-    func bhvm_mcode_hmeta : is_rollable  = { return !o->active || o->adaptive; };
+    func bhvm_mcode_hmeta : is_rollable  = { return !o->active || o->mnode->adaptive; };
     func bhvm_mcode_hmeta : is_active    = { return  o->active; };
 
     func bhvm_mcode_hmeta : get_custom = { return o->custom; };
     func bhvm_mcode_hmeta : set_custom = { bcore_inst_a_attach( &o->custom, bcore_inst_a_clone( custom ) ); return o->custom; };
 
-    func bhvm_mcode_hmeta : get_index_hbase =
-    {
-        return ( pclass == TYPEOF_pclass_ap ) ? o->index_ap : ( pclass == TYPEOF_pclass_dp ) ? o->index_dp : -1;
-    };
+    func bhvm_mcode_hmeta : get_node = { return o->mnode; };
+    func bhvm_mcode_hmeta : set_node = { bhvm_mcode_node_s_attach( &o->mnode, bcore_fork( node ) ); };
 };
 
 stamp :holor = aware :

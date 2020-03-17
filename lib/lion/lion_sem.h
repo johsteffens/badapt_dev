@@ -80,10 +80,10 @@
 
         l1 = layer( dim_h, x, ci = c, hi = h );
 
-        h = l1.ho;
+        h = l1.ho; // updating a recurrent value ends its scope
         c = l1.co;
 
-        y = tanh( w_r * h + b_r );
+        y = tanh( w_r * l1.ho + b_r );
     }
 
     g_out = lstm( dim_h = 200, x = g_in ).y;
@@ -176,6 +176,11 @@ TODO:
  *    the gradient of the node linked to the input channel. This step is done by s singe virtual operation.
  *  - The backpass procedure is compiled by recursively passing each node starting from the adaptive node downward through
  *    all downlinks.
+ *
+ *  TODO:
+ *     - Store the recurrent update to a hidden holor associated with the recurrent node
+ *     - After regular axon pass, copy all hidden recurrent holors to regular recurrent axons
+ *     - Disallow explicit use of a recurrent variable after it has been updated. (This prevents surprising syntax)
  */
 
 /**********************************************************************************************************************/
@@ -218,6 +223,7 @@ name else;
 signature   sz_t get_arity( const );
 signature   sz_t get_priority( const );
 feature 'a' tp_t get_name( const ) = { return 0; };
+feature 'a' bl_t is_visible( const ) = { return true; }; // an object can be made syntactically invisible
 body             get_name_ = { return o->name; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -226,11 +232,13 @@ body             get_name_ = { return o->name; };
 stamp :link = aware :
 {
     tp_t name;
+    bl_t visible = true;
     private :link_s -> up;   // up link
     private :link_s -> dn;   // down link
     private  vd_t cell; // cell owning the link (only if link is part of membrane)
     bl_t     exit; // true: link is of cell's exit membrane. false: entry membrane
     func : : get_name = :get_name_;
+    func : : is_visible = { return o->visible; };
 };
 
 signature bl_t     name_exists(       const,   tp_t name );
@@ -296,7 +304,10 @@ stamp :body = aware bcore_array
 
     func : :get_sem_by_name =
     {
-        BFOR_EACH( i, o ) if( :a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+        BFOR_EACH( i, o )
+        {
+            if( :a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+        }
         return NULL;
     };
 };
@@ -324,7 +335,7 @@ stamp :cell = aware :
     hidden bcore_source_point_s source_point;
 
     func : :get_name = :get_name_;
-    func : :get_arity =       { return :links_s_count_open(       &o->encs       ); };
+    func : :get_arity       = { return :links_s_count_open(       &o->encs       ); };
     func : :get_enc_by_name = { return :links_s_get_link_by_name( &o->encs, name ); };
     func : :get_exc_by_name = { return :links_s_get_link_by_name( &o->excs, name ); };
     func : :get_enc_by_open = { return :links_s_get_link_by_up(   &o->encs, NULL ); };

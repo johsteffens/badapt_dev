@@ -68,7 +68,7 @@ group :hidx =
         func : :get_pclass_idx =
         {
             const bhvm_mcode_hmeta* hmeta = @_get_hmeta( o, hbase, index );
-            if( hmeta ) return bhvm_mcode_hmeta_a_get_index_hbase( hmeta, pclass );
+            if( hmeta ) return bhvm_mcode_node_s_get_pclass_idx( bhvm_mcode_hmeta_a_get_node( hmeta ), pclass );
             return -1;
         };
 
@@ -192,12 +192,12 @@ stamp : = aware :
     func : :get_size_ex  = { return :hidx_s_get_size( &o->hidx_ex ); };
     func : :get_size_ada = { return :hidx_s_get_size( &o->hidx_ada ); };
 
-    func : :get_ap_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_ap, index ); };
-    func : :get_dp_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_dp, index ); };
-    func : :get_ap_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_ap, index ); };
-    func : :get_dp_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_dp, index ); };
-    func : :get_ap_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_ap, index ); };
-    func : :get_dp_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_dp, index ); };
+    func : :get_ap_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_ax0, index ); };
+    func : :get_dp_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_ag0, index ); };
+    func : :get_ap_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_ax0, index ); };
+    func : :get_dp_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_ag0, index ); };
+    func : :get_ap_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_ax0, index ); };
+    func : :get_dp_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_ag0, index ); };
 
     func : :run_ap;
     func : :run_dp;
