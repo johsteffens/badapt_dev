@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-17T11:25:23Z
+ *  Last File Update: 2020-03-23T16:23:46Z
  *
  *  Copyright and License of this File:
  *
@@ -39,7 +39,7 @@
   static inline void lion_hmeta_s_clear( lion_hmeta_s* o ){o->name = 0; o->htp = false;} \
   static inline tp_t lion_hmeta_s_get_name( const lion_hmeta_s* o ){return o->name;} \
   static inline tp_t lion_hmeta_s_get_pclass( const lion_hmeta_s* o ){return o->pclass;} \
-  static inline bl_t lion_hmeta_s_is_rollable( const lion_hmeta_s* o ){return !o->active || o->mnode->adaptive;} \
+  static inline bl_t lion_hmeta_s_is_rollable( const lion_hmeta_s* o ){return !o->active || o->mnode->adaptive || ( o->mnode->recurrent && o->pclass == TYPEOF_pclass_ax1 );} \
   static inline bl_t lion_hmeta_s_is_active( const lion_hmeta_s* o ){return  o->active;} \
   static inline bcore_inst* lion_hmeta_s_get_custom( const lion_hmeta_s* o ){return o->custom;} \
   static inline bcore_inst* lion_hmeta_s_set_custom( lion_hmeta_s* o, const bcore_inst* custom ){bcore_inst_a_attach( &o->custom, bcore_inst_a_clone( custom ) ); return o->custom;} \
@@ -708,9 +708,9 @@
   static inline bl_t lion_nop_ar2_recurrent_s_is_recurrent( const lion_nop_ar2_recurrent_s* o ){return true;} \
   bl_t lion_nop_ar2_recurrent_s_solve( const lion_nop_ar2_recurrent_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
   void lion_nop_ar2_recurrent_s_solve_node( lion_nop_ar2_recurrent_s* o, lion_net_node_s* node, lion_net_node_adl_s* deferred ); \
-  void lion_nop_ar2_recurrent_s_mcode_push_ap_track( const lion_nop_ar2_recurrent_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
-  void lion_nop_ar2_recurrent_s_mcode_push_dp_track( const lion_nop_ar2_recurrent_s* o, const lion_nop_solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
-  sz_t lion_nop_ar2_recurrent_s_mcode_push_dp_holor( const lion_nop_ar2_recurrent_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
+  static inline void lion_nop_ar2_recurrent_s_mcode_push_ap_track( const lion_nop_ar2_recurrent_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." );} \
+  static inline void lion_nop_ar2_recurrent_s_mcode_push_dp_track( const lion_nop_ar2_recurrent_s* o, const lion_nop_solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." );} \
+  static inline sz_t lion_nop_ar2_recurrent_s_mcode_push_dp_holor( const lion_nop_ar2_recurrent_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." ); return -1;}
 #define BETH_EXPAND_GROUP_lion_nop_ar2 \
   BCORE_FORWARD_OBJECT( lion_nop_ar2 ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_add_s ); \

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-17T11:25:23Z
+ *  Last File Update: 2020-03-23T16:23:46Z
  *
  *  Copyright and License of this File:
  *
@@ -1609,7 +1609,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 62619152 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2942155248 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

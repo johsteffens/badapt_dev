@@ -830,9 +830,9 @@ group :ar2 = retrievable
         func :: :is_recurrent = { return true; };
         func :: :solve;
         func :: :solve_node;
-        func :: :mcode_push_ap_track;
-        func :: :mcode_push_dp_track;
-        func :: :mcode_push_dp_holor;
+        func :: :mcode_push_ap_track = { ERR_fa( "Not implemented." ); };
+        func :: :mcode_push_dp_track = { ERR_fa( "Not implemented." ); };
+        func :: :mcode_push_dp_holor = { ERR_fa( "Not implemented." ); return -1; };
     };
 };
 

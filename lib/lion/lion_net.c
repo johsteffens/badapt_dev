@@ -909,6 +909,28 @@ void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink )
 /**********************************************************************************************************************/
 // node, cell: building mcode tracks
 
+// ---------------------------------------------------------------------------------------------------------------------
+
+/// node occurs in the downtree of o
+static bl_t node_s_occurs_in_downtree( lion_net_node_s* o, const lion_net_node_s* node )
+{
+    if( o == node ) return true;
+
+    o->probe = true;
+    BFOR_EACH( i, &o->dnls )
+    {
+        if( node_s_occurs_in_downtree( o->dnls.data[ i ]->node, node ) )
+        {
+            o->probe = false;
+            return true;
+        }
+    }
+    o->probe = false;
+    return false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
 static void node_s_recurrent_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
 static void node_s_recurrent_mcode_push_ap_phase2( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
@@ -967,6 +989,10 @@ static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 
 // --------------------------------------------------------------------------------------------------------------------
 
+/** Recurrent ap phase0:
+ *  node_s_mcode_push_ap for recurrent nodes.
+ *  Processes only the non_cyclic (left) up-channel [0] computing the main axon holor ax0
+ */
 static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( lion_net_node_s_is_recurrent( o ) );
@@ -977,8 +1003,6 @@ static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcod
         o->mnode->recurrent = true;
         o->mnode->adaptive  = lion_nop_a_is_adaptive( o->nop );
     }
-
-    ASSERT( o->mnode->ax1 == -1 );
 
     if( o->mnode->ax0 == -1 )
     {
@@ -1010,10 +1034,14 @@ static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcod
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+/** Recurrent ap phase1:
+ *  This function is called for all recurrent nodes after mcode_push_ap is completed for the entire network.
+ *  Processes the cyclic (right) up-channel [1] computing the auxiliary axon holor ax1.
+ */
 static void node_s_recurrent_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( lion_net_node_s_is_recurrent( o ) );
-    if( !o->mnode ) return;
+    if( !o->mnode ) node_s_recurrent_mcode_push_ap_phase0( o, mcf );
 
     ASSERT( o->mnode->ax0 >= 0 );
 
@@ -1040,6 +1068,10 @@ static void node_s_recurrent_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcod
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+/** Recurrent ap phase2:
+ *  This function is called after completion of phase1 for the entire network.
+ *  Adds mcode copying ax1 into ax0.
+ */
 static void node_s_recurrent_mcode_push_ap_phase2( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( lion_net_node_s_is_recurrent( o ) );
@@ -1048,35 +1080,24 @@ static void node_s_recurrent_mcode_push_ap_phase2( lion_net_node_s* o, bhvm_mcod
     ASSERT( o->mnode->ax0 >= 0 );
     ASSERT( o->mnode->ax1 >= 0 );
 
-    bhvm_mcode_frame_s_track_vop_push_d
-    (
-        mcf,
-        TYPEOF_track_ap_recurrent_update,
-        bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { o->mnode->ax1, o->mnode->ax0 }, 2 )
-    );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/// node occurs in the downtree of o
-static bl_t node_s_occurs_in_downtree( lion_net_node_s* o, const lion_net_node_s* node )
-{
-    if( o == node ) return true;
-
-    o->probe = true;
-    BFOR_EACH( i, &o->dnls )
+    if( o->mnode->ax0 >= 0 && o->mnode->ax1 >= 0 )
     {
-        if( node_s_occurs_in_downtree( o->dnls.data[ i ]->node, node ) )
-        {
-            o->probe = false;
-            return true;
-        }
+        bhvm_mcode_frame_s_track_vop_push_d
+        (
+            mcf,
+            TYPEOF_track_ap_recurrent_update,
+            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { o->mnode->ax1, o->mnode->ax0 }, 2 )
+        );
+
     }
-    o->probe = false;
-    return false;
+
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+
+static void node_s_recurrent_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf );
+static void node_s_recurrent_mcode_push_dp_phase1( lion_net_node_s* o,                bhvm_mcode_frame_s* mcf );
+static void node_s_recurrent_mcode_push_dp_phase2( lion_net_node_s* o,                bhvm_mcode_frame_s* mcf );
 
 static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
 {
@@ -1084,6 +1105,12 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
     if( !o->nop ) ERR_fa( "Operator is missing." );
     if( !o->result ) ERR_fa( "Result is missing." );
     if( !o->mnode ) ERR_fa( "mnode is missing." );
+
+    if( lion_net_node_s_is_recurrent( o ) )
+    {
+        node_s_recurrent_mcode_push_dp_phase0( o, up_index, mcf );
+        return;
+    }
 
     BLM_INIT();
 
@@ -1135,6 +1162,58 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+/** Recurrent dp phase0:
+ *  node_s_mcode_push_dp for recurrent nodes.
+ */
+static void node_s_recurrent_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
+{
+    BLM_INIT();
+
+    if( !o->flag ) // build gradient computation for this node
+    {
+        o->flag = true;
+
+        bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
+        lion_hmeta_s* m = BLM_CLONE( lion_hmeta_s, &o->result->h->m );
+        if( !m->name ) m->name = o->name;
+        m->pclass = TYPEOF_pclass_ag0;
+        bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );
+        sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_recurrent_zero_grad, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+        o->mnode->ag0 = idx;
+
+        // build this gradient from all downlinks ...
+        BFOR_EACH( i, &o->dnls )
+        {
+            lion_net_node_s* node = o->dnls.data[ i ]->node;
+
+            /// we do not accumulate downtree recurrences at this point
+            if( !node_s_occurs_in_downtree( node, o ) )
+            {
+                sz_t node_up_index = lion_net_node_s_up_index( node, o );
+                ASSERT( node_up_index >= 0 );
+                node_s_mcode_push_dp( node, node_up_index, mcf );
+            }
+        }
+
+    }
+
+    if( up_index == 1 )
+    {
+        lion_net_node_s* node1 = o->upls.data[ 1 ]->node;
+        bhvm_vop_ar1_identity_dp_s* identity_dp = bhvm_vop_ar1_identity_dp_s_create();
+        identity_dp->i.v[ 0 ] = o->mnode->ag0;
+        identity_dp->i.v[ 1 ] = node1->mnode->ag1 >= 0 ? node1->mnode->ag1 : node1->mnode->ag0;
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, ( bhvm_vop* )identity_dp );
+    }
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 static void node_s_recurrent_mcode_push_dp_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( o );
@@ -1143,16 +1222,6 @@ static void node_s_recurrent_mcode_push_dp_phase1( lion_net_node_s* o, bhvm_mcod
     ASSERT( lion_nop_a_is_recurrent( o->nop ) );
 
     BLM_INIT();
-
-    bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
-
-    BFOR_EACH( i, &o->upls )
-    {
-        lion_net_node_s* node = o->upls.data[ i ]->node;
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->mnode->ax0 );
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, node->mnode->ag0 );
-    }
-    bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->mnode->ax0 );
 
     {
         bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
@@ -1172,11 +1241,12 @@ static void node_s_recurrent_mcode_push_dp_phase1( lion_net_node_s* o, bhvm_mcod
         lion_net_node_s* node = o->dnls.data[ i ]->node;
 
         /// we only accumulate downtree recurrences at this point
-        if( !node_s_occurs_in_downtree( node, o ) ) continue;
-
-        sz_t node_up_index = lion_net_node_s_up_index( node, o );
-        ASSERT( node_up_index >= 0 );
-        node_s_mcode_push_dp( node, node_up_index, mcf );
+        if( node_s_occurs_in_downtree( node, o ) )
+        {
+            sz_t node_up_index = lion_net_node_s_up_index( node, o );
+            ASSERT( node_up_index >= 0 );
+            node_s_mcode_push_dp( node, node_up_index, mcf );
+        }
     }
 
     BLM_DOWN();
@@ -1204,14 +1274,12 @@ void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf 
     ASSERT( lion_net_cell_s_is_consistent( o ) );
 
     lion_net_node_adl_s* recurrent_adl = BLM_CREATE( lion_net_node_adl_s );
-    BFOR_EACH( i, &o->body )
+    BFOR_EACH( i, &o->body ) if( o->body.data[ i ]->nop )
     {
-        lion_net_node_s* node = o->body.data[ i ];
-        if( !( node->nop && lion_nop_a_is_recurrent( node->nop ) ) ) continue;
-        lion_net_node_adl_s_push_d( recurrent_adl, bcore_fork( node ) );
+        if( lion_nop_a_is_recurrent( o->body.data[ i ]->nop ) ) lion_net_node_adl_s_push_d( recurrent_adl, bcore_fork( o->body.data[ i ] ) );
     }
 
-    for( sz_t i = 0; i < o->excs.size; i++ )
+    BFOR_EACH( i, &o->excs )
     {
         lion_net_node_s* node = o->excs.data[ i ];
         if( !node->result ) ERR_fa( "Unsolved node '#<sc_t>'\n", lion_ifnameof( node->name ) );
@@ -1239,22 +1307,16 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf,
     lion_net_node_adl_s* recurrent_adl = BLM_CREATE( lion_net_node_adl_s );
     lion_net_node_adl_s* adaptive_adl  = BLM_CREATE( lion_net_node_adl_s );
 
-    BFOR_EACH( i, &o->body )
+    BFOR_EACH( i, &o->body ) if( o->body.data[ i ]->nop )
     {
         lion_net_node_s* node = o->body.data[ i ];
-        if( !node->nop  ) continue;
         if( lion_nop_a_is_recurrent( node->nop ) ) lion_net_node_adl_s_push_d( recurrent_adl, bcore_fork( node ) );
         if( lion_nop_a_is_adaptive(  node->nop ) ) lion_net_node_adl_s_push_d( adaptive_adl,  bcore_fork( node ) );
     }
 
     if( entry_channels )
     {
-        BFOR_EACH( i, &o->encs )
-        {
-            lion_net_node_s* node = o->encs.data[ i ];
-            if( !node->nop ) continue;
-            node_s_mcode_push_dp( node, -1, mcf );
-        }
+        BFOR_EACH( i, &o->encs ) if( o->encs.data[ i ]->nop ) node_s_mcode_push_dp( o->encs.data[ i ], -1, mcf );
     }
 
     /// adaptive nodes

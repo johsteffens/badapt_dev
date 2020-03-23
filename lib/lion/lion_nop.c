@@ -651,65 +651,6 @@ bl_t lion_nop_ar2_recurrent_s_solve( const lion_nop_ar2_recurrent_s* o, lion_hol
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_nop_ar2_recurrent_s_mcode_push_ap_track
-(
-    const lion_nop_ar2_recurrent_s* o,
-    const lion_nop_solve_result_s* result,
-    const bhvm_vop_arr_ci_s* arr_ci,
-    bhvm_mcode_frame_s* mcf
-)
-{
-    bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap_recurrent_reset, bhvm_vop_t_create( TYPEOF_bhvm_vop_ar1_cpy_ay_s ), arr_ci );
-    bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap_setup, bhvm_vop_t_create( TYPEOF_bhvm_vop_ar1_cpy_ay_s ), arr_ci );
-    bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap,       bhvm_vop_t_create( TYPEOF_bhvm_vop_ar1_cpy_by_s ), arr_ci );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void lion_nop_ar2_recurrent_s_mcode_push_dp_track
-(
-    const lion_nop_ar2_recurrent_s* o,
-    const lion_nop_solve_result_s* result,
-    u0_t ch_id,
-    const bhvm_vop_arr_ci_s* arr_ci,
-    bhvm_mcode_frame_s* mcf
-)
-{
-    if( ch_id == 'b' )
-    {
-        bhvm_vop_ar1_identity_dp_s* identity_dp = bhvm_vop_ar1_identity_dp_s_create();
-        identity_dp->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci, 'z' );
-        identity_dp->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci, 'g' );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, ( bhvm_vop* )identity_dp );
-        //bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, identity_dp->i.v[ 0 ] ) );
-    }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-sz_t lion_nop_ar2_recurrent_s_mcode_push_dp_holor
-(
-    const lion_nop_ar2_recurrent_s* o,
-    const lion_nop_solve_result_s* result,
-    const bhvm_vop_arr_ci_s* arr_ci,
-    bhvm_mcode_frame_s* mcf
-)
-{
-    BLM_INIT();
-
-    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
-    lion_hmeta_s* m = &result->h->m;
-    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,               bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_recurrent_zero_grad, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve,              bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-
-    BLM_RETURNV( sz_t, idx );
-}
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 /**********************************************************************************************************************/
 // lion_nop_ar3_branch_s
 

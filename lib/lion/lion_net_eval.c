@@ -183,13 +183,20 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
 
     lion_frame_s_setup_from_source_adl( frame, source, adl_ap_en );
 
-    for( sz_t i = 0; i < o->recurrent_cycles; i++ ) lion_frame_s_run_ap_adl( frame, adl_ap_en, adl_ap_ex );
-
-    if( o->param.verbosity >= 10 )
+    for( sz_t i = 0; i < o->recurrent_cycles; i++ )
     {
-        bcore_sink_a_push_fa( o->param.log, "Begin microcode disassembly\n\n" );
-        lion_frame_s_disassemble_to_sink( frame, o->param.log );
-        bcore_sink_a_push_fa( o->param.log, "End microcode disassembly\n\n" );
+        lion_frame_s_run_ap_adl( frame, adl_ap_en, adl_ap_ex );
+
+        if( o->param.verbosity >= 2 )
+        {
+            bcore_sink_a_push_fa( o->param.log, "Output (cycle #pl3 {#<sz_t>}): ", i );
+            BFOR_EACH( j, adl_ap_ex )
+            {
+                bhvm_holor_s* h_hbo = adl_ap_ex->data[ j ];
+                bhvm_holor_s_brief_to_sink( h_hbo, o->param.log );
+                bcore_sink_a_push_fa( o->param.log, "#<sc_t>", j + 1 < adl_ap_ex->size ? ", " : "\n" );
+            }
+        }
     }
 
     BFOR_EACH( i, adl_ap_ex )
@@ -216,6 +223,13 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
             bcore_sink_a_push_fa( o->param.log, "Frame out channel '#<sz_t>':\n", i );
             bhvm_holor_s_to_sink_nl( h_hbo, o->param.log );
         }
+    }
+
+    if( o->param.verbosity >= 10 )
+    {
+        bcore_sink_a_push_fa( o->param.log, "\nBegin microcode disassembly\n\n" );
+        lion_frame_s_disassemble_to_sink( frame, o->param.log );
+        bcore_sink_a_push_fa( o->param.log, "End microcode disassembly\n\n" );
     }
 
     if( o->jacobian_test )
@@ -528,8 +542,9 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
         }
         else
         {
-            bcore_sink_a_push_fa( o->param.log, "Frame out channel '#<sz_t>':\n", i );
-            bhvm_holor_s_to_sink_nl( h_ex1, o->param.log );
+            bcore_sink_a_push_fa( o->param.log, "Output #pl5 {[#<sz_t>]}: ", i );
+            bhvm_holor_s_brief_to_sink( h_ex1, o->param.log );
+            bcore_sink_a_push_fa( o->param.log, "\n" );
         }
 
         {
@@ -539,9 +554,9 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
             {
                 st_s* msg = BLM_CREATE( st_s );
                 bcore_sink_a_push_fa( (bcore_sink*)msg, "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
-                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{frame_ur output} " );
+                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Output (frame_ur)} " );
                 bhvm_holor_s_brief_to_sink( h_ex1, (bcore_sink*)msg );
-                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{frame output} " );
+                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Output (frame)} " );
                 bhvm_holor_s_brief_to_sink( h_ex2, (bcore_sink*)msg );
                 ERR_fa( "#<st_s*>\n", msg );
             }
