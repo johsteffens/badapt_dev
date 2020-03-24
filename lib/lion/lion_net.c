@@ -1178,7 +1178,7 @@ static void node_s_recurrent_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_i
     if( up_index == 1 )
     {
         lion_net_node_s* node1 = o->upls.data[ 1 ]->node;
-        bhvm_vop_ar1_identity_dp_s* identity_dp = bhvm_vop_ar1_identity_dp_s_create();
+        bhvm_vop_ar1_acc_s* identity_dp = bhvm_vop_ar1_acc_s_create();
         identity_dp->i.v[ 0 ] = o->mnode->ag0;
         identity_dp->i.v[ 1 ] = node1->mnode->ag1 >= 0 ? node1->mnode->ag1 : node1->mnode->ag0;
         bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp, ( bhvm_vop* )identity_dp );

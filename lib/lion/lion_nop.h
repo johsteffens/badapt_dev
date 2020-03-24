@@ -345,7 +345,7 @@ group :ar1 = retrievable
             result->h->m.active = a[0]->m.active;
             result->settled = (result->h) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
+            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
     };
@@ -360,7 +360,7 @@ group :ar1 = retrievable
             bhvm_holor_s_set_type( &result->h->h, TYPEOF_f3_t );
             result->settled = ( result->h ) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
+            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
     };
@@ -375,7 +375,7 @@ group :ar1 = retrievable
             bhvm_holor_s_set_type( &result->h->h, TYPEOF_f2_t );
             result->settled = ( result->h ) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
+            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
     };
@@ -541,7 +541,7 @@ group :ar1 = retrievable
             result->h->m.active = a[0]->m.active;
             result->settled = (result->h) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
+            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
         func :: :mcode_push_dp_holor;
