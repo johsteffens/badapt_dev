@@ -344,7 +344,7 @@ group :ar1 = retrievable
             result->h->m.htp = a[0]->m.htp;
             result->h->m.active = a[0]->m.active;
             result->settled = (result->h) && !result->h->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
         };
@@ -359,7 +359,7 @@ group :ar1 = retrievable
             lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
             bhvm_holor_s_set_type( &result->h->h, TYPEOF_f3_t );
             result->settled = ( result->h ) && !result->h->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
         };
@@ -374,7 +374,7 @@ group :ar1 = retrievable
             lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
             bhvm_holor_s_set_type( &result->h->h, TYPEOF_f2_t );
             result->settled = ( result->h ) && !result->h->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
         };
@@ -540,7 +540,7 @@ group :ar1 = retrievable
             result->h->m.htp = a[0]->m.htp;
             result->h->m.active = a[0]->m.active;
             result->settled = (result->h) && !result->h->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
             return true;
         };

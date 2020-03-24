@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-24T12:44:18Z
+ *  Last File Update: 2020-03-24T13:25:51Z
  *
  *  Copyright and License of this File:
  *
@@ -268,7 +268,7 @@ bl_t lion_nop_ar1_identity_s_solve( const lion_nop_ar1_identity_s* o, lion_holor
     result->h->m.htp = a[0]->m.htp;
     result->h->m.active = a[0]->m.active;
     result->settled = (result->h) && !result->h->m.active;
-    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
     result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
     return true;
 }
@@ -287,7 +287,7 @@ bl_t lion_nop_ar1_f3_s_solve( const lion_nop_ar1_f3_s* o, lion_holor_s** a, lion
     lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
     bhvm_holor_s_set_type( &result->h->h, TYPEOF_f3_t );
     result->settled = ( result->h ) && !result->h->m.active;
-    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
     result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
     return true;
 }
@@ -306,7 +306,7 @@ bl_t lion_nop_ar1_f2_s_solve( const lion_nop_ar1_f2_s* o, lion_holor_s** a, lion
     lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
     bhvm_holor_s_set_type( &result->h->h, TYPEOF_f2_t );
     result->settled = ( result->h ) && !result->h->m.active;
-    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
     result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
     return true;
 }
@@ -514,7 +514,7 @@ bl_t lion_nop_ar1_output_s_solve( const lion_nop_ar1_output_s* o, lion_holor_s**
     result->h->m.htp = a[0]->m.htp;
     result->h->m.active = a[0]->m.active;
     result->settled = (result->h) && !result->h->m.active;
-    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_identity_s;
+    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
     result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_identity_dp_s;
     return true;
 }
@@ -1608,7 +1608,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2802265658 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1887728952 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

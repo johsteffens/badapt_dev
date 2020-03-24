@@ -933,7 +933,6 @@ static bl_t node_s_occurs_in_downtree( lion_net_node_s* o, const lion_net_node_s
 
 static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
 static void node_s_recurrent_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
-static void node_s_recurrent_mcode_push_ap_phase2( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
 
 static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
@@ -1023,15 +1022,23 @@ static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcod
         (
             mcf,
             TYPEOF_track_ap_setup,
-            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
+            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
         );
 
         bhvm_mcode_frame_s_track_vop_push_d
         (
             mcf,
             TYPEOF_track_ap_recurrent_reset,
-            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
+            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
         );
+
+        bhvm_mcode_frame_s_track_vop_push_d
+        (
+            mcf,
+            TYPEOF_track_ap_recurrent_update,
+            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_s_create() ), ( sz_t[] ) { o->mnode->ax1, o->mnode->ax0 }, 2 )
+        );
+
     }
 }
 
@@ -1056,31 +1063,9 @@ static void node_s_recurrent_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcod
         (
             mcf,
             TYPEOF_track_ap,
-            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
+            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
         );
     }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/** Recurrent ap phase2:
- *  This function is called after completion of phase1 for the entire network.
- *  Adds mcode copying ax1 into ax0.
- */
-static void node_s_recurrent_mcode_push_ap_phase2( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
-{
-    ASSERT( lion_net_node_s_is_recurrent( o ) );
-    if( !o->mnode ) return;
-
-    ASSERT( o->mnode->ax0 >= 0 );
-    ASSERT( o->mnode->ax1 >= 0 );
-
-    bhvm_mcode_frame_s_track_vop_push_d
-    (
-        mcf,
-        TYPEOF_track_ap_recurrent_update,
-        bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { o->mnode->ax1, o->mnode->ax0 }, 2 )
-    );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1278,7 +1263,6 @@ void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf 
 
     /// recurrent nodes phase 1, 2
     BFOR_EACH( i, recurrent_adl ) node_s_recurrent_mcode_push_ap_phase1( recurrent_adl->data[ i ], mcf );
-    BFOR_EACH( i, recurrent_adl ) node_s_recurrent_mcode_push_ap_phase2( recurrent_adl->data[ i ], mcf );
 
     lion_net_cell_s_clear_all_flags( o );
 
