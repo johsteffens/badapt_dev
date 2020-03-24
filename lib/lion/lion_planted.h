@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-23T16:23:46Z
+ *  Last File Update: 2020-03-24T12:44:17Z
  *
  *  Copyright and License of this File:
  *
@@ -1285,7 +1285,7 @@
 #define TYPEOF_lion_frame_ur_s 3391564507
 #define BETH_EXPAND_ITEM_lion_frame_ur_s \
   BCORE_DECLARE_OBJECT( lion_frame_ur_s ) \
-    {aware_t _;lion_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t rolled_hbase_size;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_dp;bhvm_mcode_track_adl_s* track_adl_ap_setup;bhvm_mcode_track_adl_s* track_adl_ap_shelve;bhvm_mcode_track_adl_s* track_adl_ap_recurrent_reset;lion_frame_hidx_ads_s hidx_ads_en;lion_frame_hidx_ads_s hidx_ads_ex;}; \
+    {aware_t _;lion_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t rolled_hbase_size;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_dp;bhvm_mcode_track_adl_s* track_adl_ap_setup;bhvm_mcode_track_adl_s* track_adl_ap_shelve;lion_frame_hidx_ads_s hidx_ads_en;lion_frame_hidx_ads_s hidx_ads_ex;}; \
   void lion_frame_ur_s_reset( lion_frame_ur_s* o ); \
   void lion_frame_ur_s_setup( lion_frame_ur_s* o ); \
   static inline void lion_frame_ur_s_shelve( lion_frame_ur_s* o ){lion_frame_ur_s_reset( o );} \

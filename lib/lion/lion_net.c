@@ -1002,16 +1002,19 @@ static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcod
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
         o->mnode->recurrent = true;
         o->mnode->adaptive  = lion_nop_a_is_adaptive( o->nop );
-    }
 
-    if( o->mnode->ax0 == -1 )
-    {
         o->mnode->ax0 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
+        o->mnode->ax1 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
 
-        lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
-        if( !hmeta->name ) hmeta->name = o->name;
-        hmeta->pclass   = TYPEOF_pclass_ax0;
-        bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
+        lion_hmeta_s* hmeta0 = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
+        lion_hmeta_s* hmeta1 = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax1 ];
+
+        hmeta0->name = hmeta1->name = o->name;
+        hmeta0->pclass = TYPEOF_pclass_ax0;
+        hmeta1->pclass = TYPEOF_pclass_ax1;
+
+        bhvm_mcode_node_s_attach( &hmeta0->mnode, bcore_fork( o->mnode ) );
+        bhvm_mcode_node_s_attach( &hmeta1->mnode, bcore_fork( o->mnode ) );
 
         lion_net_node_s* node = o->upls.data[ 0 ]->node;
         node_s_mcode_push_ap( node, mcf );
@@ -1019,15 +1022,15 @@ static void node_s_recurrent_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcod
         bhvm_mcode_frame_s_track_vop_push_d
         (
             mcf,
-            TYPEOF_track_ap_recurrent_reset,
-            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax0 }, 2 )
+            TYPEOF_track_ap_setup,
+            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
         );
 
         bhvm_mcode_frame_s_track_vop_push_d
         (
             mcf,
-            TYPEOF_track_ap_setup,
-            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax0 }, 2 )
+            TYPEOF_track_ap_recurrent_reset,
+            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { node->mnode->ax0, o->mnode->ax1 }, 2 )
         );
     }
 }
@@ -1043,17 +1046,9 @@ static void node_s_recurrent_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcod
     ASSERT( lion_net_node_s_is_recurrent( o ) );
     if( !o->mnode ) node_s_recurrent_mcode_push_ap_phase0( o, mcf );
 
-    ASSERT( o->mnode->ax0 >= 0 );
-
-    if( o->mnode->ax1 == -1 )
+    if( !o->flag )
     {
-        o->mnode->ax1 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
-
-        lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax1 ];
-        if( !hmeta->name ) hmeta->name = o->name;
-        hmeta->pclass   = TYPEOF_pclass_ax1;
-        bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
-
+        o->flag = true;
         lion_net_node_s* node = o->upls.data[ 1 ]->node;
         node_s_mcode_push_ap( node, mcf );
 
@@ -1080,17 +1075,12 @@ static void node_s_recurrent_mcode_push_ap_phase2( lion_net_node_s* o, bhvm_mcod
     ASSERT( o->mnode->ax0 >= 0 );
     ASSERT( o->mnode->ax1 >= 0 );
 
-    if( o->mnode->ax0 >= 0 && o->mnode->ax1 >= 0 )
-    {
-        bhvm_mcode_frame_s_track_vop_push_d
-        (
-            mcf,
-            TYPEOF_track_ap_recurrent_update,
-            bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { o->mnode->ax1, o->mnode->ax0 }, 2 )
-        );
-
-    }
-
+    bhvm_mcode_frame_s_track_vop_push_d
+    (
+        mcf,
+        TYPEOF_track_ap_recurrent_update,
+        bhvm_vop_a_set_index_arr( ( ( bhvm_vop* )bhvm_vop_ar1_cpy_ay_s_create() ), ( sz_t[] ) { o->mnode->ax1, o->mnode->ax0 }, 2 )
+    );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

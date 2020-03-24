@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-23T16:23:46Z
+ *  Last File Update: 2020-03-24T12:44:18Z
  *
  *  Copyright and License of this File:
  *
@@ -1520,7 +1520,6 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_s )
     "bhvm_mcode_track_adl_s => track_adl_dp;"
     "bhvm_mcode_track_adl_s => track_adl_ap_setup;"
     "bhvm_mcode_track_adl_s => track_adl_ap_shelve;"
-    "bhvm_mcode_track_adl_s => track_adl_ap_recurrent_reset;"
     "lion_frame_hidx_ads_s hidx_ads_en;"
     "lion_frame_hidx_ads_s hidx_ads_ex;"
     "func bcore_via_call:shelve;"
@@ -1609,7 +1608,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2942155248 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2802265658 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

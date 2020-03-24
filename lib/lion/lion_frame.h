@@ -246,7 +246,6 @@ stamp :ur = aware :
     bhvm_mcode_track_adl_s => track_adl_dp;
     bhvm_mcode_track_adl_s => track_adl_ap_setup;
     bhvm_mcode_track_adl_s => track_adl_ap_shelve;
-    bhvm_mcode_track_adl_s => track_adl_ap_recurrent_reset;
 
     /// unrolled hindex
     :hidx_ads_s hidx_ads_en;  // entry index
