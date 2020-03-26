@@ -164,7 +164,7 @@ stamp :frame  = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :frame_ur  = extending :std
+stamp :frame_cyclic  = extending :std
 {
     bl_t jacobian_test = true;
 };

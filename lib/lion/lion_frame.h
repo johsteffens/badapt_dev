@@ -207,7 +207,7 @@ stamp : = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :ur_custom_hmeta = aware :
+stamp :custom_hmeta = aware :
 {
     sz_t ur_slot;
     sz_t ur_src;
@@ -215,13 +215,8 @@ stamp :ur_custom_hmeta = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :ur_cross_idx     = aware bcore_array { sz_t []; };
-stamp :ur_cross_idx_ads = aware bcore_array { :ur_cross_idx_s []; };
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 /// frame specialized in unrolling (e.g. for cyclic networks)
-stamp :ur = aware :
+stamp :cyclic = aware :
 {
     /// setup parameters ...
 
@@ -277,18 +272,18 @@ void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, bhvm_holor_s** en )
 
 void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, bcore_sink* sink );
 
-void lion_frame_ur_s_setup_from_frame( lion_frame_ur_s* o, const lion_frame_s* frame, sz_t unroll_size );
+void lion_frame_cyclic_s_setup_from_frame( lion_frame_cyclic_s* o, const lion_frame_s* frame, sz_t unroll_size );
 
-void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* sink );
+void lion_frame_cyclic_s_disassemble_to_sink( const lion_frame_cyclic_s* o, bcore_sink* sink );
 
 /// resets all cyclic values to the initialization
-void lion_frame_ur_s_cyclic_reset( lion_frame_ur_s* o );
+void lion_frame_cyclic_s_cyclic_reset( lion_frame_cyclic_s* o );
 
 /// resets cyclic values; runs track_ap for all slots assuming all input/output holors are provided in sequence
-void lion_frame_ur_s_run_ap_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
+void lion_frame_cyclic_s_run_ap_adl_flat( lion_frame_cyclic_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
 
 ///  runs track_dp for all slots assuming all input/output holors are provided in sequence
-void lion_frame_ur_s_run_dp_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en );
+void lion_frame_cyclic_s_run_dp_adl_flat( lion_frame_cyclic_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en );
 
 #endif // TYPEOF_lion_frame
 

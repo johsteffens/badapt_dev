@@ -392,22 +392,22 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-/// lion_frame_ur_s
+/// lion_frame_cyclic_s
 
 /** Estimates jacobians for entry and exit channels of last axon pass, given epsilon.
  *  jac_mdl stores jacobians in the form [in-channels][out-channels]
  */
-static void frame_ur_s_estimate_jacobian_en( const lion_frame_ur_s* const_o, const bhvm_holor_adl_s* en, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl )
+static void frame_cyclic_s_estimate_jacobian_en( const lion_frame_cyclic_s* const_o, const bhvm_holor_adl_s* en, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl )
 {
     BLM_INIT();
 
-    lion_frame_ur_s* o = BLM_CLONE( lion_frame_ur_s, const_o );
+    lion_frame_cyclic_s* o = BLM_CLONE( lion_frame_cyclic_s, const_o );
     ASSERT( o->setup );
 
     bhvm_holor_adl_s* adl_en = BLM_CLONE( bhvm_holor_adl_s, en );
     bhvm_holor_adl_s* adl_ex = BLM_CREATE( bhvm_holor_adl_s );
     bhvm_holor_adl_s* adl_rf = BLM_CREATE( bhvm_holor_adl_s );
-    lion_frame_ur_s_run_ap_adl_flat( o, adl_en, adl_ex );
+    lion_frame_cyclic_s_run_ap_adl_flat( o, adl_en, adl_ex );
     bhvm_holor_adl_s_copy( adl_rf, adl_ex );
 
     bhvm_holor_mdl_s_clear( jac_mdl );
@@ -423,7 +423,7 @@ static void frame_ur_s_estimate_jacobian_en( const lion_frame_ur_s* const_o, con
         {
             f3_t v_en = bhvm_value_s_get_f3( &h_en->v, j );
             bhvm_value_s_set_f3( &h_en->v, j, v_en + epsilon );
-            lion_frame_ur_s_run_ap_adl_flat( o, adl_en, adl_ex );
+            lion_frame_cyclic_s_run_ap_adl_flat( o, adl_en, adl_ex );
             BFOR_SIZE( k, adl_ex->size )
             {
                 bhvm_holor_s* h_ex = adl_ex->data[ k ];
@@ -455,7 +455,7 @@ static void frame_ur_s_estimate_jacobian_en( const lion_frame_ur_s* const_o, con
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_ur_s* o, lion_net_eval_result_s* result )
+lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_frame_cyclic_s* o, lion_net_eval_result_s* result )
 {
     BLM_INIT();
 
@@ -497,11 +497,11 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
     sz_t unroll_size = adl_ap_en->size / frame->size_en;
     ASSERT( unroll_size * frame->size_en == adl_ap_en->size );
 
-    lion_frame_ur_s* frame_ur = BLM_CREATE( lion_frame_ur_s );
+    lion_frame_cyclic_s* frame_cyclic = BLM_CREATE( lion_frame_cyclic_s );
 
-    lion_frame_ur_s_setup_from_frame( frame_ur, frame, unroll_size );
+    lion_frame_cyclic_s_setup_from_frame( frame_cyclic, frame, unroll_size );
 
-    lion_frame_ur_s_run_ap_adl_flat( frame_ur, adl_ap_en, adl_ap_ex1 );
+    lion_frame_cyclic_s_run_ap_adl_flat( frame_cyclic, adl_ap_en, adl_ap_ex1 );
     bhvm_holor_adl_s_set_size( adl_ap_ex2, adl_ap_ex1->size );
     BFOR_EACH( i, adl_ap_ex1 ) adl_ap_ex2->data[ i ] = bhvm_holor_s_create();
 
@@ -516,7 +516,7 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
     if( o->param.verbosity >= 10 )
     {
         bcore_sink_a_push_fa( o->param.log, "Begin microcode disassembly\n\n" );
-        lion_frame_ur_s_disassemble_to_sink( frame_ur, o->param.log );
+        lion_frame_cyclic_s_disassemble_to_sink( frame_cyclic, o->param.log );
         bcore_sink_a_push_fa( o->param.log, "End microcode disassembly\n\n" );
     }
 
@@ -533,7 +533,7 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
             {
                 st_s* msg = BLM_CREATE( st_s );
                 bcore_sink_a_push_fa( (bcore_sink*)msg, "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
-                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{frame_ur output} " );
+                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{frame_cyclic output} " );
                 bhvm_holor_s_brief_to_sink( h_ex1, (bcore_sink*)msg );
                 bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{expected output} " );
                 bhvm_holor_s_brief_to_sink( h_out, (bcore_sink*)msg );
@@ -554,7 +554,7 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
             {
                 st_s* msg = BLM_CREATE( st_s );
                 bcore_sink_a_push_fa( (bcore_sink*)msg, "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
-                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Output (frame_ur)} " );
+                bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Output (frame_cyclic)} " );
                 bhvm_holor_s_brief_to_sink( h_ex1, (bcore_sink*)msg );
                 bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Output (frame)} " );
                 bhvm_holor_s_brief_to_sink( h_ex2, (bcore_sink*)msg );
@@ -583,7 +583,7 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
             }
         }
 
-        lion_frame_ur_s_run_dp_adl_flat( frame_ur, adl_dp_ex, adl_dp_en );
+        lion_frame_cyclic_s_run_dp_adl_flat( frame_cyclic, adl_dp_ex, adl_dp_en );
 
         if( o->param.verbosity >= 10 )
         {
@@ -603,7 +603,7 @@ lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_
         {
             if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "\nTesting #<sz_t> composite entry channels:\n", adl_ap_en->size );
 
-            frame_ur_s_estimate_jacobian_en( frame_ur, adl_ap_en, o->param.epsilon, mdl_jc );
+            frame_cyclic_s_estimate_jacobian_en( frame_cyclic, adl_ap_en, o->param.epsilon, mdl_jc );
 
             BFOR_SIZE( i, size_en )
             {

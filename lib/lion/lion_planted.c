@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-26T15:22:31Z
+ *  Last File Update: 2020-03-26T15:43:10Z
  *
  *  Copyright and License of this File:
  *
@@ -1425,7 +1425,7 @@ s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s*
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_ur_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_cyclic_s )
 "aware lion_net_eval"
 "{"
     "lion_net_eval_param_s param;"
@@ -1435,10 +1435,10 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_ur_s )
     "bl_t jacobian_test = true;"
 "}";
 
-s2_t lion_net_eval_frame_ur_s_main( lion_net_eval_frame_ur_s* o, const bcore_arr_st_s* args )
+s2_t lion_net_eval_frame_cyclic_s_main( lion_net_eval_frame_cyclic_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_frame_ur_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
+    lion_net_eval_result_s_resolve( lion_net_eval_frame_cyclic_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
@@ -1489,26 +1489,14 @@ void lion_frame_s_setup( lion_frame_s* o )
     o->setup = true;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_custom_hmeta_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_custom_hmeta_s )
 "aware lion_frame"
 "{"
     "sz_t ur_slot;"
     "sz_t ur_src;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_cross_idx_s )
-"aware bcore_array"
-"{"
-    "sz_t [];"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_cross_idx_ads_s )
-"aware bcore_array"
-"{"
-    "lion_frame_ur_cross_idx_s [];"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_ur_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_cyclic_s )
 "aware lion_frame"
 "{"
     "lion_frame_s => frame;"
@@ -1608,7 +1596,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2497373644 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 3467286961 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2139,10 +2127,10 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_frame_s_set_param );
             BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_frame_s_main );
             BCORE_REGISTER_OBJECT( lion_net_eval_frame_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_frame_ur_s_run );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_frame_ur_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_frame_ur_s_main );
-            BCORE_REGISTER_OBJECT( lion_net_eval_frame_ur_s );
+            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_frame_cyclic_s_run );
+            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_frame_cyclic_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_frame_cyclic_s_main );
+            BCORE_REGISTER_OBJECT( lion_net_eval_frame_cyclic_s );
             BCORE_REGISTER_SPECT( lion_net_eval );
 
             // --------------------------------------------------------------------
@@ -2153,13 +2141,11 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_frame_s_mutated );
             BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, lion_frame_s_copy_x );
             BCORE_REGISTER_OBJECT( lion_frame_s );
-            BCORE_REGISTER_OBJECT( lion_frame_ur_custom_hmeta_s );
-            BCORE_REGISTER_OBJECT( lion_frame_ur_cross_idx_s );
-            BCORE_REGISTER_OBJECT( lion_frame_ur_cross_idx_ads_s );
-            BCORE_REGISTER_FFUNC( bcore_via_call_shelve, lion_frame_ur_s_shelve );
-            BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_frame_ur_s_mutated );
-            BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, lion_frame_ur_s_copy_x );
-            BCORE_REGISTER_OBJECT( lion_frame_ur_s );
+            BCORE_REGISTER_OBJECT( lion_frame_custom_hmeta_s );
+            BCORE_REGISTER_FFUNC( bcore_via_call_shelve, lion_frame_cyclic_s_shelve );
+            BCORE_REGISTER_FFUNC( bcore_via_call_mutated, lion_frame_cyclic_s_mutated );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, lion_frame_cyclic_s_copy_x );
+            BCORE_REGISTER_OBJECT( lion_frame_cyclic_s );
             BCORE_REGISTER_TRAIT( lion_frame, bcore_inst );
 
             // group: lion_frame_hidx

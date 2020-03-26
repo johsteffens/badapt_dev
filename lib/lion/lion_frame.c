@@ -106,12 +106,10 @@ static void disassemble_hbase_to_sink( const bhvm_mcode_hbase_s* hbase, sz_t ind
         st_s_push_fa( msg, " #rn{.} ", sz_max( 0, 22 - msg->size ) );
 
         st_s_push_fa( msg, " #pln' '{#<sc_t>}", hname_length, sc_name );
-        if     ( mnode->adaptive  ) st_s_push_fa( msg, " adaptive " );
-        else if( mnode->cyclic ) st_s_push_fa( msg, " cyclic" );
-        else if( bhvm_mcode_hmeta_a_is_active(    hmeta ) ) st_s_push_fa( msg, " active   " );
-        else                                                st_s_push_fa( msg, "          " );
-
-        st_s_push_fa( msg, ":" );
+        if     ( mnode->adaptive  )                         st_s_push_fa( msg, " adaptive" );
+        else if( mnode->cyclic )                            st_s_push_fa( msg, " cyclic  " );
+        else if( bhvm_mcode_hmeta_a_is_active(    hmeta ) ) st_s_push_fa( msg, " active  " );
+        else                                                st_s_push_fa( msg, " const   " );
 
         st_s* st = BLM_CREATE( st_s );
         bhvm_holor_s_compact_to_sink( h, 12, ( bcore_sink* )st );
@@ -119,9 +117,9 @@ static void disassemble_hbase_to_sink( const bhvm_mcode_hbase_s* hbase, sz_t ind
         st_s_push_fa( msg, " #pn' '{#<st_s*>} ", hbrief_length, st );
 
         const bcore_inst* custom = bhvm_mcode_hmeta_a_get_custom( hmeta );
-        if( custom && *(aware_t*)custom == TYPEOF_lion_frame_ur_custom_hmeta_s )
+        if( custom && *(aware_t*)custom == TYPEOF_lion_frame_custom_hmeta_s )
         {
-            lion_frame_ur_custom_hmeta_s* custom_hmeta = ( lion_frame_ur_custom_hmeta_s* )custom;
+            lion_frame_custom_hmeta_s* custom_hmeta = ( lion_frame_custom_hmeta_s* )custom;
             st_s_push_fa( msg, " ur_slot #pl2 {#<sz_t>}", custom_hmeta->ur_slot );
         }
 
@@ -470,11 +468,11 @@ void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, bhvm_holor_s** en )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-/// frame_ur
+/// frame_cyclic
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_reset( lion_frame_ur_s* o )
+void lion_frame_cyclic_s_reset( lion_frame_cyclic_s* o )
 {
     if( !o->setup ) return;
     if( !o->frame ) return;
@@ -494,7 +492,7 @@ void lion_frame_ur_s_reset( lion_frame_ur_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_setup( lion_frame_ur_s* o )
+void lion_frame_cyclic_s_setup( lion_frame_cyclic_s* o )
 {
     if( o->setup ) return;
     if( !o->frame ) return;
@@ -531,7 +529,7 @@ void lion_frame_ur_s_setup( lion_frame_ur_s* o )
         if( !bhvm_mcode_hmeta_a_is_rollable( hbase->hmeta_adl.data[ src_idx ] ) ) bcore_arr_sz_s_push( ur_idx_arr, src_idx );
     }
 
-    lion_frame_ur_custom_hmeta_s* custom = BLM_CREATE( lion_frame_ur_custom_hmeta_s );
+    lion_frame_custom_hmeta_s* custom = BLM_CREATE( lion_frame_custom_hmeta_s );
 
     bhvm_mcode_track_s* track_ap_prev = NULL;
 
@@ -590,17 +588,17 @@ void lion_frame_ur_s_setup( lion_frame_ur_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_setup_from_frame( lion_frame_ur_s* o, const lion_frame_s* frame, sz_t unroll_size )
+void lion_frame_cyclic_s_setup_from_frame( lion_frame_cyclic_s* o, const lion_frame_s* frame, sz_t unroll_size )
 {
-    lion_frame_ur_s_reset( o );
+    lion_frame_cyclic_s_reset( o );
     lion_frame_s_attach( &o->frame, lion_frame_s_clone( frame ) );
     o->unroll_size = unroll_size;
-    lion_frame_ur_s_setup( o );
+    lion_frame_cyclic_s_setup( o );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_ur_s* lion_frame_ur_s_run_ap( lion_frame_ur_s* o, const bhvm_holor_s** en, bhvm_holor_s** ex )
+lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap( lion_frame_cyclic_s* o, const bhvm_holor_s** en, bhvm_holor_s** ex )
 {
     ASSERT( o->frame );
     assert( o->setup );
@@ -644,16 +642,16 @@ lion_frame_ur_s* lion_frame_ur_s_run_ap( lion_frame_ur_s* o, const bhvm_holor_s*
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_ur_s* lion_frame_ur_s_run_ap_adl( lion_frame_ur_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex )
+lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap_adl( lion_frame_cyclic_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex )
 {
-    if( ex && ex->size != lion_frame_ur_s_get_size_ex( o ) ) bhvm_holor_adl_s_set_size( ex, lion_frame_ur_s_get_size_ex( o ) );
+    if( ex && ex->size != lion_frame_cyclic_s_get_size_ex( o ) ) bhvm_holor_adl_s_set_size( ex, lion_frame_cyclic_s_get_size_ex( o ) );
     BFOR_EACH( i, ex ) if( !ex->data[ i ] ) ex->data[ i ] = bhvm_holor_s_create();
-    return lion_frame_ur_s_run_ap( o, en ? ( const bhvm_holor_s** )en->data : NULL, ex ? ( bhvm_holor_s** ) ex->data : NULL );
+    return lion_frame_cyclic_s_run_ap( o, en ? ( const bhvm_holor_s** )en->data : NULL, ex ? ( bhvm_holor_s** ) ex->data : NULL );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* sink )
+void lion_frame_cyclic_s_disassemble_to_sink( const lion_frame_cyclic_s* o, bcore_sink* sink )
 {
     BLM_INIT();
 
@@ -732,7 +730,7 @@ void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_cyclic_reset( lion_frame_ur_s* o )
+void lion_frame_cyclic_s_cyclic_reset( lion_frame_cyclic_s* o )
 {
     bhvm_mcode_frame_s_track_run( o->frame->mcf, TYPEOF_track_ap_cyclic_reset );
     o->unroll_index = 0;
@@ -740,10 +738,10 @@ void lion_frame_ur_s_cyclic_reset( lion_frame_ur_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_run_ap_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex )
+void lion_frame_cyclic_s_run_ap_adl_flat( lion_frame_cyclic_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex )
 {
     ASSERT( o->frame );
-    lion_frame_ur_s_cyclic_reset( o );
+    lion_frame_cyclic_s_cyclic_reset( o );
     sz_t size_en = lion_frame_s_get_size_en( o->frame );
     sz_t size_ex = lion_frame_s_get_size_ex( o->frame );
 
@@ -754,14 +752,14 @@ void lion_frame_ur_s_run_ap_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s
     {
         ASSERT( i * size_en < en->size );
         ASSERT( ex ? ( i * size_ex < ex->size ) : true);
-        lion_frame_ur_s_run_ap( o, ( const bhvm_holor_s** )( en->data + i * size_en ), ex ? ( ex->data + i * size_ex ) : NULL );
+        lion_frame_cyclic_s_run_ap( o, ( const bhvm_holor_s** )( en->data + i * size_en ), ex ? ( ex->data + i * size_ex ) : NULL );
     }
 
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_run_dp_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en )
+void lion_frame_cyclic_s_run_dp_adl_flat( lion_frame_cyclic_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en )
 {
     ASSERT( o->frame );
     assert( o->setup );

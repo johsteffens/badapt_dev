@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-26T15:22:31Z
+ *  Last File Update: 2020-03-26T15:43:10Z
  *
  *  Copyright and License of this File:
  *
@@ -1168,13 +1168,13 @@
   lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* o, lion_net_eval_result_s* result ); \
   static inline void lion_net_eval_frame_s_set_param( lion_net_eval_frame_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
   s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args );
-#define TYPEOF_lion_net_eval_frame_ur_s 2096110884
-#define BETH_EXPAND_ITEM_lion_net_eval_frame_ur_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_frame_ur_s ) \
+#define TYPEOF_lion_net_eval_frame_cyclic_s 3545084104
+#define BETH_EXPAND_ITEM_lion_net_eval_frame_cyclic_s \
+  BCORE_DECLARE_OBJECT( lion_net_eval_frame_cyclic_s ) \
     {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;}; \
-  lion_net_eval_result_s* lion_net_eval_frame_ur_s_run( const lion_net_eval_frame_ur_s* o, lion_net_eval_result_s* result ); \
-  static inline void lion_net_eval_frame_ur_s_set_param( lion_net_eval_frame_ur_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_frame_ur_s_main( lion_net_eval_frame_ur_s* o, const bcore_arr_st_s* args );
+  lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_frame_cyclic_s* o, lion_net_eval_result_s* result ); \
+  static inline void lion_net_eval_frame_cyclic_s_set_param( lion_net_eval_frame_cyclic_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
+  s2_t lion_net_eval_frame_cyclic_s_main( lion_net_eval_frame_cyclic_s* o, const bcore_arr_st_s* args );
 #define BETH_EXPAND_GROUP_lion_net_eval \
   BCORE_FORWARD_OBJECT( lion_net_eval ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_result_s ); \
@@ -1183,7 +1183,7 @@
   BCORE_FORWARD_OBJECT( lion_net_eval_arr_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_set_s ); \
   BCORE_FORWARD_OBJECT( lion_net_eval_frame_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_frame_ur_s ); \
+  BCORE_FORWARD_OBJECT( lion_net_eval_frame_cyclic_s ); \
   typedef lion_net_eval_result_s* (*lion_net_eval_run)( const lion_net_eval* o, lion_net_eval_result_s* result ); \
   typedef void (*lion_net_eval_set_param)( lion_net_eval* o, const lion_net_eval_param_s* param ); \
   BCORE_DECLARE_SPECT( lion_net_eval ) \
@@ -1206,7 +1206,7 @@
   BETH_EXPAND_ITEM_lion_net_eval_arr_s \
   BETH_EXPAND_ITEM_lion_net_eval_set_s \
   BETH_EXPAND_ITEM_lion_net_eval_frame_s \
-  BETH_EXPAND_ITEM_lion_net_eval_frame_ur_s
+  BETH_EXPAND_ITEM_lion_net_eval_frame_cyclic_s
 
 /**********************************************************************************************************************/
 // source: lion_frame.h
@@ -1250,66 +1250,34 @@
   lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhvm_holor_s** en ); \
   lion_frame_s* lion_frame_s_run_ap_adl( lion_frame_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex ); \
   lion_frame_s* lion_frame_s_run_dp_adl( lion_frame_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en );
-#define TYPEOF_lion_frame_ur_custom_hmeta_s 3124701101
-#define BETH_EXPAND_ITEM_lion_frame_ur_custom_hmeta_s \
-  BCORE_DECLARE_OBJECT( lion_frame_ur_custom_hmeta_s ) \
+#define TYPEOF_lion_frame_custom_hmeta_s 420203025
+#define BETH_EXPAND_ITEM_lion_frame_custom_hmeta_s \
+  BCORE_DECLARE_OBJECT( lion_frame_custom_hmeta_s ) \
     {aware_t _;sz_t ur_slot;sz_t ur_src;};
-#define TYPEOF_lion_frame_ur_cross_idx_s 4020731920
-#define BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_s \
-  BCORE_DECLARE_OBJECT( lion_frame_ur_cross_idx_s ) \
-    {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( sz_t, );}; \
-  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_s_set_space( lion_frame_ur_cross_idx_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, size ); return o; } \
-  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_s_set_size( lion_frame_ur_cross_idx_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, size ); return o; } \
-  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_s_clear( lion_frame_ur_cross_idx_s* o ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, 0 ); return o; } \
-  static inline sz_t* lion_frame_ur_cross_idx_s_push_c( lion_frame_ur_cross_idx_s* o, const sz_t* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, sr_twc( TYPEOF_sz_t, v ) ); return &o->data[ o->size - 1 ]; } \
-  static inline sz_t* lion_frame_ur_cross_idx_s_push_d( lion_frame_ur_cross_idx_s* o,       sz_t* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, sr_tsd( TYPEOF_sz_t, v ) ); return &o->data[ o->size - 1 ]; } \
-  static inline sz_t* lion_frame_ur_cross_idx_s_push( lion_frame_ur_cross_idx_s* o ) \
-  { \
-      bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_s, ( bcore_array* )o, sr_null() ); \
-      return &o->data[ o->size - 1 ]; \
-  }
-#define TYPEOF_lion_frame_ur_cross_idx_ads_s 3812010329
-#define BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_ads_s \
-  BCORE_DECLARE_OBJECT( lion_frame_ur_cross_idx_ads_s ) \
-    {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( lion_frame_ur_cross_idx_s, );}; \
-  static inline lion_frame_ur_cross_idx_ads_s* lion_frame_ur_cross_idx_ads_s_set_space( lion_frame_ur_cross_idx_ads_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, size ); return o; } \
-  static inline lion_frame_ur_cross_idx_ads_s* lion_frame_ur_cross_idx_ads_s_set_size( lion_frame_ur_cross_idx_ads_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, size ); return o; } \
-  static inline lion_frame_ur_cross_idx_ads_s* lion_frame_ur_cross_idx_ads_s_clear( lion_frame_ur_cross_idx_ads_s* o ) { bcore_array_t_set_space( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, 0 ); return o; } \
-  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_ads_s_push_c( lion_frame_ur_cross_idx_ads_s* o, const lion_frame_ur_cross_idx_s* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, sr_twc( TYPEOF_lion_frame_ur_cross_idx_s, v ) ); return &o->data[ o->size - 1 ]; } \
-  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_ads_s_push_d( lion_frame_ur_cross_idx_ads_s* o,       lion_frame_ur_cross_idx_s* v ) { bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, sr_tsd( TYPEOF_lion_frame_ur_cross_idx_s, v ) ); return &o->data[ o->size - 1 ]; } \
-  static inline lion_frame_ur_cross_idx_s* lion_frame_ur_cross_idx_ads_s_push( lion_frame_ur_cross_idx_ads_s* o ) \
-  { \
-      bcore_array_t_push( TYPEOF_lion_frame_ur_cross_idx_ads_s, ( bcore_array* )o, sr_null() ); \
-      return &o->data[ o->size - 1 ]; \
-  }
-#define TYPEOF_lion_frame_ur_s 3391564507
-#define BETH_EXPAND_ITEM_lion_frame_ur_s \
-  BCORE_DECLARE_OBJECT( lion_frame_ur_s ) \
+#define TYPEOF_lion_frame_cyclic_s 3706646511
+#define BETH_EXPAND_ITEM_lion_frame_cyclic_s \
+  BCORE_DECLARE_OBJECT( lion_frame_cyclic_s ) \
     {aware_t _;lion_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t rolled_hbase_size;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_dp;bhvm_mcode_track_adl_s* track_adl_ap_setup;bhvm_mcode_track_adl_s* track_adl_ap_shelve;lion_frame_hidx_ads_s hidx_ads_en;lion_frame_hidx_ads_s hidx_ads_ex;}; \
-  void lion_frame_ur_s_reset( lion_frame_ur_s* o ); \
-  void lion_frame_ur_s_setup( lion_frame_ur_s* o ); \
-  static inline void lion_frame_ur_s_shelve( lion_frame_ur_s* o ){lion_frame_ur_s_reset( o );} \
-  static inline void lion_frame_ur_s_mutated( lion_frame_ur_s* o ){if( o->setup ) { lion_frame_ur_s_reset( o ); lion_frame_ur_s_setup( o ); }} \
-  static inline void lion_frame_ur_s_copy_x( lion_frame_ur_s* o ){if( o->setup ) { lion_frame_ur_s_reset( o ); lion_frame_ur_s_setup( o ); }} \
-  static inline sz_t lion_frame_ur_s_get_size_en( const lion_frame_ur_s* o ){return lion_frame_s_get_size_en(  o->frame );} \
-  static inline sz_t lion_frame_ur_s_get_size_ex( const lion_frame_ur_s* o ){return lion_frame_s_get_size_ex(  o->frame );} \
-  static inline sz_t lion_frame_ur_s_get_size_ada( const lion_frame_ur_s* o ){return lion_frame_s_get_size_ada( o->frame );} \
-  lion_frame_ur_s* lion_frame_ur_s_run_ap( lion_frame_ur_s* o, const bhvm_holor_s** en, bhvm_holor_s** ex ); \
-  lion_frame_ur_s* lion_frame_ur_s_run_ap_adl( lion_frame_ur_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
+  void lion_frame_cyclic_s_reset( lion_frame_cyclic_s* o ); \
+  void lion_frame_cyclic_s_setup( lion_frame_cyclic_s* o ); \
+  static inline void lion_frame_cyclic_s_shelve( lion_frame_cyclic_s* o ){lion_frame_cyclic_s_reset( o );} \
+  static inline void lion_frame_cyclic_s_mutated( lion_frame_cyclic_s* o ){if( o->setup ) { lion_frame_cyclic_s_reset( o ); lion_frame_cyclic_s_setup( o ); }} \
+  static inline void lion_frame_cyclic_s_copy_x( lion_frame_cyclic_s* o ){if( o->setup ) { lion_frame_cyclic_s_reset( o ); lion_frame_cyclic_s_setup( o ); }} \
+  static inline sz_t lion_frame_cyclic_s_get_size_en( const lion_frame_cyclic_s* o ){return lion_frame_s_get_size_en(  o->frame );} \
+  static inline sz_t lion_frame_cyclic_s_get_size_ex( const lion_frame_cyclic_s* o ){return lion_frame_s_get_size_ex(  o->frame );} \
+  static inline sz_t lion_frame_cyclic_s_get_size_ada( const lion_frame_cyclic_s* o ){return lion_frame_s_get_size_ada( o->frame );} \
+  lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap( lion_frame_cyclic_s* o, const bhvm_holor_s** en, bhvm_holor_s** ex ); \
+  lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap_adl( lion_frame_cyclic_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
 #define BETH_EXPAND_GROUP_lion_frame \
   BCORE_FORWARD_OBJECT( lion_frame ); \
   BCORE_FORWARD_OBJECT( lion_frame_hidx ); \
   BCORE_FORWARD_OBJECT( lion_frame_s ); \
-  BCORE_FORWARD_OBJECT( lion_frame_ur_custom_hmeta_s ); \
-  BCORE_FORWARD_OBJECT( lion_frame_ur_cross_idx_s ); \
-  BCORE_FORWARD_OBJECT( lion_frame_ur_cross_idx_ads_s ); \
-  BCORE_FORWARD_OBJECT( lion_frame_ur_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_custom_hmeta_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_cyclic_s ); \
   BETH_EXPAND_GROUP_lion_frame_hidx \
   BETH_EXPAND_ITEM_lion_frame_s \
-  BETH_EXPAND_ITEM_lion_frame_ur_custom_hmeta_s \
-  BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_s \
-  BETH_EXPAND_ITEM_lion_frame_ur_cross_idx_ads_s \
-  BETH_EXPAND_ITEM_lion_frame_ur_s
+  BETH_EXPAND_ITEM_lion_frame_custom_hmeta_s \
+  BETH_EXPAND_ITEM_lion_frame_cyclic_s
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_frame_hidx
