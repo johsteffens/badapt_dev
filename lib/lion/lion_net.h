@@ -99,7 +99,7 @@ signature void set_nop_d( mutable, lion_nop* nop );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' bl_t is_recurrent( const ) = { return false; };
+feature 'a' bl_t is_cyclic( const ) = { return false; };
 
 stamp :node = aware :
 {
@@ -148,7 +148,7 @@ stamp :node = aware :
         lion_nop_a_attach( &o->nop, nop );
     };
 
-    func : :is_recurrent = { return ( o->mnode ) ? o->mnode->recurrent : lion_nop_a_is_recurrent( o->nop ); };
+    func : :is_cyclic = { return ( o->mnode ) ? o->mnode->cyclic : lion_nop_a_is_cyclic( o->nop ); };
 };
 
 stamp :node_adl = aware bcore_array { :node_s => []; };

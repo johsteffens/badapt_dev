@@ -64,7 +64,7 @@ stamp :hmeta = aware bhvm_mcode_hmeta
 
     func bhvm_mcode_hmeta : get_name     = { return o->name; };
     func bhvm_mcode_hmeta : get_pclass   = { return o->pclass; };
-    func bhvm_mcode_hmeta : is_rollable  = { return !o->active || o->mnode->adaptive || ( o->mnode->recurrent && o->pclass == TYPEOF_pclass_ax1 ); };
+    func bhvm_mcode_hmeta : is_rollable  = { return !o->active || o->mnode->adaptive || ( o->mnode->cyclic && o->pclass == TYPEOF_pclass_ax1 ); };
     func bhvm_mcode_hmeta : is_active    = { return  o->active; };
 
     func bhvm_mcode_hmeta : get_custom = { return o->custom; };

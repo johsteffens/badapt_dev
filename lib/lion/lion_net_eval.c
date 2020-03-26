@@ -183,7 +183,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
 
     lion_frame_s_setup_from_source_adl( frame, source, adl_ap_en );
 
-    for( sz_t i = 0; i < o->recurrent_cycles; i++ )
+    for( sz_t i = 0; i < o->cyclic_cycles; i++ )
     {
         lion_frame_s_run_ap_adl( frame, adl_ap_en, adl_ap_ex );
 

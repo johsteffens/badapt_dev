@@ -708,15 +708,15 @@ void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source )
             cell->encs.data[ 0 ]->up = lion_sem_cell_s_evaluate_link( o, source );
             link->up = cell->excs.data[ 0 ];
         }
-        else if( bcore_source_a_parse_bl_fa( source, " #?'recurrent'" ) ) // A link is defined as recurrent by attaching recurrent operator with open input channel
+        else if( bcore_source_a_parse_bl_fa( source, " #?'cyclic'" ) ) // A link is defined as cyclic by attaching cyclic operator with open input channel
         {
             tp_t tp_name = lion_parse_name( source );
             lion_sem_link_s* link = lion_sem_cell_s_push_link( o );
             lion_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
             link->name = tp_name;
-            lion_nop_ar2_recurrent_s* nop_recurrent = lion_nop_ar2_recurrent_s_create();
-            nop_recurrent->name = tp_name;
-            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )nop_recurrent, source );
+            lion_nop_ar2_cyclic_s* nop_cyclic = lion_nop_ar2_cyclic_s_create();
+            nop_cyclic->name = tp_name;
+            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )nop_cyclic, source );
 
             bcore_source_a_parse_fa( source, " =" );
             cell->encs.data[ 0 ]->up = lion_sem_cell_s_evaluate_link( o, source );
@@ -747,7 +747,7 @@ void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source )
                 if( !link->up->cell ) bcore_source_a_parse_err_fa( source, "Link '#<sc_t>' has already been defined.", lion_ifnameof( tp_name ) );
                 lion_sem_cell_s* cell = link->up->cell;
 
-                if( cell->nop && cell->nop->_ == TYPEOF_lion_nop_ar2_recurrent_s )
+                if( cell->nop && cell->nop->_ == TYPEOF_lion_nop_ar2_cyclic_s )
                 {
                     if( !cell->encs.data[ 1 ]->up )
                     {
@@ -757,7 +757,7 @@ void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source )
                     }
                     else
                     {
-                        bcore_source_a_parse_err_fa( source, "Redefining a recurrent link '#<sc_t>'.", lion_ifnameof( tp_name ) );
+                        bcore_source_a_parse_err_fa( source, "Redefining a cyclic link '#<sc_t>'.", lion_ifnameof( tp_name ) );
                     }
                 }
                 else
@@ -972,7 +972,7 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                             if( link->up && link->up->cell )
                             {
                                 lion_sem_cell_s* cell = link->up->cell;
-                                if( cell->nop && cell->nop->_ == TYPEOF_lion_nop_ar2_recurrent_s )
+                                if( cell->nop && cell->nop->_ == TYPEOF_lion_nop_ar2_cyclic_s )
                                 {
                                     bcore_source_a_parse_err_fa( source, "Recurrent node '#<sc_t>' must not be used after updating.", name->sc );
                                 }

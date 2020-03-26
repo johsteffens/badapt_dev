@@ -56,8 +56,8 @@ stamp : = aware badapt_adaptive
 
     func ^ : arc_to_sink;
     func ^ : minfer;
-
     func ^ : bgrad_adapt;
+
     // ==============================================================
 };
 

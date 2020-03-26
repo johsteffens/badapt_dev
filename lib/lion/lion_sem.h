@@ -75,12 +75,12 @@
         adaptive w_r = random( dim_h [ dimof( x ) [ # );
         adaptive b_r = dim_h [ #;
 
-        recurrent c = dim_h [ 0;
-        recurrent h = dim_h [ 0;
+        cyclic c = dim_h [ 0;
+        cyclic h = dim_h [ 0;
 
         l1 = layer( dim_h, x, ci = c, hi = h );
 
-        h = l1.ho; // updating a recurrent value ends its scope
+        h = l1.ho; // updating a cyclic value ends its scope
         c = l1.co;
 
         y = tanh( w_r * l1.ho + b_r );
@@ -100,7 +100,7 @@ TODO:
    - virtual machine: overhaul differentiating between micro- and macrocode
    -                  add macro operations operating on the frame
    -                  add macro operations controlling program flow
-   - recurrent: implement unrolled inference and bp_grad
+   - cyclic: implement unrolled inference and bp_grad
    - allow elementwise operators mix with scalars (like mul)
    - look for generally accepted offline problems for neural networks
    - parameterize adaptive (e.g. adaptive( min, max, additional cost ))
@@ -178,9 +178,9 @@ TODO:
  *    all downlinks.
  *
  *  TODO:
- *     - Store the recurrent update to a hidden holor associated with the recurrent node
- *     - After regular axon pass, copy all hidden recurrent holors to regular recurrent axons
- *     - Disallow explicit use of a recurrent variable after it has been updated. (This prevents surprising syntax)
+ *     - Store the cyclic update to a hidden holor associated with the cyclic node
+ *     - After regular axon pass, copy all hidden cyclic holors to regular cyclic axons
+ *     - Disallow explicit use of a cyclic variable after it has been updated. (This prevents surprising syntax)
  */
 
 /**********************************************************************************************************************/

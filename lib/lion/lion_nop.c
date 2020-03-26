@@ -618,17 +618,17 @@ sz_t lion_nop_ar2_order_dec_s_mcode_push_dp_holor( const lion_nop_ar2_order_dec_
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-// lion_nop_ar2_recurrent_s
+// lion_nop_ar2_cyclic_s
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bl_t lion_nop_ar2_recurrent_s_solve( const lion_nop_ar2_recurrent_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+bl_t lion_nop_ar2_cyclic_s_solve( const lion_nop_ar2_cyclic_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
 {
     if( a[0] )
     {
         lion_holor_s_attach( &result->h, lion_holor_s_create() );
-        result->settled        = false; // recurrent results never settle
-        result->h->m.active    = true;  // recurrent results are always active
+        result->settled        = false; // cyclic results never settle
+        result->h->m.active    = true;  // cyclic results are always active
         result->h->m.name = o->name;
 
         bhvm_holor_s* ha = &a[0]->h;

@@ -107,14 +107,14 @@ static void disassemble_hbase_to_sink( const bhvm_mcode_hbase_s* hbase, sz_t ind
 
         st_s_push_fa( msg, " #pln' '{#<sc_t>}", hname_length, sc_name );
         if     ( mnode->adaptive  ) st_s_push_fa( msg, " adaptive " );
-        else if( mnode->recurrent ) st_s_push_fa( msg, " recurrent" );
+        else if( mnode->cyclic ) st_s_push_fa( msg, " cyclic" );
         else if( bhvm_mcode_hmeta_a_is_active(    hmeta ) ) st_s_push_fa( msg, " active   " );
         else                                                st_s_push_fa( msg, "          " );
 
         st_s_push_fa( msg, ":" );
 
         st_s* st = BLM_CREATE( st_s );
-        bhvm_holor_s_brief_to_sink( h, ( bcore_sink* )st );
+        bhvm_holor_s_compact_to_sink( h, 12, ( bcore_sink* )st );
 
         st_s_push_fa( msg, " #pn' '{#<st_s*>} ", hbrief_length, st );
 
@@ -173,9 +173,9 @@ void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, bcore_sink* sink )
     tp_t track_types [] =
     {
         TYPEOF_track_ap,
-        TYPEOF_track_ap_recurrent_update,
+        TYPEOF_track_ap_cyclic_update,
         TYPEOF_track_dp,
-        TYPEOF_track_dp_recurrent_zero_grad,
+        TYPEOF_track_dp_cyclic_zero_grad,
         TYPEOF_track_ap_setup,
         TYPEOF_track_dp_setup,
         TYPEOF_track_ap_shelve,
@@ -370,7 +370,7 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhv
         bhvm_value_s_cpy( &h_i->v, &h_m->v );
     }
 
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_recurrent_update );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_cyclic_update );
     bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap );
 
     if( ex )
@@ -560,7 +560,7 @@ void lion_frame_ur_s_setup( lion_frame_ur_s* o )
                 bhvm_mcode_hmeta* src_hmeta = hbase->hmeta_adl.data[ src_idx ];
                 bhvm_mcode_hmeta* dst_hmeta = hbase->hmeta_adl.data[ dst_idx ];
                 bhvm_mcode_node_s* src_node = bhvm_mcode_hmeta_a_get_node( src_hmeta );
-                if( src_node->recurrent ) rc_idx_map->data[ src_node->ax1 ] = dst_idx;
+                if( src_node->cyclic ) rc_idx_map->data[ src_node->ax1 ] = dst_idx;
 
                 bhvm_mcode_hmeta_a_set_custom( dst_hmeta, ( bcore_inst* )custom );
             }
@@ -621,7 +621,7 @@ lion_frame_ur_s* lion_frame_ur_s_run_ap( lion_frame_ur_s* o, const bhvm_holor_s*
         bhvm_value_s_cpy( &h_i->v, &h_m->v );
     }
 
-    if( o->unroll_index == 0 ) bhvm_mcode_frame_s_track_run( frame->mcf, TYPEOF_track_ap_recurrent_update );
+    if( o->unroll_index == 0 ) bhvm_mcode_frame_s_track_run( frame->mcf, TYPEOF_track_ap_cyclic_update );
     bhvm_mcode_track_s_run( track, hbase->holor_ads.data );
 
     if( ex )
@@ -676,7 +676,7 @@ void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* 
     bcore_sink_a_push_fa( sink, "Global Tracks:\n" );
 
     bhvm_mcode_track_s* track = NULL;
-    track = bhvm_mcode_frame_s_track_get( mcf, TYPEOF_track_ap_recurrent_reset );
+    track = bhvm_mcode_frame_s_track_get( mcf, TYPEOF_track_ap_cyclic_reset );
     if( track )
     {
 
@@ -685,7 +685,7 @@ void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* 
         bcore_sink_a_push_fa( sink, "\n" );
     }
 
-    track = bhvm_mcode_frame_s_track_get( mcf, TYPEOF_track_ap_recurrent_update );
+    track = bhvm_mcode_frame_s_track_get( mcf, TYPEOF_track_ap_cyclic_update );
     if( track )
     {
         bcore_sink_a_push_fa( sink, "#<sc_t>:\n", ifnameof( track->name ) );
@@ -732,9 +732,9 @@ void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_ur_s_recurrent_reset( lion_frame_ur_s* o )
+void lion_frame_ur_s_cyclic_reset( lion_frame_ur_s* o )
 {
-    bhvm_mcode_frame_s_track_run( o->frame->mcf, TYPEOF_track_ap_recurrent_reset );
+    bhvm_mcode_frame_s_track_run( o->frame->mcf, TYPEOF_track_ap_cyclic_reset );
     o->unroll_index = 0;
 }
 
@@ -743,7 +743,7 @@ void lion_frame_ur_s_recurrent_reset( lion_frame_ur_s* o )
 void lion_frame_ur_s_run_ap_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex )
 {
     ASSERT( o->frame );
-    lion_frame_ur_s_recurrent_reset( o );
+    lion_frame_ur_s_cyclic_reset( o );
     sz_t size_en = lion_frame_s_get_size_en( o->frame );
     sz_t size_ex = lion_frame_s_get_size_ex( o->frame );
 
@@ -775,7 +775,7 @@ void lion_frame_ur_s_run_dp_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s
     lion_frame_s* frame = o->frame;
     bhvm_mcode_hbase_s* hbase = frame->mcf->hbase;
 
-    lion_frame_s_run( frame, TYPEOF_track_dp_recurrent_zero_grad );
+    lion_frame_s_run( frame, TYPEOF_track_dp_cyclic_zero_grad );
 
     BFOR_SIZE( i, o->unroll_size )
     {

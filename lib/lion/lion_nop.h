@@ -61,21 +61,21 @@ name track_ap_shelve;
 /// shelving (if dp is used)
 name track_dp_shelve;
 
-/** Zeros gradient on recurrent node
- *  Used on unrolled recurrent network
+/** Zeros gradient on cyclic node
+ *  Used on unrolled cyclic network
  *  before applying dp on unrolled slots.
  */
-name track_dp_recurrent_zero_grad;
+name track_dp_cyclic_zero_grad;
 
-/** Resets recurrent value to initial state.
+/** Resets cyclic value to initial state.
  *  This operation is also part of ap_setup.
  */
-name track_ap_recurrent_reset;
+name track_ap_cyclic_reset;
 
-/** Updates recurrent (ax0) value
+/** Updates cyclic (ax0) value
  *  This operation is usually just a copy from ax1
  */
-name track_ap_recurrent_update;
+name track_ap_cyclic_update;
 
 /** Zeros gradients on adaptive nodes.
  *  Used on adaptive frame after adaptive nodes have been
@@ -147,7 +147,7 @@ feature 'a' void solve_node( mutable, lion_net_node_s* node, lion_net_node_adl_s
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' bl_t is_recurrent( const ) = { return false; };
+feature 'a' bl_t is_cyclic( const ) = { return false; };
 feature 'a' bl_t is_adaptive(  const ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -822,12 +822,12 @@ group :ar2 = retrievable
 
     // argument 'a' is initialization, 'b' is normal input
     // dendrite-pass treats 'b' -> 'y' as identity
-    stamp :recurrent =
+    stamp :cyclic =
     {
         tp_t name;
 
         func :: :priority = { return 8; };
-        func :: :is_recurrent = { return true; };
+        func :: :is_cyclic = { return true; };
         func :: :solve;
         func :: :solve_node;
         func :: :mcode_push_ap_track = { ERR_fa( "Not implemented." ); };

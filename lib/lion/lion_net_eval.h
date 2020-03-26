@@ -159,7 +159,7 @@ stamp :set = extending :std
 stamp :frame  = extending :std
 {
     bl_t jacobian_test = true;
-    sz_t recurrent_cycles = 1; // for testing
+    sz_t cyclic_cycles = 1; // for testing
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -220,14 +220,14 @@ stamp :ur_cross_idx_ads = aware bcore_array { :ur_cross_idx_s []; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// frame specialized in unrolling (e.g. for recurrent networks)
+/// frame specialized in unrolling (e.g. for cyclic networks)
 stamp :ur = aware :
 {
     /// setup parameters ...
 
     :s => frame;
 
-    /// number of unrolled cycles (useful for recurrent networks)
+    /// number of unrolled cycles (useful for cyclic networks)
     sz_t unroll_size = 1;
 
     /// state data ...
@@ -281,10 +281,10 @@ void lion_frame_ur_s_setup_from_frame( lion_frame_ur_s* o, const lion_frame_s* f
 
 void lion_frame_ur_s_disassemble_to_sink( const lion_frame_ur_s* o, bcore_sink* sink );
 
-/// resets all recurrent values to the initialization
-void lion_frame_ur_s_recurrent_reset( lion_frame_ur_s* o );
+/// resets all cyclic values to the initialization
+void lion_frame_ur_s_cyclic_reset( lion_frame_ur_s* o );
 
-/// resets recurrent values; runs track_ap for all slots assuming all input/output holors are provided in sequence
+/// resets cyclic values; runs track_ap for all slots assuming all input/output holors are provided in sequence
 void lion_frame_ur_s_run_ap_adl_flat( lion_frame_ur_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
 
 ///  runs track_dp for all slots assuming all input/output holors are provided in sequence

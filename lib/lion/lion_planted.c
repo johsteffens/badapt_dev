@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-24T14:00:17Z
+ *  Last File Update: 2020-03-26T15:22:31Z
  *
  *  Copyright and License of this File:
  *
@@ -101,7 +101,7 @@ BCORE_DEFINE_SPECT( bcore_inst, lion_nop )
     "feature aware lion_nop : eci = lion_nop_eci__;"
     "feature aware lion_nop : solve = lion_nop_solve__;"
     "feature aware lion_nop : solve_node = lion_nop_solve_node__;"
-    "feature aware lion_nop : is_recurrent = lion_nop_is_recurrent__;"
+    "feature aware lion_nop : is_cyclic = lion_nop_is_cyclic__;"
     "feature aware lion_nop : is_adaptive = lion_nop_is_adaptive__;"
     "feature aware lion_nop : settle = lion_nop_settle__;"
     "feature aware lion_nop : type_vop_ap;"
@@ -818,13 +818,13 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar2_order_dec_s )
     "func lion_nop:mcode_push_dp_holor;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar2_recurrent_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar2_cyclic_s )
 "aware lion_nop_ar2"
 "{"
     "func lion_nop:arity;"
     "tp_t name;"
     "func lion_nop:priority;"
-    "func lion_nop:is_recurrent;"
+    "func lion_nop:is_cyclic;"
     "func lion_nop:solve;"
     "func lion_nop:solve_node;"
     "func lion_nop:mcode_push_ap_track;"
@@ -1215,7 +1215,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_node_s )
     "aware lion_nop -> nop;"
     "lion_nop_solve_result_s => result;"
     "hidden bcore_source_point_s -> source_point;"
-    "func ^:is_recurrent;"
+    "func ^:is_cyclic;"
 "}";
 
 sz_t lion_net_node_s_up_index( const lion_net_node_s* o, const lion_net_node_s* node )
@@ -1281,7 +1281,7 @@ void lion_net_cell_s_clear_downlinks( lion_net_cell_s* o )
 BCORE_DEFINE_SPECT( bcore_inst, lion_net )
 "{"
     "bcore_spect_header_s header;"
-    "feature aware lion_net : is_recurrent = lion_net_is_recurrent__;"
+    "feature aware lion_net : is_cyclic = lion_net_is_cyclic__;"
 "}";
 
 /**********************************************************************************************************************/
@@ -1415,7 +1415,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_s )
     "func ^:set_param;"
     "func bcore_main:main;"
     "bl_t jacobian_test = true;"
-    "sz_t recurrent_cycles = 1;"
+    "sz_t cyclic_cycles = 1;"
 "}";
 
 s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args )
@@ -1608,7 +1608,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1197961956 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2497373644 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1637,9 +1637,9 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_NAME( track_dp_setup );
             BCORE_REGISTER_NAME( track_ap_shelve );
             BCORE_REGISTER_NAME( track_dp_shelve );
-            BCORE_REGISTER_NAME( track_dp_recurrent_zero_grad );
-            BCORE_REGISTER_NAME( track_ap_recurrent_reset );
-            BCORE_REGISTER_NAME( track_ap_recurrent_update );
+            BCORE_REGISTER_NAME( track_dp_cyclic_zero_grad );
+            BCORE_REGISTER_NAME( track_ap_cyclic_reset );
+            BCORE_REGISTER_NAME( track_ap_cyclic_update );
             BCORE_REGISTER_NAME( track_dp_adaptive_zero_grad );
             BCORE_REGISTER_FEATURE( lion_nop_arity );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_arity__ );
@@ -1656,8 +1656,8 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_solve__ );
             BCORE_REGISTER_FEATURE( lion_nop_solve_node );
             BCORE_REGISTER_FFUNC( lion_nop_solve_node, lion_nop_solve_node__ );
-            BCORE_REGISTER_FEATURE( lion_nop_is_recurrent );
-            BCORE_REGISTER_FFUNC( lion_nop_is_recurrent, lion_nop_is_recurrent__ );
+            BCORE_REGISTER_FEATURE( lion_nop_is_cyclic );
+            BCORE_REGISTER_FFUNC( lion_nop_is_cyclic, lion_nop_is_cyclic__ );
             BCORE_REGISTER_FEATURE( lion_nop_is_adaptive );
             BCORE_REGISTER_FFUNC( lion_nop_is_adaptive, lion_nop_is_adaptive__ );
             BCORE_REGISTER_FEATURE( lion_nop_settle );
@@ -2003,15 +2003,15 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_mcode_push_ap_holor, lion_nop_ar2_order_dec_s_mcode_push_ap_holor );
             BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_holor, lion_nop_ar2_order_dec_s_mcode_push_dp_holor );
             BCORE_REGISTER_OBJECT( lion_nop_ar2_order_dec_s );
-            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar2_recurrent_s_arity );
-            BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar2_recurrent_s_priority );
-            BCORE_REGISTER_FFUNC( lion_nop_is_recurrent, lion_nop_ar2_recurrent_s_is_recurrent );
-            BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar2_recurrent_s_solve );
-            BCORE_REGISTER_FFUNC( lion_nop_solve_node, lion_nop_ar2_recurrent_s_solve_node );
-            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_ap_track, lion_nop_ar2_recurrent_s_mcode_push_ap_track );
-            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_track, lion_nop_ar2_recurrent_s_mcode_push_dp_track );
-            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_holor, lion_nop_ar2_recurrent_s_mcode_push_dp_holor );
-            BCORE_REGISTER_OBJECT( lion_nop_ar2_recurrent_s );
+            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar2_cyclic_s_arity );
+            BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar2_cyclic_s_priority );
+            BCORE_REGISTER_FFUNC( lion_nop_is_cyclic, lion_nop_ar2_cyclic_s_is_cyclic );
+            BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar2_cyclic_s_solve );
+            BCORE_REGISTER_FFUNC( lion_nop_solve_node, lion_nop_ar2_cyclic_s_solve_node );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_ap_track, lion_nop_ar2_cyclic_s_mcode_push_ap_track );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_track, lion_nop_ar2_cyclic_s_mcode_push_dp_track );
+            BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_holor, lion_nop_ar2_cyclic_s_mcode_push_dp_holor );
+            BCORE_REGISTER_OBJECT( lion_nop_ar2_cyclic_s );
             BCORE_REGISTER_TRAIT( lion_nop_ar2, lion_nop );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_add_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_sub_s );
@@ -2030,7 +2030,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_ccat_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_order_inc_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_order_dec_s );
-            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_recurrent_s );
+            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_cyclic_s );
 
             // group: lion_nop_ar3
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar3_branch_s_arity );
@@ -2106,9 +2106,9 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             // group: lion_net
             BCORE_REGISTER_OBJECT( lion_net_link_s );
             BCORE_REGISTER_OBJECT( lion_net_links_s );
-            BCORE_REGISTER_FEATURE( lion_net_is_recurrent );
-            BCORE_REGISTER_FFUNC( lion_net_is_recurrent, lion_net_is_recurrent__ );
-            BCORE_REGISTER_FFUNC( lion_net_is_recurrent, lion_net_node_s_is_recurrent );
+            BCORE_REGISTER_FEATURE( lion_net_is_cyclic );
+            BCORE_REGISTER_FFUNC( lion_net_is_cyclic, lion_net_is_cyclic__ );
+            BCORE_REGISTER_FFUNC( lion_net_is_cyclic, lion_net_node_s_is_cyclic );
             BCORE_REGISTER_OBJECT( lion_net_node_s );
             BCORE_REGISTER_OBJECT( lion_net_node_adl_s );
             BCORE_REGISTER_OBJECT( lion_net_nodes_s );
