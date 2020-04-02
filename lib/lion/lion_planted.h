@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-26T15:43:10Z
+ *  Last File Update: 2020-04-02T12:10:49Z
  *
  *  Copyright and License of this File:
  *
@@ -432,7 +432,6 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_adaptive_s ) \
     {aware_t _;tp_t name;}; \
   static inline sz_t lion_nop_ar1_adaptive_s_arity( const lion_nop_ar1_adaptive_s* o ){return 1;} \
-  static inline sc_t lion_nop_ar1_adaptive_s_symbol( const lion_nop_ar1_adaptive_s* o ){return "adaptive";} \
   static inline sz_t lion_nop_ar1_adaptive_s_priority( const lion_nop_ar1_adaptive_s* o ){return 8;} \
   static inline bl_t lion_nop_ar1_adaptive_s_is_adaptive( const lion_nop_ar1_adaptive_s* o ){return true;} \
   bl_t lion_nop_ar1_adaptive_s_solve( const lion_nop_ar1_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -933,7 +932,7 @@
 #define TYPEOF_lion_sem_cell_s 2003406506
 #define BETH_EXPAND_ITEM_lion_sem_cell_s \
   BCORE_DECLARE_OBJECT( lion_sem_cell_s ) \
-    {aware_t _;tp_t name;lion_sem_links_s encs;lion_sem_links_s excs;lion_sem_body_s* body;lion_nop* nop;sz_t priority;lion_sem_cell_s* parent;bcore_source_point_s source_point;}; \
+    {aware_t _;tp_t name;lion_sem_links_s encs;lion_sem_links_s excs;lion_sem_body_s* body;lion_nop* nop;lion_sem_cell_s* wrapped_cell;sz_t priority;lion_sem_cell_s* parent;bcore_source_point_s source_point;}; \
   static inline tp_t lion_sem_cell_s_get_name( const lion_sem_cell_s* o ){return o->name;} \
   static inline sz_t lion_sem_cell_s_get_arity( const lion_sem_cell_s* o ){return lion_sem_links_s_count_open(       &o->encs       );} \
   static inline lion_sem_link_s* lion_sem_cell_s_get_enc_by_name( lion_sem_cell_s* o, tp_t name ){return lion_sem_links_s_get_link_by_name( &o->encs, name );} \
@@ -941,6 +940,7 @@
   static inline lion_sem_link_s* lion_sem_cell_s_get_enc_by_open( lion_sem_cell_s* o ){return lion_sem_links_s_get_link_by_up(   &o->encs, NULL );} \
   static inline lion_sem_link_s* lion_sem_cell_s_get_enc_by_dn( lion_sem_cell_s* o, lion_sem_link_s* dn ){return lion_sem_links_s_get_link_by_dn(   &o->encs, dn   );} \
   static inline sz_t lion_sem_cell_s_get_priority( const lion_sem_cell_s* o ){return o->priority;} \
+  static inline bl_t lion_sem_cell_s_is_wrapper( const lion_sem_cell_s* o ){return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL;} \
   lion_sem_cell_s* lion_sem_cell_s_get_cell_by_name( lion_sem_cell_s* o, tp_t name ); \
   lion_sem_link_s* lion_sem_cell_s_get_link_by_name( lion_sem_cell_s* o, tp_t name );
 #define TYPEOF_lion_sem_stack_flag_s 3570599949
@@ -1219,7 +1219,7 @@
 #define TYPEOF_lion_frame_s 1392811455
 #define BETH_EXPAND_ITEM_lion_frame_s \
   BCORE_DECLARE_OBJECT( lion_frame_s ) \
-    {aware_t _;bhvm_mcode_frame_s* mcf;bl_t setup;sz_t size_en;sz_t size_ex;lion_frame_hidx_s hidx_en;lion_frame_hidx_s hidx_ex;lion_frame_hidx_s hidx_ada;}; \
+    {aware_t _;bcore_sink* log;bhvm_mcode_frame_s* mcf;bl_t is_cyclic;bl_t setup;sz_t size_en;sz_t size_ex;lion_frame_hidx_s hidx_en;lion_frame_hidx_s hidx_ex;lion_frame_hidx_s hidx_ada;}; \
   void lion_frame_s_reset( lion_frame_s* o ); \
   void lion_frame_s_setup( lion_frame_s* o ); \
   static inline void lion_frame_s_shelve( lion_frame_s* o ){lion_frame_s_reset( o );} \

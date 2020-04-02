@@ -147,8 +147,8 @@ feature 'a' void solve_node( mutable, lion_net_node_s* node, lion_net_node_adl_s
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' bl_t is_cyclic( const ) = { return false; };
-feature 'a' bl_t is_adaptive(  const ) = { return false; };
+feature 'a' bl_t is_cyclic(   const ) = { return false; };
+feature 'a' bl_t is_adaptive( const ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -555,7 +555,6 @@ group :ar1 = retrievable
     {
         tp_t name;
 
-        func :: :symbol      = { return "adaptive"; };
         func :: :priority    = { return 8; };
         func :: :is_adaptive = { return true; };
 

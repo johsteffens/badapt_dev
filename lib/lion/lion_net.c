@@ -36,9 +36,16 @@
  *     node_out is set to the parent of the node referencing the cell.
  *     Returns 1 in case no match is found.
  *
- *  Returns 0 in case of success.
+ *  Returns 0 in case of success. !=0 is considered an error
  */
-s2_t lion_ctr_node_s_node_process( lion_ctr_node_s* o, lion_sem_cell_s* cell, bl_t enter, lion_ctr_node_s** node_out )
+s2_t lion_ctr_node_s_node_process
+(
+    lion_ctr_node_s* o,
+    lion_sem_cell_s* cell,
+    bl_t enter,
+    bl_t exit_through_wrapper,
+    lion_ctr_node_s** node_out
+)
 {
     lion_ctr_node_s* node = NULL;
     if( enter )
@@ -62,23 +69,50 @@ s2_t lion_ctr_node_s_node_process( lion_ctr_node_s* o, lion_sem_cell_s* cell, bl
     else
     {
         node = o;
-        while( node && node->cell != cell ) node = node->parent;
-        if( node && node->cell == cell )
+
         {
-            node = node->parent;
-            *node_out = node;
-            return 0;
-        }
-        else
-        {
-            return 1;
+            /** Descend tree until node->cell == cell.
+              * This part covers specific (rare) situations in which a link exits a cell without passing through its membrane
+              * It is unclear if this handling is sensitive. Probably all relevant cases are covered using exit_through_wrapper
+              * scheme.
+              */
+            while( node && node->cell != cell )
+            {
+                //bcore_msg_fa( "descending..." );
+                node = node->parent;
+            }
+
+            if( node && node->cell == cell )
+            {
+                node = node->parent;
+
+                if( exit_through_wrapper && node && lion_sem_cell_s_is_wrapper( node->cell ) )
+                {
+                    while( node && lion_sem_cell_s_is_wrapper( node->cell ) ) node = node->parent;
+                }
+
+                *node_out = node;
+                return 0;
+            }
+            else
+            {
+                return 1; // exiting from untraced cell
+            }
         }
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-s2_t lion_ctr_tree_s_tree_process( lion_ctr_tree_s* o, lion_sem_cell_s* cell, bl_t enter, lion_ctr_node_s* node_in, lion_ctr_node_s** node_out )
+s2_t lion_ctr_tree_s_tree_process
+(
+    lion_ctr_tree_s* o,
+    lion_sem_cell_s* cell,
+    bl_t enter,
+    bl_t exit_through_wrapper,
+    lion_ctr_node_s* node_in,
+    lion_ctr_node_s** node_out
+)
 {
     if( enter )
     {
@@ -99,7 +133,7 @@ s2_t lion_ctr_tree_s_tree_process( lion_ctr_tree_s* o, lion_sem_cell_s* cell, bl
         }
         else
         {
-            s2_t ret = lion_ctr_node_s_node_process( node_in, cell, enter, &node );
+            s2_t ret = lion_ctr_node_s_node_process( node_in, cell, enter, false, &node );
             if( ret ) return ret;
             if( node->id < 0 ) node->id = o->id_base++;
             *node_out = node;
@@ -108,7 +142,7 @@ s2_t lion_ctr_tree_s_tree_process( lion_ctr_tree_s* o, lion_sem_cell_s* cell, bl
     }
     else
     {
-        return lion_ctr_node_s_node_process( node_in, cell, enter, node_out );
+        return lion_ctr_node_s_node_process( node_in, cell, enter, exit_through_wrapper, node_out );
     }
 }
 
@@ -631,6 +665,8 @@ static void net_cell_s_from_sem_recursive
     lion_sem_cell_s* cell = link->cell;
     lion_sem_link_s* next_link = NULL;
 
+    sc_t cell_type = cell->nop ? "node" : cell->body ? "graph" : lion_sem_cell_s_is_wrapper( cell ) ? "wrapper" : "";
+
     if( depth > o->max_depth )
     {
         bcore_source_point_s_parse_err_fa( &cell->source_point, "Maximum depth '#<sz_t>' exceeded: This problem might be the result of an indefinite recursion.\n", o->max_depth );
@@ -638,10 +674,10 @@ static void net_cell_s_from_sem_recursive
 
     if( link->exit )
     {
-        bcore_source_point_s_parse_msg_to_sink_fa( &cell->source_point, log, "entering cell: '#<sc_t>' \n", lion_nameof( cell->name ) );
+        bcore_source_point_s_parse_msg_to_sink_fa( &cell->source_point, log, "entering #<sc_t>-cell: '#<sc_t>' \n", cell_type, lion_ifnameof( cell->name ) );
 
         // since we backtrace, a cell is entered through an 'exit' link
-        s2_t err = lion_ctr_tree_s_tree_process( ctr_tree, cell, true, ctr_node, &ctr_node );
+        s2_t err = lion_ctr_tree_s_tree_process( ctr_tree, cell, true, false, ctr_node, &ctr_node );
         if( err )
         {
             bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nEntering cell failed.", lion_ifnameof( name ) );
@@ -725,9 +761,12 @@ static void net_cell_s_from_sem_recursive
     }
     else
     {
-        if( log ) bcore_sink_a_push_fa( log, "exiting cell: '#<sc_t>' \n", lion_ifnameof( cell->name ) );
+        if( log ) bcore_sink_a_push_fa( log, "exiting #<sc_t>-cell: '#<sc_t>' \n", cell_type, lion_ifnameof( cell->name ) );
 
-        s2_t err = lion_ctr_tree_s_tree_process( ctr_tree, cell, false, ctr_node, &ctr_node );
+        bl_t exit_through_wrapper = link->up != NULL;
+
+        s2_t err = lion_ctr_tree_s_tree_process( ctr_tree, cell, false, exit_through_wrapper, ctr_node, &ctr_node );
+
         if( err )
         {
             if( err == 1 )
@@ -805,7 +844,7 @@ void lion_holor_s_from_sem_link( lion_holor_s* o, lion_sem_link_s* link, lion_se
     lion_sem_cell_s* cell = link->cell;
     lion_ctr_tree_s* tree = BLM_CREATE( lion_ctr_tree_s );
     lion_ctr_node_s* ctr_node = NULL;
-    lion_ctr_tree_s_tree_process( tree, root, true, ctr_node, &ctr_node );
+    lion_ctr_tree_s_tree_process( tree, root, true, false, ctr_node, &ctr_node );
     lion_net_cell_s* net_frame = BLM_CREATE( lion_net_cell_s );
     lion_net_node_s* up_node = BLM_CREATE( lion_net_node_s );
     up_node->name = link->name;
@@ -912,14 +951,15 @@ void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// node occurs in the downtree of o
-static bl_t node_s_occurs_in_downtree( lion_net_node_s* o, const lion_net_node_s* node )
+static bl_t node_s_recurses_in_downtree( lion_net_node_s* o, const lion_net_node_s* node )
 {
     if( o == node ) return true;
+    if( o->probe ) return false;
 
     o->probe = true;
     BFOR_EACH( i, &o->dnls )
     {
-        if( node_s_occurs_in_downtree( o->dnls.data[ i ]->node, node ) )
+        if( node_s_recurses_in_downtree( o->dnls.data[ i ]->node, node ) )
         {
             o->probe = false;
             return true;
@@ -1110,7 +1150,7 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
             lion_net_node_s* node = o->dnls.data[ i ]->node;
 
             /// we do not accumulate downtree recurrences at this point
-            if( lion_nop_a_is_cyclic( o->nop ) ) if( node_s_occurs_in_downtree( node, o ) ) continue;
+            if( lion_nop_a_is_cyclic( o->nop ) ) if( node_s_recurses_in_downtree( node, o ) ) continue;
 
             sz_t node_up_index = lion_net_node_s_up_index( node, o );
             ASSERT( node_up_index >= 0 );
@@ -1165,7 +1205,7 @@ static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_inde
             lion_net_node_s* node = o->dnls.data[ i ]->node;
 
             /// we do not accumulate downtree recurrences at this point
-            if( !node_s_occurs_in_downtree( node, o ) )
+            if( !node_s_recurses_in_downtree( node, o ) )
             {
                 sz_t node_up_index = lion_net_node_s_up_index( node, o );
                 ASSERT( node_up_index >= 0 );
@@ -1216,7 +1256,7 @@ static void node_s_cyclic_mcode_push_dp_phase1( lion_net_node_s* o, bhvm_mcode_f
         lion_net_node_s* node = o->dnls.data[ i ]->node;
 
         /// we only accumulate downtree recurrences at this point
-        if( node_s_occurs_in_downtree( node, o ) )
+        if( node_s_recurses_in_downtree( node, o ) )
         {
             sz_t node_up_index = lion_net_node_s_up_index( node, o );
             ASSERT( node_up_index >= 0 );

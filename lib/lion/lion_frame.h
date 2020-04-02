@@ -137,9 +137,12 @@ signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* 
 stamp : = aware :
 {
     /// pre-setup parameters
+    aware bcore_sink -> log;
 
     /// post-setup data
     bhvm_mcode_frame_s => mcf;
+
+    bl_t is_cyclic; // indicates that the underlying graph is cyclic
 
     /// frame has been setup
     bl_t setup;
@@ -215,14 +218,13 @@ stamp :custom_hmeta = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// frame specialized in unrolling (e.g. for cyclic networks)
+/// frame specialized in unrolling cyclic networks
 stamp :cyclic = aware :
 {
-    /// setup parameters ...
-
+    /// pre-setup parameters
     :s => frame;
 
-    /// number of unrolled cycles (useful for cyclic networks)
+    /// number of unrolled cycles
     sz_t unroll_size = 1;
 
     /// state data ...

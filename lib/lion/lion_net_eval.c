@@ -152,6 +152,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
     if( !o->param.src ) ERR_fa( "Source missing." );
 
     lion_frame_s* frame = BLM_CREATE( lion_frame_s );
+    if( o->param.verbosity >= 20 ) frame->log = bcore_fork( o->param.log );
 
     bcore_source* source = NULL;
 
@@ -220,8 +221,11 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
         }
         else
         {
-            bcore_sink_a_push_fa( o->param.log, "Frame out channel '#<sz_t>':\n", i );
-            bhvm_holor_s_to_sink_nl( h_hbo, o->param.log );
+            if( o->param.verbosity >= 0 )
+            {
+                bcore_sink_a_push_fa( o->param.log, "Frame out channel '#<sz_t>':\n", i );
+                bhvm_holor_s_to_sink_nl( h_hbo, o->param.log );
+            }
         }
     }
 
@@ -464,6 +468,7 @@ lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_fr
     if( !o->param.src ) ERR_fa( "Source missing." );
 
     lion_frame_s* frame = BLM_CREATE( lion_frame_s );
+    if( o->param.verbosity >= 20 ) frame->log = bcore_fork( o->param.log );
 
     bcore_source* source = NULL;
 
@@ -542,9 +547,12 @@ lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_fr
         }
         else
         {
-            bcore_sink_a_push_fa( o->param.log, "Output #pl5 {[#<sz_t>]}: ", i );
-            bhvm_holor_s_brief_to_sink( h_ex1, o->param.log );
-            bcore_sink_a_push_fa( o->param.log, "\n" );
+            if( o->param.verbosity >= 0 )
+            {
+                bcore_sink_a_push_fa( o->param.log, "Output #pl5 {[#<sz_t>]}: ", i );
+                bhvm_holor_s_brief_to_sink( h_ex1, o->param.log );
+                bcore_sink_a_push_fa( o->param.log, "\n" );
+            }
         }
 
         {

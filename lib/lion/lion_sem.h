@@ -321,13 +321,17 @@ signature :link_s* get_enc_by_dn(    mutable, :link_s* dn );
 signature :link_s* get_exc_by_name(  mutable, tp_t name );
 signature :cell_s* get_cell_by_name( mutable, tp_t name );
 
+signature bl_t is_wrapper( const );
+
 stamp :cell = aware :
 {
             tp_t       name;
            :links_s    encs; // entry channels
            :links_s    excs; // exit channels
            :body_s  => body;
-    aware lion_nop  -> nop;   // cell holds either operator (cell is a node) or body (cell is a graph) or neither (cell is a wrapper)
+    aware lion_nop  -> nop;          // cell holds either operator (cell is a node) or body (cell is a graph) or neither (cell is a wrapper)
+    private :cell_s -> wrapped_cell; // if cell is a wrapper, wrapped_cell is the cell being wrapped
+
             sz_t       priority = 10;
 
     private :cell_s* parent; // lexical parent
@@ -341,6 +345,7 @@ stamp :cell = aware :
     func : :get_enc_by_open = { return :links_s_get_link_by_up(   &o->encs, NULL ); };
     func : :get_enc_by_dn   = { return :links_s_get_link_by_dn(   &o->encs, dn   ); };
     func : :get_priority    = { return o->priority; };
+    func : :is_wrapper      = { return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL; };
 
     // search for a cell descends the tree
     func : :get_cell_by_name =

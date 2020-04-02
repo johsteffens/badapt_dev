@@ -378,6 +378,33 @@ void lion_sem_cell_s_wrap_cell( lion_sem_cell_s* o, lion_sem_cell_s* src )
 {
     ASSERT( !o->body );
     ASSERT( !o->nop  );
+    ASSERT( !o->wrapped_cell );
+
+//    lion_sem_cell_s* src1 = src;
+//    lion_sem_cell_s* src2 = src->wrapped_cell ? src->wrapped_cell : src1;
+//    o->wrapped_cell = src2;
+//    o->priority     = src2->priority;
+//
+//    lion_sem_links_s_set_size( &o->encs, src1->encs.size );
+//    lion_sem_links_s_set_size( &o->excs, src1->excs.size );
+//
+//    BFOR_EACH( i, &src->encs )
+//    {
+//        lion_sem_link_s* en1 = src1->encs.data[ i ];
+//        lion_sem_link_s* en2 = src2->encs.data[ i ];
+//
+//        ASSERT( !en2->up );
+//        o->encs.data[ i ] = lion_sem_link_s_create_setup( en2->name, en1->up, en2, o, false );
+//    }
+//
+//    BFOR_EACH( i, &src->excs )
+//    {
+//        lion_sem_link_s* ex2 = src2->excs.data[ i ];
+//        o->excs.data[ i ] = lion_sem_link_s_create_setup( ex2->name, ex2, NULL, o, true );
+//    }
+
+
+    o->wrapped_cell = src;
     o->priority = src->priority;
     lion_sem_links_s_set_size( &o->encs, lion_sem_cell_s_get_arity( src ) );
     lion_sem_links_s_set_size( &o->excs, src->excs.size );

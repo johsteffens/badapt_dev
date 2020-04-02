@@ -300,7 +300,7 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
     lion_sem_cell_s_parse( sem_frame, source );
 
     /// network cell
-    lion_net_cell_s_from_sem_cell( cell, sem_frame, input_op_create, ( vd_t )in, NULL );
+    lion_net_cell_s_from_sem_cell( cell, sem_frame, input_op_create, ( vd_t )in, o->log );
 
     lion_net_cell_s_mcode_push_ap( cell, o->mcf );
     lion_net_cell_s_mcode_push_dp( cell, o->mcf, true );
@@ -324,9 +324,11 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
     BFOR_EACH( i, &cell->body )
     {
         lion_net_node_s* node = cell->body.data[ i ];
-        if( node->nop && node->nop->_ == TYPEOF_lion_nop_ar0_adaptive_s )
+        if( node->nop )
         {
-            if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_ada, node->mnode->ax0 );
+            const bhvm_mcode_node_s* mnode = node->mnode;
+            if( mnode->adaptive ) if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_ada, node->mnode->ax0 );
+            if( mnode->cyclic ) o->is_cyclic = true;
         }
     }
 
@@ -393,6 +395,7 @@ lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhv
 {
     ASSERT( o->setup );
     ASSERT( o->mcf );
+    ASSERT( !o->is_cyclic );
 
     bhvm_mcode_hbase_s* hbase = o->mcf->hbase;
     const lion_frame_hidx_s* hidx_en = &o->hidx_en;

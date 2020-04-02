@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-03-26T15:43:10Z
+ *  Last File Update: 2020-04-02T12:10:49Z
  *
  *  Copyright and License of this File:
  *
@@ -524,7 +524,6 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_adaptive_s )
 "{"
     "func lion_nop:arity;"
     "tp_t name;"
-    "func lion_nop:symbol;"
     "func lion_nop:priority;"
     "func lion_nop:is_adaptive;"
     "func lion_nop:solve;"
@@ -1131,6 +1130,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_sem_cell_s )
     "lion_sem_links_s excs;"
     "lion_sem_body_s => body;"
     "aware lion_nop -> nop;"
+    "private lion_sem_cell_s -> wrapped_cell;"
     "sz_t priority = 10;"
     "private lion_sem_cell_s* parent;"
     "hidden bcore_source_point_s source_point;"
@@ -1459,7 +1459,9 @@ BCORE_DEFINE_SPECT( bcore_inst, lion_net_eval )
 BCORE_DEFINE_OBJECT_INST_P( lion_frame_s )
 "aware lion_frame"
 "{"
+    "aware bcore_sink -> log;"
     "bhvm_mcode_frame_s => mcf;"
+    "bl_t is_cyclic;"
     "bl_t setup;"
     "sz_t size_en;"
     "sz_t size_ex;"
@@ -1596,7 +1598,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 3467286961 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 102678694 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1814,7 +1816,6 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_mcode_push_dp_holor, lion_nop_ar1_output_s_mcode_push_dp_holor );
             BCORE_REGISTER_OBJECT( lion_nop_ar1_output_s );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar1_adaptive_s_arity );
-            BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_adaptive_s_symbol );
             BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_adaptive_s_priority );
             BCORE_REGISTER_FFUNC( lion_nop_is_adaptive, lion_nop_ar1_adaptive_s_is_adaptive );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar1_adaptive_s_solve );
