@@ -984,8 +984,24 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 vd_t item = lion_sem_cell_s_get_enc_by_name( o, tp_name );
                 if( !item && o->body   ) item = lion_sem_body_s_get_sem_by_name( o->body, tp_name );
                 if( !item && o->parent ) item = lion_sem_cell_s_get_cell_by_name( o->parent, tp_name );
-                if( !item ) bcore_source_a_parse_err_fa( source, "Cannot evaluate identifier '#<sc_t>'.", name->sc );
-
+                if( !item )
+                {
+                    item = lion_sem_cell_s_get_exc_by_name( o, tp_name );
+                    if( item )
+                    {
+                        assert( *(aware_t*)item == TYPEOF_lion_sem_link_s );
+                        lion_sem_link_s* link = item;
+                        if( !link->up )
+                        {
+                            bcore_source_a_parse_err_fa( source, "Use of exit channel '#<sc_t>' before it was defined.", name->sc );
+                        }
+                        item = link->up;
+                    }
+                    else
+                    {
+                        bcore_source_a_parse_err_fa( source, "Cannot evaluate identifier '#<sc_t>'.", name->sc );
+                    }
+                }
 
                 tp_t tp_item = *(aware_t*)item;
 
