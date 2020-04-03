@@ -297,6 +297,8 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
     sem_frame->parent = BLM_A_PUSH( lion_sem_cell_s_create_frame() ); // double nested
 
     bcore_source_point_s_set( &sem_frame->source_point, source );
+
+    bcore_source_a_parse_fa( source, " #-?'cell'" ); // leading 'cell' keyword is optional
     lion_sem_cell_s_parse( sem_frame, source );
 
     /// network cell

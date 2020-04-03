@@ -178,9 +178,10 @@ TODO:
  *    all downlinks.
  *
  *  TODO:
- *     - Store the cyclic update to a hidden holor associated with the cyclic node
- *     - After regular axon pass, copy all hidden cyclic holors to regular cyclic axons
- *     - Disallow explicit use of a cyclic variable after it has been updated. (This prevents surprising syntax)
+ *     - (done) Store the cyclic update to a hidden holor associated with the cyclic node
+ *     - (done) After regular axon pass, copy all hidden cyclic holors to regular cyclic axons
+ *     - (done) Disallow explicit use of a cyclic variable after it has been updated. (This prevents surprising syntax)
+ *     - Add list of reserved keywords (not usable for variables)
  */
 
 /**********************************************************************************************************************/
@@ -209,7 +210,9 @@ stamp :context = aware bcore_inst
     bcore_hmap_name_s hmap_name;
     bcore_arr_st_s    arr_symbol_op2;
     :cell_s        => cell; // frame of a cell structure
-    bcore_arr_tp_s    control_types; // types reserved for control and not allowed for identifiers
+
+    bcore_hmap_tp_s control_types; // types reserved for control
+    bcore_hmap_tp_s reserved_names; // reserved keywords (not allowed for variables)
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

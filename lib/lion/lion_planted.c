@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-02T17:12:11Z
+ *  Last File Update: 2020-04-03T09:52:45Z
  *
  *  Copyright and License of this File:
  *
@@ -1042,7 +1042,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_sem_context_s )
     "bcore_hmap_name_s hmap_name;"
     "bcore_arr_st_s arr_symbol_op2;"
     "lion_sem_cell_s => cell;"
-    "bcore_arr_tp_s control_types;"
+    "bcore_hmap_tp_s control_types;"
+    "bcore_hmap_tp_s reserved_names;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_sem_link_s )
@@ -1598,7 +1599,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 4130276790 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2263010081 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

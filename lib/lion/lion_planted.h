@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-02T17:12:10Z
+ *  Last File Update: 2020-04-03T09:52:45Z
  *
  *  Copyright and License of this File:
  *
@@ -881,7 +881,7 @@
 #define TYPEOF_lion_sem_context_s 2384100905
 #define BETH_EXPAND_ITEM_lion_sem_context_s \
   BCORE_DECLARE_OBJECT( lion_sem_context_s ) \
-    {aware_t _;bcore_hmap_name_s hmap_name;bcore_arr_st_s arr_symbol_op2;lion_sem_cell_s* cell;bcore_arr_tp_s control_types;};
+    {aware_t _;bcore_hmap_name_s hmap_name;bcore_arr_st_s arr_symbol_op2;lion_sem_cell_s* cell;bcore_hmap_tp_s control_types;bcore_hmap_tp_s reserved_names;};
 #define TYPEOF_cell 1759288501
 #define TYPEOF_if 959999494
 #define TYPEOF_then 3844270454

@@ -39,6 +39,9 @@ lion_sem_cell_s* lion_sem_cell_s_push_cell_nop_d(     lion_sem_cell_s* o,       
 lion_sem_cell_s* lion_sem_cell_s_push_cell_nop_d_reset_name( lion_sem_cell_s* o, lion_nop* nop );
 void             lion_sem_cell_s_set_channels(        lion_sem_cell_s* o, sz_t excs, sz_t encs );
 
+bl_t lion_is_control_type(  tp_t name );
+bl_t lion_is_reserved_name( tp_t name );
+
 // ---------------------------------------------------------------------------------------------------------------------
 // context
 
@@ -102,10 +105,18 @@ void lion_sem_context_setup()
     bcore_array_a_sort( (bcore_array*)&context_g->arr_symbol_op2, 0, -1, -1 );
 
     /// register control types
-    bcore_arr_tp_s_push( &context_g->control_types, lion_entypeof( "cell" ) );
-    bcore_arr_tp_s_push( &context_g->control_types, lion_entypeof( "if" ) );
-    bcore_arr_tp_s_push( &context_g->control_types, lion_entypeof( "then" ) );
-    bcore_arr_tp_s_push( &context_g->control_types, lion_entypeof( "else" ) );
+    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "cell" ) );
+    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "if" ) );
+    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "then" ) );
+    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "else" ) );
+
+    /// register reserved keywords
+    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "if"       ) );
+    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "then"     ) );
+    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "else"     ) );
+    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "cell"     ) );
+    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "cyclic"   ) );
+    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "adaptive" ) );
 
     BLM_DOWN();
 }
@@ -179,6 +190,19 @@ tp_t lion_parse_name( bcore_source* source )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+tp_t lion_parse_var_name( bcore_source* source )
+{
+    tp_t name = lion_parse_name( source );
+    if( lion_is_reserved_name( name ) )
+    {
+        bcore_source_a_parse_err_fa( source, "'#<sc_t>' is a reserved keyword. It may not be used as identifier at this point.", lion_ifnameof( name ) );
+    }
+
+    return name;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 tp_t lion_parse_op2_symbol( bcore_source* source )
 {
     if( !context_g ) lion_sem_context_setup();
@@ -205,9 +229,16 @@ tp_t lion_parse_op2_symbol( bcore_source* source )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-tp_t lion_is_control_type( tp_t name )
+bl_t lion_is_control_type( tp_t name )
 {
-    return ( bcore_arr_tp_s_find( &context_g->control_types, 0, -1, name ) < context_g->control_types.size );
+    return bcore_hmap_tp_s_exists( &context_g->control_types, name );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bl_t lion_is_reserved_name( tp_t name )
+{
+    return bcore_hmap_tp_s_exists( &context_g->reserved_names, name );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -380,37 +411,14 @@ void lion_sem_cell_s_wrap_cell( lion_sem_cell_s* o, lion_sem_cell_s* src )
     ASSERT( !o->nop  );
     ASSERT( !o->wrapped_cell );
 
-//    lion_sem_cell_s* src1 = src;
-//    lion_sem_cell_s* src2 = src->wrapped_cell ? src->wrapped_cell : src1;
-//    o->wrapped_cell = src2;
-//    o->priority     = src2->priority;
-//
-//    lion_sem_links_s_set_size( &o->encs, src1->encs.size );
-//    lion_sem_links_s_set_size( &o->excs, src1->excs.size );
-//
-//    BFOR_EACH( i, &src->encs )
-//    {
-//        lion_sem_link_s* en1 = src1->encs.data[ i ];
-//        lion_sem_link_s* en2 = src2->encs.data[ i ];
-//
-//        ASSERT( !en2->up );
-//        o->encs.data[ i ] = lion_sem_link_s_create_setup( en2->name, en1->up, en2, o, false );
-//    }
-//
-//    BFOR_EACH( i, &src->excs )
-//    {
-//        lion_sem_link_s* ex2 = src2->excs.data[ i ];
-//        o->excs.data[ i ] = lion_sem_link_s_create_setup( ex2->name, ex2, NULL, o, true );
-//    }
-
-
     o->wrapped_cell = src;
     o->priority = src->priority;
     lion_sem_links_s_set_size( &o->encs, lion_sem_cell_s_get_arity( src ) );
     lion_sem_links_s_set_size( &o->excs, src->excs.size );
 
     sz_t k = 0;
-    for( sz_t i = 0; i < src->encs.size; i++ )
+
+    BFOR_EACH( i, &src->encs )
     {
         if( !src->encs.data[ i ]->up )
         {
@@ -420,7 +428,7 @@ void lion_sem_cell_s_wrap_cell( lion_sem_cell_s* o, lion_sem_cell_s* src )
 
     assert( k == o->encs.size );
 
-    for( sz_t i = 0; i < o->excs.size; i++ )
+    BFOR_EACH( i, &src->excs )
     {
         o->excs.data[ i ] = lion_sem_link_s_create_setup( src->excs.data[ i ]->name, src->excs.data[ i ], NULL, o, true );
     }
@@ -583,7 +591,7 @@ void lion_sem_cell_s_parse_signature( lion_sem_cell_s* o, bcore_source* source )
         while( !bcore_source_a_parse_bl_fa( source, " #?'<-'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            lion_sem_link_s* link = lion_sem_link_s_create_setup( lion_parse_name( source ), NULL, NULL, o, true );
+            lion_sem_link_s* link = lion_sem_link_s_create_setup( lion_parse_var_name( source ), NULL, NULL, o, true );
             lion_sem_links_s_push_d( &o->excs, link );
             first = false;
         }
@@ -596,7 +604,7 @@ void lion_sem_cell_s_parse_signature( lion_sem_cell_s* o, bcore_source* source )
         while( !bcore_source_a_parse_bl_fa( source, " #?')'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            lion_sem_link_s* link = lion_sem_link_s_create_setup( lion_parse_name( source ), NULL, NULL, o, false );
+            lion_sem_link_s* link = lion_sem_link_s_create_setup( lion_parse_var_name( source ), NULL, NULL, o, false );
             if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
             {
                 link->up = lion_sem_cell_s_evaluate_link( o->parent, source );
@@ -616,7 +624,7 @@ void lion_sem_cell_s_parse( lion_sem_cell_s* o, bcore_source* source )
     // cell signature without name is allowed
     if( !bcore_source_a_parse_bl_fa( source, " #=?'('" ) )
     {
-        tp_t tp_cell_name = lion_parse_name( source );
+        tp_t tp_cell_name = lion_parse_var_name( source );
         if( frame ) lion_sem_cell_s_assert_identifier_not_yet_defined( frame, tp_cell_name, source );
         o->name = tp_cell_name;
     }
@@ -666,7 +674,7 @@ void lion_sem_cell_s_parse_verify_signature( const lion_sem_cell_s* o, bcore_sou
         while( !err && !bcore_source_a_parse_bl_fa( source, " #?'<-'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            tp_t name = lion_parse_name( source );
+            tp_t name = lion_parse_var_name( source );
             if( !err ) err = ( index >= o->excs.size );
             if( !err ) err = o->excs.data[ index ]->name != name;
             first = false;
@@ -689,7 +697,7 @@ void lion_sem_cell_s_parse_verify_signature( const lion_sem_cell_s* o, bcore_sou
         while( !err && !bcore_source_a_parse_bl_fa( source, " #?')'" ) )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
-            tp_t name = lion_parse_name( source );
+            tp_t name = lion_parse_var_name( source );
             if( !err ) err = ( index >= o->encs.size );
             if( !err ) err = o->encs.data[ index ]->name != name;
             first = false;
@@ -722,7 +730,7 @@ void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source )
         }
         else if( bcore_source_a_parse_bl_fa( source, " #?'adaptive'" ) ) // defining a link to an adaptive operator
         {
-            tp_t tp_name = lion_parse_name( source );
+            tp_t tp_name = lion_parse_var_name( source );
             lion_sem_link_s* link = lion_sem_cell_s_push_link( o );
             lion_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
             link->name = tp_name;
@@ -737,7 +745,7 @@ void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source )
         }
         else if( bcore_source_a_parse_bl_fa( source, " #?'cyclic'" ) ) // A link is defined as cyclic by attaching cyclic operator with open input channel
         {
-            tp_t tp_name = lion_parse_name( source );
+            tp_t tp_name = lion_parse_var_name( source );
             lion_sem_link_s* link = lion_sem_cell_s_push_link( o );
             lion_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
             link->name = tp_name;
@@ -751,7 +759,7 @@ void lion_sem_cell_s_parse_body( lion_sem_cell_s* o, bcore_source* source )
         }
         else // identifier
         {
-            tp_t tp_name = lion_parse_name( source );
+            tp_t tp_name = lion_parse_var_name( source );
 
             vd_t item = NULL;
 
