@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-02T12:10:49Z
+ *  Last File Update: 2020-04-02T17:12:11Z
  *
  *  Copyright and License of this File:
  *
@@ -1415,7 +1415,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_s )
     "func ^:set_param;"
     "func bcore_main:main;"
     "bl_t jacobian_test = true;"
-    "sz_t cyclic_cycles = 1;"
+    "sz_t ap_cycles = 1;"
 "}";
 
 s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args )
@@ -1598,7 +1598,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 102678694 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 4130276790 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-02T12:10:49Z
+ *  Last File Update: 2020-04-02T17:12:10Z
  *
  *  Copyright and License of this File:
  *
@@ -1164,7 +1164,7 @@
 #define TYPEOF_lion_net_eval_frame_s 3846669574
 #define BETH_EXPAND_ITEM_lion_net_eval_frame_s \
   BCORE_DECLARE_OBJECT( lion_net_eval_frame_s ) \
-    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t cyclic_cycles;}; \
+    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t ap_cycles;}; \
   lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* o, lion_net_eval_result_s* result ); \
   static inline void lion_net_eval_frame_s_set_param( lion_net_eval_frame_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
   s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args );
