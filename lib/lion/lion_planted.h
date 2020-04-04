@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-03T09:52:45Z
+ *  Last File Update: 2020-04-03T16:43:57Z
  *
  *  Copyright and License of this File:
  *
@@ -1347,12 +1347,37 @@
   static inline sz_t lion_adaptive_builder_s_get_out_size( const lion_adaptive_builder_s* o ){return o->out_size;} \
   static inline void lion_adaptive_builder_s_set_out_size( lion_adaptive_builder_s* o, sz_t size ){o->out_size = size;} \
   badapt_adaptive* lion_adaptive_builder_s_build( const lion_adaptive_builder_s* o );
+#define TYPEOF_lion_adaptive_cyclic_s 306213838
+#define BETH_EXPAND_ITEM_lion_adaptive_cyclic_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_cyclic_s ) \
+    {aware_t _;vd_t src;lion_frame_cyclic_s frame;badapt_dynamics_std_s dynamics;sz_t in_size;sz_t out_size;bhvm_holor_adl_s* dp_buffer;bl_t dp_value;}; \
+  static inline sz_t lion_adaptive_cyclic_s_get_in_size( const lion_adaptive_cyclic_s* o ){return o->in_size;} \
+  static inline sz_t lion_adaptive_cyclic_s_get_out_size( const lion_adaptive_cyclic_s* o ){return o->out_size;} \
+  static inline void lion_adaptive_cyclic_s_get_dynamics_std( const lion_adaptive_cyclic_s* o, badapt_dynamics_std_s* dynamics ){badapt_dynamics_std_s_copy( dynamics, &o->dynamics );} \
+  static inline void lion_adaptive_cyclic_s_set_dynamics_std( lion_adaptive_cyclic_s* o, const badapt_dynamics_std_s* dynamics ){badapt_dynamics_std_s_copy( &o->dynamics, dynamics );} \
+  void lion_adaptive_cyclic_s_arc_to_sink( const lion_adaptive_cyclic_s* o, bcore_sink* sink ); \
+  void lion_adaptive_cyclic_s_minfer( lion_adaptive_cyclic_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
+  void lion_adaptive_cyclic_s_bgrad_adapt( lion_adaptive_cyclic_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out ); \
+  void lion_adaptive_cyclic_s_reset( lion_adaptive_cyclic_s* o );
+#define TYPEOF_lion_adaptive_cyclic_builder_s 1640287118
+#define BETH_EXPAND_ITEM_lion_adaptive_cyclic_builder_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_cyclic_builder_s ) \
+    {aware_t _;vd_t src;sz_t in_size;sz_t out_size;sz_t unroll_size;badapt_dynamics_std_s dynamics;}; \
+  static inline sz_t lion_adaptive_cyclic_builder_s_get_in_size( const lion_adaptive_cyclic_builder_s* o ){return o->in_size;} \
+  static inline void lion_adaptive_cyclic_builder_s_set_in_size( lion_adaptive_cyclic_builder_s* o, sz_t size ){o->in_size = size;} \
+  static inline sz_t lion_adaptive_cyclic_builder_s_get_out_size( const lion_adaptive_cyclic_builder_s* o ){return o->out_size;} \
+  static inline void lion_adaptive_cyclic_builder_s_set_out_size( lion_adaptive_cyclic_builder_s* o, sz_t size ){o->out_size = size;} \
+  badapt_adaptive* lion_adaptive_cyclic_builder_s_build( const lion_adaptive_cyclic_builder_s* o );
 #define BETH_EXPAND_GROUP_lion_adaptive \
   BCORE_FORWARD_OBJECT( lion_adaptive ); \
   BCORE_FORWARD_OBJECT( lion_adaptive_s ); \
   BCORE_FORWARD_OBJECT( lion_adaptive_builder_s ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_cyclic_s ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_cyclic_builder_s ); \
   BETH_EXPAND_ITEM_lion_adaptive_s \
-  BETH_EXPAND_ITEM_lion_adaptive_builder_s
+  BETH_EXPAND_ITEM_lion_adaptive_builder_s \
+  BETH_EXPAND_ITEM_lion_adaptive_cyclic_s \
+  BETH_EXPAND_ITEM_lion_adaptive_cyclic_builder_s
 
 /**********************************************************************************************************************/
 

@@ -90,6 +90,66 @@ stamp :builder = aware badapt_builder
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+stamp :cyclic = aware badapt_adaptive
+{
+    // === architecture parameters ================================
+
+    aware =>               src;      // source (bcore_file_path_s or st_s with inline code)  (just for reference)
+    lion_frame_cyclic_s    frame;
+    badapt_dynamics_std_s  dynamics;
+    sz_t                   in_size;  // input vector size
+    sz_t                   out_size; // output vector size
+
+    // ==============================================================
+
+    /// accumulated dp data
+    bhvm_holor_adl_s => dp_buffer;
+    bl_t dp_value; // true in case a value was stored
+
+    // === adaptive functions =======================================
+    func ^ : get_in_size  = { return o->in_size;  };
+    func ^ : get_out_size = { return o->out_size; };
+    func ^ : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
+    func ^ : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
+
+    func ^ : arc_to_sink;
+    func ^ : minfer;
+    func ^ : bgrad_adapt;
+    func ^ : reset;
+
+    // ==============================================================
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :cyclic_builder = aware badapt_builder
+{
+    aware => src; // source (bcore_file_path_s or st_s with inline code)
+
+    sz_t in_size;  // input vector size
+    sz_t out_size; // output vector size
+    sz_t unroll_size;
+
+    badapt_dynamics_std_s dynamics;
+
+    // === builder functions =======================================
+
+    /// input vector size
+    func ^ : get_in_size = { return o->in_size; };
+    func ^ : set_in_size = { o->in_size = size; };
+
+    /// output vector size
+    func ^ : get_out_size = { return o->out_size; };
+    func ^ : set_out_size = { o->out_size = size; };
+
+    /// builds adaptive ready to be trained; passes ownership
+    func ^ : build;
+
+    // ==============================================================
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // TYPEOF_lion_adaptive

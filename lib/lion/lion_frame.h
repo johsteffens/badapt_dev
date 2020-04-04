@@ -225,7 +225,7 @@ stamp :cyclic = aware :
     :s => frame;
 
     /// number of unrolled cycles
-    sz_t unroll_size = 1;
+    sz_t unroll_size = 2;
 
     /// state data ...
 

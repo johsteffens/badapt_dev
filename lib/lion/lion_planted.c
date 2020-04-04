@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-03T09:52:45Z
+ *  Last File Update: 2020-04-03T16:43:57Z
  *
  *  Copyright and License of this File:
  *
@@ -1503,7 +1503,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_cyclic_s )
 "aware lion_frame"
 "{"
     "lion_frame_s => frame;"
-    "sz_t unroll_size = 1;"
+    "sz_t unroll_size = 2;"
     "bl_t setup = false;"
     "sz_t rolled_hbase_size;"
     "sz_t unroll_index = 0;"
@@ -1590,6 +1590,41 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_builder_s )
     "func ^:build;"
 "}";
 
+BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_s )
+"aware badapt_adaptive"
+"{"
+    "aware => src;"
+    "lion_frame_cyclic_s frame;"
+    "badapt_dynamics_std_s dynamics;"
+    "sz_t in_size;"
+    "sz_t out_size;"
+    "bhvm_holor_adl_s => dp_buffer;"
+    "bl_t dp_value;"
+    "func ^:get_in_size;"
+    "func ^:get_out_size;"
+    "func ^:get_dynamics_std;"
+    "func ^:set_dynamics_std;"
+    "func ^:arc_to_sink;"
+    "func ^:minfer;"
+    "func ^:bgrad_adapt;"
+    "func ^:reset;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_builder_s )
+"aware badapt_builder"
+"{"
+    "aware => src;"
+    "sz_t in_size;"
+    "sz_t out_size;"
+    "sz_t unroll_size;"
+    "badapt_dynamics_std_s dynamics;"
+    "func ^:get_in_size;"
+    "func ^:set_in_size;"
+    "func ^:get_out_size;"
+    "func ^:set_out_size;"
+    "func ^:build;"
+"}";
+
 /**********************************************************************************************************************/
 
 vd_t lion_planted_signal_handler( const bcore_signal_s* o )
@@ -1599,7 +1634,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2263010081 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1546103218 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2173,6 +2208,21 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_builder_set_out_size, lion_adaptive_builder_s_set_out_size );
             BCORE_REGISTER_FFUNC( badapt_builder_build, lion_adaptive_builder_s_build );
             BCORE_REGISTER_OBJECT( lion_adaptive_builder_s );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_get_in_size, lion_adaptive_cyclic_s_get_in_size );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_get_out_size, lion_adaptive_cyclic_s_get_out_size );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_get_dynamics_std, lion_adaptive_cyclic_s_get_dynamics_std );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_set_dynamics_std, lion_adaptive_cyclic_s_set_dynamics_std );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_arc_to_sink, lion_adaptive_cyclic_s_arc_to_sink );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_minfer, lion_adaptive_cyclic_s_minfer );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_bgrad_adapt, lion_adaptive_cyclic_s_bgrad_adapt );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_reset, lion_adaptive_cyclic_s_reset );
+            BCORE_REGISTER_OBJECT( lion_adaptive_cyclic_s );
+            BCORE_REGISTER_FFUNC( badapt_builder_get_in_size, lion_adaptive_cyclic_builder_s_get_in_size );
+            BCORE_REGISTER_FFUNC( badapt_builder_set_in_size, lion_adaptive_cyclic_builder_s_set_in_size );
+            BCORE_REGISTER_FFUNC( badapt_builder_get_out_size, lion_adaptive_cyclic_builder_s_get_out_size );
+            BCORE_REGISTER_FFUNC( badapt_builder_set_out_size, lion_adaptive_cyclic_builder_s_set_out_size );
+            BCORE_REGISTER_FFUNC( badapt_builder_build, lion_adaptive_cyclic_builder_s_build );
+            BCORE_REGISTER_OBJECT( lion_adaptive_cyclic_builder_s );
             BCORE_REGISTER_TRAIT( lion_adaptive, bcore_inst );
         }
         break;
