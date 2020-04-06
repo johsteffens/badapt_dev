@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-03T16:43:57Z
+ *  Last File Update: 2020-04-04T15:11:55Z
  *
  *  Copyright and License of this File:
  *
@@ -470,6 +470,16 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_tanh_leaky_s )
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_softplus_s )
+"aware lion_nop_ar1"
+"{"
+    "func lion_nop:arity;"
+    "func lion_nop:priority;"
+    "func lion_nop:symbol;"
+    "func lion_nop:type_vop_ap;"
+    "func lion_nop:type_vop_dp_a;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_softmax_s )
 "aware lion_nop_ar1"
 "{"
     "func lion_nop:arity;"
@@ -1634,7 +1644,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1546103218 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2401188170 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1835,6 +1845,12 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_type_vop_ap, lion_nop_ar1_softplus_s_type_vop_ap );
             BCORE_REGISTER_FFUNC( lion_nop_type_vop_dp_a, lion_nop_ar1_softplus_s_type_vop_dp_a );
             BCORE_REGISTER_OBJECT( lion_nop_ar1_softplus_s );
+            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar1_softmax_s_arity );
+            BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_softmax_s_priority );
+            BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_softmax_s_symbol );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_ap, lion_nop_ar1_softmax_s_type_vop_ap );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_dp_a, lion_nop_ar1_softmax_s_type_vop_dp_a );
+            BCORE_REGISTER_OBJECT( lion_nop_ar1_softmax_s );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar1_relu_s_arity );
             BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_relu_s_priority );
             BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_relu_s_symbol );
@@ -1893,6 +1909,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_tanh_hard_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_tanh_leaky_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_softplus_s );
+            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_softmax_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_relu_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_relu_leaky_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_output_s );

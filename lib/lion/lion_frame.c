@@ -78,7 +78,7 @@ static void disassemble_hbase_to_sink( const bhvm_mcode_hbase_s* hbase, sz_t ind
         hname_length = sz_max( hname_length, bcore_strlen( lion_ifnameof( bhvm_mcode_hmeta_a_get_name( hmeta ) ) ) );
 
         st_s* st = BLM_CREATE( st_s );
-        bhvm_holor_s_brief_to_sink( h, ( bcore_sink* )st );
+        bhvm_holor_s_compact_to_sink( h, 12, ( bcore_sink* )st );
         hbrief_length = sz_max( hbrief_length, st->size );
 
         BLM_DOWN();
@@ -106,10 +106,10 @@ static void disassemble_hbase_to_sink( const bhvm_mcode_hbase_s* hbase, sz_t ind
         st_s_push_fa( msg, " #rn{.} ", sz_max( 0, 22 - msg->size ) );
 
         st_s_push_fa( msg, " #pln' '{#<sc_t>}", hname_length, sc_name );
-        if     ( mnode->adaptive  )                         st_s_push_fa( msg, " adaptive" );
-        else if( mnode->cyclic )                            st_s_push_fa( msg, " cyclic  " );
-        else if( bhvm_mcode_hmeta_a_is_active(    hmeta ) ) st_s_push_fa( msg, " active  " );
-        else                                                st_s_push_fa( msg, " const   " );
+        if     ( mnode->adaptive  )                      st_s_push_fa( msg, " adaptive" );
+        else if( mnode->cyclic )                         st_s_push_fa( msg, " cyclic  " );
+        else if( bhvm_mcode_hmeta_a_is_active( hmeta ) ) st_s_push_fa( msg, " active  " );
+        else                                             st_s_push_fa( msg, " const   " );
 
         st_s* st = BLM_CREATE( st_s );
         bhvm_holor_s_compact_to_sink( h, 12, ( bcore_sink* )st );

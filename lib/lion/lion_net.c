@@ -1039,8 +1039,8 @@ static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_f
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
-        o->mnode->cyclic = true;
-        o->mnode->adaptive  = lion_nop_a_is_adaptive( o->nop );
+        o->mnode->cyclic   = true;
+        o->mnode->adaptive = lion_nop_a_is_adaptive( o->nop );
 
         o->mnode->ax0 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
         o->mnode->ax1 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
@@ -1048,7 +1048,8 @@ static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_f
         lion_hmeta_s* hmeta0 = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
         lion_hmeta_s* hmeta1 = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax1 ];
 
-        hmeta0->name = hmeta1->name = o->name;
+        if( !hmeta0->name ) hmeta0->name = o->name;
+        if( !hmeta1->name ) hmeta1->name = o->name;
         hmeta0->pclass = TYPEOF_pclass_ax0;
         hmeta1->pclass = TYPEOF_pclass_ax1;
 

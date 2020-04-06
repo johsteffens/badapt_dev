@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-03T16:43:57Z
+ *  Last File Update: 2020-04-04T15:11:55Z
  *
  *  Copyright and License of this File:
  *
@@ -402,6 +402,15 @@
   static inline sc_t lion_nop_ar1_softplus_s_symbol( const lion_nop_ar1_softplus_s* o ){return "softplus";} \
   static inline tp_t lion_nop_ar1_softplus_s_type_vop_ap( const lion_nop_ar1_softplus_s* o ){return TYPEOF_bhvm_vop_ar1_softplus_s;} \
   static inline tp_t lion_nop_ar1_softplus_s_type_vop_dp_a( const lion_nop_ar1_softplus_s* o ){return TYPEOF_bhvm_vop_ar2_softplus_dp_s;}
+#define TYPEOF_lion_nop_ar1_softmax_s 2695309895
+#define BETH_EXPAND_ITEM_lion_nop_ar1_softmax_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_softmax_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar1_softmax_s_arity( const lion_nop_ar1_softmax_s* o ){return 1;} \
+  static inline sz_t lion_nop_ar1_softmax_s_priority( const lion_nop_ar1_softmax_s* o ){return 8;} \
+  static inline sc_t lion_nop_ar1_softmax_s_symbol( const lion_nop_ar1_softmax_s* o ){return "softmax";} \
+  static inline tp_t lion_nop_ar1_softmax_s_type_vop_ap( const lion_nop_ar1_softmax_s* o ){return TYPEOF_bhvm_vop_ar1_softmax_s;} \
+  static inline tp_t lion_nop_ar1_softmax_s_type_vop_dp_a( const lion_nop_ar1_softmax_s* o ){return TYPEOF_bhvm_vop_ar2_softmax_dp_s;}
 #define TYPEOF_lion_nop_ar1_relu_s 1447672377
 #define BETH_EXPAND_ITEM_lion_nop_ar1_relu_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar1_relu_s ) \
@@ -482,6 +491,7 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar1_tanh_hard_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_tanh_leaky_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_softplus_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_softmax_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_relu_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_relu_leaky_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_output_s ); \
@@ -508,6 +518,7 @@
   BETH_EXPAND_ITEM_lion_nop_ar1_tanh_hard_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_tanh_leaky_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_softplus_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_softmax_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_relu_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_relu_leaky_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_output_s \

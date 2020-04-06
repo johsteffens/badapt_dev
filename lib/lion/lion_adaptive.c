@@ -177,7 +177,7 @@ static void lion_adaptive_cyclic_s_dp_buffer_reset( lion_adaptive_cyclic_s* o )
     if( !o->dp_buffer ) lion_adaptive_cyclic_s_dp_buffer_create( o );
     BFOR_EACH( i, o->dp_buffer )
     {
-        bhvm_holor_s* h = o->dp_buffer->data[ i ] = bhvm_holor_s_create();
+        bhvm_holor_s* h = o->dp_buffer->data[ i ];
         bhvm_value_s_zro( &h->v );
     }
     o->dp_value = false;
