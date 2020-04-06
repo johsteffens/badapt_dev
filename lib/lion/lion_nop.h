@@ -514,6 +514,14 @@ group :ar1 = retrievable
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_softplus_dp_s; };
     };
 
+    stamp :softmax =
+    {
+        func :: :priority      = { return 8; };
+        func :: :symbol        = { return "softmax"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_softmax_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_softmax_dp_s; };
+    };
+
     stamp :relu =
     {
         func :: :priority      = { return 8; };

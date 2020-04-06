@@ -634,6 +634,7 @@ bl_t lion_nop_ar2_cyclic_s_solve( const lion_nop_ar2_cyclic_s* o, lion_holor_s**
         bhvm_holor_s* ha = &a[0]->h;
         bhvm_holor_s* hr = &result->h->h;
         bhvm_shape_s_copy( &hr->s, &ha->s );
+        bhvm_value_s_set_type( &hr->v, ha->v.type );
 
         if( a[1] )
         {
