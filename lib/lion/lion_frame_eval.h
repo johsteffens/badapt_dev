@@ -19,8 +19,8 @@
 
 /**********************************************************************************************************************/
 
-#ifndef LION_NET_EVAL_H
-#define LION_NET_EVAL_H
+#ifndef LION_FRAME_EVAL_H
+#define LION_FRAME_EVAL_H
 
 #include "lion_net.h"
 #include "lion_frame.h"
@@ -28,9 +28,9 @@
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_lion_net_eval
+#ifdef TYPEOF_lion_frame_eval
 
-PLANT_GROUP( lion_net_eval, bcore_inst )
+PLANT_GROUP( lion_frame_eval, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( mutable );
@@ -177,12 +177,12 @@ stamp :frame_cyclic  = extending :std
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#endif // TYPEOF_lion_net_eval
+#endif // TYPEOF_lion_frame_eval
 
 /**********************************************************************************************************************/
 
-vd_t lion_net_eval_signal_handler( const bcore_signal_s* o );
+vd_t lion_frame_eval_signal_handler( const bcore_signal_s* o );
 
 /**********************************************************************************************************************/
 
-#endif // LION_NET_EVAL_H
+#endif // LION_FRAME_EVAL_H

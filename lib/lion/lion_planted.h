@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-04T15:11:55Z
+ *  Last File Update: 2020-04-07T10:47:11Z
  *
  *  Copyright and License of this File:
  *
@@ -12,8 +12,8 @@
  *  lion_nop_eval.h
  *  lion_sem.h
  *  lion_net.h
- *  lion_net_eval.h
  *  lion_frame.h
+ *  lion_frame_eval.h
  *  lion_adaptive.h
  *
  */
@@ -1125,101 +1125,6 @@
   BETH_EXPAND_ITEM_lion_net_cell_s
 
 /**********************************************************************************************************************/
-// source: lion_net_eval.h
-
-//----------------------------------------------------------------------------------------------------------------------
-// group: lion_net_eval
-
-#define TYPEOF_lion_net_eval 2067991306
-#define TYPEOF_lion_net_eval_s 596642292
-#define TYPEOF_lion_net_eval_result_s 2093263176
-#define BETH_EXPAND_ITEM_lion_net_eval_result_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_result_s ) \
-    {aware_t _;bl_t error;st_s msg;}; \
-  void lion_net_eval_result_s_resolve( lion_net_eval_result_s* o );
-#define TYPEOF_lion_net_eval_param_s 2216106526
-#define BETH_EXPAND_ITEM_lion_net_eval_param_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_param_s ) \
-    {aware_t _;bcore_sink* log;sz_t verbosity;u2_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;f3_t max_dev;f3_t epsilon;}; \
-  static inline void lion_net_eval_param_s_init_x( lion_net_eval_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
-  void lion_net_eval_param_s_set( lion_net_eval_param_s* o, const lion_net_eval_param_s* src );
-#define TYPEOF_lion_net_eval_show_param_s 507841254
-#define BETH_EXPAND_ITEM_lion_net_eval_show_param_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_show_param_s ) \
-    {aware_t _;lion_net_eval_param_s param;}; \
-  static inline void lion_net_eval_show_param_s_set_param( lion_net_eval_show_param_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_show_param_s_main( lion_net_eval_show_param_s* o, const bcore_arr_st_s* args ); \
-  static inline lion_net_eval_result_s* lion_net_eval_show_param_s_run( const lion_net_eval_show_param_s* o, lion_net_eval_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
-#define TYPEOF_lion_net_eval_arr_s 2808905232
-#define BETH_EXPAND_ITEM_lion_net_eval_arr_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_arr_s ) \
-    {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_net_eval, );}; \
-  static inline lion_net_eval_arr_s* lion_net_eval_arr_s_set_space( lion_net_eval_arr_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_net_eval_arr_s, ( bcore_array* )o, size ); return o; } \
-  static inline lion_net_eval_arr_s* lion_net_eval_arr_s_set_size( lion_net_eval_arr_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_net_eval_arr_s, ( bcore_array* )o, size ); return o; } \
-  static inline lion_net_eval_arr_s* lion_net_eval_arr_s_clear( lion_net_eval_arr_s* o ) { bcore_array_t_set_space( TYPEOF_lion_net_eval_arr_s, ( bcore_array* )o, 0 ); return o; } \
-  static inline lion_net_eval* lion_net_eval_arr_s_push_c( lion_net_eval_arr_s* o, const lion_net_eval* v ) { bcore_array_t_push( TYPEOF_lion_net_eval_arr_s, ( bcore_array* )o, sr_awc( v ) ); return o->data[ o->size - 1 ]; } \
-  static inline lion_net_eval* lion_net_eval_arr_s_push_d( lion_net_eval_arr_s* o,       lion_net_eval* v ) { bcore_array_t_push( TYPEOF_lion_net_eval_arr_s, ( bcore_array* )o, sr_asd( v ) ); return o->data[ o->size - 1 ]; } \
-  static inline lion_net_eval* lion_net_eval_arr_s_push_t( lion_net_eval_arr_s* o, tp_t t ) \
-  { \
-      bcore_trait_assert_satisfied_type( TYPEOF_lion_net_eval, t ); \
-      bcore_array_t_push( TYPEOF_lion_net_eval_arr_s, ( bcore_array* )o, sr_t_create( t ) ); \
-      return o->data[ o->size - 1 ]; \
-  }
-#define TYPEOF_lion_net_eval_set_s 1049202679
-#define BETH_EXPAND_ITEM_lion_net_eval_set_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_set_s ) \
-    {aware_t _;lion_net_eval_param_s param;lion_net_eval_arr_s arr;}; \
-  static inline void lion_net_eval_set_s_set_param( lion_net_eval_set_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_set_s_main( lion_net_eval_set_s* o, const bcore_arr_st_s* args ); \
-  lion_net_eval_result_s* lion_net_eval_set_s_run( const lion_net_eval_set_s* o, lion_net_eval_result_s* result );
-#define TYPEOF_lion_net_eval_frame_s 3846669574
-#define BETH_EXPAND_ITEM_lion_net_eval_frame_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_frame_s ) \
-    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;sz_t ap_cycles;}; \
-  lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* o, lion_net_eval_result_s* result ); \
-  static inline void lion_net_eval_frame_s_set_param( lion_net_eval_frame_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args );
-#define TYPEOF_lion_net_eval_frame_cyclic_s 3545084104
-#define BETH_EXPAND_ITEM_lion_net_eval_frame_cyclic_s \
-  BCORE_DECLARE_OBJECT( lion_net_eval_frame_cyclic_s ) \
-    {aware_t _;lion_net_eval_param_s param;bl_t jacobian_test;}; \
-  lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_frame_cyclic_s* o, lion_net_eval_result_s* result ); \
-  static inline void lion_net_eval_frame_cyclic_s_set_param( lion_net_eval_frame_cyclic_s* o, const lion_net_eval_param_s* param ){lion_net_eval_param_s_set( &o->param, param );} \
-  s2_t lion_net_eval_frame_cyclic_s_main( lion_net_eval_frame_cyclic_s* o, const bcore_arr_st_s* args );
-#define BETH_EXPAND_GROUP_lion_net_eval \
-  BCORE_FORWARD_OBJECT( lion_net_eval ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_result_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_param_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_show_param_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_arr_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_set_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_frame_s ); \
-  BCORE_FORWARD_OBJECT( lion_net_eval_frame_cyclic_s ); \
-  typedef lion_net_eval_result_s* (*lion_net_eval_run)( const lion_net_eval* o, lion_net_eval_result_s* result ); \
-  typedef void (*lion_net_eval_set_param)( lion_net_eval* o, const lion_net_eval_param_s* param ); \
-  BCORE_DECLARE_SPECT( lion_net_eval ) \
-  { \
-      bcore_spect_header_s header; \
-      lion_net_eval_run run; \
-      lion_net_eval_set_param set_param; \
-  }; \
-  static inline lion_net_eval* lion_net_eval_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_lion_net_eval, t ); return ( lion_net_eval* )bcore_inst_t_create( t ); } \
-  static inline bl_t lion_net_eval_t_is_trait_of( tp_t t ) { return bcore_trait_is_of( t, TYPEOF_lion_net_eval ); } \
-  BCORE_DECLARE_VIRTUAL_AWARE_OBJECT( lion_net_eval ) \
-  static inline bl_t lion_net_eval_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_lion_net_eval ); } \
-  BETH_EXPAND_ITEM_lion_net_eval_result_s \
-  static inline lion_net_eval_result_s* lion_net_eval_a_run( const lion_net_eval* o, lion_net_eval_result_s* result ) { const lion_net_eval_s* p = lion_net_eval_s_get_aware( o ); assert( p->run ); return p->run( o, result ); } \
-  static inline bl_t lion_net_eval_a_defines_run( const lion_net_eval* o ) { return lion_net_eval_s_get_aware( o )->run != NULL; } \
-  BETH_EXPAND_ITEM_lion_net_eval_param_s \
-  BETH_EXPAND_ITEM_lion_net_eval_show_param_s \
-  static inline void lion_net_eval_a_set_param( lion_net_eval* o, const lion_net_eval_param_s* param ) { const lion_net_eval_s* p = lion_net_eval_s_get_aware( o ); assert( p->set_param ); p->set_param( o, param ); } \
-  static inline bl_t lion_net_eval_a_defines_set_param( const lion_net_eval* o ) { return lion_net_eval_s_get_aware( o )->set_param != NULL; } \
-  BETH_EXPAND_ITEM_lion_net_eval_arr_s \
-  BETH_EXPAND_ITEM_lion_net_eval_set_s \
-  BETH_EXPAND_ITEM_lion_net_eval_frame_s \
-  BETH_EXPAND_ITEM_lion_net_eval_frame_cyclic_s
-
-/**********************************************************************************************************************/
 // source: lion_frame.h
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1329,6 +1234,101 @@
   BCORE_FORWARD_OBJECT( lion_frame_hidx_ads_s ); \
   BETH_EXPAND_ITEM_lion_frame_hidx_s \
   BETH_EXPAND_ITEM_lion_frame_hidx_ads_s
+
+/**********************************************************************************************************************/
+// source: lion_frame_eval.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_frame_eval
+
+#define TYPEOF_lion_frame_eval 871776600
+#define TYPEOF_lion_frame_eval_s 2819404738
+#define TYPEOF_lion_frame_eval_result_s 3932818902
+#define BETH_EXPAND_ITEM_lion_frame_eval_result_s \
+  BCORE_DECLARE_OBJECT( lion_frame_eval_result_s ) \
+    {aware_t _;bl_t error;st_s msg;}; \
+  void lion_frame_eval_result_s_resolve( lion_frame_eval_result_s* o );
+#define TYPEOF_lion_frame_eval_param_s 3532241452
+#define BETH_EXPAND_ITEM_lion_frame_eval_param_s \
+  BCORE_DECLARE_OBJECT( lion_frame_eval_param_s ) \
+    {aware_t _;bcore_sink* log;sz_t verbosity;u2_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;f3_t max_dev;f3_t epsilon;}; \
+  static inline void lion_frame_eval_param_s_init_x( lion_frame_eval_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
+  void lion_frame_eval_param_s_set( lion_frame_eval_param_s* o, const lion_frame_eval_param_s* src );
+#define TYPEOF_lion_frame_eval_show_param_s 529477128
+#define BETH_EXPAND_ITEM_lion_frame_eval_show_param_s \
+  BCORE_DECLARE_OBJECT( lion_frame_eval_show_param_s ) \
+    {aware_t _;lion_frame_eval_param_s param;}; \
+  static inline void lion_frame_eval_show_param_s_set_param( lion_frame_eval_show_param_s* o, const lion_frame_eval_param_s* param ){lion_frame_eval_param_s_set( &o->param, param );} \
+  s2_t lion_frame_eval_show_param_s_main( lion_frame_eval_show_param_s* o, const bcore_arr_st_s* args ); \
+  static inline lion_frame_eval_result_s* lion_frame_eval_show_param_s_run( const lion_frame_eval_show_param_s* o, lion_frame_eval_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
+#define TYPEOF_lion_frame_eval_arr_s 1141125058
+#define BETH_EXPAND_ITEM_lion_frame_eval_arr_s \
+  BCORE_DECLARE_OBJECT( lion_frame_eval_arr_s ) \
+    {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( lion_frame_eval, );}; \
+  static inline lion_frame_eval_arr_s* lion_frame_eval_arr_s_set_space( lion_frame_eval_arr_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_lion_frame_eval_arr_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_eval_arr_s* lion_frame_eval_arr_s_set_size( lion_frame_eval_arr_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_lion_frame_eval_arr_s, ( bcore_array* )o, size ); return o; } \
+  static inline lion_frame_eval_arr_s* lion_frame_eval_arr_s_clear( lion_frame_eval_arr_s* o ) { bcore_array_t_set_space( TYPEOF_lion_frame_eval_arr_s, ( bcore_array* )o, 0 ); return o; } \
+  static inline lion_frame_eval* lion_frame_eval_arr_s_push_c( lion_frame_eval_arr_s* o, const lion_frame_eval* v ) { bcore_array_t_push( TYPEOF_lion_frame_eval_arr_s, ( bcore_array* )o, sr_awc( v ) ); return o->data[ o->size - 1 ]; } \
+  static inline lion_frame_eval* lion_frame_eval_arr_s_push_d( lion_frame_eval_arr_s* o,       lion_frame_eval* v ) { bcore_array_t_push( TYPEOF_lion_frame_eval_arr_s, ( bcore_array* )o, sr_asd( v ) ); return o->data[ o->size - 1 ]; } \
+  static inline lion_frame_eval* lion_frame_eval_arr_s_push_t( lion_frame_eval_arr_s* o, tp_t t ) \
+  { \
+      bcore_trait_assert_satisfied_type( TYPEOF_lion_frame_eval, t ); \
+      bcore_array_t_push( TYPEOF_lion_frame_eval_arr_s, ( bcore_array* )o, sr_t_create( t ) ); \
+      return o->data[ o->size - 1 ]; \
+  }
+#define TYPEOF_lion_frame_eval_set_s 1051660069
+#define BETH_EXPAND_ITEM_lion_frame_eval_set_s \
+  BCORE_DECLARE_OBJECT( lion_frame_eval_set_s ) \
+    {aware_t _;lion_frame_eval_param_s param;lion_frame_eval_arr_s arr;}; \
+  static inline void lion_frame_eval_set_s_set_param( lion_frame_eval_set_s* o, const lion_frame_eval_param_s* param ){lion_frame_eval_param_s_set( &o->param, param );} \
+  s2_t lion_frame_eval_set_s_main( lion_frame_eval_set_s* o, const bcore_arr_st_s* args ); \
+  lion_frame_eval_result_s* lion_frame_eval_set_s_run( const lion_frame_eval_set_s* o, lion_frame_eval_result_s* result );
+#define TYPEOF_lion_frame_eval_frame_s 3023783768
+#define BETH_EXPAND_ITEM_lion_frame_eval_frame_s \
+  BCORE_DECLARE_OBJECT( lion_frame_eval_frame_s ) \
+    {aware_t _;lion_frame_eval_param_s param;bl_t jacobian_test;sz_t ap_cycles;}; \
+  lion_frame_eval_result_s* lion_frame_eval_frame_s_run( const lion_frame_eval_frame_s* o, lion_frame_eval_result_s* result ); \
+  static inline void lion_frame_eval_frame_s_set_param( lion_frame_eval_frame_s* o, const lion_frame_eval_param_s* param ){lion_frame_eval_param_s_set( &o->param, param );} \
+  s2_t lion_frame_eval_frame_s_main( lion_frame_eval_frame_s* o, const bcore_arr_st_s* args );
+#define TYPEOF_lion_frame_eval_frame_cyclic_s 834404542
+#define BETH_EXPAND_ITEM_lion_frame_eval_frame_cyclic_s \
+  BCORE_DECLARE_OBJECT( lion_frame_eval_frame_cyclic_s ) \
+    {aware_t _;lion_frame_eval_param_s param;bl_t jacobian_test;}; \
+  lion_frame_eval_result_s* lion_frame_eval_frame_cyclic_s_run( const lion_frame_eval_frame_cyclic_s* o, lion_frame_eval_result_s* result ); \
+  static inline void lion_frame_eval_frame_cyclic_s_set_param( lion_frame_eval_frame_cyclic_s* o, const lion_frame_eval_param_s* param ){lion_frame_eval_param_s_set( &o->param, param );} \
+  s2_t lion_frame_eval_frame_cyclic_s_main( lion_frame_eval_frame_cyclic_s* o, const bcore_arr_st_s* args );
+#define BETH_EXPAND_GROUP_lion_frame_eval \
+  BCORE_FORWARD_OBJECT( lion_frame_eval ); \
+  BCORE_FORWARD_OBJECT( lion_frame_eval_result_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_eval_param_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_eval_show_param_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_eval_arr_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_eval_set_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_eval_frame_s ); \
+  BCORE_FORWARD_OBJECT( lion_frame_eval_frame_cyclic_s ); \
+  typedef lion_frame_eval_result_s* (*lion_frame_eval_run)( const lion_frame_eval* o, lion_frame_eval_result_s* result ); \
+  typedef void (*lion_frame_eval_set_param)( lion_frame_eval* o, const lion_frame_eval_param_s* param ); \
+  BCORE_DECLARE_SPECT( lion_frame_eval ) \
+  { \
+      bcore_spect_header_s header; \
+      lion_frame_eval_run run; \
+      lion_frame_eval_set_param set_param; \
+  }; \
+  static inline lion_frame_eval* lion_frame_eval_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_lion_frame_eval, t ); return ( lion_frame_eval* )bcore_inst_t_create( t ); } \
+  static inline bl_t lion_frame_eval_t_is_trait_of( tp_t t ) { return bcore_trait_is_of( t, TYPEOF_lion_frame_eval ); } \
+  BCORE_DECLARE_VIRTUAL_AWARE_OBJECT( lion_frame_eval ) \
+  static inline bl_t lion_frame_eval_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_lion_frame_eval ); } \
+  BETH_EXPAND_ITEM_lion_frame_eval_result_s \
+  static inline lion_frame_eval_result_s* lion_frame_eval_a_run( const lion_frame_eval* o, lion_frame_eval_result_s* result ) { const lion_frame_eval_s* p = lion_frame_eval_s_get_aware( o ); assert( p->run ); return p->run( o, result ); } \
+  static inline bl_t lion_frame_eval_a_defines_run( const lion_frame_eval* o ) { return lion_frame_eval_s_get_aware( o )->run != NULL; } \
+  BETH_EXPAND_ITEM_lion_frame_eval_param_s \
+  BETH_EXPAND_ITEM_lion_frame_eval_show_param_s \
+  static inline void lion_frame_eval_a_set_param( lion_frame_eval* o, const lion_frame_eval_param_s* param ) { const lion_frame_eval_s* p = lion_frame_eval_s_get_aware( o ); assert( p->set_param ); p->set_param( o, param ); } \
+  static inline bl_t lion_frame_eval_a_defines_set_param( const lion_frame_eval* o ) { return lion_frame_eval_s_get_aware( o )->set_param != NULL; } \
+  BETH_EXPAND_ITEM_lion_frame_eval_arr_s \
+  BETH_EXPAND_ITEM_lion_frame_eval_set_s \
+  BETH_EXPAND_ITEM_lion_frame_eval_frame_s \
+  BETH_EXPAND_ITEM_lion_frame_eval_frame_cyclic_s
 
 /**********************************************************************************************************************/
 // source: lion_adaptive.h

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-04T15:11:55Z
+ *  Last File Update: 2020-04-07T10:47:11Z
  *
  *  Copyright and License of this File:
  *
@@ -12,8 +12,8 @@
  *  lion_nop_eval.h
  *  lion_sem.h
  *  lion_net.h
- *  lion_net_eval.h
  *  lion_frame.h
+ *  lion_frame_eval.h
  *  lion_adaptive.h
  *
  */
@@ -1296,171 +1296,6 @@ BCORE_DEFINE_SPECT( bcore_inst, lion_net )
 "}";
 
 /**********************************************************************************************************************/
-// source: lion_net_eval.h
-#include "lion_net_eval.h"
-
-//----------------------------------------------------------------------------------------------------------------------
-// group: lion_net_eval
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_result_s )
-"aware bcore_inst"
-"{"
-    "bl_t error = false;"
-    "st_s msg;"
-"}";
-
-void lion_net_eval_result_s_resolve( lion_net_eval_result_s* o )
-{
-    if( !o ) return;
-    if( o->error )
-    {
-        bcore_sink_a_push_fa( BCORE_STDERR, "#<sc_t>\n", o->msg.sc );
-    }
-    else if( o->msg.size > 0 )
-    {
-        bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o->msg.sc );
-    }
-}
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_param_s )
-"aware bcore_inst"
-"{"
-    "hidden aware bcore_sink -> log;"
-    "sz_t verbosity = 1;"
-    "u2_t rval = 1234;"
-    "st_s name;"
-    "aware => src;"
-    "bhvm_holor_adl_s => in;"
-    "bhvm_holor_adl_s => out;"
-    "f3_t max_dev = 1E-5;"
-    "f3_t epsilon = 1E-5;"
-    "func bcore_inst_call:init_x;"
-"}";
-
-void lion_net_eval_param_s_set( lion_net_eval_param_s* o, const lion_net_eval_param_s* src )
-{
-    o->verbosity = sz_max( o->verbosity, src->verbosity );
-    o->rval      = bcore_xsg3_u2( o->rval + src->rval );
-    bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
-    
-    if( o->name.size == 0 )
-    {
-        st_s_copy( &o->name, &src->name );
-    }
-    else if( src->name.size > 0 )
-    {
-        st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
-        st_s_copy( &o->name, new_name );
-        st_s_discard( new_name );
-    }
-    
-    if( !o->src ) o->src = bcore_fork( src->src );
-    if( !o->in  ) o->in  = bcore_fork( src->in );
-    if( !o->out ) o->out = bcore_fork( src->out );
-    
-    o->max_dev = f3_max( o->max_dev, src->max_dev );
-}
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_show_param_s )
-"aware lion_net_eval"
-"{"
-    "lion_net_eval_param_s param;"
-    "func ^:set_param;"
-    "func bcore_main:main;"
-    "func ^:run;"
-"}";
-
-s2_t lion_net_eval_show_param_s_main( lion_net_eval_show_param_s* o, const bcore_arr_st_s* args )
-{
-    BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_show_param_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
-    BLM_RETURNV( s2_t, 0 );
-}
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_arr_s )
-"aware bcore_array"
-"{"
-    "aware lion_net_eval* [];"
-"}";
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_set_s )
-"aware lion_net_eval"
-"{"
-    "lion_net_eval_param_s param;"
-    "func ^:set_param;"
-    "func bcore_main:main;"
-    "lion_net_eval_arr_s arr;"
-    "func ^:run;"
-"}";
-
-s2_t lion_net_eval_set_s_main( lion_net_eval_set_s* o, const bcore_arr_st_s* args )
-{
-    BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_set_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
-    BLM_RETURNV( s2_t, 0 );
-}
-
-lion_net_eval_result_s* lion_net_eval_set_s_run( const lion_net_eval_set_s* o, lion_net_eval_result_s* result )
-{
-    BFOR_EACH( i, &o->arr )
-    {
-        BLM_INIT();
-        lion_net_eval* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
-        lion_net_eval_a_set_param( eval, &o->param );
-        lion_net_eval_a_run( eval, result );
-        if( result->error )
-        {
-            st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, BLM_CLONE( st_s, &result->msg ) );
-            BLM_RETURNV( lion_net_eval_result_s*, result );
-        }
-        BLM_DOWN();
-    };
-    return result;
-}
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_s )
-"aware lion_net_eval"
-"{"
-    "lion_net_eval_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
-    "func bcore_main:main;"
-    "bl_t jacobian_test = true;"
-    "sz_t ap_cycles = 1;"
-"}";
-
-s2_t lion_net_eval_frame_s_main( lion_net_eval_frame_s* o, const bcore_arr_st_s* args )
-{
-    BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_frame_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
-    BLM_RETURNV( s2_t, 0 );
-}
-
-BCORE_DEFINE_OBJECT_INST_P( lion_net_eval_frame_cyclic_s )
-"aware lion_net_eval"
-"{"
-    "lion_net_eval_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
-    "func bcore_main:main;"
-    "bl_t jacobian_test = true;"
-"}";
-
-s2_t lion_net_eval_frame_cyclic_s_main( lion_net_eval_frame_cyclic_s* o, const bcore_arr_st_s* args )
-{
-    BLM_INIT();
-    lion_net_eval_result_s_resolve( lion_net_eval_frame_cyclic_s_run( o, BLM_CREATE( lion_net_eval_result_s ) ) );
-    BLM_RETURNV( s2_t, 0 );
-}
-
-BCORE_DEFINE_SPECT( bcore_inst, lion_net_eval )
-"{"
-    "bcore_spect_header_s header;"
-    "feature aware lion_net_eval : run;"
-    "feature aware lion_net_eval : set_param;"
-"}";
-
-/**********************************************************************************************************************/
 // source: lion_frame.h
 #include "lion_frame.h"
 
@@ -1563,6 +1398,171 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_hidx_ads_s )
 "}";
 
 /**********************************************************************************************************************/
+// source: lion_frame_eval.h
+#include "lion_frame_eval.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_frame_eval
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_result_s )
+"aware bcore_inst"
+"{"
+    "bl_t error = false;"
+    "st_s msg;"
+"}";
+
+void lion_frame_eval_result_s_resolve( lion_frame_eval_result_s* o )
+{
+    if( !o ) return;
+    if( o->error )
+    {
+        bcore_sink_a_push_fa( BCORE_STDERR, "#<sc_t>\n", o->msg.sc );
+    }
+    else if( o->msg.size > 0 )
+    {
+        bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o->msg.sc );
+    }
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_param_s )
+"aware bcore_inst"
+"{"
+    "hidden aware bcore_sink -> log;"
+    "sz_t verbosity = 1;"
+    "u2_t rval = 1234;"
+    "st_s name;"
+    "aware => src;"
+    "bhvm_holor_adl_s => in;"
+    "bhvm_holor_adl_s => out;"
+    "f3_t max_dev = 1E-5;"
+    "f3_t epsilon = 1E-5;"
+    "func bcore_inst_call:init_x;"
+"}";
+
+void lion_frame_eval_param_s_set( lion_frame_eval_param_s* o, const lion_frame_eval_param_s* src )
+{
+    o->verbosity = sz_max( o->verbosity, src->verbosity );
+    o->rval      = bcore_xsg3_u2( o->rval + src->rval );
+    bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
+    
+    if( o->name.size == 0 )
+    {
+        st_s_copy( &o->name, &src->name );
+    }
+    else if( src->name.size > 0 )
+    {
+        st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
+        st_s_copy( &o->name, new_name );
+        st_s_discard( new_name );
+    }
+    
+    if( !o->src ) o->src = bcore_fork( src->src );
+    if( !o->in  ) o->in  = bcore_fork( src->in );
+    if( !o->out ) o->out = bcore_fork( src->out );
+    
+    o->max_dev = f3_max( o->max_dev, src->max_dev );
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_show_param_s )
+"aware lion_frame_eval"
+"{"
+    "lion_frame_eval_param_s param;"
+    "func ^:set_param;"
+    "func bcore_main:main;"
+    "func ^:run;"
+"}";
+
+s2_t lion_frame_eval_show_param_s_main( lion_frame_eval_show_param_s* o, const bcore_arr_st_s* args )
+{
+    BLM_INIT();
+    lion_frame_eval_result_s_resolve( lion_frame_eval_show_param_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    BLM_RETURNV( s2_t, 0 );
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_arr_s )
+"aware bcore_array"
+"{"
+    "aware lion_frame_eval* [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_set_s )
+"aware lion_frame_eval"
+"{"
+    "lion_frame_eval_param_s param;"
+    "func ^:set_param;"
+    "func bcore_main:main;"
+    "lion_frame_eval_arr_s arr;"
+    "func ^:run;"
+"}";
+
+s2_t lion_frame_eval_set_s_main( lion_frame_eval_set_s* o, const bcore_arr_st_s* args )
+{
+    BLM_INIT();
+    lion_frame_eval_result_s_resolve( lion_frame_eval_set_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    BLM_RETURNV( s2_t, 0 );
+}
+
+lion_frame_eval_result_s* lion_frame_eval_set_s_run( const lion_frame_eval_set_s* o, lion_frame_eval_result_s* result )
+{
+    BFOR_EACH( i, &o->arr )
+    {
+        BLM_INIT();
+        lion_frame_eval* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+        lion_frame_eval_a_set_param( eval, &o->param );
+        lion_frame_eval_a_run( eval, result );
+        if( result->error )
+        {
+            st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, BLM_CLONE( st_s, &result->msg ) );
+            BLM_RETURNV( lion_frame_eval_result_s*, result );
+        }
+        BLM_DOWN();
+    };
+    return result;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_frame_s )
+"aware lion_frame_eval"
+"{"
+    "lion_frame_eval_param_s param;"
+    "func ^:run;"
+    "func ^:set_param;"
+    "func bcore_main:main;"
+    "bl_t jacobian_test = true;"
+    "sz_t ap_cycles = 1;"
+"}";
+
+s2_t lion_frame_eval_frame_s_main( lion_frame_eval_frame_s* o, const bcore_arr_st_s* args )
+{
+    BLM_INIT();
+    lion_frame_eval_result_s_resolve( lion_frame_eval_frame_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    BLM_RETURNV( s2_t, 0 );
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_frame_cyclic_s )
+"aware lion_frame_eval"
+"{"
+    "lion_frame_eval_param_s param;"
+    "func ^:run;"
+    "func ^:set_param;"
+    "func bcore_main:main;"
+    "bl_t jacobian_test = true;"
+"}";
+
+s2_t lion_frame_eval_frame_cyclic_s_main( lion_frame_eval_frame_cyclic_s* o, const bcore_arr_st_s* args )
+{
+    BLM_INIT();
+    lion_frame_eval_result_s_resolve( lion_frame_eval_frame_cyclic_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    BLM_RETURNV( s2_t, 0 );
+}
+
+BCORE_DEFINE_SPECT( bcore_inst, lion_frame_eval )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware lion_frame_eval : run;"
+    "feature aware lion_frame_eval : set_param;"
+"}";
+
+/**********************************************************************************************************************/
 // source: lion_adaptive.h
 #include "lion_adaptive.h"
 
@@ -1644,7 +1644,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2401188170 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 654096994 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2160,34 +2160,6 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_SPECT( lion_net );
 
             // --------------------------------------------------------------------
-            // source: lion_net_eval.h
-
-            // group: lion_net_eval
-            BCORE_REGISTER_OBJECT( lion_net_eval_result_s );
-            BCORE_REGISTER_FEATURE( lion_net_eval_run );
-            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_net_eval_param_s_init_x );
-            BCORE_REGISTER_OBJECT( lion_net_eval_param_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_show_param_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_show_param_s_main );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_show_param_s_run );
-            BCORE_REGISTER_OBJECT( lion_net_eval_show_param_s );
-            BCORE_REGISTER_FEATURE( lion_net_eval_set_param );
-            BCORE_REGISTER_OBJECT( lion_net_eval_arr_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_set_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_set_s_main );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_set_s_run );
-            BCORE_REGISTER_OBJECT( lion_net_eval_set_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_frame_s_run );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_frame_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_frame_s_main );
-            BCORE_REGISTER_OBJECT( lion_net_eval_frame_s );
-            BCORE_REGISTER_FFUNC( lion_net_eval_run, lion_net_eval_frame_cyclic_s_run );
-            BCORE_REGISTER_FFUNC( lion_net_eval_set_param, lion_net_eval_frame_cyclic_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_net_eval_frame_cyclic_s_main );
-            BCORE_REGISTER_OBJECT( lion_net_eval_frame_cyclic_s );
-            BCORE_REGISTER_SPECT( lion_net_eval );
-
-            // --------------------------------------------------------------------
             // source: lion_frame.h
 
             // group: lion_frame
@@ -2206,6 +2178,34 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_OBJECT( lion_frame_hidx_s );
             BCORE_REGISTER_OBJECT( lion_frame_hidx_ads_s );
             BCORE_REGISTER_TRAIT( lion_frame_hidx, lion_frame );
+
+            // --------------------------------------------------------------------
+            // source: lion_frame_eval.h
+
+            // group: lion_frame_eval
+            BCORE_REGISTER_OBJECT( lion_frame_eval_result_s );
+            BCORE_REGISTER_FEATURE( lion_frame_eval_run );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_frame_eval_param_s_init_x );
+            BCORE_REGISTER_OBJECT( lion_frame_eval_param_s );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_show_param_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_show_param_s_main );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_show_param_s_run );
+            BCORE_REGISTER_OBJECT( lion_frame_eval_show_param_s );
+            BCORE_REGISTER_FEATURE( lion_frame_eval_set_param );
+            BCORE_REGISTER_OBJECT( lion_frame_eval_arr_s );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_set_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_set_s_main );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_set_s_run );
+            BCORE_REGISTER_OBJECT( lion_frame_eval_set_s );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_frame_s_run );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_frame_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_frame_s_main );
+            BCORE_REGISTER_OBJECT( lion_frame_eval_frame_s );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_frame_cyclic_s_run );
+            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_frame_cyclic_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_frame_cyclic_s_main );
+            BCORE_REGISTER_OBJECT( lion_frame_eval_frame_cyclic_s );
+            BCORE_REGISTER_SPECT( lion_frame_eval );
 
             // --------------------------------------------------------------------
             // source: lion_adaptive.h

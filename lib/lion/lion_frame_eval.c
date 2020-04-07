@@ -15,7 +15,9 @@
 
 /**********************************************************************************************************************/
 
-#include "lion_net_eval.h"
+#include "lion_frame_eval.h"
+
+#ifdef TYPEOF_lion_frame_eval
 
 /**********************************************************************************************************************/
 /// lion_frame_s
@@ -143,7 +145,7 @@ static void frame_s_estimate_jacobian_ada( const lion_frame_s* const_o, const bh
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* o, lion_net_eval_result_s* result )
+lion_frame_eval_result_s* lion_frame_eval_frame_s_run( const lion_frame_eval_frame_s* o, lion_frame_eval_result_s* result )
 {
     BLM_INIT();
 
@@ -313,7 +315,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
                         st_s_push_fa( &result->msg, "\n#<sc_t>:", o->param.name.sc );
                         st_s_push_fa( &result->msg, "\nJacobian test failure:\n#<sc_t>\n", st->sc );
                         result->error = true;
-                        BLM_RETURNV( lion_net_eval_result_s*, result );
+                        BLM_RETURNV( lion_frame_eval_result_s*, result );
                     }
                     else
                     {
@@ -377,7 +379,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
                     {
                         st_s_push_fa( &result->msg, "\nJacobian test failure:\n#<sc_t>\n", st->sc );
                         result->error = true;
-                        BLM_RETURNV( lion_net_eval_result_s*, result );
+                        BLM_RETURNV( lion_frame_eval_result_s*, result );
                     }
                     else
                     {
@@ -390,7 +392,7 @@ lion_net_eval_result_s* lion_net_eval_frame_s_run( const lion_net_eval_frame_s* 
         }
     }
 
-    BLM_RETURNV( lion_net_eval_result_s*, result );
+    BLM_RETURNV( lion_frame_eval_result_s*, result );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -459,7 +461,7 @@ static void frame_cyclic_s_estimate_jacobian_en( const lion_frame_cyclic_s* cons
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_frame_cyclic_s* o, lion_net_eval_result_s* result )
+lion_frame_eval_result_s* lion_frame_eval_frame_cyclic_s_run( const lion_frame_eval_frame_cyclic_s* o, lion_frame_eval_result_s* result )
 {
     BLM_INIT();
 
@@ -658,7 +660,7 @@ lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_fr
                         st_s_push_fa( &result->msg, "\n#<sc_t>:", o->param.name.sc );
                         st_s_push_fa( &result->msg, "\nJacobian test failure:\n#<sc_t>\n", st->sc );
                         result->error = true;
-                        BLM_RETURNV( lion_net_eval_result_s*, result );
+                        BLM_RETURNV( lion_frame_eval_result_s*, result );
                     }
                     else
                     {
@@ -671,18 +673,20 @@ lion_net_eval_result_s* lion_net_eval_frame_cyclic_s_run( const lion_net_eval_fr
         }
     }
 
-    BLM_RETURNV( lion_net_eval_result_s*, result );
+    BLM_RETURNV( lion_frame_eval_result_s*, result );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+
+#endif // TYPEOF_lion_frame_eval
 
 /**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-vd_t lion_net_eval_signal_handler( const bcore_signal_s* o )
+vd_t lion_frame_eval_signal_handler( const bcore_signal_s* o )
 {
-    switch( bcore_signal_s_handle_type( o, typeof( "lion_net_eval" ) ) )
+    switch( bcore_signal_s_handle_type( o, typeof( "lion_frame_eval" ) ) )
     {
         case TYPEOF_init1:
         {
