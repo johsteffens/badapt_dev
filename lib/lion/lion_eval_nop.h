@@ -1,4 +1,4 @@
-/** Author and Copyright 2020 Johannes Bernhard Steffens
+/** Author and Copyright 2019 Johannes Bernhard Steffens
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,30 +15,33 @@
 
 /**********************************************************************************************************************/
 
-/// Network Evaluation
+/// node operator
 
 /**********************************************************************************************************************/
 
-#ifndef LION_FRAME_EVAL_H
-#define LION_FRAME_EVAL_H
+#ifndef LION_EVAL_NOP_H
+#define LION_EVAL_NOP_H
 
-#include "lion_net.h"
-#include "lion_frame.h"
+#include "bmath_std.h"
+#include "bhvm_mcode.h"
 #include "lion_planted.h"
+#include "lion_nop.h"
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_lion_frame_eval
+#ifdef TYPEOF_lion_eval_nop
 
-PLANT_GROUP( lion_frame_eval, bcore_inst )
+PLANT_GROUP( lion_eval_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-signature void resolve( mutable );
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+signature void resolve( const );
 
 stamp :result = aware bcore_inst
 {
+    sz_t total_tests = 0;
+    sz_t solvable_tests = 0;
+    sz_t tolerated_errors = 0;
+
     bl_t error = false;
     st_s msg;
 
@@ -53,29 +56,26 @@ stamp :result = aware bcore_inst
         {
             bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o->msg.sc );
         }
+        if( o->total_tests > 0 )
+        {
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Total tests ...... #<sz_t>\n", o->total_tests );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o->solvable_tests, ( o->solvable_tests * 100 ) / o->total_tests );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Tolerated errors . #<sz_t>\n", o->tolerated_errors );
+        }
     };
 };
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-feature 'a' :result_s* run( const, :result_s* result ); // returns result
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void set( mutable, const :param_s* src );
 stamp :param = aware bcore_inst
 {
+    aware lion_nop => nop;
+    lion_holor_s => ha;
+    lion_holor_s => hb;
+    lion_holor_s => hc;
+    lion_holor_s => hr;
     hidden aware bcore_sink -> log;
     sz_t verbosity = 1;
     u2_t rval = 1234; // for random generators
-
-    st_s name;              // name of test (only for logging)
-    aware => src;           // source (bcore_file_path_s or st_s with inline code)
-
-    bhvm_holor_adl_s => in;  // input holors
-    bhvm_holor_adl_s => out; // expected output holors (if NULL, output is sent to log)
-    f3_t max_dev = 1E-5;   // if output deviation exceeds this value, an error is generated
-    f3_t epsilon = 1E-5;   // for Jacobian estimation
 
     func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
 
@@ -84,34 +84,26 @@ stamp :param = aware bcore_inst
         o->verbosity = sz_max( o->verbosity, src->verbosity );
         o->rval      = bcore_xsg3_u2( o->rval + src->rval );
         bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
-
-        if( o->name.size == 0 )
-        {
-            st_s_copy( &o->name, &src->name );
-        }
-        else if( src->name.size > 0 )
-        {
-            st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
-            st_s_copy( &o->name, new_name );
-            st_s_discard( new_name );
-        }
-
-        if( !o->src ) o->src = bcore_fork( src->src );
-        if( !o->in  ) o->in  = bcore_fork( src->in );
-        if( !o->out ) o->out = bcore_fork( src->out );
-
-        o->max_dev = f3_max( o->max_dev, src->max_dev );
+        if( !o->ha  ) o->ha  = lion_holor_s_clone( src->ha );
+        if( !o->hb  ) o->hb  = lion_holor_s_clone( src->hb );
+        if( !o->hc  ) o->hc  = lion_holor_s_clone( src->hc );
+        if( !o->hr  ) o->hr  = lion_holor_s_clone( src->hr );
+        if( !o->nop ) o->nop = lion_nop_a_clone( src->nop );
     };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+feature 'a' void set_param( mutable, const :param_s* param );
+feature 'a' :result_s* run( const, :result_s* result ); // creates result or returns NULL
+
+/// template
 stump :std = aware :
 {
     :param_s param;
     func : :run;
     func : :set_param = { :param_s_set( &o->param, param ); };
-    func bcore_main :main =
+    func bcore_main : main =
     {
         BLM_INIT();
         :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
@@ -119,22 +111,38 @@ stump :std = aware :
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/// randomizes holors defined in param; undefined holors stay undefined
+stamp :generator = extending :std
+{
+    bl_t set_htp    = false;  // changes htp-state
+    bl_t set_value  = false;  // sets/changes values
+    bl_t set_shape  = false;  // sets/changes shape
+    bl_t set_dim    = false;  // sets/changes dimensions
+    bl_t set_v_type = false;  // sets/changes value type
+
+    sz_t max_shape_size =  3;
+    sz_t max_dim        =  3;
+    f3_t v_min          = -1;
+    f3_t v_max          =  1;
+    sz_t cycles         =  0;
+
+    // Cycles with borderline conditions producing an error despite being mathematically correct
+    // are not marked as error if listed in tolerated_cycles.
+    bcore_arr_uz_s tolerated_cycles;
+    aware : => eval;
+};
 
 stamp :show_param = extending :std
 {
     func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-feature 'a' void set_param( mutable, const :param_s* param );
-
 stamp :arr = aware bcore_array { aware :* []; };
 
 stamp :set = extending :std
 {
     :arr_s arr;
+
     func : :run =
     {
         BFOR_EACH( i, &o->arr )
@@ -145,7 +153,8 @@ stamp :set = extending :std
             :a_run( eval, result );
             if( result->error )
             {
-                st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, BLM_CLONE( st_s, &result->msg ) );
+                st_s* s = BLM_A_PUSH( st_s_clone( &result->msg ) );
+                st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
                 BLM_RETURNV( :result_s*, result );
             }
             BLM_DOWN();
@@ -154,35 +163,17 @@ stamp :set = extending :std
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :frame  = extending :std
-{
-    bl_t jacobian_test = true;
-    sz_t ap_cycles = 1; // for testing
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :frame_cyclic  = extending :std
-{
-    bl_t jacobian_test = true;
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-//stamp :timing = extending :std {};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+stamp :ar1 = extending :std {};
+stamp :ar2 = extending :std {};
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#endif // TYPEOF_lion_frame_eval
+#endif // TYPEOF_lion_eval_nop
 
 /**********************************************************************************************************************/
 
-vd_t lion_frame_eval_signal_handler( const bcore_signal_s* o );
+vd_t lion_eval_nop_signal_handler( const bcore_signal_s* o );
 
 /**********************************************************************************************************************/
 
-#endif // LION_FRAME_EVAL_H
+#endif // LION_EVAL_NOP_H

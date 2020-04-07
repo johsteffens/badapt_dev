@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-07T10:47:11Z
+ *  Last File Update: 2020-04-07T16:37:04Z
  *
  *  Copyright and License of this File:
  *
@@ -9,11 +9,11 @@
  *
  *  lion_root.h
  *  lion_nop.h
- *  lion_nop_eval.h
+ *  lion_eval_nop.h
  *  lion_sem.h
  *  lion_net.h
  *  lion_frame.h
- *  lion_frame_eval.h
+ *  lion_eval_frame.h
  *  lion_adaptive.h
  *
  */
@@ -853,13 +853,13 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar3_branch_s )
 "}";
 
 /**********************************************************************************************************************/
-// source: lion_nop_eval.h
-#include "lion_nop_eval.h"
+// source: lion_eval_nop.h
+#include "lion_eval_nop.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: lion_nop_eval
+// group: lion_eval_nop
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_result_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_result_s )
 "aware bcore_inst"
 "{"
     "sz_t total_tests = 0;"
@@ -869,7 +869,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_result_s )
     "st_s msg;"
 "}";
 
-void lion_nop_eval_result_s_resolve( const lion_nop_eval_result_s* o )
+void lion_eval_nop_result_s_resolve( const lion_eval_nop_result_s* o )
 {
     if( !o ) return;
     if( o->error )
@@ -888,7 +888,7 @@ void lion_nop_eval_result_s_resolve( const lion_nop_eval_result_s* o )
     }
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_param_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_param_s )
 "aware bcore_inst"
 "{"
     "aware lion_nop => nop;"
@@ -902,7 +902,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_param_s )
     "func bcore_inst_call:init_x;"
 "}";
 
-void lion_nop_eval_param_s_set( lion_nop_eval_param_s* o, const lion_nop_eval_param_s* src )
+void lion_eval_nop_param_s_set( lion_eval_nop_param_s* o, const lion_eval_nop_param_s* src )
 {
     o->verbosity = sz_max( o->verbosity, src->verbosity );
     o->rval      = bcore_xsg3_u2( o->rval + src->rval );
@@ -914,10 +914,10 @@ void lion_nop_eval_param_s_set( lion_nop_eval_param_s* o, const lion_nop_eval_pa
     if( !o->nop ) o->nop = lion_nop_a_clone( src->nop );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_generator_s )
-"aware lion_nop_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_generator_s )
+"aware lion_eval_nop"
 "{"
-    "lion_nop_eval_param_s param;"
+    "lion_eval_nop_param_s param;"
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
@@ -932,111 +932,111 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_generator_s )
     "f3_t v_max = 1;"
     "sz_t cycles = 0;"
     "bcore_arr_uz_s tolerated_cycles;"
-    "aware lion_nop_eval=> eval;"
+    "aware lion_eval_nop=> eval;"
 "}";
 
-s2_t lion_nop_eval_generator_s_main( lion_nop_eval_generator_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_nop_generator_s_main( lion_eval_nop_generator_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_nop_eval_result_s_resolve( lion_nop_eval_generator_s_run( o, BLM_CREATE( lion_nop_eval_result_s ) ) );
+    lion_eval_nop_result_s_resolve( lion_eval_nop_generator_s_run( o, BLM_CREATE( lion_eval_nop_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_show_param_s )
-"aware lion_nop_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_show_param_s )
+"aware lion_eval_nop"
 "{"
-    "lion_nop_eval_param_s param;"
+    "lion_eval_nop_param_s param;"
     "func ^:set_param;"
     "func bcore_main:main;"
     "func ^:run;"
 "}";
 
-s2_t lion_nop_eval_show_param_s_main( lion_nop_eval_show_param_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_nop_show_param_s_main( lion_eval_nop_show_param_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_nop_eval_result_s_resolve( lion_nop_eval_show_param_s_run( o, BLM_CREATE( lion_nop_eval_result_s ) ) );
+    lion_eval_nop_result_s_resolve( lion_eval_nop_show_param_s_run( o, BLM_CREATE( lion_eval_nop_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_arr_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_arr_s )
 "aware bcore_array"
 "{"
-    "aware lion_nop_eval* [];"
+    "aware lion_eval_nop* [];"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_set_s )
-"aware lion_nop_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_set_s )
+"aware lion_eval_nop"
 "{"
-    "lion_nop_eval_param_s param;"
+    "lion_eval_nop_param_s param;"
     "func ^:set_param;"
     "func bcore_main:main;"
-    "lion_nop_eval_arr_s arr;"
+    "lion_eval_nop_arr_s arr;"
     "func ^:run;"
 "}";
 
-s2_t lion_nop_eval_set_s_main( lion_nop_eval_set_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_nop_set_s_main( lion_eval_nop_set_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_nop_eval_result_s_resolve( lion_nop_eval_set_s_run( o, BLM_CREATE( lion_nop_eval_result_s ) ) );
+    lion_eval_nop_result_s_resolve( lion_eval_nop_set_s_run( o, BLM_CREATE( lion_eval_nop_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-lion_nop_eval_result_s* lion_nop_eval_set_s_run( const lion_nop_eval_set_s* o, lion_nop_eval_result_s* result )
+lion_eval_nop_result_s* lion_eval_nop_set_s_run( const lion_eval_nop_set_s* o, lion_eval_nop_result_s* result )
 {
     BFOR_EACH( i, &o->arr )
     {
         BLM_INIT();
-        lion_nop_eval* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
-        lion_nop_eval_a_set_param( eval, &o->param );
-        lion_nop_eval_a_run( eval, result );
+        lion_eval_nop* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+        lion_eval_nop_a_set_param( eval, &o->param );
+        lion_eval_nop_a_run( eval, result );
         if( result->error )
         {
             st_s* s = BLM_A_PUSH( st_s_clone( &result->msg ) );
             st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
-            BLM_RETURNV( lion_nop_eval_result_s*, result );
+            BLM_RETURNV( lion_eval_nop_result_s*, result );
         }
         BLM_DOWN();
     };
     return result;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_ar1_s )
-"aware lion_nop_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_ar1_s )
+"aware lion_eval_nop"
 "{"
-    "lion_nop_eval_param_s param;"
+    "lion_eval_nop_param_s param;"
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
 "}";
 
-s2_t lion_nop_eval_ar1_s_main( lion_nop_eval_ar1_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_nop_ar1_s_main( lion_eval_nop_ar1_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_nop_eval_result_s_resolve( lion_nop_eval_ar1_s_run( o, BLM_CREATE( lion_nop_eval_result_s ) ) );
+    lion_eval_nop_result_s_resolve( lion_eval_nop_ar1_s_run( o, BLM_CREATE( lion_eval_nop_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_eval_ar2_s )
-"aware lion_nop_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_ar2_s )
+"aware lion_eval_nop"
 "{"
-    "lion_nop_eval_param_s param;"
+    "lion_eval_nop_param_s param;"
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
 "}";
 
-s2_t lion_nop_eval_ar2_s_main( lion_nop_eval_ar2_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_nop_ar2_s_main( lion_eval_nop_ar2_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_nop_eval_result_s_resolve( lion_nop_eval_ar2_s_run( o, BLM_CREATE( lion_nop_eval_result_s ) ) );
+    lion_eval_nop_result_s_resolve( lion_eval_nop_ar2_s_run( o, BLM_CREATE( lion_eval_nop_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_SPECT( bcore_inst, lion_nop_eval )
+BCORE_DEFINE_SPECT( bcore_inst, lion_eval_nop )
 "{"
     "bcore_spect_header_s header;"
-    "feature aware lion_nop_eval : set_param;"
-    "feature aware lion_nop_eval : run;"
+    "feature aware lion_eval_nop : set_param;"
+    "feature aware lion_eval_nop : run;"
 "}";
 
 /**********************************************************************************************************************/
@@ -1398,20 +1398,20 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_hidx_ads_s )
 "}";
 
 /**********************************************************************************************************************/
-// source: lion_frame_eval.h
-#include "lion_frame_eval.h"
+// source: lion_eval_frame.h
+#include "lion_eval_frame.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-// group: lion_frame_eval
+// group: lion_eval_frame
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_result_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_result_s )
 "aware bcore_inst"
 "{"
     "bl_t error = false;"
     "st_s msg;"
 "}";
 
-void lion_frame_eval_result_s_resolve( lion_frame_eval_result_s* o )
+void lion_eval_frame_result_s_resolve( lion_eval_frame_result_s* o )
 {
     if( !o ) return;
     if( o->error )
@@ -1424,7 +1424,7 @@ void lion_frame_eval_result_s_resolve( lion_frame_eval_result_s* o )
     }
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_param_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_param_s )
 "aware bcore_inst"
 "{"
     "hidden aware bcore_sink -> log;"
@@ -1439,7 +1439,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_param_s )
     "func bcore_inst_call:init_x;"
 "}";
 
-void lion_frame_eval_param_s_set( lion_frame_eval_param_s* o, const lion_frame_eval_param_s* src )
+void lion_eval_frame_param_s_set( lion_eval_frame_param_s* o, const lion_eval_frame_param_s* src )
 {
     o->verbosity = sz_max( o->verbosity, src->verbosity );
     o->rval      = bcore_xsg3_u2( o->rval + src->rval );
@@ -1463,67 +1463,67 @@ void lion_frame_eval_param_s_set( lion_frame_eval_param_s* o, const lion_frame_e
     o->max_dev = f3_max( o->max_dev, src->max_dev );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_show_param_s )
-"aware lion_frame_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_show_param_s )
+"aware lion_eval_frame"
 "{"
-    "lion_frame_eval_param_s param;"
+    "lion_eval_frame_param_s param;"
     "func ^:set_param;"
     "func bcore_main:main;"
     "func ^:run;"
 "}";
 
-s2_t lion_frame_eval_show_param_s_main( lion_frame_eval_show_param_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_frame_show_param_s_main( lion_eval_frame_show_param_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_frame_eval_result_s_resolve( lion_frame_eval_show_param_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    lion_eval_frame_result_s_resolve( lion_eval_frame_show_param_s_run( o, BLM_CREATE( lion_eval_frame_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_arr_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_arr_s )
 "aware bcore_array"
 "{"
-    "aware lion_frame_eval* [];"
+    "aware lion_eval_frame* [];"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_set_s )
-"aware lion_frame_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_set_s )
+"aware lion_eval_frame"
 "{"
-    "lion_frame_eval_param_s param;"
+    "lion_eval_frame_param_s param;"
     "func ^:set_param;"
     "func bcore_main:main;"
-    "lion_frame_eval_arr_s arr;"
+    "lion_eval_frame_arr_s arr;"
     "func ^:run;"
 "}";
 
-s2_t lion_frame_eval_set_s_main( lion_frame_eval_set_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_frame_set_s_main( lion_eval_frame_set_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_frame_eval_result_s_resolve( lion_frame_eval_set_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    lion_eval_frame_result_s_resolve( lion_eval_frame_set_s_run( o, BLM_CREATE( lion_eval_frame_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-lion_frame_eval_result_s* lion_frame_eval_set_s_run( const lion_frame_eval_set_s* o, lion_frame_eval_result_s* result )
+lion_eval_frame_result_s* lion_eval_frame_set_s_run( const lion_eval_frame_set_s* o, lion_eval_frame_result_s* result )
 {
     BFOR_EACH( i, &o->arr )
     {
         BLM_INIT();
-        lion_frame_eval* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
-        lion_frame_eval_a_set_param( eval, &o->param );
-        lion_frame_eval_a_run( eval, result );
+        lion_eval_frame* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+        lion_eval_frame_a_set_param( eval, &o->param );
+        lion_eval_frame_a_run( eval, result );
         if( result->error )
         {
             st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, BLM_CLONE( st_s, &result->msg ) );
-            BLM_RETURNV( lion_frame_eval_result_s*, result );
+            BLM_RETURNV( lion_eval_frame_result_s*, result );
         }
         BLM_DOWN();
     };
     return result;
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_frame_s )
-"aware lion_frame_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_plain_s )
+"aware lion_eval_frame"
 "{"
-    "lion_frame_eval_param_s param;"
+    "lion_eval_frame_param_s param;"
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
@@ -1531,35 +1531,35 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_frame_s )
     "sz_t ap_cycles = 1;"
 "}";
 
-s2_t lion_frame_eval_frame_s_main( lion_frame_eval_frame_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_frame_plain_s_main( lion_eval_frame_plain_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_frame_eval_result_s_resolve( lion_frame_eval_frame_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    lion_eval_frame_result_s_resolve( lion_eval_frame_plain_s_run( o, BLM_CREATE( lion_eval_frame_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_OBJECT_INST_P( lion_frame_eval_frame_cyclic_s )
-"aware lion_frame_eval"
+BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_cyclic_s )
+"aware lion_eval_frame"
 "{"
-    "lion_frame_eval_param_s param;"
+    "lion_eval_frame_param_s param;"
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
     "bl_t jacobian_test = true;"
 "}";
 
-s2_t lion_frame_eval_frame_cyclic_s_main( lion_frame_eval_frame_cyclic_s* o, const bcore_arr_st_s* args )
+s2_t lion_eval_frame_cyclic_s_main( lion_eval_frame_cyclic_s* o, const bcore_arr_st_s* args )
 {
     BLM_INIT();
-    lion_frame_eval_result_s_resolve( lion_frame_eval_frame_cyclic_s_run( o, BLM_CREATE( lion_frame_eval_result_s ) ) );
+    lion_eval_frame_result_s_resolve( lion_eval_frame_cyclic_s_run( o, BLM_CREATE( lion_eval_frame_result_s ) ) );
     BLM_RETURNV( s2_t, 0 );
 }
 
-BCORE_DEFINE_SPECT( bcore_inst, lion_frame_eval )
+BCORE_DEFINE_SPECT( bcore_inst, lion_eval_frame )
 "{"
     "bcore_spect_header_s header;"
-    "feature aware lion_frame_eval : run;"
-    "feature aware lion_frame_eval : set_param;"
+    "feature aware lion_eval_frame : run;"
+    "feature aware lion_eval_frame : set_param;"
 "}";
 
 /**********************************************************************************************************************/
@@ -1644,7 +1644,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 654096994 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 3439177002 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2083,36 +2083,36 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar3_branch_s );
 
             // --------------------------------------------------------------------
-            // source: lion_nop_eval.h
+            // source: lion_eval_nop.h
 
-            // group: lion_nop_eval
-            BCORE_REGISTER_OBJECT( lion_nop_eval_result_s );
-            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_nop_eval_param_s_init_x );
-            BCORE_REGISTER_OBJECT( lion_nop_eval_param_s );
-            BCORE_REGISTER_FEATURE( lion_nop_eval_set_param );
-            BCORE_REGISTER_FEATURE( lion_nop_eval_run );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_run, lion_nop_eval_generator_s_run );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_set_param, lion_nop_eval_generator_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_nop_eval_generator_s_main );
-            BCORE_REGISTER_OBJECT( lion_nop_eval_generator_s );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_set_param, lion_nop_eval_show_param_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_nop_eval_show_param_s_main );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_run, lion_nop_eval_show_param_s_run );
-            BCORE_REGISTER_OBJECT( lion_nop_eval_show_param_s );
-            BCORE_REGISTER_OBJECT( lion_nop_eval_arr_s );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_set_param, lion_nop_eval_set_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_nop_eval_set_s_main );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_run, lion_nop_eval_set_s_run );
-            BCORE_REGISTER_OBJECT( lion_nop_eval_set_s );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_run, lion_nop_eval_ar1_s_run );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_set_param, lion_nop_eval_ar1_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_nop_eval_ar1_s_main );
-            BCORE_REGISTER_OBJECT( lion_nop_eval_ar1_s );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_run, lion_nop_eval_ar2_s_run );
-            BCORE_REGISTER_FFUNC( lion_nop_eval_set_param, lion_nop_eval_ar2_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_nop_eval_ar2_s_main );
-            BCORE_REGISTER_OBJECT( lion_nop_eval_ar2_s );
-            BCORE_REGISTER_SPECT( lion_nop_eval );
+            // group: lion_eval_nop
+            BCORE_REGISTER_OBJECT( lion_eval_nop_result_s );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_eval_nop_param_s_init_x );
+            BCORE_REGISTER_OBJECT( lion_eval_nop_param_s );
+            BCORE_REGISTER_FEATURE( lion_eval_nop_set_param );
+            BCORE_REGISTER_FEATURE( lion_eval_nop_run );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_run, lion_eval_nop_generator_s_run );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_set_param, lion_eval_nop_generator_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_nop_generator_s_main );
+            BCORE_REGISTER_OBJECT( lion_eval_nop_generator_s );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_set_param, lion_eval_nop_show_param_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_nop_show_param_s_main );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_run, lion_eval_nop_show_param_s_run );
+            BCORE_REGISTER_OBJECT( lion_eval_nop_show_param_s );
+            BCORE_REGISTER_OBJECT( lion_eval_nop_arr_s );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_set_param, lion_eval_nop_set_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_nop_set_s_main );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_run, lion_eval_nop_set_s_run );
+            BCORE_REGISTER_OBJECT( lion_eval_nop_set_s );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_run, lion_eval_nop_ar1_s_run );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_set_param, lion_eval_nop_ar1_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_nop_ar1_s_main );
+            BCORE_REGISTER_OBJECT( lion_eval_nop_ar1_s );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_run, lion_eval_nop_ar2_s_run );
+            BCORE_REGISTER_FFUNC( lion_eval_nop_set_param, lion_eval_nop_ar2_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_nop_ar2_s_main );
+            BCORE_REGISTER_OBJECT( lion_eval_nop_ar2_s );
+            BCORE_REGISTER_SPECT( lion_eval_nop );
 
             // --------------------------------------------------------------------
             // source: lion_sem.h
@@ -2180,32 +2180,32 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_TRAIT( lion_frame_hidx, lion_frame );
 
             // --------------------------------------------------------------------
-            // source: lion_frame_eval.h
+            // source: lion_eval_frame.h
 
-            // group: lion_frame_eval
-            BCORE_REGISTER_OBJECT( lion_frame_eval_result_s );
-            BCORE_REGISTER_FEATURE( lion_frame_eval_run );
-            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_frame_eval_param_s_init_x );
-            BCORE_REGISTER_OBJECT( lion_frame_eval_param_s );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_show_param_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_show_param_s_main );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_show_param_s_run );
-            BCORE_REGISTER_OBJECT( lion_frame_eval_show_param_s );
-            BCORE_REGISTER_FEATURE( lion_frame_eval_set_param );
-            BCORE_REGISTER_OBJECT( lion_frame_eval_arr_s );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_set_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_set_s_main );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_set_s_run );
-            BCORE_REGISTER_OBJECT( lion_frame_eval_set_s );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_frame_s_run );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_frame_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_frame_s_main );
-            BCORE_REGISTER_OBJECT( lion_frame_eval_frame_s );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_run, lion_frame_eval_frame_cyclic_s_run );
-            BCORE_REGISTER_FFUNC( lion_frame_eval_set_param, lion_frame_eval_frame_cyclic_s_set_param );
-            BCORE_REGISTER_FFUNC( bcore_main_main, lion_frame_eval_frame_cyclic_s_main );
-            BCORE_REGISTER_OBJECT( lion_frame_eval_frame_cyclic_s );
-            BCORE_REGISTER_SPECT( lion_frame_eval );
+            // group: lion_eval_frame
+            BCORE_REGISTER_OBJECT( lion_eval_frame_result_s );
+            BCORE_REGISTER_FEATURE( lion_eval_frame_run );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, lion_eval_frame_param_s_init_x );
+            BCORE_REGISTER_OBJECT( lion_eval_frame_param_s );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_set_param, lion_eval_frame_show_param_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_frame_show_param_s_main );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_run, lion_eval_frame_show_param_s_run );
+            BCORE_REGISTER_OBJECT( lion_eval_frame_show_param_s );
+            BCORE_REGISTER_FEATURE( lion_eval_frame_set_param );
+            BCORE_REGISTER_OBJECT( lion_eval_frame_arr_s );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_set_param, lion_eval_frame_set_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_frame_set_s_main );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_run, lion_eval_frame_set_s_run );
+            BCORE_REGISTER_OBJECT( lion_eval_frame_set_s );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_run, lion_eval_frame_plain_s_run );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_set_param, lion_eval_frame_plain_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_frame_plain_s_main );
+            BCORE_REGISTER_OBJECT( lion_eval_frame_plain_s );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_run, lion_eval_frame_cyclic_s_run );
+            BCORE_REGISTER_FFUNC( lion_eval_frame_set_param, lion_eval_frame_cyclic_s_set_param );
+            BCORE_REGISTER_FFUNC( bcore_main_main, lion_eval_frame_cyclic_s_main );
+            BCORE_REGISTER_OBJECT( lion_eval_frame_cyclic_s );
+            BCORE_REGISTER_SPECT( lion_eval_frame );
 
             // --------------------------------------------------------------------
             // source: lion_adaptive.h

@@ -17,11 +17,11 @@
 #include "lion_planted.h"
 #include "lion_root.h"
 #include "lion_nop.h"
-#include "lion_nop_eval.h"
+#include "lion_eval_nop.h"
 #include "lion_sem.h"
 #include "lion_net.h"
 #include "lion_frame.h"
-#include "lion_frame_eval.h"
+#include "lion_eval_frame.h"
 #include "lion_adaptive.h"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -45,11 +45,11 @@ vd_t lion_signal_handler( const bcore_signal_s* o )
             lion_planted_signal_handler,
             lion_root_signal_handler,
             lion_nop_signal_handler,
-            lion_nop_eval_signal_handler,
+            lion_eval_nop_signal_handler,
             lion_sem_signal_handler,
             lion_net_signal_handler,
             lion_frame_signal_handler,
-            lion_frame_eval_signal_handler,
+            lion_eval_frame_signal_handler,
             lion_adaptive_signal_handler,
         };
 

@@ -509,10 +509,10 @@ void lion_frame_cyclic_s_setup( lion_frame_cyclic_s* o )
     lion_frame_s* frame = o->frame;
     lion_frame_s_shelve( frame );
 
-    bhvm_mcode_track_adl_s_attach( &o->track_adl_ap                , bhvm_mcode_track_adl_s_create() );
-    bhvm_mcode_track_adl_s_attach( &o->track_adl_dp                , bhvm_mcode_track_adl_s_create() );
-    bhvm_mcode_track_adl_s_attach( &o->track_adl_ap_setup          , bhvm_mcode_track_adl_s_create() );
-    bhvm_mcode_track_adl_s_attach( &o->track_adl_ap_shelve         , bhvm_mcode_track_adl_s_create() );
+    bhvm_mcode_track_adl_s_attach( &o->track_adl_ap        , bhvm_mcode_track_adl_s_create() );
+    bhvm_mcode_track_adl_s_attach( &o->track_adl_dp        , bhvm_mcode_track_adl_s_create() );
+    bhvm_mcode_track_adl_s_attach( &o->track_adl_ap_setup  , bhvm_mcode_track_adl_s_create() );
+    bhvm_mcode_track_adl_s_attach( &o->track_adl_ap_shelve , bhvm_mcode_track_adl_s_create() );
 
     bhvm_mcode_track_s* track0_ap        = bhvm_mcode_frame_s_track_get( o->frame->mcf, TYPEOF_track_ap );
     bhvm_mcode_track_s* track0_dp        = bhvm_mcode_frame_s_track_get( o->frame->mcf, TYPEOF_track_dp );

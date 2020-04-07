@@ -15,9 +15,9 @@
 
 /**********************************************************************************************************************/
 
-#include "lion_frame_eval.h"
+#include "lion_eval_frame.h"
 
-#ifdef TYPEOF_lion_frame_eval
+#ifdef TYPEOF_lion_eval_frame
 
 /**********************************************************************************************************************/
 /// lion_frame_s
@@ -145,7 +145,7 @@ static void frame_s_estimate_jacobian_ada( const lion_frame_s* const_o, const bh
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_eval_result_s* lion_frame_eval_frame_s_run( const lion_frame_eval_frame_s* o, lion_frame_eval_result_s* result )
+lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_plain_s* o, lion_eval_frame_result_s* result )
 {
     BLM_INIT();
 
@@ -315,7 +315,7 @@ lion_frame_eval_result_s* lion_frame_eval_frame_s_run( const lion_frame_eval_fra
                         st_s_push_fa( &result->msg, "\n#<sc_t>:", o->param.name.sc );
                         st_s_push_fa( &result->msg, "\nJacobian test failure:\n#<sc_t>\n", st->sc );
                         result->error = true;
-                        BLM_RETURNV( lion_frame_eval_result_s*, result );
+                        BLM_RETURNV( lion_eval_frame_result_s*, result );
                     }
                     else
                     {
@@ -379,7 +379,7 @@ lion_frame_eval_result_s* lion_frame_eval_frame_s_run( const lion_frame_eval_fra
                     {
                         st_s_push_fa( &result->msg, "\nJacobian test failure:\n#<sc_t>\n", st->sc );
                         result->error = true;
-                        BLM_RETURNV( lion_frame_eval_result_s*, result );
+                        BLM_RETURNV( lion_eval_frame_result_s*, result );
                     }
                     else
                     {
@@ -392,7 +392,7 @@ lion_frame_eval_result_s* lion_frame_eval_frame_s_run( const lion_frame_eval_fra
         }
     }
 
-    BLM_RETURNV( lion_frame_eval_result_s*, result );
+    BLM_RETURNV( lion_eval_frame_result_s*, result );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -461,7 +461,7 @@ static void frame_cyclic_s_estimate_jacobian_en( const lion_frame_cyclic_s* cons
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_eval_result_s* lion_frame_eval_frame_cyclic_s_run( const lion_frame_eval_frame_cyclic_s* o, lion_frame_eval_result_s* result )
+lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cyclic_s* o, lion_eval_frame_result_s* result )
 {
     BLM_INIT();
 
@@ -504,9 +504,11 @@ lion_frame_eval_result_s* lion_frame_eval_frame_cyclic_s_run( const lion_frame_e
     sz_t unroll_size = adl_ap_en->size / frame->size_en;
     ASSERT( unroll_size * frame->size_en == adl_ap_en->size );
 
-    lion_frame_cyclic_s* frame_cyclic = BLM_CREATE( lion_frame_cyclic_s );
+    lion_frame_cyclic_s* frame_cyclic0 = BLM_CREATE( lion_frame_cyclic_s );
+    lion_frame_cyclic_s* frame_cyclic  = BLM_CREATE( lion_frame_cyclic_s );
 
-    lion_frame_cyclic_s_setup_from_frame( frame_cyclic, frame, unroll_size );
+    lion_frame_cyclic_s_setup_from_frame( frame_cyclic0, frame, unroll_size );
+    lion_frame_cyclic_s_copy( frame_cyclic, frame_cyclic0 );
 
     lion_frame_cyclic_s_run_ap_adl_flat( frame_cyclic, adl_ap_en, adl_ap_ex1 );
     bhvm_holor_adl_s_set_size( adl_ap_ex2, adl_ap_ex1->size );
@@ -660,7 +662,7 @@ lion_frame_eval_result_s* lion_frame_eval_frame_cyclic_s_run( const lion_frame_e
                         st_s_push_fa( &result->msg, "\n#<sc_t>:", o->param.name.sc );
                         st_s_push_fa( &result->msg, "\nJacobian test failure:\n#<sc_t>\n", st->sc );
                         result->error = true;
-                        BLM_RETURNV( lion_frame_eval_result_s*, result );
+                        BLM_RETURNV( lion_eval_frame_result_s*, result );
                     }
                     else
                     {
@@ -673,20 +675,20 @@ lion_frame_eval_result_s* lion_frame_eval_frame_cyclic_s_run( const lion_frame_e
         }
     }
 
-    BLM_RETURNV( lion_frame_eval_result_s*, result );
+    BLM_RETURNV( lion_eval_frame_result_s*, result );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-#endif // TYPEOF_lion_frame_eval
+#endif // TYPEOF_lion_eval_frame
 
 /**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-vd_t lion_frame_eval_signal_handler( const bcore_signal_s* o )
+vd_t lion_eval_frame_signal_handler( const bcore_signal_s* o )
 {
-    switch( bcore_signal_s_handle_type( o, typeof( "lion_frame_eval" ) ) )
+    switch( bcore_signal_s_handle_type( o, typeof( "lion_eval_frame" ) ) )
     {
         case TYPEOF_init1:
         {
