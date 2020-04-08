@@ -126,6 +126,20 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+bl_t lion_nop_ar1_output_s_solve( const lion_nop_ar1_output_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    lion_holor_s_attach( &result->h, lion_holor_s_create() );
+    bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+    result->h->m.htp = a[0]->m.htp;
+    result->h->m.active = a[0]->m.active;
+    result->settled = (result->h) && !result->h->m.active;
+    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
+    result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 sz_t lion_nop_ar1_output_s_mcode_push_dp_holor( const lion_nop_ar1_output_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
 {
     BLM_INIT();
@@ -152,7 +166,7 @@ bl_t lion_nop_ar1_cast_htp_s_solve( const lion_nop_ar1_cast_htp_s* o, lion_holor
     if( a[0] )
     {
         lion_holor_s_attach( &result->h, lion_holor_s_create() );
-        bhvm_holor_s_init_fork_from_holor( &result->h->h, &a[0]->h );
+        bhvm_holor_s_fork( &result->h->h, &a[0]->h );
         lion_hmeta_s_copy( &result->h->m, &a[0]->m );
         result->h->m.htp = !a[0]->m.htp;
     }
@@ -562,12 +576,14 @@ bl_t lion_nop_ar2_order_dec_s_solve( const lion_nop_ar2_order_dec_s* o, lion_hol
         sz_t index = bhvm_holor_s_f3_get_scalar( hb );
         if( ha->s.size == 0 ) return false;
         if( index < 0 || index >= ha->s.data[ ha->s.size - 1 ] ) return false;
-        bhvm_holor_s_order_dec_fork( ha, index, hr );
 
-        bhvm_vop_ar1_order_dec_fork_s* order_dec_fork = bhvm_vop_ar1_order_dec_fork_s_create();
-        order_dec_fork->idx = index;
+        //bhvm_holor_s_order_dec_set( ha, index, hr );
+        bhvm_holor_s_order_dec_weak( ha, index, hr );
+
+        bhvm_vop_ar1_order_dec_weak_s* order_dec_weak = bhvm_vop_ar1_order_dec_weak_s_create();
+        order_dec_weak->idx = index;
         bhvm_vop_arr_s* vop_arr = bhvm_vop_arr_s_create();
-        bhvm_vop_arr_s_push_d( vop_arr, ( bhvm_vop* )order_dec_fork );
+        bhvm_vop_arr_s_push_d( vop_arr, ( bhvm_vop* )order_dec_weak );
         bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)vop_arr );
     }
     result->settled = ( result->h && !result->h->m.active );
@@ -585,10 +601,10 @@ sz_t lion_nop_ar2_order_dec_s_mcode_push_ap_holor( const lion_nop_ar2_order_dec_
     bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
     bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'y', idx );
 
-    bhvm_vop_ar1_order_dec_fork_s* fork = bhvm_vop_ar1_order_dec_fork_s_clone( ( bhvm_vop_ar1_order_dec_fork_s* )( ( bhvm_vop_arr_s* )result->attached )->data[ 0 ] );
-    fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'a' );
-    fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'y' );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup, ( bhvm_vop* )fork );
+    bhvm_vop_ar1_order_dec_weak_s* weak = bhvm_vop_ar1_order_dec_weak_s_clone( ( bhvm_vop_ar1_order_dec_weak_s* )( ( bhvm_vop_arr_s* )result->attached )->data[ 0 ] );
+    weak->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'a' );
+    weak->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'y' );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup, ( bhvm_vop* )weak );
 
     bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap_shelve, ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create(), arr_ci_l );
     BLM_RETURNV( sz_t, idx );
@@ -606,10 +622,10 @@ sz_t lion_nop_ar2_order_dec_s_mcode_push_dp_holor( const lion_nop_ar2_order_dec_
     bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
     bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'z', idx );
 
-    bhvm_vop_ar1_order_dec_fork_s* fork = bhvm_vop_ar1_order_dec_fork_s_clone( ( bhvm_vop_ar1_order_dec_fork_s* )( ( bhvm_vop_arr_s* )result->attached )->data[ 0 ] );
-    fork->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'f' );
-    fork->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup, ( bhvm_vop* )fork );
+    bhvm_vop_ar1_order_dec_weak_s* weak = bhvm_vop_ar1_order_dec_weak_s_clone( ( bhvm_vop_ar1_order_dec_weak_s* )( ( bhvm_vop_arr_s* )result->attached )->data[ 0 ] );
+    weak->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'f' );
+    weak->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup, ( bhvm_vop* )weak );
 
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     BLM_RETURNV( sz_t, idx );

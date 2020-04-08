@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-07T16:37:04Z
+ *  Last File Update: 2020-04-08T13:52:24Z
  *
  *  Copyright and License of this File:
  *
@@ -516,18 +516,6 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_output_s )
     "func lion_nop:solve;"
     "func lion_nop:mcode_push_dp_holor;"
 "}";
-
-bl_t lion_nop_ar1_output_s_solve( const lion_nop_ar1_output_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
-{
-    lion_holor_s_attach( &result->h, lion_holor_s_create() );
-    bhvm_holor_s_fork( &result->h->h, &a[0]->h );
-    result->h->m.htp = a[0]->m.htp;
-    result->h->m.active = a[0]->m.active;
-    result->settled = (result->h) && !result->h->m.active;
-    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-    result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
-    return true;
-}
 
 BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_adaptive_s )
 "aware lion_nop_ar1"
@@ -1644,7 +1632,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 3439177002 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 862429722 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

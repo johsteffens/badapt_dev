@@ -541,17 +541,7 @@ group :ar1 = retrievable
     /// formal output (used for resolving the network; not part of syntax)
     stamp :output =
     {
-        func :: :solve =
-        {
-            lion_holor_s_attach( &result->h, lion_holor_s_create() );
-            bhvm_holor_s_fork( &result->h->h, &a[0]->h );
-            result->h->m.htp = a[0]->m.htp;
-            result->h->m.active = a[0]->m.active;
-            result->settled = (result->h) && !result->h->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
-            return true;
-        };
+        func :: :solve;
         func :: :mcode_push_dp_holor;
     };
 
