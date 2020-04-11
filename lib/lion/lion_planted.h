@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-08T13:52:24Z
+ *  Last File Update: 2020-04-11T13:04:27Z
  *
  *  Copyright and License of this File:
  *
@@ -1138,9 +1138,10 @@
     {aware_t _;bcore_sink* log;bhvm_mcode_frame_s* mcf;bl_t is_cyclic;bl_t setup;sz_t size_en;sz_t size_ex;lion_frame_hidx_s hidx_en;lion_frame_hidx_s hidx_ex;lion_frame_hidx_s hidx_ada;}; \
   void lion_frame_s_reset( lion_frame_s* o ); \
   void lion_frame_s_setup( lion_frame_s* o ); \
-  static inline void lion_frame_s_shelve( lion_frame_s* o ){lion_frame_s_reset( o );} \
-  static inline void lion_frame_s_mutated( lion_frame_s* o ){if( o->setup ) { lion_frame_s_reset( o ); lion_frame_s_setup( o ); }} \
-  static inline void lion_frame_s_copy_x( lion_frame_s* o ){if( o->setup ) { lion_frame_s_reset( o ); lion_frame_s_setup( o ); }} \
+  void lion_frame_s_check_integrity( const lion_frame_s* o ); \
+  static inline void lion_frame_s_shelve( lion_frame_s* o ){bl_t setup = o->setup; lion_frame_s_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */} \
+  static inline void lion_frame_s_mutated( lion_frame_s* o ){if( o->setup ) { lion_frame_s_reset( o ); lion_frame_s_setup( o ); }  lion_frame_s_check_integrity( o );} \
+  static inline void lion_frame_s_copy_x( lion_frame_s* o ){if( o->setup ) { lion_frame_s_reset( o ); lion_frame_s_setup( o ); }  lion_frame_s_check_integrity( o );} \
   lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* source, const bhvm_holor_s** en ); \
   static inline lion_frame_s* lion_frame_s_setup_from_st( lion_frame_s* o, const st_s* st, const bhvm_holor_s** en ){BLM_INIT(); BLM_RETURNV( lion_frame_s*, lion_frame_s_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en ) );} \
   static inline lion_frame_s* lion_frame_s_setup_from_sc( lion_frame_s* o, sc_t sc, const bhvm_holor_s** en ){st_s st; st_s_init_weak_sc( &st, sc ); return lion_frame_s_setup_from_st( o, &st, en );} \
@@ -1173,10 +1174,10 @@
 #define TYPEOF_lion_frame_cyclic_s 3706646511
 #define BETH_EXPAND_ITEM_lion_frame_cyclic_s \
   BCORE_DECLARE_OBJECT( lion_frame_cyclic_s ) \
-    {aware_t _;lion_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t rolled_hbase_size;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_dp;bhvm_mcode_track_adl_s* track_adl_ap_setup;bhvm_mcode_track_adl_s* track_adl_ap_shelve;lion_frame_hidx_ads_s hidx_ads_en;lion_frame_hidx_ads_s hidx_ads_ex;}; \
+    {aware_t _;lion_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_dp;bhvm_mcode_track_adl_s* track_adl_ap_setup;lion_frame_hidx_ads_s hidx_ads_en;lion_frame_hidx_ads_s hidx_ads_ex;}; \
   void lion_frame_cyclic_s_reset( lion_frame_cyclic_s* o ); \
   void lion_frame_cyclic_s_setup( lion_frame_cyclic_s* o ); \
-  static inline void lion_frame_cyclic_s_shelve( lion_frame_cyclic_s* o ){lion_frame_cyclic_s_reset( o );} \
+  static inline void lion_frame_cyclic_s_shelve( lion_frame_cyclic_s* o ){bl_t setup = o->setup; lion_frame_cyclic_s_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */} \
   static inline void lion_frame_cyclic_s_mutated( lion_frame_cyclic_s* o ){if( o->setup ) { lion_frame_cyclic_s_reset( o ); lion_frame_cyclic_s_setup( o ); }} \
   static inline void lion_frame_cyclic_s_copy_x( lion_frame_cyclic_s* o ){if( o->setup ) { lion_frame_cyclic_s_reset( o ); lion_frame_cyclic_s_setup( o ); }} \
   static inline sz_t lion_frame_cyclic_s_get_size_en( const lion_frame_cyclic_s* o ){return lion_frame_s_get_size_en(  o->frame );} \
@@ -1251,7 +1252,7 @@
 #define TYPEOF_lion_eval_frame_param_s 1608970388
 #define BETH_EXPAND_ITEM_lion_eval_frame_param_s \
   BCORE_DECLARE_OBJECT( lion_eval_frame_param_s ) \
-    {aware_t _;bcore_sink* log;sz_t verbosity;u2_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;f3_t max_dev;f3_t epsilon;}; \
+    {aware_t _;bcore_sink* log;sz_t verbosity;u2_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;bl_t recovery_test;bl_t jacobian_test;f3_t max_dev;f3_t epsilon;}; \
   static inline void lion_eval_frame_param_s_init_x( lion_eval_frame_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   void lion_eval_frame_param_s_set( lion_eval_frame_param_s* o, const lion_eval_frame_param_s* src );
 #define TYPEOF_lion_eval_frame_show_param_s 3596640144
@@ -1286,14 +1287,14 @@
 #define TYPEOF_lion_eval_frame_plain_s 229993865
 #define BETH_EXPAND_ITEM_lion_eval_frame_plain_s \
   BCORE_DECLARE_OBJECT( lion_eval_frame_plain_s ) \
-    {aware_t _;lion_eval_frame_param_s param;bl_t jacobian_test;sz_t ap_cycles;}; \
+    {aware_t _;lion_eval_frame_param_s param;sz_t ap_cycles;}; \
   lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_plain_s* o, lion_eval_frame_result_s* result ); \
   static inline void lion_eval_frame_plain_s_set_param( lion_eval_frame_plain_s* o, const lion_eval_frame_param_s* param ){lion_eval_frame_param_s_set( &o->param, param );} \
   s2_t lion_eval_frame_plain_s_main( lion_eval_frame_plain_s* o, const bcore_arr_st_s* args );
 #define TYPEOF_lion_eval_frame_cyclic_s 2923935876
 #define BETH_EXPAND_ITEM_lion_eval_frame_cyclic_s \
   BCORE_DECLARE_OBJECT( lion_eval_frame_cyclic_s ) \
-    {aware_t _;lion_eval_frame_param_s param;bl_t jacobian_test;}; \
+    {aware_t _;lion_eval_frame_param_s param;}; \
   lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cyclic_s* o, lion_eval_frame_result_s* result ); \
   static inline void lion_eval_frame_cyclic_s_set_param( lion_eval_frame_cyclic_s* o, const lion_eval_frame_param_s* param ){lion_eval_frame_param_s_set( &o->param, param );} \
   s2_t lion_eval_frame_cyclic_s_main( lion_eval_frame_cyclic_s* o, const bcore_arr_st_s* args );

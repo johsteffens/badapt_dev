@@ -1195,9 +1195,9 @@ static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_inde
         m->pclass = TYPEOF_pclass_ag0;
         bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );
         sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_cyclic_zero_grad, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,            bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve,           bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+        bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_cyclic_zero_grad, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
         o->mnode->ag0 = idx;
 
         // build this gradient from all downlinks ...

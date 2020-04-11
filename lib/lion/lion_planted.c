@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-08T13:52:24Z
+ *  Last File Update: 2020-04-11T13:04:27Z
  *
  *  Copyright and License of this File:
  *
@@ -1338,12 +1338,10 @@ BCORE_DEFINE_OBJECT_INST_P( lion_frame_cyclic_s )
     "lion_frame_s => frame;"
     "sz_t unroll_size = 2;"
     "bl_t setup = false;"
-    "sz_t rolled_hbase_size;"
     "sz_t unroll_index = 0;"
     "bhvm_mcode_track_adl_s => track_adl_ap;"
     "bhvm_mcode_track_adl_s => track_adl_dp;"
     "bhvm_mcode_track_adl_s => track_adl_ap_setup;"
-    "bhvm_mcode_track_adl_s => track_adl_ap_shelve;"
     "lion_frame_hidx_ads_s hidx_ads_en;"
     "lion_frame_hidx_ads_s hidx_ads_ex;"
     "func bcore_via_call:shelve;"
@@ -1422,6 +1420,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_param_s )
     "aware => src;"
     "bhvm_holor_adl_s => in;"
     "bhvm_holor_adl_s => out;"
+    "bl_t recovery_test = false;"
+    "bl_t jacobian_test = false;"
     "f3_t max_dev = 1E-5;"
     "f3_t epsilon = 1E-5;"
     "func bcore_inst_call:init_x;"
@@ -1429,6 +1429,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_param_s )
 
 void lion_eval_frame_param_s_set( lion_eval_frame_param_s* o, const lion_eval_frame_param_s* src )
 {
+    o->recovery_test = o->recovery_test || src->recovery_test;
+    o->jacobian_test = o->jacobian_test || src->jacobian_test;
+    
     o->verbosity = sz_max( o->verbosity, src->verbosity );
     o->rval      = bcore_xsg3_u2( o->rval + src->rval );
     bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
@@ -1515,7 +1518,6 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_plain_s )
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
-    "bl_t jacobian_test = true;"
     "sz_t ap_cycles = 1;"
 "}";
 
@@ -1533,7 +1535,6 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_cyclic_s )
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
-    "bl_t jacobian_test = true;"
 "}";
 
 s2_t lion_eval_frame_cyclic_s_main( lion_eval_frame_cyclic_s* o, const bcore_arr_st_s* args )
@@ -1632,7 +1633,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 862429722 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 3458743736 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

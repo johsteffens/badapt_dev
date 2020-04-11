@@ -15,7 +15,7 @@
 
 /**********************************************************************************************************************/
 
-/// Network Evaluation
+/// Network Frame Evaluation
 
 /**********************************************************************************************************************/
 
@@ -74,6 +74,10 @@ stamp :param = aware bcore_inst
 
     bhvm_holor_adl_s => in;  // input holors
     bhvm_holor_adl_s => out; // expected output holors (if NULL, output is sent to log)
+
+    bl_t recovery_test = false; // transfers the frame though stream-io
+    bl_t jacobian_test = false;
+
     f3_t max_dev = 1E-5;   // if output deviation exceeds this value, an error is generated
     f3_t epsilon = 1E-5;   // for Jacobian estimation
 
@@ -81,6 +85,9 @@ stamp :param = aware bcore_inst
 
     func : :set =
     {
+        o->recovery_test = o->recovery_test || src->recovery_test;
+        o->jacobian_test = o->jacobian_test || src->jacobian_test;
+
         o->verbosity = sz_max( o->verbosity, src->verbosity );
         o->rval      = bcore_xsg3_u2( o->rval + src->rval );
         bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
@@ -158,7 +165,6 @@ stamp :set = extending :std
 
 stamp :plain  = extending :std
 {
-    bl_t jacobian_test = true;
     sz_t ap_cycles = 1; // for testing
 };
 
@@ -166,7 +172,6 @@ stamp :plain  = extending :std
 
 stamp :cyclic  = extending :std
 {
-    bl_t jacobian_test = true;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

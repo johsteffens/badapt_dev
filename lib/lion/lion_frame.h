@@ -103,6 +103,7 @@ signature @* plain_from_sc(       plain,        sc_t  sc );
 
 signature void reset( mutable );
 signature void setup( mutable );
+signature void check_integrity( const );
 
 signature :mutab_from_source setup_from_source(      const bhvm_holor_s** en );
 signature :mutab_from_st     setup_from_st(          const bhvm_holor_s** en );
@@ -172,10 +173,12 @@ stamp : = aware :
         o->setup = true;
     };
 
+    func : :check_integrity;
+
     /// shelving/reconstitution
-    func bcore_via_call  : shelve  = { @_reset( o ); };
-    func bcore_via_call  : mutated = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
-    func bcore_inst_call : copy_x  = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
+    func bcore_via_call  : shelve  = { bl_t setup = o->setup; @_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */ };
+    func bcore_via_call  : mutated = { if( o->setup ) { @_reset( o ); @_setup( o ); }  @_check_integrity( o ); };
+    func bcore_inst_call : copy_x  = { if( o->setup ) { @_reset( o ); @_setup( o ); }  @_check_integrity( o ); };
 
     /// frame setup from string or source; 'in' can be NULL
     func : :setup_from_source;
@@ -232,9 +235,6 @@ stamp :cyclic = aware :
     /// frame has been setup
     bl_t setup = false;
 
-    /// number of holors in rolled state
-    sz_t rolled_hbase_size;
-
     /// current unroll process index
     sz_t unroll_index = 0;
 
@@ -242,7 +242,6 @@ stamp :cyclic = aware :
     bhvm_mcode_track_adl_s => track_adl_ap;
     bhvm_mcode_track_adl_s => track_adl_dp;
     bhvm_mcode_track_adl_s => track_adl_ap_setup;
-    bhvm_mcode_track_adl_s => track_adl_ap_shelve;
 
     /// unrolled hindex
     :hidx_ads_s hidx_ads_en;  // entry index
@@ -253,7 +252,7 @@ stamp :cyclic = aware :
     func : :setup;
 
     /// shelving/reconstitution
-    func bcore_via_call  : shelve  = { @_reset( o ); };
+    func bcore_via_call  : shelve  = { bl_t setup = o->setup; @_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */ };
     func bcore_via_call  : mutated = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
     func bcore_inst_call : copy_x  = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
 

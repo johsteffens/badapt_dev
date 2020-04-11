@@ -572,14 +572,24 @@ bl_t lion_nop_ar2_order_dec_s_solve( const lion_nop_ar2_order_dec_s* o, lion_hol
         bhvm_holor_s* ha = &a[0]->h;
         bhvm_holor_s* hb = &a[1]->h;
         bhvm_holor_s* hr = &result->h->h;
-        if( hb->v.size != 1 ) return false;
+        if( hb->v.size != 1 )
+        {
+            st_s_attach( &result->msg, st_s_create() );
+            st_s_push_fa( result->msg, "Index must be a scalar." );
+            return false;
+        }
+
         sz_t index = bhvm_holor_s_f3_get_scalar( hb );
         if( ha->s.size == 0 ) return false;
-        if( index < 0 || index >= ha->s.data[ ha->s.size - 1 ] ) return false;
 
-        //bhvm_holor_s_order_dec_set( ha, index, hr );
+        if( index < 0 || index >= ha->s.data[ ha->s.size - 1 ] )
+        {
+            st_s_attach( &result->msg, st_s_create() );
+            st_s_push_fa( result->msg, "Index value #<sz_t> is out of range (0 ... #<sz_t>).", index, ha->s.data[ ha->s.size - 1 ] - 1 );
+            return false;
+        }
+
         bhvm_holor_s_order_dec_weak( ha, index, hr );
-
         bhvm_vop_ar1_order_dec_weak_s* order_dec_weak = bhvm_vop_ar1_order_dec_weak_s_create();
         order_dec_weak->idx = index;
         bhvm_vop_arr_s* vop_arr = bhvm_vop_arr_s_create();

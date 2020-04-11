@@ -153,9 +153,6 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
 
     if( !o->param.src ) ERR_fa( "Source missing." );
 
-    lion_frame_s* frame = BLM_CREATE( lion_frame_s );
-    if( o->param.verbosity >= 20 ) frame->log = bcore_fork( o->param.log );
-
     bcore_source* source = NULL;
 
     switch( *(aware_t*)o->param.src )
@@ -184,7 +181,20 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
     const bhvm_holor_adl_s* adl_ap_en = o->param.in;
           bhvm_holor_adl_s* adl_ap_ex = BLM_CREATE( bhvm_holor_adl_s );
 
-    lion_frame_s_setup_from_source_adl( frame, source, adl_ap_en );
+    lion_frame_s* frame0 = BLM_CREATE( lion_frame_s );
+    if( o->param.verbosity >= 20 ) frame0->log = bcore_fork( o->param.log );
+
+    lion_frame_s_setup_from_source_adl( frame0, source, adl_ap_en );
+
+    /// test frame recovery/copying
+    if( o->param.recovery_test)
+    {
+        lion_frame_s* frame1 = BLM_CREATE( lion_frame_s );
+        bcore_bin_ml_a_copy( frame1, frame0 );
+        frame0 = frame1;
+    }
+
+    lion_frame_s* frame = BLM_CLONE( lion_frame_s, frame0 );
 
     for( sz_t i = 0; i < o->ap_cycles; i++ )
     {
@@ -238,7 +248,7 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
         bcore_sink_a_push_fa( o->param.log, "End microcode disassembly\n\n" );
     }
 
-    if( o->jacobian_test )
+    if( o->param.jacobian_test )
     {
         u2_t rval = 1234;
 
@@ -505,10 +515,17 @@ lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cy
     ASSERT( unroll_size * frame->size_en == adl_ap_en->size );
 
     lion_frame_cyclic_s* frame_cyclic0 = BLM_CREATE( lion_frame_cyclic_s );
-    lion_frame_cyclic_s* frame_cyclic  = BLM_CREATE( lion_frame_cyclic_s );
-
     lion_frame_cyclic_s_setup_from_frame( frame_cyclic0, frame, unroll_size );
-    lion_frame_cyclic_s_copy( frame_cyclic, frame_cyclic0 );
+
+    /// test frame recovery/copying
+    if( o->param.recovery_test)
+    {
+        lion_frame_cyclic_s* frame_cyclic1 = BLM_CREATE( lion_frame_cyclic_s );
+        bcore_bin_ml_a_copy( frame_cyclic1, frame_cyclic0 );
+        frame_cyclic0 = frame_cyclic1;
+    }
+
+    lion_frame_cyclic_s* frame_cyclic  = BLM_CLONE( lion_frame_cyclic_s, frame_cyclic0 );
 
     lion_frame_cyclic_s_run_ap_adl_flat( frame_cyclic, adl_ap_en, adl_ap_ex1 );
     bhvm_holor_adl_s_set_size( adl_ap_ex2, adl_ap_ex1->size );
@@ -576,7 +593,7 @@ lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cy
 
     }
 
-    if( o->jacobian_test )
+    if( o->param.jacobian_test )
     {
         u2_t rval = 1234;
 
