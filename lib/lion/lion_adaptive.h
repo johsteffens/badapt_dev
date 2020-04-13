@@ -58,6 +58,8 @@ stamp : = aware badapt_adaptive
     func ^ : minfer;
     func ^ : bgrad_adapt;
 
+    func ^ : get_weights_min_max;
+
     // ==============================================================
 };
 
@@ -115,6 +117,7 @@ stamp :cyclic = aware badapt_adaptive
     func ^ : arc_to_sink;
     func ^ : minfer;
     func ^ : bgrad_adapt;
+    func ^ : get_weights_min_max;
     func ^ : reset;
 
     // ==============================================================

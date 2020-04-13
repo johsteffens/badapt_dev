@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-11T13:04:27Z
+ *  Last File Update: 2020-04-12T14:34:16Z
  *
  *  Copyright and License of this File:
  *
@@ -1349,7 +1349,8 @@
   static inline void lion_adaptive_s_set_dynamics_std( lion_adaptive_s* o, const badapt_dynamics_std_s* dynamics ){badapt_dynamics_std_s_copy( &o->dynamics, dynamics );} \
   void lion_adaptive_s_arc_to_sink( const lion_adaptive_s* o, bcore_sink* sink ); \
   void lion_adaptive_s_minfer( lion_adaptive_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
-  void lion_adaptive_s_bgrad_adapt( lion_adaptive_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out );
+  void lion_adaptive_s_bgrad_adapt( lion_adaptive_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out ); \
+  void lion_adaptive_s_get_weights_min_max( const lion_adaptive_s* o, f3_t* min, f3_t* max );
 #define TYPEOF_lion_adaptive_builder_s 937777220
 #define BETH_EXPAND_ITEM_lion_adaptive_builder_s \
   BCORE_DECLARE_OBJECT( lion_adaptive_builder_s ) \
@@ -1370,6 +1371,7 @@
   void lion_adaptive_cyclic_s_arc_to_sink( const lion_adaptive_cyclic_s* o, bcore_sink* sink ); \
   void lion_adaptive_cyclic_s_minfer( lion_adaptive_cyclic_s* o, const bmath_vf3_s* in, bmath_vf3_s* out ); \
   void lion_adaptive_cyclic_s_bgrad_adapt( lion_adaptive_cyclic_s* o, bmath_vf3_s* grad_in, const bmath_vf3_s* grad_out ); \
+  void lion_adaptive_cyclic_s_get_weights_min_max( const lion_adaptive_cyclic_s* o, f3_t* min, f3_t* max ); \
   void lion_adaptive_cyclic_s_reset( lion_adaptive_cyclic_s* o );
 #define TYPEOF_lion_adaptive_cyclic_builder_s 1640287118
 #define BETH_EXPAND_ITEM_lion_adaptive_cyclic_builder_s \

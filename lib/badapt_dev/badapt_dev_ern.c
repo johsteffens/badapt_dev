@@ -65,36 +65,6 @@ void badapt_ern_test_recurrent_abc()
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void badapt_ern_test_recurrent_kjv()
-{
-    BLM_INIT();
-    badapt_problem_recurrent_kjv_s* problem = BLM_CREATE( badapt_problem_recurrent_kjv_s );
-    badapt_ern_builder_s*           builder = BLM_CREATE( badapt_ern_builder_s );
-    badapt_trainer_batch_s*         trainer = BLM_CREATE( badapt_trainer_batch_s );
-
-    builder->random_seed = 111;
-    builder->size_unfolded = 25;
-
-    builder->size_hidden        = 50;
-    builder->dynamics.epsilon   = 0.02;
-    builder->dynamics.lambda_l2 = 0.00001;
-
-//    builder->dynamics.lambda_l1 = 0.0001;
-
-//    builder->a_h = badapt_activator_create_from_names( "plain", "leaky_relu" );
-    builder->a_h = badapt_activator_create_from_names( "plain", "tanh" );
-    builder->a_o = badapt_activator_create_from_names( "plain", "lgst" );
-
-    trainer->fetch_cycles_per_iteration = 10;
-//    trainer->batch_cycles_per_fetch = 1;
-    trainer->max_iterations = 10;
-
-    badapt_dev_ern_s_run_training( ( badapt_supplier* )problem, ( badapt_builder* )builder, trainer );
-    BLM_RETURN();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 /**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------

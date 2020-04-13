@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-11T13:04:27Z
+ *  Last File Update: 2020-04-12T14:34:16Z
  *
  *  Copyright and License of this File:
  *
@@ -1573,6 +1573,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_s )
     "func ^:arc_to_sink;"
     "func ^:minfer;"
     "func ^:bgrad_adapt;"
+    "func ^:get_weights_min_max;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_builder_s )
@@ -1606,6 +1607,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_s )
     "func ^:arc_to_sink;"
     "func ^:minfer;"
     "func ^:bgrad_adapt;"
+    "func ^:get_weights_min_max;"
     "func ^:reset;"
 "}";
 
@@ -1633,7 +1635,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 3458743736 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1462430511 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2207,6 +2209,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_adaptive_arc_to_sink, lion_adaptive_s_arc_to_sink );
             BCORE_REGISTER_FFUNC( badapt_adaptive_minfer, lion_adaptive_s_minfer );
             BCORE_REGISTER_FFUNC( badapt_adaptive_bgrad_adapt, lion_adaptive_s_bgrad_adapt );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_get_weights_min_max, lion_adaptive_s_get_weights_min_max );
             BCORE_REGISTER_OBJECT( lion_adaptive_s );
             BCORE_REGISTER_FFUNC( badapt_builder_get_in_size, lion_adaptive_builder_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_builder_set_in_size, lion_adaptive_builder_s_set_in_size );
@@ -2221,6 +2224,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_adaptive_arc_to_sink, lion_adaptive_cyclic_s_arc_to_sink );
             BCORE_REGISTER_FFUNC( badapt_adaptive_minfer, lion_adaptive_cyclic_s_minfer );
             BCORE_REGISTER_FFUNC( badapt_adaptive_bgrad_adapt, lion_adaptive_cyclic_s_bgrad_adapt );
+            BCORE_REGISTER_FFUNC( badapt_adaptive_get_weights_min_max, lion_adaptive_cyclic_s_get_weights_min_max );
             BCORE_REGISTER_FFUNC( badapt_adaptive_reset, lion_adaptive_cyclic_s_reset );
             BCORE_REGISTER_OBJECT( lion_adaptive_cyclic_s );
             BCORE_REGISTER_FFUNC( badapt_builder_get_in_size, lion_adaptive_cyclic_builder_s_get_in_size );

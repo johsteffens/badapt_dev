@@ -22,6 +22,27 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+void lion_adaptive_s_get_weights_min_max( const lion_adaptive_s* o, f3_t* arg_min, f3_t* arg_max )
+{
+    lion_frame_s* frame = ( lion_frame_s* )&o->frame;
+    f3_t max = 0;
+    f3_t min = 0;
+
+    BFOR_SIZE( i, lion_frame_s_get_size_ada( frame ) )
+    {
+        const bhvm_value_s* v = &lion_frame_s_get_ap_ada( frame, i )->v;
+        f3_t v_max = bhvm_value_s_get_max_f3( v );
+        f3_t v_min = bhvm_value_s_get_min_f3( v );
+        max = ( i == 0 ) ? v_max : f3_max( max, v_max );
+        min = ( i == 0 ) ? v_min : f3_min( min, v_min );
+    }
+
+    if( arg_max ) *arg_max = max;
+    if( arg_min ) *arg_min = min;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 void lion_adaptive_s_arc_to_sink( const lion_adaptive_s* o, bcore_sink* sink )
 {
     lion_frame_s_disassemble_to_sink( &o->frame, sink );

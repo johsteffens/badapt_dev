@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2019-12-12T12:53:52Z
+ *  Last File Update: 2020-04-12T14:02:12Z
  *
  *  Copyright and License of this File:
  *
@@ -43,26 +43,6 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_abc_s )
     "func ^:fetch_sample_vio;"
 "}";
 
-BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_kjv_s )
-"badapt_supplier"
-"{"
-    "aware_t _;"
-    "aware bcore_source => source;"
-    "bcore_arr_sz_s => charmap;"
-    "st_s => charset;"
-    "u0_t t_last_char = 0;"
-    "u0_t v_last_char = 0;"
-    "u2_t rval = 1234;"
-    "f3_t pos_tgt = 1.0;"
-    "f3_t neg_tgt = 0.0;"
-    "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
-    "func ^:preferred_loss;"
-    "func ^:get_in_size;"
-    "func ^:get_out_size;"
-    "func ^:fetch_sample_tio;"
-    "func ^:fetch_sample_vio;"
-"}";
-
 BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_text_s )
 "aware badapt_supplier"
 "{"
@@ -91,10 +71,51 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_char_encode_s )
     "aware badapt_guide => guide_default = badapt_guide_std_s;"
     "bcore_arr_sz_s -> charmap;"
     "st_s -> charset;"
+    "hidden aware bcore_sink -> sink;"
+    "func bcore_inst_call:init_x;"
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
+    "st_s prefix = \"\";"
+    "st_s postfix = \"\n\";"
     "st_s txt_trigger;"
     "sz_t txt_size = 128;"
+    "sz_t line_size = 256;"
+    "f3_t heat = 0.3;"
+    "func ^:callback;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_utf8_s )
+"aware badapt_supplier"
+"{"
+    "st_s text_file;"
+    "aware bcore_source => source;"
+    "u0_t t_last_char = 0;"
+    "u0_t v_last_char = 0;"
+    "u2_t rval = 1234;"
+    "f3_t pos_tgt = 1.0;"
+    "f3_t neg_tgt = 0.0;"
+    "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
+    "func ^:preferred_loss;"
+    "func ^:get_in_size;"
+    "func ^:get_out_size;"
+    "func ^:fetch_sample_tio;"
+    "func ^:fetch_sample_vio;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( badapt_guide_utf8_encode_s )
+"badapt_guide"
+"{"
+    "aware_t _;"
+    "aware badapt_guide => guide_default = badapt_guide_std_s;"
+    "hidden aware bcore_sink -> sink;"
+    "func bcore_inst_call:init_x;"
+    "f3_t pos_tgt = 1.0;"
+    "f3_t neg_tgt = 0.0;"
+    "st_s prefix = \"\";"
+    "st_s postfix = \"\n\";"
+    "st_s txt_trigger;"
+    "sz_t txt_size = 128;"
+    "sz_t line_size = 256;"
     "f3_t heat = 0.3;"
     "func ^:callback;"
 "}";
@@ -119,7 +140,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 4188750548 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 896133971 ) );
 
             // --------------------------------------------------------------------
             // source: badapt_dev_problem.h
@@ -131,20 +152,24 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_recurrent_abc_s_fetch_sample_tio );
             BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_recurrent_abc_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_recurrent_abc_s );
-            BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_kjv_s_preferred_loss );
-            BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_kjv_s_get_in_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_kjv_s_get_out_size );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_recurrent_kjv_s_fetch_sample_tio );
-            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_recurrent_kjv_s_fetch_sample_vio );
-            BCORE_REGISTER_OBJECT( badapt_problem_recurrent_kjv_s );
             BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_text_s_preferred_loss );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_text_s_get_in_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_text_s_get_out_size );
             BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_recurrent_text_s_fetch_sample_tio );
             BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_recurrent_text_s_fetch_sample_vio );
             BCORE_REGISTER_OBJECT( badapt_problem_recurrent_text_s );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, badapt_guide_char_encode_s_init_x );
             BCORE_REGISTER_FFUNC( badapt_guide_callback, badapt_guide_char_encode_s_callback );
             BCORE_REGISTER_OBJECT( badapt_guide_char_encode_s );
+            BCORE_REGISTER_FFUNC( badapt_supplier_preferred_loss, badapt_problem_recurrent_utf8_s_preferred_loss );
+            BCORE_REGISTER_FFUNC( badapt_supplier_get_in_size, badapt_problem_recurrent_utf8_s_get_in_size );
+            BCORE_REGISTER_FFUNC( badapt_supplier_get_out_size, badapt_problem_recurrent_utf8_s_get_out_size );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_tio, badapt_problem_recurrent_utf8_s_fetch_sample_tio );
+            BCORE_REGISTER_FFUNC( badapt_supplier_fetch_sample_vio, badapt_problem_recurrent_utf8_s_fetch_sample_vio );
+            BCORE_REGISTER_OBJECT( badapt_problem_recurrent_utf8_s );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_init_x, badapt_guide_utf8_encode_s_init_x );
+            BCORE_REGISTER_FFUNC( badapt_guide_callback, badapt_guide_utf8_encode_s_callback );
+            BCORE_REGISTER_OBJECT( badapt_guide_utf8_encode_s );
             BCORE_REGISTER_TRAIT( badapt_dev_problem_objects, bcore_inst );
 
             // --------------------------------------------------------------------
