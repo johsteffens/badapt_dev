@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-12T14:02:12Z
+ *  Last File Update: 2020-04-13T11:36:59Z
  *
  *  Copyright and License of this File:
  *
@@ -111,8 +111,6 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_utf8_encode_s )
     "func bcore_inst_call:init_x;"
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
-    "st_s prefix = \"\";"
-    "st_s postfix = \"\n\";"
     "st_s txt_trigger;"
     "sz_t txt_size = 128;"
     "sz_t line_size = 256;"
@@ -140,7 +138,7 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 896133971 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 2621459360 ) );
 
             // --------------------------------------------------------------------
             // source: badapt_dev_problem.h

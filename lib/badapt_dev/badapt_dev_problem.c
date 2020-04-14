@@ -279,7 +279,7 @@ bl_t badapt_guide_utf8_encode_s_callback( const badapt_guide_utf8_encode_s* o, b
 
     sz_t c_count = 0;
 
-    bcore_sink_a_push_fa( o->sink, "#<st_s*>", &o->prefix );
+    bcore_sink_a_push_fa( o->sink, "\n#rn{=}\n", o->line_size );
 
     for( sz_t i = 0; txt0[ i ] != 0; i++ )
     {
@@ -304,7 +304,7 @@ bl_t badapt_guide_utf8_encode_s_callback( const badapt_guide_utf8_encode_s* o, b
         badapt_adaptive_a_minfer( adaptive, vin, vout );
     }
 
-    bcore_sink_a_push_fa( o->sink, "#<st_s*>", &o->postfix );
+    bcore_sink_a_push_fa( o->sink, "\n#rn{=}\n", o->line_size );
 
     BLM_DOWN();
 

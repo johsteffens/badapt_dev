@@ -405,7 +405,10 @@ void lion_sem_cell_s_set_channels( lion_sem_cell_s* o, sz_t excs, sz_t encs )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_sem_cell_s_wrap_cell( lion_sem_cell_s* o, lion_sem_cell_s* src )
+/** Adds a wrapping membrane only exposing unspecified entry links.
+  * links of src are not modified
+  */
+void lion_sem_cell_s_wrap_cell_soft( lion_sem_cell_s* o, lion_sem_cell_s* src )
 {
     ASSERT( !o->body );
     ASSERT( !o->nop  );
@@ -431,6 +434,76 @@ void lion_sem_cell_s_wrap_cell( lion_sem_cell_s* o, lion_sem_cell_s* src )
     BFOR_EACH( i, &src->excs )
     {
         o->excs.data[ i ] = lion_sem_link_s_create_setup( src->excs.data[ i ]->name, src->excs.data[ i ], NULL, o, true );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Adds a wrapping membrane exposing all links of src.
+  * Explicitly moves entry links of src to the wrapping membrane
+  */
+void lion_sem_cell_s_wrap_cell_hard( lion_sem_cell_s* o, lion_sem_cell_s* src )
+{
+    ASSERT( !o->body );
+    ASSERT( !o->nop  );
+    ASSERT( !o->wrapped_cell );
+
+    o->wrapped_cell = src;
+    o->priority = src->priority;
+    lion_sem_links_s_set_size( &o->encs, src->encs.size );
+    lion_sem_links_s_set_size( &o->excs, src->excs.size );
+
+    BFOR_EACH( i, &o->encs )
+    {
+        o->encs.data[ i ] = lion_sem_link_s_create_setup( src->encs.data[ i ]->name, src->encs.data[ i ]->up, src->encs.data[ i ], o, false );
+        src->encs.data[ i ]->up = NULL;
+    }
+
+    BFOR_EACH( i, &o->excs )
+    {
+        o->excs.data[ i ] = lion_sem_link_s_create_setup( src->excs.data[ i ]->name, src->excs.data[ i ], NULL, o, true );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Passes through all wrapping membranes of src to find first non-wrapper (root).
+ *  Wraps root by moving all specified entries of intermediate wrappers to the outermost membrane.
+ *  Does not (!) move specified links of the root cell.
+ */
+void lion_sem_cell_s_rewrap_cell_soft( lion_sem_cell_s* o, lion_sem_cell_s* src )
+{
+    ASSERT( !o->body );
+    ASSERT( !o->nop  );
+    ASSERT( !o->wrapped_cell );
+
+    lion_sem_cell_s* root = src;
+    while( root->wrapped_cell ) root = root->wrapped_cell;
+    lion_sem_cell_s_wrap_cell_soft( o, root );
+
+    lion_sem_cell_s* wrap = src;
+    while( wrap->wrapped_cell )
+    {
+        BFOR_EACH( i, &wrap->encs )
+        {
+            lion_sem_link_s* wrap_link = wrap->encs.data[ i ];
+            if( wrap_link->up )
+            {
+                lion_sem_link_s* root_link = wrap_link;
+                while( root_link->cell != root && root_link->dn ) root_link = root_link->dn;
+                ASSERT( root_link->cell == root );
+
+                BFOR_EACH( i, &o->encs )
+                {
+                    if( o->encs.data[ i ]->dn == root_link )
+                    {
+                        o->encs.data[ i ]->up = wrap_link->up;
+                        break;
+                    }
+                }
+            }
+        }
+        wrap = wrap->wrapped_cell;
     }
 }
 
@@ -537,10 +610,28 @@ lion_sem_cell_s* lion_sem_cell_s_push_cell_scalar( lion_sem_cell_s* o, f3_t* v )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_sem_cell_s* lion_sem_cell_s_push_wrap_cell( lion_sem_cell_s* o, lion_sem_cell_s* src )
+lion_sem_cell_s* lion_sem_cell_s_push_wrap_cell_soft( lion_sem_cell_s* o, lion_sem_cell_s* src )
 {
     lion_sem_cell_s* cell = lion_sem_cell_s_push_cell( o );
-    lion_sem_cell_s_wrap_cell( cell, src );
+    lion_sem_cell_s_wrap_cell_soft( cell, src );
+    return cell;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_sem_cell_s* lion_sem_cell_s_push_wrap_cell_hard( lion_sem_cell_s* o, lion_sem_cell_s* src )
+{
+    lion_sem_cell_s* cell = lion_sem_cell_s_push_cell( o );
+    lion_sem_cell_s_wrap_cell_hard( cell, src );
+    return cell;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_sem_cell_s* lion_sem_cell_s_push_rewrap_cell_soft( lion_sem_cell_s* o, lion_sem_cell_s* src )
+{
+    lion_sem_cell_s* cell = lion_sem_cell_s_push_cell( o );
+    lion_sem_cell_s_rewrap_cell_soft( cell, src );
     return cell;
 }
 
@@ -548,7 +639,7 @@ lion_sem_cell_s* lion_sem_cell_s_push_wrap_cell( lion_sem_cell_s* o, lion_sem_ce
 
 lion_sem_cell_s* lion_sem_cell_s_push_wrap_cell_set_source( lion_sem_cell_s* o, lion_sem_cell_s* src, bcore_source* source )
 {
-    lion_sem_cell_s* cell = lion_sem_cell_s_push_wrap_cell( o, src );
+    lion_sem_cell_s* cell = lion_sem_cell_s_push_wrap_cell_soft( o, src );
     bcore_source_point_s_set( &cell->source_point, source );
     return cell;
 }
@@ -643,7 +734,7 @@ void lion_sem_cell_s_parse( lion_sem_cell_s* o, bcore_source* source )
     {
         bcore_source_a_parse_fa( source, " = " );
         lion_sem_cell_s* cell = lion_sem_cell_s_evaluate_cell( frame, source );
-        lion_sem_cell_s_wrap_cell( o, cell );
+        lion_sem_cell_s_wrap_cell_soft( o, cell );
     }
 }
 
@@ -870,14 +961,16 @@ void lion_sem_cell_s_evaluate_set_encs( lion_sem_cell_s* o, lion_sem_cell_s* par
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// in body of o: creates new cell wrapping the catenated cells: cell = { c1 : c2 }
+/** In body of o: creates new cell wrapping the catenated cells: cell = { c1 <: c2 }
+ *  Deprecated approach. Prefer lion_sem_cell_s_recat_cell below.
+ */
 lion_sem_cell_s* lion_sem_cell_s_cat_cell( lion_sem_cell_s* o, lion_sem_cell_s* c1, lion_sem_cell_s* c2, bcore_source* source )
 {
     lion_sem_cell_s* cell = lion_sem_cell_s_push_cell( o );
     bcore_source_point_s_set( &cell->source_point, source );
 
-    c1 = lion_sem_cell_s_push_wrap_cell( cell, c1 );
-    c2 = lion_sem_cell_s_push_wrap_cell( cell, c2 );
+    c1 = lion_sem_cell_s_push_wrap_cell_soft( cell, c1 );
+    c2 = lion_sem_cell_s_push_wrap_cell_soft( cell, c2 );
 
     // only free input channels get wrapped (code below must change in case wrapping scheme changes)
     assert( c1->encs.size == lion_sem_cell_s_get_arity( c1 ) );
@@ -916,6 +1009,79 @@ lion_sem_cell_s* lion_sem_cell_s_cat_cell( lion_sem_cell_s* o, lion_sem_cell_s* 
     }
 
     return cell;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** In body of o: creates new cell rewrapping the catenated cells: cell = { c1 <: c2 }
+ *  This function rewraps c1, c2 making sure that all defined uplinks are moved to the outermost membrane.
+ *  The catenated cell is then wrapped again to leave only undefined input links exposed.
+ *  The last soft-wrapping is done for convenience because some code using this function assumes arity == encs.size.
+ */
+lion_sem_cell_s* lion_sem_cell_s_recat_cell( lion_sem_cell_s* o, lion_sem_cell_s* c1, lion_sem_cell_s* c2, bcore_source* source )
+{
+    lion_sem_cell_s* cell = lion_sem_cell_s_push_cell( o );
+    bcore_source_point_s_set( &cell->source_point, source );
+
+    c1 = lion_sem_cell_s_push_rewrap_cell_soft( cell, c1 );
+    c2 = lion_sem_cell_s_push_rewrap_cell_soft( cell, c2 );
+
+    sz_t arity_c1 = lion_sem_cell_s_get_arity( c1 );
+
+    /// free input channels of n1 must match output channels of n2
+    if( arity_c1 != c2->excs.size )
+    {
+        bcore_source_point_s_parse_err_fa
+        (
+            &cell->source_point,
+            "Catenating cells: Number of left cell's open entry channels (#<sz_t>) differs from right cells's exit channels (#<sz_t>).",
+            arity_c1,
+            c2->excs.size
+        );
+    }
+
+    /// channels of wrapping cell
+    lion_sem_cell_s_set_channels( cell, c1->excs.size, c2->encs.size + c1->encs.size - arity_c1 );
+
+    sz_t k = 0;
+    for( sz_t i = 0; i < c2->encs.size; i++ )
+    {
+        cell->encs.data[ k ]->name =   c2->encs.data[ i ]->name;
+        cell->encs.data[ k ]->up   =   c2->encs.data[ i ]->up;
+          c2->encs.data[ i ]->up   = cell->encs.data[ k ];
+        k++;
+    }
+
+    sz_t l = 0;
+    for( sz_t i = 0; i < c1->encs.size; i++ )
+    {
+        if( c1->encs.data[ i ]->up )
+        {
+            assert( k < cell->encs.size );
+            cell->encs.data[ k ]->name =   c1->encs.data[ i ]->name;
+            cell->encs.data[ k ]->up   =   c1->encs.data[ i ]->up;
+              c1->encs.data[ i ]->up   = cell->encs.data[ k ];
+            k++;
+        }
+        else
+        {
+            assert( l < c2->excs.size );
+            c1->encs.data[ i ]->up = c2->excs.data[ l ];
+            l++;
+        }
+    }
+
+    ASSERT( k == cell->encs.size );
+    ASSERT( l ==   c2->excs.size );
+
+    for( sz_t i = 0; i < c1->excs.size; i++ )
+    {
+        cell->excs.data[ i ]->up   = c1->excs.data[ i ];
+        cell->excs.data[ i ]->name = c1->excs.data[ i ]->name;
+    }
+
+    /// the last soft-wrap is convenience (consider changing dependent code using arity rather then encs.size to determine open links)
+    return lion_sem_cell_s_push_wrap_cell_soft( o, lion_sem_cell_s_push_wrap_cell_hard( o, cell ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1284,14 +1450,15 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 lion_sem_cell_s* cell2 = stack_pop_cell( stack, source );
                 stack_pop_of_value( stack, flag_cell_cat, source );
                 lion_sem_cell_s* cell1 = stack_pop_cell( stack, source );
-                stack_push( stack, lion_sem_cell_s_cat_cell( o, cell1, cell2, source ) );
+//                stack_push( stack, lion_sem_cell_s_cat_cell( o, cell1, cell2, source ) );
+                stack_push( stack, lion_sem_cell_s_recat_cell( o, cell1, cell2, source ) );
             }
             else if( stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) ) // cell : link
             {
                 lion_sem_link_s* link = stack_pop_link( stack, source );
                 stack_pop_of_value( stack, flag_cell_cat, source );
                 lion_sem_cell_s* cell = stack_pop_cell( stack, source );
-                cell = lion_sem_cell_s_push_wrap_cell( o, cell );
+                cell = lion_sem_cell_s_push_wrap_cell_soft( o, cell );
                 if( cell->encs.size != 1 ) bcore_source_a_parse_err_fa( source, "Catenation 'Cell : Link': Cell has #<sz_t> free entry channels; required is 1", cell->encs.size );
                 cell->encs.data[ 0 ]->up = link;
                 stack_push( stack, cell );

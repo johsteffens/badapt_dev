@@ -78,7 +78,7 @@ s2_t lion_ctr_node_s_node_process
               */
             while( node && node->cell != cell )
             {
-                //bcore_msg_fa( "descending..." );
+                //bcore_msg_fa( "descending...\n" );
                 node = node->parent;
             }
 

@@ -137,8 +137,6 @@ stamp badapt_guide_utf8_encode = badapt_guide
 
     f3_t pos_tgt    =  1.0;
     f3_t neg_tgt    =  0.0;
-    st_s prefix     = "";
-    st_s postfix    = "\n";
     st_s txt_trigger;
     sz_t txt_size   = 128;
     sz_t line_size  = 256;

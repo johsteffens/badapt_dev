@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-12T14:02:12Z
+ *  Last File Update: 2020-04-13T11:36:59Z
  *
  *  Copyright and License of this File:
  *
@@ -63,7 +63,7 @@
 #define TYPEOF_badapt_guide_utf8_encode_s 3478673599
 #define BETH_EXPAND_ITEM_badapt_guide_utf8_encode_s \
   BCORE_DECLARE_OBJECT( badapt_guide_utf8_encode_s ) \
-    {aware_t _;badapt_guide* guide_default;bcore_sink* sink;f3_t pos_tgt;f3_t neg_tgt;st_s prefix;st_s postfix;st_s txt_trigger;sz_t txt_size;sz_t line_size;f3_t heat;}; \
+    {aware_t _;badapt_guide* guide_default;bcore_sink* sink;f3_t pos_tgt;f3_t neg_tgt;st_s txt_trigger;sz_t txt_size;sz_t line_size;f3_t heat;}; \
   static inline void badapt_guide_utf8_encode_s_init_x( badapt_guide_utf8_encode_s* o ){o->sink = bcore_fork( BCORE_STDOUT );} \
   bl_t badapt_guide_utf8_encode_s_callback( const badapt_guide_utf8_encode_s* o, badapt_training_state* state );
 #define BETH_EXPAND_GROUP_badapt_dev_problem_objects \
