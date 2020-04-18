@@ -4,6 +4,7 @@
 
 #include "badapt_std.h"
 #include "bhvm_std.h"
+#include "bhpt_std.h"
 #include "badapt_dev_signal.h"
 #include "lion_signal.h"
 #include "badapt_dev_ern.h"
@@ -13,6 +14,7 @@ int main( int argc, char** argv )
 {
     bcore_register_signal_handler( bmath_signal_handler );
     bcore_register_signal_handler( bhvm_signal_handler );
+    bcore_register_signal_handler( bhpt_signal_handler );
     bcore_register_signal_handler( badapt_signal_handler );
     bcore_register_signal_handler( badapt_dev_signal_handler );
     bcore_register_signal_handler( lion_signal_handler );
