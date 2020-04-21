@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-12T14:34:16Z
+ *  Last File Update: 2020-04-20T16:57:35Z
  *
  *  Copyright and License of this File:
  *
@@ -15,6 +15,7 @@
  *  lion_frame.h
  *  lion_eval_frame.h
  *  lion_adaptive.h
+ *  lion_adaptive_bhpt.h
  *
  */
 
@@ -1627,6 +1628,41 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_builder_s )
 "}";
 
 /**********************************************************************************************************************/
+// source: lion_adaptive_bhpt.h
+#include "lion_adaptive_bhpt.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_adaptive_bhpt
+
+BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_s )
+"aware bhpt_adaptive"
+"{"
+    "aware => src;"
+    "lion_frame_s frame;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "func ^:get_format_en;"
+    "func ^:get_format_ex;"
+    "func ^:axon_pass;"
+    "func ^:dendrite_pass;"
+    "func ^:cyclic_reset;"
+    "func ^:get_hprobe_accugrad;"
+    "func ^:get_hprobe_adaptive;"
+    "func ^:status_to_sink;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_builder_s )
+"aware bhpt_builder"
+"{"
+    "aware => src;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "func ^:set_format_en;"
+    "func ^:set_format_ex;"
+    "func ^:create_adaptive;"
+"}";
+
+/**********************************************************************************************************************/
 
 vd_t lion_planted_signal_handler( const bcore_signal_s* o )
 {
@@ -1635,7 +1671,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1462430511 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1896485566 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2234,6 +2270,25 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( badapt_builder_build, lion_adaptive_cyclic_builder_s_build );
             BCORE_REGISTER_OBJECT( lion_adaptive_cyclic_builder_s );
             BCORE_REGISTER_TRAIT( lion_adaptive, bcore_inst );
+
+            // --------------------------------------------------------------------
+            // source: lion_adaptive_bhpt.h
+
+            // group: lion_adaptive_bhpt
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_en, lion_adaptive_bhpt_s_get_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_ex, lion_adaptive_bhpt_s_get_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_axon_pass, lion_adaptive_bhpt_s_axon_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_dendrite_pass, lion_adaptive_bhpt_s_dendrite_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_cyclic_reset, lion_adaptive_bhpt_s_cyclic_reset );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_hprobe_accugrad, lion_adaptive_bhpt_s_get_hprobe_accugrad );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_hprobe_adaptive, lion_adaptive_bhpt_s_get_hprobe_adaptive );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_status_to_sink, lion_adaptive_bhpt_s_status_to_sink );
+            BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_s );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_en, lion_adaptive_bhpt_builder_s_set_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_ex, lion_adaptive_bhpt_builder_s_set_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_builder_create_adaptive, lion_adaptive_bhpt_builder_s_create_adaptive );
+            BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_builder_s );
+            BCORE_REGISTER_TRAIT( lion_adaptive_bhpt, bcore_inst );
         }
         break;
         default: break;

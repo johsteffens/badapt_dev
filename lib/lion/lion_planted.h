@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-12T14:34:16Z
+ *  Last File Update: 2020-04-20T16:57:35Z
  *
  *  Copyright and License of this File:
  *
@@ -15,6 +15,7 @@
  *  lion_frame.h
  *  lion_eval_frame.h
  *  lion_adaptive.h
+ *  lion_adaptive_bhpt.h
  *
  */
 
@@ -1392,6 +1393,40 @@
   BETH_EXPAND_ITEM_lion_adaptive_builder_s \
   BETH_EXPAND_ITEM_lion_adaptive_cyclic_s \
   BETH_EXPAND_ITEM_lion_adaptive_cyclic_builder_s
+
+/**********************************************************************************************************************/
+// source: lion_adaptive_bhpt.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_adaptive_bhpt
+
+#define TYPEOF_lion_adaptive_bhpt 1889049037
+#define TYPEOF_lion_adaptive_bhpt_s 2515157951
+#define TYPEOF_lion_adaptive_bhpt_s 2515157951
+#define BETH_EXPAND_ITEM_lion_adaptive_bhpt_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_bhpt_s ) \
+    {aware_t _;vd_t src;lion_frame_s frame;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;}; \
+  static inline bhvm_holor_s* lion_adaptive_bhpt_s_get_format_en( const lion_adaptive_bhpt_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_en ); return format;} \
+  static inline bhvm_holor_s* lion_adaptive_bhpt_s_get_format_ex( const lion_adaptive_bhpt_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format;} \
+  void lion_adaptive_bhpt_s_axon_pass( lion_adaptive_bhpt_s* o, const bhvm_holor_s* ax_en, bhvm_holor_s* ax_ex ); \
+  void lion_adaptive_bhpt_s_dendrite_pass( lion_adaptive_bhpt_s* o, const bhvm_holor_s* ag_ex, bhvm_holor_s* ag_en ); \
+  void lion_adaptive_bhpt_s_cyclic_reset( lion_adaptive_bhpt_s* o ); \
+  void lion_adaptive_bhpt_s_get_hprobe_accugrad( const lion_adaptive_bhpt_s* o, bhpt_hprobe_s* hprobe ); \
+  void lion_adaptive_bhpt_s_get_hprobe_adaptive( const lion_adaptive_bhpt_s* o, bhpt_hprobe_s* hprobe ); \
+  void lion_adaptive_bhpt_s_status_to_sink( const lion_adaptive_bhpt_s* o, sz_t verbosity, bcore_sink* sink );
+#define TYPEOF_lion_adaptive_bhpt_builder_s 1403919155
+#define BETH_EXPAND_ITEM_lion_adaptive_bhpt_builder_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_bhpt_builder_s ) \
+    {aware_t _;vd_t src;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;}; \
+  static inline void lion_adaptive_bhpt_builder_s_set_format_en( lion_adaptive_bhpt_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_en, format );} \
+  static inline void lion_adaptive_bhpt_builder_s_set_format_ex( lion_adaptive_bhpt_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_ex, format );} \
+  bhpt_adaptive* lion_adaptive_bhpt_builder_s_create_adaptive( const lion_adaptive_bhpt_builder_s* o );
+#define BETH_EXPAND_GROUP_lion_adaptive_bhpt \
+  BCORE_FORWARD_OBJECT( lion_adaptive_bhpt ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_bhpt_s ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_bhpt_builder_s ); \
+  BETH_EXPAND_ITEM_lion_adaptive_bhpt_s \
+  BETH_EXPAND_ITEM_lion_adaptive_bhpt_builder_s
 
 /**********************************************************************************************************************/
 

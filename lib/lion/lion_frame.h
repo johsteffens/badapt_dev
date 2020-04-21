@@ -271,6 +271,9 @@ stamp :cyclic = aware :
 void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, bhvm_holor_s** ex );
 void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, bhvm_holor_s** en );
 
+/// resets all cyclic values to the initialization
+void lion_frame_s_cyclic_reset( lion_frame_s* o );
+
 void lion_frame_s_disassemble_to_sink( const lion_frame_s* o, bcore_sink* sink );
 
 void lion_frame_cyclic_s_setup_from_frame( lion_frame_cyclic_s* o, const lion_frame_s* frame, sz_t unroll_size );

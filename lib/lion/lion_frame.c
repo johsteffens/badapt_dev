@@ -332,7 +332,18 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhv
         bhvm_holor_s* h_m = lion_frame_hidx_s_get_holor( hidx_en, hbase, i );
         const bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
-        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) )
+        {
+            BLM_INIT();
+            st_s* st = BLM_CREATE( st_s );
+            st_s_push_fa( st, "Entry channel #<sz_t> size mismatch:", i );
+            st_s_push_fa( st, "\nGiven holor:   " );
+            bhvm_holor_s_brief_to_sink( h_i, (bcore_sink*)st );
+            st_s_push_fa( st, "\nChannel holor: " );
+            bhvm_holor_s_brief_to_sink( h_m, (bcore_sink*)st );
+            ERR_fa( "#<sc_t>\n", st->sc );
+            BLM_DOWN();
+        }
         bhvm_value_s_cpy( &h_i->v, &h_m->v );
     }
 
@@ -374,7 +385,18 @@ lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhv
         bhvm_holor_s* h_m = bhvm_mcode_hbase_s_get_holor( hbase, idx );
         const bhvm_holor_s* h_i = ex[ i ];
         ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
-        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) ) ERR_fa( "Input shape mismatch" );
+        if( !bhvm_shape_s_is_equal( &h_m->s, &h_i->s ) )
+        {
+            BLM_INIT();
+            st_s* st = BLM_CREATE( st_s );
+            st_s_push_fa( st, "Exit channel #<sz_t> shape mismatch:", i );
+            st_s_push_fa( st, "\nGiven holor:   " );
+            bhvm_holor_s_brief_to_sink( h_i, (bcore_sink*)st );
+            st_s_push_fa( st, "\nChannel holor: " );
+            bhvm_holor_s_brief_to_sink( h_m, (bcore_sink*)st );
+            ERR_fa( "#<sc_t>\n", st->sc );
+            BLM_DOWN();
+        }
         bhvm_value_s_cpy( &h_i->v, &h_m->v );
     }
 
@@ -432,6 +454,13 @@ void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, bhvm_holor_s** en )
     BLM_INIT();
     lion_frame_s_run_dp( BLM_A_PUSH( lion_frame_s_create_from_sc( sc, ex ) ), ex, en );
     BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_frame_s_cyclic_reset( lion_frame_s* o )
+{
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_cyclic_reset );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
