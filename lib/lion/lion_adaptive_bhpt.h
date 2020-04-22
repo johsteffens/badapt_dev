@@ -56,8 +56,7 @@ stamp : = aware bhpt_adaptive
     func ^ : axon_pass;
     func ^ : dendrite_pass;
     func ^ : cyclic_reset;
-    func ^ : get_hprobe_accugrad;
-    func ^ : get_hprobe_adaptive;
+    func ^ : get_adaptor_probe;
     func ^ : status_to_sink;
 
     // ==============================================================

@@ -45,26 +45,16 @@ void lion_adaptive_bhpt_s_cyclic_reset( lion_adaptive_bhpt_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_adaptive_bhpt_s_get_hprobe_accugrad( const lion_adaptive_bhpt_s* o, bhpt_hprobe_s* hprobe )
+bhpt_adaptor_probe_s* lion_adaptive_bhpt_s_get_adaptor_probe( const lion_adaptive_bhpt_s* o, bhpt_adaptor_probe_s* probe )
 {
-    bhpt_hprobe_s_set_size( hprobe, lion_frame_s_get_size_ada( &o->frame ) );
+    bhpt_adaptor_probe_s_set_size( probe, lion_frame_s_get_size_ada( &o->frame ) );
     lion_frame_s* frame = ( lion_frame_s* )&o->frame;
-    BFOR_EACH( i, hprobe )
+    BFOR_EACH( i, probe )
     {
-        bhvm_holor_s_attach( &hprobe->data[ i ], bcore_fork( lion_frame_s_get_dp_ada( frame, i ) ) );
+        bhvm_holor_s_attach( &probe->data[ i ].axon, bcore_fork( lion_frame_s_get_ap_ada( frame, i ) ) );
+        bhvm_holor_s_attach( &probe->data[ i ].grad, bcore_fork( lion_frame_s_get_dp_ada( frame, i ) ) );
     }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void lion_adaptive_bhpt_s_get_hprobe_adaptive( const lion_adaptive_bhpt_s* o, bhpt_hprobe_s* hprobe )
-{
-    bhpt_hprobe_s_set_size( hprobe, lion_frame_s_get_size_ada( &o->frame ) );
-    lion_frame_s* frame = ( lion_frame_s* )&o->frame;
-    BFOR_EACH( i, hprobe )
-    {
-        bhvm_holor_s_attach( &hprobe->data[ i ], bcore_fork( lion_frame_s_get_ap_ada( frame, i ) ) );
-    }
+    return probe;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

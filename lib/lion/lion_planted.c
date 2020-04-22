@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-20T16:57:35Z
+ *  Last File Update: 2020-04-22T11:32:05Z
  *
  *  Copyright and License of this File:
  *
@@ -1646,8 +1646,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_s )
     "func ^:axon_pass;"
     "func ^:dendrite_pass;"
     "func ^:cyclic_reset;"
-    "func ^:get_hprobe_accugrad;"
-    "func ^:get_hprobe_adaptive;"
+    "func ^:get_adaptor_probe;"
     "func ^:status_to_sink;"
 "}";
 
@@ -1671,7 +1670,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1896485566 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 261934653 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2280,8 +2279,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhpt_adaptive_axon_pass, lion_adaptive_bhpt_s_axon_pass );
             BCORE_REGISTER_FFUNC( bhpt_adaptive_dendrite_pass, lion_adaptive_bhpt_s_dendrite_pass );
             BCORE_REGISTER_FFUNC( bhpt_adaptive_cyclic_reset, lion_adaptive_bhpt_s_cyclic_reset );
-            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_hprobe_accugrad, lion_adaptive_bhpt_s_get_hprobe_accugrad );
-            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_hprobe_adaptive, lion_adaptive_bhpt_s_get_hprobe_adaptive );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_adaptor_probe, lion_adaptive_bhpt_s_get_adaptor_probe );
             BCORE_REGISTER_FFUNC( bhpt_adaptive_status_to_sink, lion_adaptive_bhpt_s_status_to_sink );
             BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_s );
             BCORE_REGISTER_FFUNC( bhpt_builder_set_format_en, lion_adaptive_bhpt_builder_s_set_format_en );

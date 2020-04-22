@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-20T16:57:35Z
+ *  Last File Update: 2020-04-22T11:32:05Z
  *
  *  Copyright and License of this File:
  *
@@ -1411,8 +1411,7 @@
   void lion_adaptive_bhpt_s_axon_pass( lion_adaptive_bhpt_s* o, const bhvm_holor_s* ax_en, bhvm_holor_s* ax_ex ); \
   void lion_adaptive_bhpt_s_dendrite_pass( lion_adaptive_bhpt_s* o, const bhvm_holor_s* ag_ex, bhvm_holor_s* ag_en ); \
   void lion_adaptive_bhpt_s_cyclic_reset( lion_adaptive_bhpt_s* o ); \
-  void lion_adaptive_bhpt_s_get_hprobe_accugrad( const lion_adaptive_bhpt_s* o, bhpt_hprobe_s* hprobe ); \
-  void lion_adaptive_bhpt_s_get_hprobe_adaptive( const lion_adaptive_bhpt_s* o, bhpt_hprobe_s* hprobe ); \
+  bhpt_adaptor_probe_s* lion_adaptive_bhpt_s_get_adaptor_probe( const lion_adaptive_bhpt_s* o, bhpt_adaptor_probe_s* probe ); \
   void lion_adaptive_bhpt_s_status_to_sink( const lion_adaptive_bhpt_s* o, sz_t verbosity, bcore_sink* sink );
 #define TYPEOF_lion_adaptive_bhpt_builder_s 1403919155
 #define BETH_EXPAND_ITEM_lion_adaptive_bhpt_builder_s \
