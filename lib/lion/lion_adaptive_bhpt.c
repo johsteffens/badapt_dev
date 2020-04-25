@@ -49,6 +49,7 @@ bhpt_adaptor_probe_s* lion_adaptive_bhpt_s_get_adaptor_probe( const lion_adaptiv
 {
     bhpt_adaptor_probe_s_set_size( probe, lion_frame_s_get_size_ada( &o->frame ) );
     lion_frame_s* frame = ( lion_frame_s* )&o->frame;
+    ASSERT( frame->setup );
     BFOR_EACH( i, probe )
     {
         bhvm_holor_s_attach( &probe->data[ i ].axon, bcore_fork( lion_frame_s_get_ap_ada( frame, i ) ) );
@@ -61,7 +62,12 @@ bhpt_adaptor_probe_s* lion_adaptive_bhpt_s_get_adaptor_probe( const lion_adaptiv
 
 void lion_adaptive_bhpt_s_status_to_sink( const lion_adaptive_bhpt_s* o, sz_t verbosity, bcore_sink* sink )
 {
-    if( verbosity > 0 )
+    if( verbosity >= 1 )
+    {
+        bcore_sink_a_push_fa( sink, "#<sc_t>", ifnameof( o->_ ) );
+    }
+
+    if( verbosity >= 10 )
     {
         lion_frame_s_disassemble_to_sink( &o->frame, sink );
     }
