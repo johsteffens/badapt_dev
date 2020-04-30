@@ -57,6 +57,7 @@ stamp : = aware bhpt_adaptive
     func ^ : dendrite_pass;
     func ^ : cyclic_reset;
     func ^ : get_adaptor_probe;
+    func ^ : rebind_holors = { lion_frame_s_bind_holors( &o->frame ); };
     func ^ : status_to_sink;
 
     // ==============================================================
@@ -70,6 +71,58 @@ stamp :builder = aware bhpt_builder
 
     bhvm_holor_s holor_frame_en;
     bhvm_holor_s holor_frame_ex;
+
+    // === builder functions =======================================
+
+    func ^ : set_format_en = { bhvm_holor_s_copy( &o->holor_frame_en, format ); };
+    func ^ : set_format_ex = { bhvm_holor_s_copy( &o->holor_frame_ex, format ); };
+    func ^ : create_adaptive;
+
+    // ==============================================================
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :cyclic = aware bhpt_adaptive
+{
+    // === architecture parameters ================================
+
+    aware =>     src;      // source (bcore_file_path_s or st_s with inline code)  (just for reference)
+    lion_frame_cyclic_s frame;
+
+    bhvm_holor_s holor_frame_en;
+    bhvm_holor_s holor_frame_ex;
+
+    // ==============================================================
+
+    /// accumulated dp data
+    bhvm_holor_adl_s => dp_buffer;
+    bl_t dp_value; // true in case a value was stored
+
+    // === adaptive functions =======================================
+
+    func ^ : get_format_en = { bhvm_holor_s_copy( format, &o->holor_frame_en ); return format; };
+    func ^ : get_format_ex = { bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format; };
+
+    func ^ : axon_pass;
+    func ^ : dendrite_pass;
+    func ^ : cyclic_reset;
+    func ^ : get_adaptor_probe;
+    func ^ : rebind_holors = { lion_frame_cyclic_s_bind_holors( &o->frame ); };
+    func ^ : status_to_sink;
+
+    // ==============================================================
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :cyclic_builder = aware bhpt_builder
+{
+    aware => src; // source (bcore_file_path_s or st_s with inline code)
+
+    bhvm_holor_s holor_frame_en;
+    bhvm_holor_s holor_frame_ex;
+    sz_t unroll_size;
 
     // === builder functions =======================================
 

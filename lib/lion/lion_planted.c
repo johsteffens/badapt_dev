@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
- *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-22T11:32:05Z
+ *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
+ *  Last File Update: 2020-04-30T13:07:53Z
  *
  *  Copyright and License of this File:
  *
@@ -15,6 +15,7 @@
  *  lion_frame.h
  *  lion_eval_frame.h
  *  lion_adaptive.h
+ *  lion_adaptor.h
  *  lion_adaptive_bhpt.h
  *
  */
@@ -1317,12 +1318,18 @@ void lion_frame_s_reset( lion_frame_s* o )
     o->setup = false;
 }
 
+lion_frame_s* lion_frame_s_bind_holors( lion_frame_s* o )
+{
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_setup );
+    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_setup );
+    return o;
+}
+
 void lion_frame_s_setup( lion_frame_s* o )
 {
     if( o->setup ) return;
     if( !o->mcf ) return;
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_setup );
-    bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_setup );
+    lion_frame_s_bind_holors( o );
     o->setup = true;
 }
 
@@ -1628,6 +1635,22 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_builder_s )
 "}";
 
 /**********************************************************************************************************************/
+// source: lion_adaptor.h
+#include "lion_adaptor.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_adaptor
+
+BCORE_DEFINE_OBJECT_INST_P( lion_adaptor_frame_s )
+"aware bhpt_adaptor"
+"{"
+    "aware => src;"
+    "hidden lion_frame_s => frame;"
+    "func ^:reset;"
+    "func ^:adapt;"
+"}";
+
+/**********************************************************************************************************************/
 // source: lion_adaptive_bhpt.h
 #include "lion_adaptive_bhpt.h"
 
@@ -1647,6 +1670,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_s )
     "func ^:dendrite_pass;"
     "func ^:cyclic_reset;"
     "func ^:get_adaptor_probe;"
+    "func ^:rebind_holors;"
     "func ^:status_to_sink;"
 "}";
 
@@ -1661,6 +1685,37 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_builder_s )
     "func ^:create_adaptive;"
 "}";
 
+BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_s )
+"aware bhpt_adaptive"
+"{"
+    "aware => src;"
+    "lion_frame_cyclic_s frame;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "bhvm_holor_adl_s => dp_buffer;"
+    "bl_t dp_value;"
+    "func ^:get_format_en;"
+    "func ^:get_format_ex;"
+    "func ^:axon_pass;"
+    "func ^:dendrite_pass;"
+    "func ^:cyclic_reset;"
+    "func ^:get_adaptor_probe;"
+    "func ^:rebind_holors;"
+    "func ^:status_to_sink;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_builder_s )
+"aware bhpt_builder"
+"{"
+    "aware => src;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "sz_t unroll_size;"
+    "func ^:set_format_en;"
+    "func ^:set_format_ex;"
+    "func ^:create_adaptive;"
+"}";
+
 /**********************************************************************************************************************/
 
 vd_t lion_planted_signal_handler( const bcore_signal_s* o )
@@ -1670,7 +1725,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 261934653 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2618807554 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2271,6 +2326,15 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_TRAIT( lion_adaptive, bcore_inst );
 
             // --------------------------------------------------------------------
+            // source: lion_adaptor.h
+
+            // group: lion_adaptor
+            BCORE_REGISTER_FFUNC( bhpt_adaptor_reset, lion_adaptor_frame_s_reset );
+            BCORE_REGISTER_FFUNC( bhpt_adaptor_adapt, lion_adaptor_frame_s_adapt );
+            BCORE_REGISTER_OBJECT( lion_adaptor_frame_s );
+            BCORE_REGISTER_TRAIT( lion_adaptor, bcore_inst );
+
+            // --------------------------------------------------------------------
             // source: lion_adaptive_bhpt.h
 
             // group: lion_adaptive_bhpt
@@ -2280,12 +2344,26 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhpt_adaptive_dendrite_pass, lion_adaptive_bhpt_s_dendrite_pass );
             BCORE_REGISTER_FFUNC( bhpt_adaptive_cyclic_reset, lion_adaptive_bhpt_s_cyclic_reset );
             BCORE_REGISTER_FFUNC( bhpt_adaptive_get_adaptor_probe, lion_adaptive_bhpt_s_get_adaptor_probe );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_rebind_holors, lion_adaptive_bhpt_s_rebind_holors );
             BCORE_REGISTER_FFUNC( bhpt_adaptive_status_to_sink, lion_adaptive_bhpt_s_status_to_sink );
             BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_s );
             BCORE_REGISTER_FFUNC( bhpt_builder_set_format_en, lion_adaptive_bhpt_builder_s_set_format_en );
             BCORE_REGISTER_FFUNC( bhpt_builder_set_format_ex, lion_adaptive_bhpt_builder_s_set_format_ex );
             BCORE_REGISTER_FFUNC( bhpt_builder_create_adaptive, lion_adaptive_bhpt_builder_s_create_adaptive );
             BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_builder_s );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_en, lion_adaptive_bhpt_cyclic_s_get_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_ex, lion_adaptive_bhpt_cyclic_s_get_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_axon_pass, lion_adaptive_bhpt_cyclic_s_axon_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_dendrite_pass, lion_adaptive_bhpt_cyclic_s_dendrite_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_cyclic_reset, lion_adaptive_bhpt_cyclic_s_cyclic_reset );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_adaptor_probe, lion_adaptive_bhpt_cyclic_s_get_adaptor_probe );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_rebind_holors, lion_adaptive_bhpt_cyclic_s_rebind_holors );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_status_to_sink, lion_adaptive_bhpt_cyclic_s_status_to_sink );
+            BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_cyclic_s );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_en, lion_adaptive_bhpt_cyclic_builder_s_set_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_ex, lion_adaptive_bhpt_cyclic_builder_s_set_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_builder_create_adaptive, lion_adaptive_bhpt_cyclic_builder_s_create_adaptive );
+            BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_cyclic_builder_s );
             BCORE_REGISTER_TRAIT( lion_adaptive_bhpt, bcore_inst );
         }
         break;

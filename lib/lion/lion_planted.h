@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
- *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-22T11:32:05Z
+ *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
+ *  Last File Update: 2020-04-30T13:07:53Z
  *
  *  Copyright and License of this File:
  *
@@ -15,6 +15,7 @@
  *  lion_frame.h
  *  lion_eval_frame.h
  *  lion_adaptive.h
+ *  lion_adaptor.h
  *  lion_adaptive_bhpt.h
  *
  */
@@ -1138,6 +1139,7 @@
   BCORE_DECLARE_OBJECT( lion_frame_s ) \
     {aware_t _;bcore_sink* log;bhvm_mcode_frame_s* mcf;bl_t is_cyclic;bl_t setup;sz_t size_en;sz_t size_ex;lion_frame_hidx_s hidx_en;lion_frame_hidx_s hidx_ex;lion_frame_hidx_s hidx_ada;}; \
   void lion_frame_s_reset( lion_frame_s* o ); \
+  lion_frame_s* lion_frame_s_bind_holors( lion_frame_s* o ); \
   void lion_frame_s_setup( lion_frame_s* o ); \
   void lion_frame_s_check_integrity( const lion_frame_s* o ); \
   static inline void lion_frame_s_shelve( lion_frame_s* o ){bl_t setup = o->setup; lion_frame_s_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */} \
@@ -1176,6 +1178,7 @@
 #define BETH_EXPAND_ITEM_lion_frame_cyclic_s \
   BCORE_DECLARE_OBJECT( lion_frame_cyclic_s ) \
     {aware_t _;lion_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_dp;bhvm_mcode_track_adl_s* track_adl_ap_setup;lion_frame_hidx_ads_s hidx_ads_en;lion_frame_hidx_ads_s hidx_ads_ex;}; \
+  lion_frame_cyclic_s* lion_frame_cyclic_s_bind_holors( lion_frame_cyclic_s* o ); \
   void lion_frame_cyclic_s_reset( lion_frame_cyclic_s* o ); \
   void lion_frame_cyclic_s_setup( lion_frame_cyclic_s* o ); \
   static inline void lion_frame_cyclic_s_shelve( lion_frame_cyclic_s* o ){bl_t setup = o->setup; lion_frame_cyclic_s_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */} \
@@ -1395,6 +1398,25 @@
   BETH_EXPAND_ITEM_lion_adaptive_cyclic_builder_s
 
 /**********************************************************************************************************************/
+// source: lion_adaptor.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: lion_adaptor
+
+#define TYPEOF_lion_adaptor 1865093325
+#define TYPEOF_lion_adaptor_s 3132297919
+#define TYPEOF_lion_adaptor_frame_s 3407775329
+#define BETH_EXPAND_ITEM_lion_adaptor_frame_s \
+  BCORE_DECLARE_OBJECT( lion_adaptor_frame_s ) \
+    {aware_t _;vd_t src;lion_frame_s* frame;}; \
+  static inline void lion_adaptor_frame_s_reset( lion_adaptor_frame_s* o ){if( o->frame ) lion_frame_s_cyclic_reset( o->frame );} \
+  void lion_adaptor_frame_s_adapt( lion_adaptor_frame_s* o, const bhpt_adaptor_node_s* node );
+#define BETH_EXPAND_GROUP_lion_adaptor \
+  BCORE_FORWARD_OBJECT( lion_adaptor ); \
+  BCORE_FORWARD_OBJECT( lion_adaptor_frame_s ); \
+  BETH_EXPAND_ITEM_lion_adaptor_frame_s
+
+/**********************************************************************************************************************/
 // source: lion_adaptive_bhpt.h
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1412,6 +1434,7 @@
   void lion_adaptive_bhpt_s_dendrite_pass( lion_adaptive_bhpt_s* o, const bhvm_holor_s* ag_ex, bhvm_holor_s* ag_en ); \
   void lion_adaptive_bhpt_s_cyclic_reset( lion_adaptive_bhpt_s* o ); \
   bhpt_adaptor_probe_s* lion_adaptive_bhpt_s_get_adaptor_probe( const lion_adaptive_bhpt_s* o, bhpt_adaptor_probe_s* probe ); \
+  static inline void lion_adaptive_bhpt_s_rebind_holors( lion_adaptive_bhpt_s* o ){lion_frame_s_bind_holors( &o->frame );} \
   void lion_adaptive_bhpt_s_status_to_sink( const lion_adaptive_bhpt_s* o, sz_t verbosity, bcore_sink* sink );
 #define TYPEOF_lion_adaptive_bhpt_builder_s 1403919155
 #define BETH_EXPAND_ITEM_lion_adaptive_bhpt_builder_s \
@@ -1420,12 +1443,35 @@
   static inline void lion_adaptive_bhpt_builder_s_set_format_en( lion_adaptive_bhpt_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_en, format );} \
   static inline void lion_adaptive_bhpt_builder_s_set_format_ex( lion_adaptive_bhpt_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_ex, format );} \
   bhpt_adaptive* lion_adaptive_bhpt_builder_s_create_adaptive( const lion_adaptive_bhpt_builder_s* o );
+#define TYPEOF_lion_adaptive_bhpt_cyclic_s 432058863
+#define BETH_EXPAND_ITEM_lion_adaptive_bhpt_cyclic_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_bhpt_cyclic_s ) \
+    {aware_t _;vd_t src;lion_frame_cyclic_s frame;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;bhvm_holor_adl_s* dp_buffer;bl_t dp_value;}; \
+  static inline bhvm_holor_s* lion_adaptive_bhpt_cyclic_s_get_format_en( const lion_adaptive_bhpt_cyclic_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_en ); return format;} \
+  static inline bhvm_holor_s* lion_adaptive_bhpt_cyclic_s_get_format_ex( const lion_adaptive_bhpt_cyclic_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format;} \
+  void lion_adaptive_bhpt_cyclic_s_axon_pass( lion_adaptive_bhpt_cyclic_s* o, const bhvm_holor_s* ax_en, bhvm_holor_s* ax_ex ); \
+  void lion_adaptive_bhpt_cyclic_s_dendrite_pass( lion_adaptive_bhpt_cyclic_s* o, const bhvm_holor_s* ag_ex, bhvm_holor_s* ag_en ); \
+  void lion_adaptive_bhpt_cyclic_s_cyclic_reset( lion_adaptive_bhpt_cyclic_s* o ); \
+  bhpt_adaptor_probe_s* lion_adaptive_bhpt_cyclic_s_get_adaptor_probe( const lion_adaptive_bhpt_cyclic_s* o, bhpt_adaptor_probe_s* probe ); \
+  static inline void lion_adaptive_bhpt_cyclic_s_rebind_holors( lion_adaptive_bhpt_cyclic_s* o ){lion_frame_cyclic_s_bind_holors( &o->frame );} \
+  void lion_adaptive_bhpt_cyclic_s_status_to_sink( const lion_adaptive_bhpt_cyclic_s* o, sz_t verbosity, bcore_sink* sink );
+#define TYPEOF_lion_adaptive_bhpt_cyclic_builder_s 140720899
+#define BETH_EXPAND_ITEM_lion_adaptive_bhpt_cyclic_builder_s \
+  BCORE_DECLARE_OBJECT( lion_adaptive_bhpt_cyclic_builder_s ) \
+    {aware_t _;vd_t src;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;sz_t unroll_size;}; \
+  static inline void lion_adaptive_bhpt_cyclic_builder_s_set_format_en( lion_adaptive_bhpt_cyclic_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_en, format );} \
+  static inline void lion_adaptive_bhpt_cyclic_builder_s_set_format_ex( lion_adaptive_bhpt_cyclic_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_ex, format );} \
+  bhpt_adaptive* lion_adaptive_bhpt_cyclic_builder_s_create_adaptive( const lion_adaptive_bhpt_cyclic_builder_s* o );
 #define BETH_EXPAND_GROUP_lion_adaptive_bhpt \
   BCORE_FORWARD_OBJECT( lion_adaptive_bhpt ); \
   BCORE_FORWARD_OBJECT( lion_adaptive_bhpt_s ); \
   BCORE_FORWARD_OBJECT( lion_adaptive_bhpt_builder_s ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_bhpt_cyclic_s ); \
+  BCORE_FORWARD_OBJECT( lion_adaptive_bhpt_cyclic_builder_s ); \
   BETH_EXPAND_ITEM_lion_adaptive_bhpt_s \
-  BETH_EXPAND_ITEM_lion_adaptive_bhpt_builder_s
+  BETH_EXPAND_ITEM_lion_adaptive_bhpt_builder_s \
+  BETH_EXPAND_ITEM_lion_adaptive_bhpt_cyclic_s \
+  BETH_EXPAND_ITEM_lion_adaptive_bhpt_cyclic_builder_s
 
 /**********************************************************************************************************************/
 

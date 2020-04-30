@@ -24,6 +24,7 @@
 #include "lion_eval_frame.h"
 #include "lion_adaptive.h"
 #include "lion_adaptive_bhpt.h"
+#include "lion_adaptor.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ vd_t lion_signal_handler( const bcore_signal_s* o )
             lion_frame_signal_handler,
             lion_eval_frame_signal_handler,
             lion_adaptive_signal_handler,
+            lion_adaptor_signal_handler,
             lion_adaptive_bhpt_signal_handler,
         };
 

@@ -135,6 +135,12 @@ signature @* run_dp(     mutable, const bhvm_holor_s**    ex, bhvm_holor_s**    
 signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex ); // allocates out
 signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en ); // allocates out
 
+/** Explicitly re-binds holors (typically by running setup tracks).
+ *  This can be necessary when certain holors have been externally reallocated.
+ *  Use with care!
+ */
+signature @* bind_holors( mutable );
+
 stamp : = aware :
 {
     /// pre-setup parameters
@@ -164,12 +170,18 @@ stamp : = aware :
         o->setup = false;
     };
 
+    func : :bind_holors =
+    {
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_setup );
+        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_setup );
+        return o;
+    };
+
     func : :setup =
     {
         if( o->setup ) return;
         if( !o->mcf ) return;
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_setup );
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_setup );
+        @_bind_holors( o );
         o->setup = true;
     };
 
@@ -248,6 +260,7 @@ stamp :cyclic = aware :
     :hidx_ads_s hidx_ads_ex;  // exit index
 
     /// functions ...
+    func : :bind_holors;
     func : :reset;
     func : :setup;
 

@@ -486,10 +486,19 @@ void lion_frame_cyclic_s_reset( lion_frame_cyclic_s* o )
     bhvm_mcode_track_adl_s_detach( &o->track_adl_ap );
     bhvm_mcode_track_adl_s_detach( &o->track_adl_dp );
     bhvm_mcode_track_adl_s_detach( &o->track_adl_ap_setup );
-    //bhvm_mcode_track_adl_s_detach( &o->track_adl_ap_shelve );
 
     o->unroll_index = 0;
     o->setup = false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+lion_frame_cyclic_s* lion_frame_cyclic_s_bind_holors( lion_frame_cyclic_s* o )
+{
+    lion_frame_s_bind_holors( o->frame );
+    bhvm_mcode_hbase_s* hbase = o->frame->mcf->hbase;
+    for( sz_t i = 1; i < o->unroll_size; i++ ) bhvm_mcode_track_s_run( o->track_adl_ap_setup->data[ i ], hbase->holor_ads.data );
+    return o;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -673,10 +682,18 @@ void lion_frame_cyclic_s_disassemble_to_sink( const lion_frame_cyclic_s* o, bcor
     bcore_sink_a_push_fa( sink, "Global Tracks:\n" );
 
     bhvm_mcode_track_s* track = NULL;
+
+    track = bhvm_mcode_frame_s_track_get( mcf, TYPEOF_track_dp_setup );
+    if( track )
+    {
+        bcore_sink_a_push_fa( sink, "#<sc_t>:\n", ifnameof( track->name ) );
+        disassemble_track_to_sink( track, 2, sink );
+        bcore_sink_a_push_fa( sink, "\n" );
+    }
+
     track = bhvm_mcode_frame_s_track_get( mcf, TYPEOF_track_ap_cyclic_reset );
     if( track )
     {
-
         bcore_sink_a_push_fa( sink, "#<sc_t>:\n", ifnameof( track->name ) );
         disassemble_track_to_sink( track, 2, sink );
         bcore_sink_a_push_fa( sink, "\n" );
@@ -715,10 +732,6 @@ void lion_frame_cyclic_s_disassemble_to_sink( const lion_frame_cyclic_s* o, bcor
         track = o->track_adl_ap_setup->data[ i ];
         bcore_sink_a_push_fa( sink, "\n  #<sc_t>:\n", ifnameof( track->name ) );
         disassemble_track_to_sink( track, 4, sink );
-
-        //track = o->track_adl_ap_shelve->data[ i ];
-        //bcore_sink_a_push_fa( sink, "\n  #<sc_t>:\n", ifnameof( track->name ) );
-        //disassemble_track_to_sink( track, 4, sink );
 
         bcore_sink_a_push_fa( sink, "\n  #r32{-}\n" );
     }
