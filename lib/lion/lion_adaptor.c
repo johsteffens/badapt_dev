@@ -52,15 +52,15 @@ void lion_adaptor_frame_s_adapt( lion_adaptor_frame_s* o, const bhpt_adaptor_nod
         }
 
         o->frame = lion_frame_s_create();
-        lion_frame_s_setup_from_source( o->frame, source, ( const bhvm_holor_s*[] ){ node->axon, node->grad } );
+        lion_frame_s_setup_from_source( o->frame, source, ( const bhvm_holor_s*[] ){ node->axon, node->grad }, 2 );
 
-        ASSERT( lion_frame_s_get_size_en( frame ) == 2 );
-        ASSERT( lion_frame_s_get_size_ex( frame ) == 2 );
+        ASSERT( lion_frame_s_get_size_en( o->frame ) == 2 );
+        ASSERT( lion_frame_s_get_size_ex( o->frame ) == 2 );
 
         BLM_DOWN();
     }
 
-    lion_frame_s_run_ap( o->frame, ( const bhvm_holor_s*[] ){ node->axon, node->grad }, ( bhvm_holor_s*[] ){ node->axon, node->grad } );
+    lion_frame_s_run_ap( o->frame, ( const bhvm_holor_s*[] ){ node->axon, node->grad }, 2, ( bhvm_holor_s*[] ){ node->axon, node->grad }, 2 );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

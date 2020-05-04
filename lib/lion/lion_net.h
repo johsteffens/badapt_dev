@@ -218,6 +218,12 @@ stamp :cell = aware :
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /**********************************************************************************************************************/
+/// node
+
+/// Provides necessary mcode and holor data for isolated nodes that do not actively participate in computing an output
+void node_s_isolated_mcode_push( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
+
+/**********************************************************************************************************************/
 /// cell
 
 /** Converts lion_sem_cell_s to lion_net_cell_s

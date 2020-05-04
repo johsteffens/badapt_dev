@@ -105,12 +105,12 @@ signature void reset( mutable );
 signature void setup( mutable );
 signature void check_integrity( const );
 
-signature :mutab_from_source setup_from_source(      const bhvm_holor_s** en );
-signature :mutab_from_st     setup_from_st(          const bhvm_holor_s** en );
-signature :mutab_from_sc     setup_from_sc(          const bhvm_holor_s** en );
-signature :plain_from_source create_from_source(     const bhvm_holor_s** en );
-signature :plain_from_st     create_from_st(         const bhvm_holor_s** en );
-signature :plain_from_sc     create_from_sc(         const bhvm_holor_s** en );
+signature :mutab_from_source setup_from_source(      const bhvm_holor_s** en, sz_t size_en );
+signature :mutab_from_st     setup_from_st(          const bhvm_holor_s** en, sz_t size_en );
+signature :mutab_from_sc     setup_from_sc(          const bhvm_holor_s** en, sz_t size_en );
+signature :plain_from_source create_from_source(     const bhvm_holor_s** en, sz_t size_en );
+signature :plain_from_st     create_from_st(         const bhvm_holor_s** en, sz_t size_en );
+signature :plain_from_sc     create_from_sc(         const bhvm_holor_s** en, sz_t size_en );
 signature :mutab_from_source setup_from_source_adl(  const bhvm_holor_adl_s* en );
 signature :mutab_from_st     setup_from_st_adl(      const bhvm_holor_adl_s* en );
 signature :mutab_from_sc     setup_from_sc_adl(      const bhvm_holor_adl_s* en );
@@ -130,8 +130,8 @@ signature bhvm_holor_s* get_ap_ada( mutable, sz_t index );
 signature bhvm_holor_s* get_dp_ada( mutable, sz_t index );
 
 signature @* run( mutable, tp_t track);
-signature @* run_ap(     mutable, const bhvm_holor_s**    en, bhvm_holor_s**    ex );
-signature @* run_dp(     mutable, const bhvm_holor_s**    ex, bhvm_holor_s**    en );
+signature @* run_ap(     mutable, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex );
+signature @* run_dp(     mutable, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en );
 signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex ); // allocates out
 signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en ); // allocates out
 
@@ -194,17 +194,17 @@ stamp : = aware :
 
     /// frame setup from string or source; 'in' can be NULL
     func : :setup_from_source;
-    func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en ) ); };
-    func : :setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en ); };
-    func : :create_from_source     = { @* o = @_create(); return @_setup_from_source( o, source, en ); };
-    func : :create_from_st         = { @* o = @_create(); return @_setup_from_st(     o, st,     en ); };
-    func : :create_from_sc         = { @* o = @_create(); return @_setup_from_sc(     o, sc,     en ); };
-    func : :setup_from_source_adl  = { return @_setup_from_source( o, source, en ? ( const bhvm_holor_s** )en->data : NULL ); };
-    func : :setup_from_st_adl      = { return @_setup_from_st(     o, st,     en ? ( const bhvm_holor_s** )en->data : NULL ); };
-    func : :setup_from_sc_adl      = { return @_setup_from_sc(     o, sc,     en ? ( const bhvm_holor_s** )en->data : NULL ); };
-    func : :create_from_source_adl = { return @_create_from_source( source,   en ? ( const bhvm_holor_s** )en->data : NULL ); };
-    func : :create_from_st_adl     = { return @_create_from_st( st,           en ? ( const bhvm_holor_s** )en->data : NULL ); };
-    func : :create_from_sc_adl     = { return @_create_from_sc( sc,           en ? ( const bhvm_holor_s** )en->data : NULL ); };
+    func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en, size_en ) ); };
+    func : :setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en, size_en ); };
+    func : :create_from_source     = { @* o = @_create(); return @_setup_from_source( o, source, en, size_en ); };
+    func : :create_from_st         = { @* o = @_create(); return @_setup_from_st(     o, st,     en, size_en ); };
+    func : :create_from_sc         = { @* o = @_create(); return @_setup_from_sc(     o, sc,     en, size_en ); };
+    func : :setup_from_source_adl  = { return @_setup_from_source( o, source, en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
+    func : :setup_from_st_adl      = { return @_setup_from_st(     o, st,     en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
+    func : :setup_from_sc_adl      = { return @_setup_from_sc(     o, sc,     en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
+    func : :create_from_source_adl = { return @_create_from_source( source,   en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
+    func : :create_from_st_adl     = { return @_create_from_st( st,           en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
+    func : :create_from_sc_adl     = { return @_create_from_sc( sc,           en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
 
     func : :get_size_en  = { return :hidx_s_get_size( &o->hidx_en ); };
     func : :get_size_ex  = { return :hidx_s_get_size( &o->hidx_ex ); };
@@ -281,8 +281,8 @@ stamp :cyclic = aware :
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, bhvm_holor_s** ex );
-void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, bhvm_holor_s** en );
+void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex );
+void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en );
 
 /// resets all cyclic values to the initialization
 void lion_frame_s_cyclic_reset( lion_frame_s* o );

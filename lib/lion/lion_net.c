@@ -1000,8 +1000,8 @@ static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
-        o->mnode->cyclic = lion_nop_a_is_cyclic( o->nop );
-        o->mnode->adaptive  = lion_nop_a_is_adaptive(  o->nop );
+        o->mnode->cyclic   = lion_nop_a_is_cyclic(   o->nop );
+        o->mnode->adaptive = lion_nop_a_is_adaptive( o->nop );
     }
 
     BFOR_EACH( i, &o->upls )
@@ -1028,9 +1028,33 @@ static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 
 // --------------------------------------------------------------------------------------------------------------------
 
+void node_s_isolated_mcode_push( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+{
+    if( !o->result ) lion_net_node_s_solve( o, NULL );
+
+    if( !o->result )
+    {
+        bcore_source_point_s_parse_err_fa( o->source_point, "Node '#<sc_t>' has no result.", lion_ifnameof( o->name ) );
+    }
+
+    if( !o->mnode )
+    {
+        o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
+        o->mnode->cyclic   = lion_nop_a_is_cyclic(   o->nop );
+        o->mnode->adaptive = lion_nop_a_is_adaptive( o->nop );
+    }
+    o->mnode->ax0 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
+    lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
+    if( !hmeta->name ) hmeta->name = o->name;
+    hmeta->pclass   = TYPEOF_pclass_ax0;
+    bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+
 /** Recurrent ap phase0:
  *  node_s_mcode_push_ap for cyclic nodes.
- *  Processes only the non_cyclic (left) up-channel [0] computing the main axon holor ax0
+ *  Processes only the non_cyclic (left) up-channel [0]
  */
 static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
@@ -1087,7 +1111,7 @@ static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_f
 
 /** Recurrent ap phase1:
  *  This function is called for all cyclic nodes after mcode_push_ap is completed for the entire network.
- *  Processes the cyclic (right) up-channel [1] computing the auxiliary axon holor ax1.
+ *  Processes the cyclic (right) up-channel [1].
  */
 static void node_s_cyclic_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
@@ -1118,9 +1142,12 @@ static void node_s_cyclic_mcode_push_dp_phase2( lion_net_node_s* o,             
 static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( o );
+
+    /// nodes without mnode have no active role in the axon pass and therefore do not generate dp-code
+    if( !o->mnode ) return;
+
     if( !o->nop ) ERR_fa( "Operator is missing." );
     if( !o->result ) ERR_fa( "Result is missing." );
-    if( !o->mnode ) ERR_fa( "mnode is missing." );
 
     if( lion_net_node_s_is_cyclic( o ) )
     {

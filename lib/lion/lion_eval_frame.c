@@ -187,7 +187,7 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
     lion_frame_s_setup_from_source_adl( frame0, source, adl_ap_en );
 
     /// test frame recovery/copying
-    if( o->param.recovery_test)
+    if( o->param.recovery_test )
     {
         lion_frame_s* frame1 = BLM_CREATE( lion_frame_s );
         bcore_bin_ml_a_copy( frame1, frame0 );
@@ -302,7 +302,7 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex->data[ j ];
                     bhvm_holor_s* dp_ex2 = bhvm_holor_s_fork_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_ex1 );
-                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }, &dp_en2 );
+                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }, 3, &dp_en2, 1 );
                     BLM_DOWN();
                 }
 
@@ -367,7 +367,7 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex->data[ j ];
                     bhvm_holor_s* dp_ex2 = bhvm_holor_s_fork_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_ex1 );
-                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_ada2, h_jc, dp_ex2 }, &dp_ada2 );
+                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_ada2, h_jc, dp_ex2 }, 3, &dp_ada2, 1 );
                     BLM_DOWN();
                 }
 
@@ -532,11 +532,13 @@ lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cy
     BFOR_EACH( i, adl_ap_ex1 ) adl_ap_ex2->data[ i ] = bhvm_holor_s_create();
 
     sz_t size_en = frame->size_en;
-    sz_t size_ex = frame->size_en;
+    sz_t size_ex = frame->size_ex;
 
     for( sz_t i = 0; i < unroll_size; i++ )
     {
-        lion_frame_s_run_ap( frame, ( const bhvm_holor_s** ) adl_ap_en->data + i * size_en, adl_ap_ex2->data + i * size_ex );
+        ASSERT( adl_ap_en ->size >= ( i + 1 ) * size_en );
+        ASSERT( adl_ap_ex2->size >= ( i + 1 ) * size_ex );
+        lion_frame_s_run_ap( frame, ( const bhvm_holor_s** ) adl_ap_en->data + i * size_en, size_en, adl_ap_ex2->data + i * size_ex, size_ex );
     }
 
     if( o->param.verbosity >= 10 )
@@ -657,7 +659,7 @@ lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cy
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex->data[ j ];
                     bhvm_holor_s* dp_ex2 = bhvm_holor_s_fork_vector_isovol( BLM_CREATE( bhvm_holor_s ), dp_ex1 );
-                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }, &dp_en2 );
+                    lion_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", ( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }, 3, &dp_en2, 1 );
                     BLM_DOWN();
                 }
 

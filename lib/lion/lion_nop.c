@@ -653,14 +653,26 @@ bl_t lion_nop_ar2_cyclic_s_solve( const lion_nop_ar2_cyclic_s* o, lion_holor_s**
     if( a[0] )
     {
         lion_holor_s_attach( &result->h, lion_holor_s_create() );
-        result->settled        = false; // cyclic results never settle
-        result->h->m.active    = true;  // cyclic results are always active
-        result->h->m.name = o->name;
+        result->settled     = false; // cyclic results never settle
+        result->h->m.active = true;  // cyclic results are always active
+        result->h->m.name   = o->name;
 
         bhvm_holor_s* ha = &a[0]->h;
         bhvm_holor_s* hr = &result->h->h;
         bhvm_shape_s_copy( &hr->s, &ha->s );
         bhvm_value_s_set_type( &hr->v, ha->v.type );
+
+        if( a[0]->m.active )
+        {
+            st_s_attach( &result->msg, st_s_create() );
+            st_s_push_fa
+            (
+                result->msg,
+                "\nCyclic initialization evaluates to an active expression."
+                "\nConsider using 'constof' or 'zeroof' to turn the active expression into a constant."
+            );
+            return false;
+        }
 
         if( a[1] )
         {

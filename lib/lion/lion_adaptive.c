@@ -64,7 +64,7 @@ void lion_adaptive_s_minfer( lion_adaptive_s* o, const bmath_vf3_s* in, bmath_vf
     bhvm_value_s_fork_data( &h_in->v,  TYPEOF_f3_t, in->data,  in->size );
     bhvm_value_s_fork_data( &h_out->v, TYPEOF_f3_t, out->data, out->size );
 
-    lion_frame_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, &h_out );
+    lion_frame_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, 1, &h_out, 1 );
 
     BLM_DOWN();
 }
@@ -85,7 +85,7 @@ void lion_adaptive_s_bgrad_adapt( lion_adaptive_s* o, bmath_vf3_s* grad_in, cons
     bhvm_value_s_fork_data( &h_grad_out->v, TYPEOF_f3_t, grad_out->data, grad_out->size );
 
     lion_frame_s* frame = &o->frame;
-    lion_frame_s_run_dp( frame, ( const bhvm_holor_s** )&h_grad_out, ( h_grad_in ) ? &h_grad_in : NULL );
+    lion_frame_s_run_dp( frame, ( const bhvm_holor_s** )&h_grad_out, 1, ( h_grad_in ) ? &h_grad_in : NULL, ( h_grad_in ) ? 1 : 0 );
 
     f3_t l2_reg_factor = ( 1.0 - o->dynamics.lambda_l2 * o->dynamics.epsilon );
     f3_t l1_reg_offset = o->dynamics.lambda_l1 * o->dynamics.epsilon;
@@ -150,7 +150,7 @@ badapt_adaptive* lion_adaptive_builder_s_build( const lion_adaptive_builder_s* o
 
     lion_frame_s* frame = &adaptive->frame;
 
-    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&h_in );
+    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&h_in, 1 );
 
     ASSERT( lion_frame_s_get_size_en( frame ) == 1 );
     ASSERT( lion_frame_s_get_size_ex( frame ) == 1 );
@@ -263,7 +263,7 @@ void lion_adaptive_cyclic_s_minfer( lion_adaptive_cyclic_s* o, const bmath_vf3_s
     bhvm_value_s_fork_data( &h_in->v,  TYPEOF_f3_t, in->data,  in->size );
     bhvm_value_s_fork_data( &h_out->v, TYPEOF_f3_t, out->data, out->size );
 
-    lion_frame_cyclic_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, &h_out );
+    lion_frame_cyclic_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, 1, &h_out, 1 );
 
     BLM_DOWN();
 }
@@ -351,7 +351,7 @@ badapt_adaptive* lion_adaptive_cyclic_builder_s_build( const lion_adaptive_cycli
 
     lion_frame_s* frame = BLM_CREATE( lion_frame_s );
 
-    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&h_in );
+    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&h_in, 1 );
 
     ASSERT( lion_frame_s_get_size_en( frame ) == 1 );
     ASSERT( lion_frame_s_get_size_ex( frame ) == 1 );

@@ -26,14 +26,14 @@
 
 void lion_adaptive_bhpt_s_axon_pass( lion_adaptive_bhpt_s* o, const bhvm_holor_s* ax_en, bhvm_holor_s* ax_ex )
 {
-    lion_frame_s_run_ap( &o->frame, ( const bhvm_holor_s** )&ax_en, &ax_ex );
+    lion_frame_s_run_ap( &o->frame, ( const bhvm_holor_s** )&ax_en, 1, &ax_ex, 1 );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 void lion_adaptive_bhpt_s_dendrite_pass( lion_adaptive_bhpt_s* o, const bhvm_holor_s* ag_ex, bhvm_holor_s* ag_en )
 {
-    lion_frame_s_run_dp( &o->frame, ( const bhvm_holor_s** )&ag_ex, ( ag_en ) ? &ag_en : NULL );
+    lion_frame_s_run_dp( &o->frame, ( const bhvm_holor_s** )&ag_ex, 1, ( ag_en ) ? &ag_en : NULL, ( ag_en ) ? 1 : 0 );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ bhpt_adaptive* lion_adaptive_bhpt_builder_s_create_adaptive( const lion_adaptive
 
     lion_frame_s* frame = &adaptive->frame;
     const bhvm_holor_s* holor_frame_en = &o->holor_frame_en;
-    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&holor_frame_en );
+    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&holor_frame_en, 1 );
 
     ASSERT( lion_frame_s_get_size_en( frame ) == 1 );
     ASSERT( lion_frame_s_get_size_ex( frame ) == 1 );
@@ -167,7 +167,7 @@ static void lion_adaptive_bhpt_cyclic_s_dp_buffer_apply_reset( lion_adaptive_bhp
 
 void lion_adaptive_bhpt_cyclic_s_axon_pass( lion_adaptive_bhpt_cyclic_s* o, const bhvm_holor_s* ax_en, bhvm_holor_s* ax_ex )
 {
-    lion_frame_cyclic_s_run_ap( &o->frame, ( const bhvm_holor_s** )&ax_en, &ax_ex );
+    lion_frame_cyclic_s_run_ap( &o->frame, ( const bhvm_holor_s** )&ax_en, 1, &ax_ex, 1 );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -262,7 +262,7 @@ bhpt_adaptive* lion_adaptive_bhpt_cyclic_builder_s_create_adaptive( const lion_a
 
     lion_frame_s* frame = BLM_CREATE( lion_frame_s );
     const bhvm_holor_s* holor_frame_en = &o->holor_frame_en;
-    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&holor_frame_en );
+    lion_frame_s_setup_from_source( frame, source, ( const bhvm_holor_s** )&holor_frame_en, 1 );
 
     ASSERT( lion_frame_s_get_size_en( frame ) == 1 );
     ASSERT( lion_frame_s_get_size_ex( frame ) == 1 );

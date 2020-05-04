@@ -27,7 +27,7 @@ static lion_nop* input_op_create( vd_t arg, sz_t in_idx, tp_t in_name, const lio
     BLM_INIT();
     const bhvm_holor_s** in = arg;
 
-    if( in ) ASSERT( *(aware_t*)in[ in_idx ] == TYPEOF_bhvm_holor_s );
+    if( in ) ASSERT( in[ in_idx ] != NULL && *(aware_t*)in[ in_idx ] == TYPEOF_bhvm_holor_s );
 
     const bhvm_holor_s* h_in = in ? in[ in_idx ] : NULL;
 
@@ -244,7 +244,7 @@ void lion_frame_s_check_integrity( const lion_frame_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* source, const bhvm_holor_s** in )
+lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* source, const bhvm_holor_s** en, sz_t size_en )
 {
     BLM_INIT();
 
@@ -256,17 +256,19 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
 
     bhvm_mcode_frame_s_attach( &o->mcf, bhvm_mcode_frame_s_create() );
 
-    /// We use a double-nested frame because the body of sem_frame->parent could be used
-    lion_sem_cell_s* sem_frame = BLM_CREATE( lion_sem_cell_s );
-    sem_frame->parent = BLM_A_PUSH( lion_sem_cell_s_create_frame() ); // double nested
+    /// We use a double-nested frame because the body of sem_cell->parent could be used
+    lion_sem_cell_s* sem_cell = BLM_CREATE( lion_sem_cell_s );
+    sem_cell->parent = BLM_A_PUSH( lion_sem_cell_s_create_frame() ); // double nested
 
-    bcore_source_point_s_set( &sem_frame->source_point, source );
+    bcore_source_point_s_set( &sem_cell->source_point, source );
 
     bcore_source_a_parse_fa( source, " #-?'cell'" ); // leading 'cell' keyword is optional
-    lion_sem_cell_s_parse( sem_frame, source );
+    lion_sem_cell_s_parse( sem_cell, source );
+
+    if( en ) ASSERT( size_en >= sem_cell->encs.size );
 
     /// network cell
-    lion_net_cell_s_from_sem_cell( cell, sem_frame, input_op_create, ( vd_t )in, o->log );
+    lion_net_cell_s_from_sem_cell( cell, sem_cell, input_op_create, ( vd_t )en, o->log );
 
     lion_net_cell_s_mcode_push_ap( cell, o->mcf );
     lion_net_cell_s_mcode_push_dp( cell, o->mcf, true );
@@ -278,13 +280,22 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
     {
         lion_net_node_s* node = cell->encs.data[ i ];
 
-        if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_en, node->mnode->ax0 );
+        /** An entry node without mnode does not actively contribute to the output of the cell.
+         *  We therefore construct an mnode formally to provide a holor for the input channel
+         *  with the necessary setup and shelve routines.
+         */
+        if( !node->mnode ) node_s_isolated_mcode_push( node, o->mcf );
+
+        ASSERT( node->mnode->ax0 >= 0 );
+        lion_frame_hidx_s_push( &o->hidx_en, node->mnode->ax0 );
     }
 
     BFOR_EACH( i, &cell->excs )
     {
         lion_net_node_s* node = cell->excs.data[ i ];
-        if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_ex, node->mnode->ax0 );
+        ASSERT( node->mnode );
+        ASSERT( node->mnode->ax0 >= 0 ) ;
+        lion_frame_hidx_s_push( &o->hidx_ex, node->mnode->ax0 );
     }
 
     BFOR_EACH( i, &cell->body )
@@ -292,6 +303,7 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
         lion_net_node_s* node = cell->body.data[ i ];
         if( node->nop )
         {
+            ASSERT( node->mnode );
             const bhvm_mcode_node_s* mnode = node->mnode;
             if( mnode->adaptive ) if( node->mnode->ax0 >= 0 ) lion_frame_hidx_s_push( &o->hidx_ada, node->mnode->ax0 );
             if( mnode->cyclic ) o->is_cyclic = true;
@@ -318,7 +330,7 @@ lion_frame_s* lion_frame_s_run( lion_frame_s* o, tp_t track )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhvm_holor_s** ex )
+lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex )
 {
     ASSERT( o->mcf );
     ASSERT( o->setup );
@@ -327,6 +339,7 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhv
     const lion_frame_hidx_s* hidx_en = &o->hidx_en;
     const lion_frame_hidx_s* hidx_ex = &o->hidx_ex;
 
+    ASSERT( size_en >= o->size_en );
     for( sz_t i = 0; i < o->size_en; i++ )
     {
         bhvm_holor_s* h_m = lion_frame_hidx_s_get_holor( hidx_en, hbase, i );
@@ -352,6 +365,7 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhv
 
     if( ex )
     {
+        ASSERT( size_ex >= o->size_ex );
         for( sz_t i = 0; i < o->size_ex; i++ )
         {
             bhvm_holor_s* h_m = lion_frame_hidx_s_get_holor( hidx_ex, hbase, i );
@@ -368,7 +382,7 @@ lion_frame_s* lion_frame_s_run_ap( lion_frame_s* o, const bhvm_holor_s** en, bhv
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhvm_holor_s** en )
+lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en )
 {
     ASSERT( o->setup );
     ASSERT( o->mcf );
@@ -378,6 +392,7 @@ lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhv
     const lion_frame_hidx_s* hidx_en = &o->hidx_en;
     const lion_frame_hidx_s* hidx_ex = &o->hidx_ex;
 
+    ASSERT( size_ex >= o->size_ex );
     BFOR_SIZE( i, o->size_ex )
     {
         sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_ex, hbase, TYPEOF_pclass_ag0, i );
@@ -404,6 +419,7 @@ lion_frame_s* lion_frame_s_run_dp( lion_frame_s* o, const bhvm_holor_s** ex, bhv
 
     if( en )
     {
+        ASSERT( size_en >= o->size_en );
         BFOR_SIZE( i, o->size_en )
         {
             sz_t idx = lion_frame_hidx_s_get_pclass_idx( hidx_en, hbase, TYPEOF_pclass_ag0, i );
@@ -426,7 +442,14 @@ lion_frame_s* lion_frame_s_run_ap_adl( lion_frame_s* o, const bhvm_holor_adl_s* 
 {
     if( ex && ex->size != lion_frame_s_get_size_ex( o ) ) bhvm_holor_adl_s_set_size( ex, lion_frame_s_get_size_ex( o ) );
     BFOR_EACH( i, ex ) if( !ex->data[ i ] ) ex->data[ i ] = bhvm_holor_s_create();
-    return lion_frame_s_run_ap( o, en ? ( const bhvm_holor_s** )en->data : NULL, ex ? ( bhvm_holor_s** ) ex->data : NULL );
+    return lion_frame_s_run_ap
+    (
+        o,
+        en ? ( const bhvm_holor_s** )en->data : NULL,
+        en ? en->size : 0,
+        ex ? (       bhvm_holor_s** )ex->data : NULL,
+        ex ? ex->size : 0
+    );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -435,24 +458,31 @@ lion_frame_s* lion_frame_s_run_dp_adl( lion_frame_s* o, const bhvm_holor_adl_s* 
 {
     if( en && en->size != lion_frame_s_get_size_en( o ) ) bhvm_holor_adl_s_set_size( en, lion_frame_s_get_size_en( o ) );
     BFOR_EACH( i, en ) if( !en->data[ i ] ) en->data[ i ] = bhvm_holor_s_create();
-    return lion_frame_s_run_dp( o, ex ? ( const bhvm_holor_s** )ex->data : NULL, en ? ( bhvm_holor_s** ) en->data : NULL );
+    return lion_frame_s_run_dp
+    (
+        o,
+        ex ? ( const bhvm_holor_s** )ex->data : NULL,
+        ex ? ex->size : 0,
+        en ? (       bhvm_holor_s** )en->data : NULL,
+        en ? en->size : 0
+    );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, bhvm_holor_s** ex )
+void lion_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex )
 {
     BLM_INIT();
-    lion_frame_s_run_ap( BLM_A_PUSH( lion_frame_s_create_from_sc( sc, en ) ), en, ex );
+    lion_frame_s_run_ap( BLM_A_PUSH( lion_frame_s_create_from_sc( sc, en, size_en ) ), en, size_en, ex, size_ex );
     BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, bhvm_holor_s** en )
+void lion_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en )
 {
     BLM_INIT();
-    lion_frame_s_run_dp( BLM_A_PUSH( lion_frame_s_create_from_sc( sc, ex ) ), ex, en );
+    lion_frame_s_run_dp( BLM_A_PUSH( lion_frame_s_create_from_sc( sc, ex, size_ex ) ), ex, size_ex, en, size_en );
     BLM_DOWN();
 }
 
@@ -606,7 +636,7 @@ void lion_frame_cyclic_s_setup_from_frame( lion_frame_cyclic_s* o, const lion_fr
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap( lion_frame_cyclic_s* o, const bhvm_holor_s** en, bhvm_holor_s** ex )
+lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap( lion_frame_cyclic_s* o, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex )
 {
     ASSERT( o->frame );
     assert( o->setup );
@@ -617,6 +647,8 @@ lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap( lion_frame_cyclic_s* o, const b
     const lion_frame_hidx_s* hidx_en = &o->hidx_ads_en.data[  o->unroll_index ];
     const lion_frame_hidx_s* hidx_ex = &o->hidx_ads_ex.data[  o->unroll_index ];
     const bhvm_mcode_track_s* track  = o->track_adl_ap->data[ o->unroll_index ];
+
+    ASSERT( size_en >= frame->size_en );
 
     for( sz_t i = 0; i < frame->size_en; i++ )
     {
@@ -632,6 +664,7 @@ lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap( lion_frame_cyclic_s* o, const b
 
     if( ex )
     {
+        ASSERT( size_ex >= frame->size_ex );
         for( sz_t i = 0; i < frame->size_ex; i++ )
         {
             bhvm_holor_s* h_m = lion_frame_hidx_s_get_holor( hidx_ex, hbase, i );
@@ -654,7 +687,14 @@ lion_frame_cyclic_s* lion_frame_cyclic_s_run_ap_adl( lion_frame_cyclic_s* o, con
 {
     if( ex && ex->size != lion_frame_cyclic_s_get_size_ex( o ) ) bhvm_holor_adl_s_set_size( ex, lion_frame_cyclic_s_get_size_ex( o ) );
     BFOR_EACH( i, ex ) if( !ex->data[ i ] ) ex->data[ i ] = bhvm_holor_s_create();
-    return lion_frame_cyclic_s_run_ap( o, en ? ( const bhvm_holor_s** )en->data : NULL, ex ? ( bhvm_holor_s** ) ex->data : NULL );
+    return lion_frame_cyclic_s_run_ap
+    (
+        o,
+        en ? ( const bhvm_holor_s** )en->data : NULL,
+        en ? en->size : 0,
+        ex ? ( bhvm_holor_s** ) ex->data : NULL,
+        ex ? ex->size : 0
+    );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -764,7 +804,14 @@ void lion_frame_cyclic_s_run_ap_adl_flat( lion_frame_cyclic_s* o, const bhvm_hol
     {
         ASSERT( i * size_en < en->size );
         ASSERT( ex ? ( i * size_ex < ex->size ) : true);
-        lion_frame_cyclic_s_run_ap( o, ( const bhvm_holor_s** )( en->data + i * size_en ), ex ? ( ex->data + i * size_ex ) : NULL );
+        lion_frame_cyclic_s_run_ap
+        (
+            o,
+            ( const bhvm_holor_s** )( en->data + i * size_en ),
+            size_en,
+            ex ? ( ex->data + i * size_ex ) : NULL,
+            size_ex
+        );
     }
 
 }

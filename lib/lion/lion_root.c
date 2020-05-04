@@ -65,7 +65,7 @@ void lion_holor_s_copy_typed( lion_holor_s* o, tp_t type, vc_t src )
 
 void lion_holor_s_to_sink( const lion_holor_s* o, bcore_sink* sink )
 {
-    if( !o->m.active ) bcore_sink_a_push_fa( sink, "<passive>" );
+    if( !o->m.active ) bcore_sink_a_push_fa( sink, "<const>" );
     if( o->m.htp ) bcore_sink_a_push_fa( sink, "<htp>" );
     bhvm_holor_s_to_sink( &o->h, sink );
 }
@@ -96,7 +96,14 @@ void lion_holor_s_to_stdout_nl( const lion_holor_s* o )
 
 void lion_holor_s_brief_to_sink( const lion_holor_s* o, bcore_sink* sink )
 {
-    if( !o->m.active ) bcore_sink_a_push_fa( sink, "<passive>" );
+    if( o->m.active )
+    {
+        bcore_sink_a_push_fa( sink, "<active>" );
+    }
+    else
+    {
+        bcore_sink_a_push_fa( sink, "<const>" );
+    }
     if( o->m.htp ) bcore_sink_a_push_fa( sink, "<htp>" );
     bhvm_holor_s_brief_to_sink( &o->h, sink );
 }
@@ -112,7 +119,14 @@ void lion_holor_s_brief_to_stdout( const lion_holor_s* o )
 
 void lion_holor_s_formatted_to_sink( const lion_holor_s* o, bcore_sink* sink )
 {
-    if( !o->m.active ) bcore_sink_a_push_fa( sink, "<passive>" );
+    if( o->m.active )
+    {
+        bcore_sink_a_push_fa( sink, "<active>" );
+    }
+    else
+    {
+        bcore_sink_a_push_fa( sink, "<const>" );
+    }
     if( o->m.htp ) bcore_sink_a_push_fa( sink, "(" );
     bhvm_holor_s_formatted_to_sink( &o->h, sink );
     if( o->m.htp ) bcore_sink_a_push_fa( sink, ")~" );
@@ -131,7 +145,7 @@ void lion_holor_s_parse( lion_holor_s* o, bcore_source* source )
 {
     lion_hmeta_s_clear( &o->m );
 
-    if( bcore_source_a_parse_bl_fa( source, " #?'<passive>'" ) )
+    if( bcore_source_a_parse_bl_fa( source, " #?'<const>'" ) )
     {
         lion_holor_s_parse( o, source );
         o->m.active = false;

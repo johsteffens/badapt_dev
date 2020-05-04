@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-04-30T13:07:53Z
+ *  Last File Update: 2020-05-01T12:30:48Z
  *
  *  Copyright and License of this File:
  *
@@ -569,6 +569,51 @@ bl_t lion_nop_ar1_dimof_s_solve( const lion_nop_ar1_dimof_s* o, lion_holor_s** a
     {
         lion_holor_s_attach( &result->h, lion_holor_s_create() );
         bhvm_holor_s_set_scalar_f3( &result->h->h, a[0]->h.s.size ? a[0]->h.s.data[ a[0]->h.s.size - 1 ] : 1 );
+        result->h->m.active = false;
+    }
+    result->settled = result->h != NULL;
+    result->codable = false;
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_constof_s )
+"aware lion_nop_ar1"
+"{"
+    "func lion_nop:arity;"
+    "func lion_nop:symbol;"
+    "func lion_nop:priority;"
+    "func lion_nop:solve;"
+"}";
+
+bl_t lion_nop_ar1_constof_s_solve( const lion_nop_ar1_constof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    if( a[0] )
+    {
+        lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+        if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
+        result->h->m.active = false;
+    }
+    result->settled = result->h != NULL;
+    result->codable = false;
+    return true;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_zeroof_s )
+"aware lion_nop_ar1"
+"{"
+    "func lion_nop:arity;"
+    "func lion_nop:symbol;"
+    "func lion_nop:priority;"
+    "func lion_nop:solve;"
+"}";
+
+bl_t lion_nop_ar1_zeroof_s_solve( const lion_nop_ar1_zeroof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    if( a[0] )
+    {
+        lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+        if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
+        bhvm_value_s_zro( &result->h->h.v );
         result->h->m.active = false;
     }
     result->settled = result->h != NULL;
@@ -1725,7 +1770,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2618807554 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2616254949 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -1959,6 +2004,16 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_dimof_s_priority );
             BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar1_dimof_s_solve );
             BCORE_REGISTER_OBJECT( lion_nop_ar1_dimof_s );
+            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar1_constof_s_arity );
+            BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_constof_s_symbol );
+            BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_constof_s_priority );
+            BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar1_constof_s_solve );
+            BCORE_REGISTER_OBJECT( lion_nop_ar1_constof_s );
+            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar1_zeroof_s_arity );
+            BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_zeroof_s_symbol );
+            BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_zeroof_s_priority );
+            BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar1_zeroof_s_solve );
+            BCORE_REGISTER_OBJECT( lion_nop_ar1_zeroof_s );
             BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar1_random_s_arity );
             BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar1_random_s_symbol );
             BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar1_random_s_priority );
@@ -1996,6 +2051,8 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_output_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_adaptive_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_dimof_s );
+            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_constof_s );
+            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_zeroof_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_random_s );
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar1_cast_htp_s );
 

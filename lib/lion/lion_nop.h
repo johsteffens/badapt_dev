@@ -584,7 +584,7 @@ group :ar1 = retrievable
 
     /// special operators ------------------------------------------------------
 
-    /// returns leading dimension
+    /// returns leading dimension as constant
     stamp :dimof =
     {
         func :: :symbol   = { return "dimof"; };
@@ -603,6 +603,49 @@ group :ar1 = retrievable
         };
     };
 
+    /** Converts input holor to constant.
+     *  Assumes current value.
+     *  If input is vacant, holor is determined and filled with zeros.
+     */
+    stamp :constof =
+    {
+        func :: :symbol   = { return "constof"; };
+        func :: :priority = { return 8; };
+        func :: :solve  =
+        {
+            if( a[0] )
+            {
+                lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+                if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
+                result->h->m.active = false;
+            }
+            result->settled = result->h != NULL;
+            result->codable = false;
+            return true;
+        };
+    };
+
+    /// returns input holor as constant where all values are set to zero
+    stamp :zeroof =
+    {
+        func :: :symbol   = { return "zeroof"; };
+        func :: :priority = { return 8; };
+        func :: :solve  =
+        {
+            if( a[0] )
+            {
+                lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+                if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
+                bhvm_value_s_zro( &result->h->h.v );
+                result->h->m.active = false;
+            }
+            result->settled = result->h != NULL;
+            result->codable = false;
+            return true;
+        };
+    };
+
+    /// returns randomized holor as constant
     stamp :random =
     {
         u2_t rseed = 1234;
