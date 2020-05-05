@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-05-01T12:30:47Z
+ *  Last File Update: 2020-05-05T14:38:14Z
  *
  *  Copyright and License of this File:
  *
@@ -222,14 +222,23 @@
   bl_t lion_nop_ar0_adaptive_s_solve( const lion_nop_ar0_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
   sz_t lion_nop_ar0_adaptive_s_mcode_push_ap_holor( const lion_nop_ar0_adaptive_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
   sz_t lion_nop_ar0_adaptive_s_mcode_push_dp_holor( const lion_nop_ar0_adaptive_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
+#define TYPEOF_lion_nop_ar0_rand_s 2499391049
+#define BETH_EXPAND_ITEM_lion_nop_ar0_rand_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar0_rand_s ) \
+    {aware_t _;lion_holor_s* h;f3_t min;f3_t max;f3_t density;u2_t rval;}; \
+  static inline sz_t lion_nop_ar0_rand_s_arity( const lion_nop_ar0_rand_s* o ){return 0;} \
+  bl_t lion_nop_ar0_rand_s_solve( const lion_nop_ar0_rand_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  sz_t lion_nop_ar0_rand_s_mcode_push_ap_holor( const lion_nop_ar0_rand_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
 #define BETH_EXPAND_GROUP_lion_nop_ar0 \
   BCORE_FORWARD_OBJECT( lion_nop_ar0 ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar0_literal_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar0_param_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar0_adaptive_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar0_rand_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar0_literal_s \
   BETH_EXPAND_ITEM_lion_nop_ar0_param_s \
-  BETH_EXPAND_ITEM_lion_nop_ar0_adaptive_s
+  BETH_EXPAND_ITEM_lion_nop_ar0_adaptive_s \
+  BETH_EXPAND_ITEM_lion_nop_ar0_rand_s
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_nop_ar1
@@ -471,20 +480,30 @@
   static inline sc_t lion_nop_ar1_zeroof_s_symbol( const lion_nop_ar1_zeroof_s* o ){return "zeroof";} \
   static inline sz_t lion_nop_ar1_zeroof_s_priority( const lion_nop_ar1_zeroof_s* o ){return 8;} \
   bl_t lion_nop_ar1_zeroof_s_solve( const lion_nop_ar1_zeroof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
-#define TYPEOF_lion_nop_ar1_random_s 3482240456
-#define BETH_EXPAND_ITEM_lion_nop_ar1_random_s \
-  BCORE_DECLARE_OBJECT( lion_nop_ar1_random_s ) \
+#define TYPEOF_lion_nop_ar1_shapeof_s 3043285405
+#define BETH_EXPAND_ITEM_lion_nop_ar1_shapeof_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_shapeof_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar1_shapeof_s_arity( const lion_nop_ar1_shapeof_s* o ){return 1;} \
+  static inline sc_t lion_nop_ar1_shapeof_s_symbol( const lion_nop_ar1_shapeof_s* o ){return "shapeof";} \
+  static inline sz_t lion_nop_ar1_shapeof_s_priority( const lion_nop_ar1_shapeof_s* o ){return 8;} \
+  bl_t lion_nop_ar1_shapeof_s_solve( const lion_nop_ar1_shapeof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
+#define TYPEOF_lion_nop_ar1_rand_s 288306100
+#define BETH_EXPAND_ITEM_lion_nop_ar1_rand_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_rand_s ) \
     {aware_t _;u2_t rseed;}; \
-  static inline sz_t lion_nop_ar1_random_s_arity( const lion_nop_ar1_random_s* o ){return 1;} \
-  static inline sc_t lion_nop_ar1_random_s_symbol( const lion_nop_ar1_random_s* o ){return "random";} \
-  static inline sz_t lion_nop_ar1_random_s_priority( const lion_nop_ar1_random_s* o ){return 8;} \
-  bl_t lion_nop_ar1_random_s_solve( const lion_nop_ar1_random_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
+  static inline sz_t lion_nop_ar1_rand_s_arity( const lion_nop_ar1_rand_s* o ){return 1;} \
+  static inline sc_t lion_nop_ar1_rand_s_symbol( const lion_nop_ar1_rand_s* o ){return "rand";} \
+  static inline sz_t lion_nop_ar1_rand_s_priority( const lion_nop_ar1_rand_s* o ){return 8;} \
+  bl_t lion_nop_ar1_rand_s_solve( const lion_nop_ar1_rand_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  void lion_nop_ar1_rand_s_settle( const lion_nop_ar1_rand_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result );
 #define TYPEOF_lion_nop_ar1_cast_htp_s 2772432835
 #define BETH_EXPAND_ITEM_lion_nop_ar1_cast_htp_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar1_cast_htp_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_cast_htp_s_arity( const lion_nop_ar1_cast_htp_s* o ){return 1;} \
   static inline sz_t lion_nop_ar1_cast_htp_s_priority( const lion_nop_ar1_cast_htp_s* o ){return 12;} \
+  static inline sc_t lion_nop_ar1_cast_htp_s_symbol( const lion_nop_ar1_cast_htp_s* o ){return "htp";} \
   bl_t lion_nop_ar1_cast_htp_s_solve( const lion_nop_ar1_cast_htp_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
   sz_t lion_nop_ar1_cast_htp_s_mcode_push_ap_holor( const lion_nop_ar1_cast_htp_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
   sz_t lion_nop_ar1_cast_htp_s_mcode_push_dp_holor( const lion_nop_ar1_cast_htp_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
@@ -517,7 +536,8 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar1_dimof_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_constof_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_zeroof_s ); \
-  BCORE_FORWARD_OBJECT( lion_nop_ar1_random_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_shapeof_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_rand_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_cast_htp_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar1_identity_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_f3_s \
@@ -546,7 +566,8 @@
   BETH_EXPAND_ITEM_lion_nop_ar1_dimof_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_constof_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_zeroof_s \
-  BETH_EXPAND_ITEM_lion_nop_ar1_random_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_shapeof_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_rand_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_cast_htp_s
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -674,7 +695,7 @@
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_and_s_arity( const lion_nop_ar2_logic_and_s* o ){return 2;} \
   static inline sz_t lion_nop_ar2_logic_and_s_priority( const lion_nop_ar2_logic_and_s* o ){return 6;} \
-  static inline sc_t lion_nop_ar2_logic_and_s_symbol( const lion_nop_ar2_logic_and_s* o ){return "&";} \
+  static inline sc_t lion_nop_ar2_logic_and_s_symbol( const lion_nop_ar2_logic_and_s* o ){return "&&";} \
   static inline tp_t lion_nop_ar2_logic_and_s_type_vop_ap( const lion_nop_ar2_logic_and_s* o ){return TYPEOF_bhvm_vop_ar2_logic_and_s;} \
   static inline tp_t lion_nop_ar2_logic_and_s_type_vop_dp_a( const lion_nop_ar2_logic_and_s* o ){return 0;} \
   static inline tp_t lion_nop_ar2_logic_and_s_type_vop_dp_b( const lion_nop_ar2_logic_and_s* o ){return 0;}
@@ -684,7 +705,7 @@
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_or_s_arity( const lion_nop_ar2_logic_or_s* o ){return 2;} \
   static inline sz_t lion_nop_ar2_logic_or_s_priority( const lion_nop_ar2_logic_or_s* o ){return 6;} \
-  static inline sc_t lion_nop_ar2_logic_or_s_symbol( const lion_nop_ar2_logic_or_s* o ){return "|";} \
+  static inline sc_t lion_nop_ar2_logic_or_s_symbol( const lion_nop_ar2_logic_or_s* o ){return "||";} \
   static inline tp_t lion_nop_ar2_logic_or_s_type_vop_ap( const lion_nop_ar2_logic_or_s* o ){return TYPEOF_bhvm_vop_ar2_logic_or_s;} \
   static inline tp_t lion_nop_ar2_logic_or_s_type_vop_dp_a( const lion_nop_ar2_logic_or_s* o ){return 0;} \
   static inline tp_t lion_nop_ar2_logic_or_s_type_vop_dp_b( const lion_nop_ar2_logic_or_s* o ){return 0;}
@@ -743,6 +764,15 @@
   static inline void lion_nop_ar2_cyclic_s_mcode_push_ap_track( const lion_nop_ar2_cyclic_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." );} \
   static inline void lion_nop_ar2_cyclic_s_mcode_push_dp_track( const lion_nop_ar2_cyclic_s* o, const lion_nop_solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." );} \
   static inline sz_t lion_nop_ar2_cyclic_s_mcode_push_dp_holor( const lion_nop_ar2_cyclic_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." ); return -1;}
+#define TYPEOF_lion_nop_ar2_rands_s 1572255084
+#define BETH_EXPAND_ITEM_lion_nop_ar2_rands_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar2_rands_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar2_rands_s_arity( const lion_nop_ar2_rands_s* o ){return 2;} \
+  static inline sc_t lion_nop_ar2_rands_s_symbol( const lion_nop_ar2_rands_s* o ){return "rands";} \
+  static inline sz_t lion_nop_ar2_rands_s_priority( const lion_nop_ar2_rands_s* o ){return 8;} \
+  bl_t lion_nop_ar2_rands_s_solve( const lion_nop_ar2_rands_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  void lion_nop_ar2_rands_s_settle( const lion_nop_ar2_rands_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result );
 #define BETH_EXPAND_GROUP_lion_nop_ar2 \
   BCORE_FORWARD_OBJECT( lion_nop_ar2 ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_add_s ); \
@@ -763,6 +793,7 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar2_order_inc_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_order_dec_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_cyclic_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar2_rands_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar2_add_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_sub_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_mul_s \
@@ -780,7 +811,8 @@
   BETH_EXPAND_ITEM_lion_nop_ar2_ccat_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_order_inc_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_order_dec_s \
-  BETH_EXPAND_ITEM_lion_nop_ar2_cyclic_s
+  BETH_EXPAND_ITEM_lion_nop_ar2_cyclic_s \
+  BETH_EXPAND_ITEM_lion_nop_ar2_rands_s
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_nop_ar3
@@ -793,6 +825,7 @@
     {aware_t _;}; \
   static inline sz_t lion_nop_ar3_branch_s_arity( const lion_nop_ar3_branch_s* o ){return 3;} \
   static inline sz_t lion_nop_ar3_branch_s_priority( const lion_nop_ar3_branch_s* o ){return 4;} \
+  static inline sc_t lion_nop_ar3_branch_s_symbol( const lion_nop_ar3_branch_s* o ){return "branch";} \
   bl_t lion_nop_ar3_branch_s_solve( const lion_nop_ar3_branch_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
 #define BETH_EXPAND_GROUP_lion_nop_ar3 \
   BCORE_FORWARD_OBJECT( lion_nop_ar3 ); \

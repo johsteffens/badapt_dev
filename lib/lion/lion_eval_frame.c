@@ -194,7 +194,20 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
         frame0 = frame1;
     }
 
+    /// test copying
     lion_frame_s* frame = BLM_CLONE( lion_frame_s, frame0 );
+
+    if( frame->size_en > 0 )
+    {
+        if( !adl_ap_en )
+        {
+            WRN_fa( "Entry holors were not defined." );
+        }
+        else if( adl_ap_en->size != frame->size_en )
+        {
+            WRN_fa( "Number of expected entry holors (#<sz_t>) differs from number of provided entry holors (#<sz_t>).", frame->size_en, adl_ap_en->size );
+        }
+    }
 
     for( sz_t i = 0; i < o->ap_cycles; i++ )
     {
@@ -256,6 +269,7 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
 
         bhvm_holor_adl_s* adl_dp_en = BLM_CLONE( bhvm_holor_adl_s, adl_ap_en );
         bhvm_holor_adl_s* adl_dp_ex = BLM_CLONE( bhvm_holor_adl_s, adl_ap_ex );
+        BFOR_EACH( i, adl_dp_en ) bhvm_holor_s_zro( adl_dp_en->data[ i ] );
 
         BFOR_EACH( i, adl_dp_ex )
         {

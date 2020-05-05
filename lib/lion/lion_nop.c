@@ -157,6 +157,57 @@ sz_t lion_nop_ar1_output_s_mcode_push_dp_holor( const lion_nop_ar1_output_s* o, 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+// lion_nop_ar1_rand_s
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bl_t lion_nop_ar1_rand_s_solve( const lion_nop_ar1_rand_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    lion_holor_s_attach( &result->h, ( a[0] ) ? lion_holor_s_clone( a[0] ) : NULL );
+    if( result->h )
+    {
+        lion_nop_context_s* context = lion_nop_get_context();
+        ASSERT( context->randomizer_is_locked );
+        if( context->randomizer_rval == 0 ) context->randomizer_rval = o->rseed;
+        if( !result->h->h.v.size ) bhvm_holor_s_fit_size( &result->h->h );
+
+        f3_t min     = -0.5;
+        f3_t max     =  0.5;
+        f3_t density =  1.0;
+
+        bhvm_value_s_set_random( &result->h->h.v, density, min, max, &context->randomizer_rval );
+        result->h->m.active = true;
+        result->settled     = true;
+        result->codable     = false;
+
+        lion_nop_ar0_rand_s* nop_rand = lion_nop_ar0_rand_s_create();
+        nop_rand->h = lion_holor_s_clone( result->h );
+        nop_rand->rval = context->randomizer_rval;
+        nop_rand->min = min;
+        nop_rand->max = max;
+        nop_rand->density = density;
+
+        bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)nop_rand );
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_nop_ar1_rand_s_settle( const lion_nop_ar1_rand_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result )
+{
+    ASSERT( result->attached );
+    ASSERT( *( aware_t* )result->attached == TYPEOF_lion_nop_ar0_rand_s );
+    lion_nop_ar0_rand_s* nop_rand = ( lion_nop_ar0_rand_s* )result->attached;
+    lion_nop_a_attach( out_nop, bcore_fork( nop_rand ) );
+    lion_nop_solve_result_s* r = lion_nop_solve_result_s_create();
+    r->h = bcore_fork( nop_rand->h );
+    lion_nop_solve_result_s_attach( out_result, r );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
 // lion_nop_ar1_cast_htp_s
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -691,6 +742,65 @@ bl_t lion_nop_ar2_cyclic_s_solve( const lion_nop_ar2_cyclic_s* o, lion_holor_s**
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+// lion_nop_ar2_rands_s
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bl_t lion_nop_ar2_rands_s_solve( const lion_nop_ar2_rands_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    lion_holor_s_attach( &result->h, ( a[0] && a[1] ) ? lion_holor_s_clone( a[1] ) : NULL );
+    if( result->h )
+    {
+        if( !result->h->h.v.size ) bhvm_holor_s_fit_size( &result->h->h );
+
+        bhvm_holor_s* ha = &a[0]->h;
+        if( ha->v.size == 0 )
+        {
+            st_s_attach( &result->msg, st_s_create() );
+            st_s_push_fa( result->msg, "Seed must be determined." );
+            return false;
+        }
+
+        f3_t vseed = bhvm_value_s_get_f3( &ha->v, 0 );
+
+        f3_t min     = -0.5;
+        f3_t max     =  0.5;
+        f3_t density =  1.0;
+        u2_t rval    =  ( ( tanh( vseed ) + 1.0 ) * 0.5 ) * 0xFFFFFFFFu;
+
+        bhvm_value_s_set_random( &result->h->h.v, density, min, max, &rval );
+        result->h->m.active = true;
+        result->settled     = true;
+        result->codable     = false;
+
+        lion_nop_ar0_rand_s* nop_rand = lion_nop_ar0_rand_s_create();
+        nop_rand->h = lion_holor_s_clone( result->h );
+        nop_rand->rval = rval;
+        nop_rand->min = min;
+        nop_rand->max = max;
+        nop_rand->density = density;
+
+        bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)nop_rand );
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_nop_ar2_rands_s_settle( const lion_nop_ar2_rands_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result )
+{
+    ASSERT( result->attached );
+    ASSERT( *( aware_t* )result->attached == TYPEOF_lion_nop_ar0_rand_s );
+    lion_nop_ar0_rand_s* nop_rand = ( lion_nop_ar0_rand_s* )result->attached;
+    lion_nop_a_attach( out_nop, bcore_fork( nop_rand ) );
+    lion_nop_solve_result_s* r = lion_nop_solve_result_s_create();
+    r->h = bcore_fork( nop_rand->h );
+    lion_nop_solve_result_s_attach( out_result, r );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
 // lion_nop_ar3_branch_s
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -700,7 +810,13 @@ bl_t lion_nop_ar3_branch_s_solve( const lion_nop_ar3_branch_s* o, lion_holor_s**
     if( a[0] )
     {
         bhvm_holor_s* ha = &a[0]->h;
-        if( ha->v.size != 1 ) return false;
+
+        if( bhvm_shape_s_get_volume( &ha->s ) != 1 || ha->v.size != 1 )
+        {
+            st_s_attach( &result->msg, st_s_create_fa( "\nBranch condition must be a determined scalar." ) );
+            return false;
+        }
+
         f3_t cond = bhvm_holor_s_f3_get_scalar( ha );
         if( cond > 0 )
         {

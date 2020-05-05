@@ -102,6 +102,7 @@ feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n
   *     the virtual machine. This is generally (not always) the case when the result is not active (e.g. a constant).
   *     If the result is settled, the top-spanning graph is removed, which turn the node into and arity-0 node.
   *     The feature 'settle' is triggered, which switches the operator to an arity0 operator. By default this is a literal.
+  *     Overload 'settle' when a different operator is desired.
   */
 
 stamp :solve_result = aware bcore_inst
@@ -319,6 +320,43 @@ group :ar0 = retrievable
             bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
             bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_adaptive_zero_grad,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
             BLM_RETURNV( sz_t, idx );
+        };
+
+    };
+
+    /// nullary self-seeding random operator
+    stamp :rand =
+    {
+        lion_holor_s -> h;
+        f3_t min     = -0.5;
+        f3_t max     =  0.5;
+        f3_t density =  1.0;
+        u2_t rval    = 7384;
+
+        func :: :solve =
+        {
+            lion_holor_s_attach( &result->h, bcore_fork( o->h ) );
+            result->settled = false;
+            return true;
+        };
+
+        func :: :mcode_push_ap_holor =
+        {
+            bhvm_holor_s* h = &result->h->h;
+            lion_hmeta_s* m = &result->h->m;
+            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+
+            bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s_create();
+            vop_rand->rval = o->rval;
+            vop_rand->min = o->min;
+            vop_rand->max = o->max;
+            vop_rand->density = o->density;
+
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap,        bhvm_vop_a_set_index( ( ( bhvm_vop* )vop_rand ),                          0, idx ) );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+
+            return idx;
         };
 
     };
@@ -596,8 +634,8 @@ group :ar1 = retrievable
                 lion_holor_s_attach( &result->h, lion_holor_s_create() );
                 bhvm_holor_s_set_scalar_f3( &result->h->h, a[0]->h.s.size ? a[0]->h.s.data[ a[0]->h.s.size - 1 ] : 1 );
                 result->h->m.active = false;
+                result->settled = true;
             }
-            result->settled = result->h != NULL;
             result->codable = false;
             return true;
         };
@@ -618,8 +656,8 @@ group :ar1 = retrievable
                 lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
                 if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
                 result->h->m.active = false;
+                result->settled = true;
             }
-            result->settled = result->h != NULL;
             result->codable = false;
             return true;
         };
@@ -638,29 +676,26 @@ group :ar1 = retrievable
                 if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
                 bhvm_value_s_zro( &result->h->h.v );
                 result->h->m.active = false;
+                result->settled = true;
             }
-            result->settled = result->h != NULL;
             result->codable = false;
             return true;
         };
     };
 
-    /// returns randomized holor as constant
-    stamp :random =
+    /// returns shape-only (vacant holor) as constant
+    stamp :shapeof =
     {
-        u2_t rseed = 1234;
-        func :: :symbol   = { return "random"; };
+        func :: :symbol   = { return "shapeof"; };
         func :: :priority = { return 8; };
-        func :: :solve    =
+        func :: :solve  =
         {
             if( a[0] )
             {
-                lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
-                ::context_s* context = ::get_context();
-                ASSERT( context->randomizer_is_locked );
-                if( context->randomizer_rval == 0 ) context->randomizer_rval = o->rseed;
-                if( !result->h->h.v.size ) bhvm_holor_s_fit_size( &result->h->h );
-                bhvm_value_s_set_random( &result->h->h.v, 1.0, -0.5, 0.5, &context->randomizer_rval );
+                lion_holor_s_attach( &result->h, lion_holor_s_create() );
+                bhvm_shape_s_copy( &result->h->h.s, &a[0]->h.s );
+                bhvm_value_s_set_type( &result->h->h.v, a[0]->h.v.type );
+                result->h->m.htp = &a[0]->m.htp;
                 result->h->m.active = false;
                 result->settled = true;
             }
@@ -669,9 +704,24 @@ group :ar1 = retrievable
         };
     };
 
+    /** Unary self-seeding random generator
+     *  Evaluateds only the shape of the argument to determine output shape.
+     *  Seeding and rval update is system-internal.
+     *  The resulting mcode randomizer updates its seed after each call (thread safe)
+     */
+    stamp :rand =
+    {
+        u2_t rseed = 1234;
+        func :: :symbol   = { return "rand"; };
+        func :: :priority = { return 8; };
+        func :: :solve;
+        func :: :settle;
+    };
+
     stamp :cast_htp =
     {
         func :: :priority  = { return 12; };
+        func :: :symbol   = { return "htp"; };
         func :: :solve;
         func :: :mcode_push_ap_holor;
         func :: :mcode_push_dp_holor;
@@ -801,7 +851,7 @@ group :ar2 = retrievable
     stamp :logic_and =
     {
         func :: :priority      = { return 6; };
-        func :: :symbol        = { return "&"; };
+        func :: :symbol        = { return "&&"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :type_vop_dp_a = { return 0; };
         func :: :type_vop_dp_b = { return 0; };
@@ -810,7 +860,7 @@ group :ar2 = retrievable
     stamp :logic_or =
     {
         func :: :priority      = { return 6; };
-        func :: :symbol        = { return "|"; };
+        func :: :symbol        = { return "||"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :type_vop_dp_a = { return 0; };
         func :: :type_vop_dp_b = { return 0; };
@@ -874,6 +924,20 @@ group :ar2 = retrievable
         func :: :mcode_push_dp_track = { ERR_fa( "Not implemented." ); };
         func :: :mcode_push_dp_holor = { ERR_fa( "Not implemented." ); return -1; };
     };
+
+    /** Binary self-seeding random generator
+     *  Extracts a seed from the first argument (any determined holor possible).
+     *  Evaluateds only the shape of the second argument to determine output shape.
+     *  The resulting mcode randomizer updates its seed after each call (thread safe)
+     */
+    stamp :rands =
+    {
+        func :: :symbol   = { return "rands"; };
+        func :: :priority = { return 8; };
+        func :: :solve;
+        func :: :settle;
+    };
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -889,6 +953,7 @@ group :ar3 = retrievable
     stamp :branch =
     {
         func :: :priority = { return 4; };
+        func :: :symbol   = { return "branch"; };
         func :: :solve;
     };
 };
