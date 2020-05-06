@@ -1159,12 +1159,17 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
 
     bhvm_vop_arr_ci_s* arr_ci = BLM_CREATE( bhvm_vop_arr_ci_s );
 
+    bl_t up_index_is_valid = false;
+
     BFOR_EACH( i, &o->upls )
     {
         lion_net_node_s* node = o->upls.data[ i ]->node;
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->mnode->ax0 );
-        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, node->mnode->ag1 >= 0 ? node->mnode->ag1 : node->mnode->ag0 );
+        sz_t agx = node->mnode->ag1 >= 0 ? node->mnode->ag1 : node->mnode->ag0;
+        bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, agx );
+        if( i == up_index ) up_index_is_valid = agx >= 0;
     }
+
     bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->mnode->ax0 );
 
     if( !o->flag ) // build gradient computation for this node
@@ -1172,21 +1177,21 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
         o->flag = true;
         o->mnode->ag0 = lion_nop_a_mcode_push_dp_holor( o->nop, o->result, arr_ci, mcf );
 
-        // build this gradient from all downlinks ...
-        BFOR_EACH( i, &o->dnls )
-        {
-            lion_net_node_s* node = o->dnls.data[ i ]->node;
-
-            /// we do not accumulate downtree recurrences at this point
-            if( lion_nop_a_is_cyclic( o->nop ) ) if( node_s_recurses_in_downtree( node, o ) ) continue;
-
-            sz_t node_up_index = lion_net_node_s_up_index( node, o );
-            ASSERT( node_up_index >= 0 );
-            node_s_mcode_push_dp( node, node_up_index, mcf );
-        }
-
         if( o->mnode->ag0 >= 0 )
         {
+            // build this gradient from all downlinks ...
+            BFOR_EACH( i, &o->dnls )
+            {
+                lion_net_node_s* node = o->dnls.data[ i ]->node;
+
+                /// we do not accumulate downtree recurrences at this point
+                if( lion_nop_a_is_cyclic( o->nop ) ) if( node_s_recurses_in_downtree( node, o ) ) continue;
+
+                sz_t node_up_index = lion_net_node_s_up_index( node, o );
+                ASSERT( node_up_index >= 0 );
+                node_s_mcode_push_dp( node, node_up_index, mcf );
+            }
+
             lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ag0 ];
             if( !hmeta->name ) hmeta->name = o->name;
             hmeta->pclass = TYPEOF_pclass_ag0;
@@ -1194,7 +1199,7 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
         }
     }
 
-    if( up_index >= 0 )
+    if( up_index_is_valid )
     {
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'z', o->mnode->ag0 );
         lion_nop_a_mcode_push_dp_track( o->nop, o->result, 'a' + up_index, arr_ci, mcf );

@@ -192,7 +192,11 @@ feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, cons
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// dendrite pass (input) gradient holor + initialization code
+/** Dendrite pass (input) accumulative gradient holor + initialization code.
+ *  The default implementation is valid for most nodes.
+ *  If the node does not need to compute any accumulative gradient (e.g. because all uplinks are not differentiable),
+ *  then the function should be overloaded simply returning -1.
+ */
 feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     BLM_INIT();
@@ -805,11 +809,18 @@ group :ar2 = retrievable
 
     stamp :equal =
     {
+        func :: :priority    = { return 6; };
+        func :: :symbol      = { return "=="; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
+    };
+
+    stamp :unequal =
+    {
         func :: :priority      = { return 6; };
-        func :: :symbol        = { return "=="; };
+        func :: :symbol        = { return "!="; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :larger =
@@ -817,8 +828,7 @@ group :ar2 = retrievable
         func :: :priority      = { return 6; };
         func :: :symbol        = { return ">"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :smaller =
@@ -826,8 +836,7 @@ group :ar2 = retrievable
         func :: :priority      = { return 6; };
         func :: :symbol        = { return "<"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :larger_equal =
@@ -835,8 +844,7 @@ group :ar2 = retrievable
         func :: :priority      = { return 6; };
         func :: :symbol        = { return ">="; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :smaller_equal =
@@ -844,8 +852,7 @@ group :ar2 = retrievable
         func :: :priority      = { return 6; };
         func :: :symbol        = { return "<="; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :logic_and =
@@ -853,8 +860,7 @@ group :ar2 = retrievable
         func :: :priority      = { return 6; };
         func :: :symbol        = { return "&&"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :logic_or =
@@ -862,8 +868,7 @@ group :ar2 = retrievable
         func :: :priority      = { return 6; };
         func :: :symbol        = { return "||"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
-        func :: :type_vop_dp_a = { return 0; };
-        func :: :type_vop_dp_b = { return 0; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     /// special operators ------------------------------------------------------
