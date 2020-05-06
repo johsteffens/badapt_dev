@@ -194,8 +194,9 @@ feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, cons
 
 /** Dendrite pass (input) accumulative gradient holor + initialization code.
  *  The default implementation is valid for most nodes.
- *  If the node does not need to compute any accumulative gradient (e.g. because all uplinks are not differentiable),
- *  then the function should be overloaded simply returning -1.
+ *  If the node does not need to compute any accumulative gradient (e.g. when all uplink gradients are considered zero ),
+ *  then the function should be overloaded simply returning -1. This keeps the compiler from producing
+ *  ineffective dp-mcode.
  */
 feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
@@ -441,7 +442,7 @@ group :ar1 = retrievable
         func :: :priority      = { return 8; };
         func :: :symbol        = { return "floor"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_floor_s; };
-        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar0_nul_dp_s; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :ceil =
@@ -449,7 +450,7 @@ group :ar1 = retrievable
         func :: :priority      = { return 8; };
         func :: :symbol        = { return "ceil"; };
         func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_ceil_s; };
-        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar0_nul_dp_s; };
+        func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :abs =
@@ -807,67 +808,75 @@ group :ar2 = retrievable
 
     /// logic ------------------------------------------------------------------
 
-    stamp :equal =
+    stamp :logic_equal =
     {
         func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
         func :: :symbol      = { return "=="; };
         func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :unequal =
+    stamp :logic_unequal =
     {
-        func :: :priority      = { return 6; };
-        func :: :symbol        = { return "!="; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
+        func :: :symbol      = { return "!="; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :larger =
+    stamp :logic_larger =
     {
-        func :: :priority      = { return 6; };
-        func :: :symbol        = { return ">"; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
+        func :: :symbol      = { return ">"; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :smaller =
+    stamp :logic_smaller =
     {
-        func :: :priority      = { return 6; };
-        func :: :symbol        = { return "<"; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
+        func :: :symbol      = { return "<"; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :larger_equal =
+    stamp :logic_larger_equal =
     {
-        func :: :priority      = { return 6; };
-        func :: :symbol        = { return ">="; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
+        func :: :symbol      = { return ">="; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :smaller_equal =
+    stamp :logic_smaller_equal =
     {
-        func :: :priority      = { return 6; };
-        func :: :symbol        = { return "<="; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
+        func :: :symbol      = { return "<="; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :logic_and =
     {
-        func :: :priority      = { return 6; };
-        func :: :symbol        = { return "&&"; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
+        func :: :symbol      = { return "&&"; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
     stamp :logic_or =
     {
-        func :: :priority      = { return 6; };
-        func :: :symbol        = { return "||"; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :priority    = { return 6; };
+        func :: :eci         = { return true; };
+        func :: :symbol      = { return "||"; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
