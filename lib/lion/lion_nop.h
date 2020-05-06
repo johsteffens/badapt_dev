@@ -963,13 +963,17 @@ group :ar3 = retrievable
         func :: :arity = { return 3; };
     };
 
-    // arg[0] scalar condition, arg[1] ( cond > 0 ), arg[2] ( cond <= 0 )
-    stamp :branch =
+    stamp :iff =
     {
-        func :: :priority = { return 4; };
-        func :: :symbol   = { return "branch"; };
-        func :: :solve;
+        func :: :priority      = { return 4; };
+        func :: :eci           = { return true; };
+        func :: :symbol        = { return "iff"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar3_iff_s; };
+        func :: :type_vop_dp_a = { return 0; };
+        func :: :type_vop_dp_b = { return TYPEOF_bhvm_vop_ar2_iff_dp_b_s; };
+        func :: :type_vop_dp_c = { return TYPEOF_bhvm_vop_ar2_iff_dp_c_s; };
     };
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

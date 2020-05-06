@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-05-06T11:58:12Z
+ *  Last File Update: 2020-05-06T17:09:46Z
  *
  *  Copyright and License of this File:
  *
@@ -948,13 +948,17 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar2_rands_s )
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_nop_ar3
 
-BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar3_branch_s )
+BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar3_iff_s )
 "aware lion_nop_ar3"
 "{"
     "func lion_nop:arity;"
     "func lion_nop:priority;"
+    "func lion_nop:eci;"
     "func lion_nop:symbol;"
-    "func lion_nop:solve;"
+    "func lion_nop:type_vop_ap;"
+    "func lion_nop:type_vop_dp_a;"
+    "func lion_nop:type_vop_dp_b;"
+    "func lion_nop:type_vop_dp_c;"
 "}";
 
 /**********************************************************************************************************************/
@@ -1840,7 +1844,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1119969958 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 2659040075 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2311,13 +2315,17 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             bcore_inst_s_get_typed( TYPEOF_lion_nop_ar2_rands_s );
 
             // group: lion_nop_ar3
-            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar3_branch_s_arity );
-            BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar3_branch_s_priority );
-            BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar3_branch_s_symbol );
-            BCORE_REGISTER_FFUNC( lion_nop_solve, lion_nop_ar3_branch_s_solve );
-            BCORE_REGISTER_OBJECT( lion_nop_ar3_branch_s );
+            BCORE_REGISTER_FFUNC( lion_nop_arity, lion_nop_ar3_iff_s_arity );
+            BCORE_REGISTER_FFUNC( lion_nop_priority, lion_nop_ar3_iff_s_priority );
+            BCORE_REGISTER_FFUNC( lion_nop_eci, lion_nop_ar3_iff_s_eci );
+            BCORE_REGISTER_FFUNC( lion_nop_symbol, lion_nop_ar3_iff_s_symbol );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_ap, lion_nop_ar3_iff_s_type_vop_ap );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_dp_a, lion_nop_ar3_iff_s_type_vop_dp_a );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_dp_b, lion_nop_ar3_iff_s_type_vop_dp_b );
+            BCORE_REGISTER_FFUNC( lion_nop_type_vop_dp_c, lion_nop_ar3_iff_s_type_vop_dp_c );
+            BCORE_REGISTER_OBJECT( lion_nop_ar3_iff_s );
             BCORE_REGISTER_TRAIT( lion_nop_ar3, lion_nop );
-            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar3_branch_s );
+            bcore_inst_s_get_typed( TYPEOF_lion_nop_ar3_iff_s );
 
             // --------------------------------------------------------------------
             // source: lion_eval_nop.h
@@ -2357,9 +2365,6 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             // group: lion_sem
             BCORE_REGISTER_OBJECT( lion_sem_context_s );
             BCORE_REGISTER_NAME( cell );
-            BCORE_REGISTER_NAME( if );
-            BCORE_REGISTER_NAME( then );
-            BCORE_REGISTER_NAME( else );
             BCORE_REGISTER_FEATURE( lion_sem_get_name );
             BCORE_REGISTER_FFUNC( lion_sem_get_name, lion_sem_get_name__ );
             BCORE_REGISTER_FEATURE( lion_sem_is_visible );

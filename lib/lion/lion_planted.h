@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-05-06T11:58:12Z
+ *  Last File Update: 2020-05-06T17:09:46Z
  *
  *  Copyright and License of this File:
  *
@@ -831,18 +831,22 @@
 
 #define TYPEOF_lion_nop_ar3 1828608786
 #define TYPEOF_lion_nop_ar3_s 493893900
-#define TYPEOF_lion_nop_ar3_branch_s 229442049
-#define BETH_EXPAND_ITEM_lion_nop_ar3_branch_s \
-  BCORE_DECLARE_OBJECT( lion_nop_ar3_branch_s ) \
+#define TYPEOF_lion_nop_ar3_iff_s 4098068200
+#define BETH_EXPAND_ITEM_lion_nop_ar3_iff_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar3_iff_s ) \
     {aware_t _;}; \
-  static inline sz_t lion_nop_ar3_branch_s_arity( const lion_nop_ar3_branch_s* o ){return 3;} \
-  static inline sz_t lion_nop_ar3_branch_s_priority( const lion_nop_ar3_branch_s* o ){return 4;} \
-  static inline sc_t lion_nop_ar3_branch_s_symbol( const lion_nop_ar3_branch_s* o ){return "branch";} \
-  bl_t lion_nop_ar3_branch_s_solve( const lion_nop_ar3_branch_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
+  static inline sz_t lion_nop_ar3_iff_s_arity( const lion_nop_ar3_iff_s* o ){return 3;} \
+  static inline sz_t lion_nop_ar3_iff_s_priority( const lion_nop_ar3_iff_s* o ){return 4;} \
+  static inline bl_t lion_nop_ar3_iff_s_eci( const lion_nop_ar3_iff_s* o ){return true;} \
+  static inline sc_t lion_nop_ar3_iff_s_symbol( const lion_nop_ar3_iff_s* o ){return "iff";} \
+  static inline tp_t lion_nop_ar3_iff_s_type_vop_ap( const lion_nop_ar3_iff_s* o ){return TYPEOF_bhvm_vop_ar3_iff_s;} \
+  static inline tp_t lion_nop_ar3_iff_s_type_vop_dp_a( const lion_nop_ar3_iff_s* o ){return 0;} \
+  static inline tp_t lion_nop_ar3_iff_s_type_vop_dp_b( const lion_nop_ar3_iff_s* o ){return TYPEOF_bhvm_vop_ar2_iff_dp_b_s;} \
+  static inline tp_t lion_nop_ar3_iff_s_type_vop_dp_c( const lion_nop_ar3_iff_s* o ){return TYPEOF_bhvm_vop_ar2_iff_dp_c_s;}
 #define BETH_EXPAND_GROUP_lion_nop_ar3 \
   BCORE_FORWARD_OBJECT( lion_nop_ar3 ); \
-  BCORE_FORWARD_OBJECT( lion_nop_ar3_branch_s ); \
-  BETH_EXPAND_ITEM_lion_nop_ar3_branch_s
+  BCORE_FORWARD_OBJECT( lion_nop_ar3_iff_s ); \
+  BETH_EXPAND_ITEM_lion_nop_ar3_iff_s
 
 /**********************************************************************************************************************/
 // source: lion_eval_nop.h
@@ -961,9 +965,6 @@
   BCORE_DECLARE_OBJECT( lion_sem_context_s ) \
     {aware_t _;bcore_hmap_name_s hmap_name;bcore_arr_st_s arr_symbol_op2;lion_sem_cell_s* cell;bcore_hmap_tp_s control_types;bcore_hmap_tp_s reserved_names;};
 #define TYPEOF_cell 1759288501
-#define TYPEOF_if 959999494
-#define TYPEOF_then 3844270454
-#define TYPEOF_else 3183434736
 #define TYPEOF_lion_sem_link_s 2798512654
 #define BETH_EXPAND_ITEM_lion_sem_link_s \
   BCORE_DECLARE_OBJECT( lion_sem_link_s ) \

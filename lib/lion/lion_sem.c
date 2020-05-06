@@ -73,6 +73,7 @@ void lion_sem_context_setup()
 
     bcore_push_traits_of_ancestor( TYPEOF_lion_nop_ar1, arr_tp );
     bcore_push_traits_of_ancestor( TYPEOF_lion_nop_ar2, arr_tp );
+    bcore_push_traits_of_ancestor( TYPEOF_lion_nop_ar3, arr_tp );
 
     context_g->cell = lion_sem_cell_s_create();
 
@@ -106,14 +107,14 @@ void lion_sem_context_setup()
 
     /// register control types
     bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "cell" ) );
-    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "if" ) );
-    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "then" ) );
-    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "else" ) );
+//    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "if" ) );
+//    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "then" ) );
+//    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "else" ) );
 
     /// register reserved keywords
-    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "if"       ) );
-    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "then"     ) );
-    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "else"     ) );
+//    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "if"       ) );
+//    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "then"     ) );
+//    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "else"     ) );
     bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "cell"     ) );
     bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "cyclic"   ) );
     bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "adaptive" ) );
@@ -696,8 +697,9 @@ void lion_sem_cell_s_parse_signature( lion_sem_cell_s* o, bcore_source* source )
         {
             if( !first ) bcore_source_a_parse_fa( source, " ," );
             lion_sem_link_s* link = lion_sem_link_s_create_setup( lion_parse_var_name( source ), NULL, NULL, o, false );
-            if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
+            if( bcore_source_a_parse_bl_fa( source, " #?([0]=='='&&[1]!='=')" ) )
             {
+                bcore_source_a_parse_fa( source, "=" );
                 link->up = lion_sem_cell_s_evaluate_link( o->parent, source );
             }
             lion_sem_links_s_push_d( &o->encs, link );
@@ -924,8 +926,10 @@ void lion_sem_cell_s_evaluate_set_encs( lion_sem_cell_s* o, lion_sem_cell_s* par
         if( bcore_source_a_parse_bl_fa( source, " #?(([0]>='A'&&[0]<='Z')||([0]>='a'&&[0]<='z'))" ) )
         {
             bcore_source_a_parse_fa( source, "#name", name );
-            if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
+            if( bcore_source_a_parse_bl_fa( source, " #?([0]=='='&&[1]!='=')" ) )
+            //if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
             {
+                bcore_source_a_parse_fa( source, "=" );
                 lion_sem_link_s* link = lion_sem_cell_s_get_enc_by_name( o, typeof( name->sc ) );
                 if( !link )
                 {
@@ -1103,8 +1107,8 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
         bl_t identifier = false;
 
         // immediately terminating identifiers (not being removed from stream)
-        if( bcore_source_a_parse_bl_fa( source, " #=?'then'" ) ) break;
-        if( bcore_source_a_parse_bl_fa( source, " #=?'else'" ) ) break;
+//        if( bcore_source_a_parse_bl_fa( source, " #=?'then'" ) ) break;
+//        if( bcore_source_a_parse_bl_fa( source, " #=?'else'" ) ) break;
 
         // identifier
         if( stack_of_type( stack, 1, TYPEOF_st_s ) )
@@ -1130,16 +1134,16 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                     lion_sem_cell_s_parse( cell, source );
                     stack_push( stack, cell );
                 }
-                else if( tp_name == TYPEOF_if )
-                {
-                    lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar3_branch_s_create(), source );
-                    cell->encs.data[ 0 ]->up = lion_sem_cell_s_evaluate_link( o, source );
-                    bcore_source_a_parse_fa( source, " #skip';' then" );
-                    cell->encs.data[ 1 ]->up = lion_sem_cell_s_evaluate_link( o, source );
-                    bcore_source_a_parse_fa( source, " #skip';' else" );
-                    cell->encs.data[ 2 ]->up = lion_sem_cell_s_evaluate_link( o, source );
-                    stack_push( stack, cell->excs.data[ 0 ] );
-                }
+//                else if( tp_name == TYPEOF_if )
+//                {
+//                    lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar3_branch_s_create(), source );
+//                    cell->encs.data[ 0 ]->up = lion_sem_cell_s_evaluate_link( o, source );
+//                    bcore_source_a_parse_fa( source, " #skip';' then" );
+//                    cell->encs.data[ 1 ]->up = lion_sem_cell_s_evaluate_link( o, source );
+//                    bcore_source_a_parse_fa( source, " #skip';' else" );
+//                    cell->encs.data[ 2 ]->up = lion_sem_cell_s_evaluate_link( o, source );
+//                    stack_push( stack, cell->excs.data[ 0 ] );
+//                }
                 else
                 {
                     bcore_source_a_parse_err_fa( source, "Unexpected keyword '#<sc_t>'. Did you miss ';' after previous statement?", name->sc );

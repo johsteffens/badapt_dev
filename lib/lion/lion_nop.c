@@ -801,42 +801,6 @@ void lion_nop_ar2_rands_s_settle( const lion_nop_ar2_rands_s* o, const lion_nop_
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
-// lion_nop_ar3_branch_s
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-bl_t lion_nop_ar3_branch_s_solve( const lion_nop_ar3_branch_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
-{
-    if( a[0] )
-    {
-        bhvm_holor_s* ha = &a[0]->h;
-
-        if( bhvm_shape_s_get_volume( &ha->s ) != 1 || ha->v.size != 1 )
-        {
-            st_s_attach( &result->msg, st_s_create_fa( "\nBranch condition must be a determined scalar." ) );
-            return false;
-        }
-
-        f3_t cond = bhvm_holor_s_f3_get_scalar( ha );
-        if( cond > 0 )
-        {
-            lion_holor_s_attach( &result->h, bcore_fork( a[1] ) );
-        }
-        else
-        {
-            lion_holor_s_attach( &result->h, bcore_fork( a[2] ) );
-        }
-
-        if( result->h ) result->h->m.active = false;
-    }
-    result->settled = ( result->h && !result->h->m.active );
-    result->codable = false;
-    return true;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
 

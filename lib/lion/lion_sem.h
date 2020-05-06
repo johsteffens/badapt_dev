@@ -219,9 +219,9 @@ stamp :context = aware bcore_inst
 
 // language control types
 name cell;
-name if;
-name then;
-name else;
+//name if;
+//name then;
+//name else;
 
 signature   sz_t get_arity( const );
 signature   sz_t get_priority( const );

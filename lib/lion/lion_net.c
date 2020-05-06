@@ -706,14 +706,19 @@ static void net_cell_s_from_sem_recursive
                 sz_t arity = lion_nop_a_arity( net_node_up->nop );
                 ASSERT( arity == cell->encs.size );
 
-                if( net_node_up->nop->_ == TYPEOF_lion_nop_ar3_branch_s )
+                /** If there is an iff-branch and the condition (arg0) is a constant scalar,
+                 *  then the branch code is replaced by an identity linking to the
+                 *  branch target based on the condition value.
+                 *  Otherwise the branch code is left intact.
+                 */
+                if( net_node_up->nop->_ == TYPEOF_lion_nop_ar3_iff_s )
                 {
                     if( log ) bcore_sink_a_push_fa( log, "Branch channel 0:\n" );
                     net_cell_s_from_sem_recursive( o, cell->encs.data[ 0 ], ctr_tree, ctr_node, net_node_up, depth, log );
                     lion_net_node_s* arg0 = net_node_up->upls.data[ 0 ]->node;
                     lion_net_node_s_solve( arg0, NULL );
                     lion_holor_s* result_h = arg0->result->h;
-                    if( result_h->h.v.size > 0 && !result_h->m.active ) // determined constant holor
+                    if( result_h->h.v.size == 1 && !result_h->m.active ) // determined constant holor
                     {
                         lion_net_links_s_clear( &net_node_up->upls );
                         lion_net_node_s_set_nop_d( net_node_up, ( lion_nop* )lion_nop_ar1_identity_s_create() );
@@ -729,7 +734,7 @@ static void net_cell_s_from_sem_recursive
                             net_cell_s_from_sem_recursive( o, cell->encs.data[ 2 ], ctr_tree, ctr_node, net_node_up, depth, log );
                         }
                     }
-                    else
+                    else /// leaving the branch code intact
                     {
                         if( log ) bcore_sink_a_push_fa( log, "Branching to channel " );
                         if( log ) bcore_sink_a_push_fa( log, "'TRUE'\n" );
