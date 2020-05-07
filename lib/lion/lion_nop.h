@@ -503,28 +503,28 @@ group :ar1 = retrievable
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_srt_dp_s; };
     };
 
-    stamp :lgst =
+    stamp :sigm =
     {
         func :: :priority      = { return 8; };
-        func :: :symbol        = { return "lgst"; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_lgst_s; };
-        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_lgst_dp_s; };
+        func :: :symbol        = { return "sigm"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_sigm_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sigm_dp_s; };
     };
 
-    stamp :lgst_hard =
+    stamp :sigm_hard =
     {
         func :: :priority      = { return 8; };
-        func :: :symbol        = { return "lgst_hard"; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_lgst_hard_s; };
-        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_lgst_hard_dp_s; };
+        func :: :symbol        = { return "sigm_hard"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_sigm_hard_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sigm_hard_dp_s; };
     };
 
-    stamp :lgst_leaky =
+    stamp :sigm_leaky =
     {
         func :: :priority      = { return 8; };
-        func :: :symbol        = { return "lgst_leaky"; };
-        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_lgst_leaky_s; };
-        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_lgst_leaky_dp_s; };
+        func :: :symbol        = { return "sigm_leaky"; };
+        func :: :type_vop_ap   = { return TYPEOF_bhvm_vop_ar1_sigm_leaky_s; };
+        func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sigm_leaky_dp_s; };
     };
 
     stamp :tanh =

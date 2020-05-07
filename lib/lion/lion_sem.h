@@ -60,9 +60,9 @@
         b_o = adaptive( dim_h [ 0 );
         b_q = adaptive( dim_h [ 0 );
 
-        v_f = lgst( ( w_fx ** x ) + ( w_fh ** hi ) + b_f );
-        v_i = lgst( ( w_ix ** x ) + ( w_ih ** hi ) + b_i );
-        v_o = lgst( ( w_ox ** x ) + ( w_oh ** hi ) + b_o );
+        v_f = sigm( ( w_fx ** x ) + ( w_fh ** hi ) + b_f );
+        v_i = sigm( ( w_ix ** x ) + ( w_ih ** hi ) + b_i );
+        v_o = sigm( ( w_ox ** x ) + ( w_oh ** hi ) + b_o );
         v_q = tanh( ( w_qx ** x ) + ( w_qh ** hi ) + b_q );
 
         co  = ( v_f * ci ) + ( v_i * v_q );
@@ -184,8 +184,8 @@ TODO:
  *     - (done) Add list of reserved keywords (not usable for variables)
  *     - (done) specify type by appending f2 or f3 to literal.
  *     - (done) implement operator volof  (returning the volume as constant scalar)
- *     - add cast operator 'reshape( new_shape, holor )' converting the shape of a holor
- *     - rename lgst -> sig
+ *     - (done) add cast operator 'reshape( new_shape, holor )' converting the shape of a holor
+ *     - rename sigm -> sigm
  *     - expand matrix multiplication to involve higher order holors using an eci-like-approch (elements being 2x2 matrices)
  *     - implement ar3-convolution operator
  */

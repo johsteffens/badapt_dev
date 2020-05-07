@@ -53,7 +53,7 @@ void badapt_ern_test_recurrent_abc()
 //    builder->dynamics.lambda_l1 = 0.0001;
 
     builder->a_h = badapt_activator_create_from_names( "plain", "tanh" );
-    builder->a_o = badapt_activator_create_from_names( "plain", "lgst" );
+    builder->a_o = badapt_activator_create_from_names( "plain", "sigm" );
 
     trainer->fetch_cycles_per_iteration = 10;
 //    trainer->batch_cycles_per_fetch = 1;
