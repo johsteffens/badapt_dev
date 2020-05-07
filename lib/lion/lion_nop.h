@@ -87,6 +87,9 @@ feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifn
 feature 'a' sz_t priority( const ) = { return 10; };
 feature 'a' sc_t symbol( const )   = { return NULL; };
 
+/// Overload 'true' when the symbol shall be declared as reserved keyword in the syntax. In that case the cell of that name cannot be defined locally.
+feature 'a' bl_t reserved( const ) = { return false; };
+
 /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
 feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n ) ? :a_clone( o ) : NULL; };
 
@@ -155,7 +158,8 @@ feature 'a' bl_t is_adaptive( const ) = { return false; };
 
 /** Settles operator. (Creates an arity-0 operator)
  *  Default implementation turns it into a literal.
- **/
+ *  For better control consider overloading feature 'solve_node'.
+ */
 feature 'a' void settle( const, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
 {
     :ar0_literal_s* literal = :ar0_literal_s_create();
@@ -246,12 +250,9 @@ stamp :context = aware bcore_inst
      *  always the same sequence of random values for building a network.
      *  Therefore randomizer_mutex is locked during a build.
      */
-    private bcore_mutex_s* randomizer_mutex;
-    bl_t                   randomizer_is_locked = false;
-    u2_t                   randomizer_rval = 0;
-
-    func bcore_inst_call : init_x = { o->randomizer_mutex = bcore_mutex_s_create(); };
-    func bcore_inst_call : down_e = { bcore_mutex_s_discard( o->randomizer_mutex ); };
+    hidden bcore_mutex_s randomizer_mutex;
+    bl_t                 randomizer_is_locked = false;
+    u2_t                 randomizer_rval = 0;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -375,6 +376,7 @@ group :ar1 = retrievable
     extending stump verbatim :_ = aware :
     {
         func :: :arity = { return 1; };
+        func :: :reserved = { return true; };
     };
 
     stamp :identity =
@@ -605,8 +607,8 @@ group :ar1 = retrievable
             if( result->h )
             {
                 result->h->m.active = true;
+                result->settled = true;
             }
-            result->settled = ( result->h != NULL );
             result->reducible = false; // keep subsequent graph intact
             result->codable = false;
             return true;
@@ -638,6 +640,25 @@ group :ar1 = retrievable
             {
                 lion_holor_s_attach( &result->h, lion_holor_s_create() );
                 bhvm_holor_s_set_scalar_f3( &result->h->h, a[0]->h.s.size ? a[0]->h.s.data[ a[0]->h.s.size - 1 ] : 1 );
+                result->h->m.active = false;
+                result->settled = true;
+            }
+            result->codable = false;
+            return true;
+        };
+    };
+
+    /// returns volume as constant
+    stamp :volof =
+    {
+        func :: :symbol   = { return "volof"; };
+        func :: :priority = { return 8; };
+        func :: :solve  =
+        {
+            if( a[0] )
+            {
+                lion_holor_s_attach( &result->h, lion_holor_s_create() );
+                bhvm_holor_s_set_scalar_f3( &result->h->h, bhvm_shape_s_get_volume( &a[0]->h.s ) );
                 result->h->m.active = false;
                 result->settled = true;
             }
@@ -723,10 +744,24 @@ group :ar1 = retrievable
         func :: :settle;
     };
 
+    /// Cast operator reinterpreting a holor as transposed.
     stamp :cast_htp =
     {
         func :: :priority  = { return 12; };
-        func :: :symbol   = { return "htp"; };
+        func :: :symbol    = { return "htp"; };
+        func :: :solve;
+        func :: :mcode_push_ap_holor;
+        func :: :mcode_push_dp_holor;
+    };
+
+    /** Cast operator reinterpreting a holor as reshaped. Transposed flag is cleared.
+     *  This ar1 operator is created by ar2_reshape during settlement.
+     */
+    stamp :reshape =
+    {
+        bhvm_shape_s shape;
+        func :: :priority  = { return 8; };
+        // no symbol because this operator is created from ar2_reshape
         func :: :solve;
         func :: :mcode_push_ap_holor;
         func :: :mcode_push_dp_holor;
@@ -741,6 +776,7 @@ group :ar2 = retrievable
     extending stump verbatim :_ = aware :
     {
         func :: :arity = { return 2; };
+        func :: :reserved = { return true; };
     };
 
     stamp :add =
@@ -952,6 +988,24 @@ group :ar2 = retrievable
         func :: :settle;
     };
 
+    /** Cast operator reinterpreting a holor as reshaped. Transposed flag is cleared.
+     *  This ar2 operator creates ar1_reshape during settlement.
+     */
+    stamp :reshape =
+    {
+        func :: :symbol   = { return "reshape"; };
+        func :: :priority    = { return 8; };
+
+        func :: :solve =
+        {
+            ERR_fa( "This function should never be called from feature 'solve_node'." );
+            return false;
+        };
+
+        /// Explicitly solves node with this operator; creates operator ar1_reshape replacing uplink channel 0 with channel 1.
+        func :: :solve_node;
+    };
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -960,7 +1014,8 @@ group :ar3 = retrievable
 {
     extending stump verbatim :_ = aware :
     {
-        func :: :arity = { return 3; };
+        func :: :arity    = { return 3; };
+        func :: :reserved = { return true; };
     };
 
     stamp :iff =

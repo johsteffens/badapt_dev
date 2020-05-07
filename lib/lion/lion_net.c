@@ -335,8 +335,6 @@ void lion_nop_ar2_cyclic_s_solve_node( lion_nop_ar2_cyclic_s* o, lion_net_node_s
 
     node->flag = true;
 
-    //if( node->result ) return;
-
     ASSERT( node->upls.size == 2 );
 
     lion_holor_s* arg_h[ 2 ] = { NULL };
@@ -357,6 +355,52 @@ void lion_nop_ar2_cyclic_s_solve_node( lion_nop_ar2_cyclic_s* o, lion_net_node_s
         lion_net_node_s_solve( arg_n, NULL );
         arg_h[ 1 ] = arg_n->result->h;
         net_node_s_nop_solve( node, arg_h );
+    }
+
+    node->flag = false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Solves node by changing nop: ar2_reshape -> ar1_reshape.
+ *  Shape is extracted from the uplink channel 0.
+ *  Channel 0 is then replaced by channel 1.
+ */
+void lion_nop_ar2_reshape_s_solve_node( lion_nop_ar2_reshape_s* o, lion_net_node_s* node, lion_net_node_adl_s* deferred )
+{
+    if( node->flag ) return; // cyclic link
+
+    node->flag = true;
+
+    if( node->result ) return;
+
+    ASSERT( node->upls.size == 2 );
+    lion_net_node_s* arg0 = node->upls.data[ 0 ]->node;
+    lion_net_node_s* arg1 = node->upls.data[ 1 ]->node;
+
+    if( arg0 && arg1 )
+    {
+        if( !arg0->result ) lion_net_node_s_solve( arg0, deferred );
+        if( !arg1->result ) lion_net_node_s_solve( arg1, deferred );
+
+        ASSERT( arg0->result && arg0->result->h );
+        ASSERT( arg1->result && arg1->result->h );
+
+        lion_nop_ar1_reshape_s* ar1_reshape = lion_nop_ar1_reshape_s_create();
+        bhvm_shape_s_copy( &ar1_reshape->shape, &arg0->result->h->h.s );
+
+        lion_net_links_s_clear( &node->upls );
+        lion_net_links_s_push_d( &node->upls, lion_net_link_s_create() );
+        node->upls.data[ 0 ]->node = arg1;
+
+        lion_nop_a_attach( &node->nop, ( lion_nop* )ar1_reshape );
+        net_node_s_nop_solve( node, &arg1->result->h );
+
+        if( node->result->settled )
+        {
+            lion_nop_a_settle( (lion_nop*)o, node->result, &node->nop, &node->result );
+            lion_net_links_s_clear( &node->upls );
+        }
     }
 
     node->flag = false;
@@ -913,7 +957,7 @@ void lion_net_cell_s_from_sem_cell
     }
 
     lion_nop_context_s* nop_context = lion_nop_get_context();
-    bcore_mutex_s_lock( nop_context->randomizer_mutex );
+    bcore_mutex_s_lock( &nop_context->randomizer_mutex );
     ASSERT( !nop_context->randomizer_is_locked );
     nop_context->randomizer_is_locked = true;
     nop_context->randomizer_rval = 0; // rval == 0 causes randomizer to be seeded by functions using it.
@@ -937,7 +981,7 @@ void lion_net_cell_s_from_sem_cell
     lion_net_cell_s_finalize( o );
 
     nop_context->randomizer_is_locked = false;
-    bcore_mutex_s_unlock( nop_context->randomizer_mutex );
+    bcore_mutex_s_unlock( &nop_context->randomizer_mutex );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

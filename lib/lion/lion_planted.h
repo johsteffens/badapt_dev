@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-05-06T17:09:46Z
+ *  Last File Update: 2020-05-07T17:20:30Z
  *
  *  Copyright and License of this File:
  *
@@ -84,9 +84,7 @@
 #define TYPEOF_lion_nop_context_s 1954113275
 #define BETH_EXPAND_ITEM_lion_nop_context_s \
   BCORE_DECLARE_OBJECT( lion_nop_context_s ) \
-    {aware_t _;bcore_mutex_s* randomizer_mutex;bl_t randomizer_is_locked;u2_t randomizer_rval;}; \
-  static inline void lion_nop_context_s_init_x( lion_nop_context_s* o ){o->randomizer_mutex = bcore_mutex_s_create();} \
-  static inline void lion_nop_context_s_down_e( lion_nop_context_s* o ){bcore_mutex_s_discard( o->randomizer_mutex );}
+    {aware_t _;bcore_mutex_s randomizer_mutex;bl_t randomizer_is_locked;u2_t randomizer_rval;};
 #define BETH_EXPAND_GROUP_lion_nop \
   BCORE_FORWARD_OBJECT( lion_nop ); \
   BCORE_FORWARD_OBJECT( lion_nop_solve_result_s ); \
@@ -98,6 +96,7 @@
   typedef sz_t (*lion_nop_arity)( const lion_nop* o ); \
   typedef sz_t (*lion_nop_priority)( const lion_nop* o ); \
   typedef sc_t (*lion_nop_symbol)( const lion_nop* o ); \
+  typedef bl_t (*lion_nop_reserved)( const lion_nop* o ); \
   typedef lion_nop* (*lion_nop_create_op_of_arn)( const lion_nop* o, sz_t n ); \
   typedef bl_t (*lion_nop_eci)( const lion_nop* o ); \
   typedef bl_t (*lion_nop_solve)( const lion_nop* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -119,6 +118,7 @@
       lion_nop_arity arity; \
       lion_nop_priority priority; \
       lion_nop_symbol symbol; \
+      lion_nop_reserved reserved; \
       lion_nop_create_op_of_arn create_op_of_arn; \
       lion_nop_eci eci; \
       lion_nop_solve solve; \
@@ -148,6 +148,9 @@
   static inline sc_t lion_nop_a_symbol( const lion_nop* o ) { const lion_nop_s* p = lion_nop_s_get_aware( o ); assert( p->symbol ); return p->symbol( o ); } \
   static inline bl_t lion_nop_a_defines_symbol( const lion_nop* o ) { return true; } \
   static inline sc_t lion_nop_symbol__( const lion_nop* o ){return NULL;} \
+  static inline bl_t lion_nop_a_reserved( const lion_nop* o ) { const lion_nop_s* p = lion_nop_s_get_aware( o ); assert( p->reserved ); return p->reserved( o ); } \
+  static inline bl_t lion_nop_a_defines_reserved( const lion_nop* o ) { return true; } \
+  static inline bl_t lion_nop_reserved__( const lion_nop* o ){return false;} \
   static inline lion_nop* lion_nop_a_create_op_of_arn( const lion_nop* o, sz_t n ) { const lion_nop_s* p = lion_nop_s_get_aware( o ); assert( p->create_op_of_arn ); return p->create_op_of_arn( o, n ); } \
   static inline bl_t lion_nop_a_defines_create_op_of_arn( const lion_nop* o ) { return true; } \
   static inline lion_nop* lion_nop_create_op_of_arn__( const lion_nop* o, sz_t n ){return ( lion_nop_a_arity( o ) == n ) ? lion_nop_a_clone( o ) : NULL;} \
@@ -250,6 +253,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_identity_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_identity_s_arity( const lion_nop_ar1_identity_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_identity_s_reserved( const lion_nop_ar1_identity_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_identity_s_priority( const lion_nop_ar1_identity_s* o ){return 8;} \
   bl_t lion_nop_ar1_identity_s_solve( const lion_nop_ar1_identity_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
 #define TYPEOF_lion_nop_ar1_f3_s 259552180
@@ -257,6 +261,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_f3_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_f3_s_arity( const lion_nop_ar1_f3_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_f3_s_reserved( const lion_nop_ar1_f3_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_f3_s_priority( const lion_nop_ar1_f3_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_f3_s_symbol( const lion_nop_ar1_f3_s* o ){return "f3_t";} \
   bl_t lion_nop_ar1_f3_s_solve( const lion_nop_ar1_f3_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
@@ -265,6 +270,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_f2_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_f2_s_arity( const lion_nop_ar1_f2_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_f2_s_reserved( const lion_nop_ar1_f2_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_f2_s_priority( const lion_nop_ar1_f2_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_f2_s_symbol( const lion_nop_ar1_f2_s* o ){return "f2_t";} \
   bl_t lion_nop_ar1_f2_s_solve( const lion_nop_ar1_f2_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
@@ -273,6 +279,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_neg_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_neg_s_arity( const lion_nop_ar1_neg_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_neg_s_reserved( const lion_nop_ar1_neg_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_neg_s_priority( const lion_nop_ar1_neg_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_neg_s_symbol( const lion_nop_ar1_neg_s* o ){return "neg";} \
   static inline tp_t lion_nop_ar1_neg_s_type_vop_ap( const lion_nop_ar1_neg_s* o ){return TYPEOF_bhvm_vop_ar1_neg_s;} \
@@ -283,6 +290,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_floor_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_floor_s_arity( const lion_nop_ar1_floor_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_floor_s_reserved( const lion_nop_ar1_floor_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_floor_s_priority( const lion_nop_ar1_floor_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_floor_s_symbol( const lion_nop_ar1_floor_s* o ){return "floor";} \
   static inline tp_t lion_nop_ar1_floor_s_type_vop_ap( const lion_nop_ar1_floor_s* o ){return TYPEOF_bhvm_vop_ar1_floor_s;} \
@@ -292,6 +300,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_ceil_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_ceil_s_arity( const lion_nop_ar1_ceil_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_ceil_s_reserved( const lion_nop_ar1_ceil_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_ceil_s_priority( const lion_nop_ar1_ceil_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_ceil_s_symbol( const lion_nop_ar1_ceil_s* o ){return "ceil";} \
   static inline tp_t lion_nop_ar1_ceil_s_type_vop_ap( const lion_nop_ar1_ceil_s* o ){return TYPEOF_bhvm_vop_ar1_ceil_s;} \
@@ -301,6 +310,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_abs_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_abs_s_arity( const lion_nop_ar1_abs_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_abs_s_reserved( const lion_nop_ar1_abs_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_abs_s_priority( const lion_nop_ar1_abs_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_abs_s_symbol( const lion_nop_ar1_abs_s* o ){return "abs";} \
   static inline tp_t lion_nop_ar1_abs_s_type_vop_ap( const lion_nop_ar1_abs_s* o ){return TYPEOF_bhvm_vop_ar1_abs_s;} \
@@ -310,6 +320,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_exp_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_exp_s_arity( const lion_nop_ar1_exp_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_exp_s_reserved( const lion_nop_ar1_exp_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_exp_s_priority( const lion_nop_ar1_exp_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_exp_s_symbol( const lion_nop_ar1_exp_s* o ){return "exp";} \
   static inline tp_t lion_nop_ar1_exp_s_type_vop_ap( const lion_nop_ar1_exp_s* o ){return TYPEOF_bhvm_vop_ar1_exp_s;} \
@@ -319,6 +330,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_log_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_log_s_arity( const lion_nop_ar1_log_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_log_s_reserved( const lion_nop_ar1_log_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_log_s_priority( const lion_nop_ar1_log_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_log_s_symbol( const lion_nop_ar1_log_s* o ){return "log";} \
   static inline tp_t lion_nop_ar1_log_s_type_vop_ap( const lion_nop_ar1_log_s* o ){return TYPEOF_bhvm_vop_ar1_log_s;} \
@@ -328,6 +340,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_inv_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_inv_s_arity( const lion_nop_ar1_inv_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_inv_s_reserved( const lion_nop_ar1_inv_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_inv_s_priority( const lion_nop_ar1_inv_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_inv_s_symbol( const lion_nop_ar1_inv_s* o ){return "inv";} \
   static inline tp_t lion_nop_ar1_inv_s_type_vop_ap( const lion_nop_ar1_inv_s* o ){return TYPEOF_bhvm_vop_ar1_inv_s;} \
@@ -337,6 +350,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_sqr_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_sqr_s_arity( const lion_nop_ar1_sqr_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_sqr_s_reserved( const lion_nop_ar1_sqr_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_sqr_s_priority( const lion_nop_ar1_sqr_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_sqr_s_symbol( const lion_nop_ar1_sqr_s* o ){return "sqr";} \
   static inline tp_t lion_nop_ar1_sqr_s_type_vop_ap( const lion_nop_ar1_sqr_s* o ){return TYPEOF_bhvm_vop_ar1_sqr_s;} \
@@ -346,6 +360,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_srt_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_srt_s_arity( const lion_nop_ar1_srt_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_srt_s_reserved( const lion_nop_ar1_srt_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_srt_s_priority( const lion_nop_ar1_srt_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_srt_s_symbol( const lion_nop_ar1_srt_s* o ){return "srt";} \
   static inline tp_t lion_nop_ar1_srt_s_type_vop_ap( const lion_nop_ar1_srt_s* o ){return TYPEOF_bhvm_vop_ar1_srt_s;} \
@@ -355,6 +370,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_lgst_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_lgst_s_arity( const lion_nop_ar1_lgst_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_lgst_s_reserved( const lion_nop_ar1_lgst_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_lgst_s_priority( const lion_nop_ar1_lgst_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_lgst_s_symbol( const lion_nop_ar1_lgst_s* o ){return "lgst";} \
   static inline tp_t lion_nop_ar1_lgst_s_type_vop_ap( const lion_nop_ar1_lgst_s* o ){return TYPEOF_bhvm_vop_ar1_lgst_s;} \
@@ -364,6 +380,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_lgst_hard_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_lgst_hard_s_arity( const lion_nop_ar1_lgst_hard_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_lgst_hard_s_reserved( const lion_nop_ar1_lgst_hard_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_lgst_hard_s_priority( const lion_nop_ar1_lgst_hard_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_lgst_hard_s_symbol( const lion_nop_ar1_lgst_hard_s* o ){return "lgst_hard";} \
   static inline tp_t lion_nop_ar1_lgst_hard_s_type_vop_ap( const lion_nop_ar1_lgst_hard_s* o ){return TYPEOF_bhvm_vop_ar1_lgst_hard_s;} \
@@ -373,6 +390,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_lgst_leaky_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_lgst_leaky_s_arity( const lion_nop_ar1_lgst_leaky_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_lgst_leaky_s_reserved( const lion_nop_ar1_lgst_leaky_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_lgst_leaky_s_priority( const lion_nop_ar1_lgst_leaky_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_lgst_leaky_s_symbol( const lion_nop_ar1_lgst_leaky_s* o ){return "lgst_leaky";} \
   static inline tp_t lion_nop_ar1_lgst_leaky_s_type_vop_ap( const lion_nop_ar1_lgst_leaky_s* o ){return TYPEOF_bhvm_vop_ar1_lgst_leaky_s;} \
@@ -382,6 +400,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_tanh_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_tanh_s_arity( const lion_nop_ar1_tanh_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_tanh_s_reserved( const lion_nop_ar1_tanh_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_tanh_s_priority( const lion_nop_ar1_tanh_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_tanh_s_symbol( const lion_nop_ar1_tanh_s* o ){return "tanh";} \
   static inline tp_t lion_nop_ar1_tanh_s_type_vop_ap( const lion_nop_ar1_tanh_s* o ){return TYPEOF_bhvm_vop_ar1_tanh_s;} \
@@ -391,6 +410,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_tanh_hard_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_tanh_hard_s_arity( const lion_nop_ar1_tanh_hard_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_tanh_hard_s_reserved( const lion_nop_ar1_tanh_hard_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_tanh_hard_s_priority( const lion_nop_ar1_tanh_hard_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_tanh_hard_s_symbol( const lion_nop_ar1_tanh_hard_s* o ){return "tanh_hard";} \
   static inline tp_t lion_nop_ar1_tanh_hard_s_type_vop_ap( const lion_nop_ar1_tanh_hard_s* o ){return TYPEOF_bhvm_vop_ar1_tanh_hard_s;} \
@@ -400,6 +420,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_tanh_leaky_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_tanh_leaky_s_arity( const lion_nop_ar1_tanh_leaky_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_tanh_leaky_s_reserved( const lion_nop_ar1_tanh_leaky_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_tanh_leaky_s_priority( const lion_nop_ar1_tanh_leaky_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_tanh_leaky_s_symbol( const lion_nop_ar1_tanh_leaky_s* o ){return "tanh_leaky";} \
   static inline tp_t lion_nop_ar1_tanh_leaky_s_type_vop_ap( const lion_nop_ar1_tanh_leaky_s* o ){return TYPEOF_bhvm_vop_ar1_tanh_leaky_s;} \
@@ -409,6 +430,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_softplus_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_softplus_s_arity( const lion_nop_ar1_softplus_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_softplus_s_reserved( const lion_nop_ar1_softplus_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_softplus_s_priority( const lion_nop_ar1_softplus_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_softplus_s_symbol( const lion_nop_ar1_softplus_s* o ){return "softplus";} \
   static inline tp_t lion_nop_ar1_softplus_s_type_vop_ap( const lion_nop_ar1_softplus_s* o ){return TYPEOF_bhvm_vop_ar1_softplus_s;} \
@@ -418,6 +440,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_softmax_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_softmax_s_arity( const lion_nop_ar1_softmax_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_softmax_s_reserved( const lion_nop_ar1_softmax_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_softmax_s_priority( const lion_nop_ar1_softmax_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_softmax_s_symbol( const lion_nop_ar1_softmax_s* o ){return "softmax";} \
   static inline tp_t lion_nop_ar1_softmax_s_type_vop_ap( const lion_nop_ar1_softmax_s* o ){return TYPEOF_bhvm_vop_ar1_softmax_s;} \
@@ -427,6 +450,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_relu_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_relu_s_arity( const lion_nop_ar1_relu_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_relu_s_reserved( const lion_nop_ar1_relu_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_relu_s_priority( const lion_nop_ar1_relu_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_relu_s_symbol( const lion_nop_ar1_relu_s* o ){return "relu";} \
   static inline tp_t lion_nop_ar1_relu_s_type_vop_ap( const lion_nop_ar1_relu_s* o ){return TYPEOF_bhvm_vop_ar1_relu_s;} \
@@ -436,6 +460,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_relu_leaky_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_relu_leaky_s_arity( const lion_nop_ar1_relu_leaky_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_relu_leaky_s_reserved( const lion_nop_ar1_relu_leaky_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_relu_leaky_s_priority( const lion_nop_ar1_relu_leaky_s* o ){return 8;} \
   static inline sc_t lion_nop_ar1_relu_leaky_s_symbol( const lion_nop_ar1_relu_leaky_s* o ){return "relu_leaky";} \
   static inline tp_t lion_nop_ar1_relu_leaky_s_type_vop_ap( const lion_nop_ar1_relu_leaky_s* o ){return TYPEOF_bhvm_vop_ar1_relu_leaky_s;} \
@@ -445,6 +470,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_output_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_output_s_arity( const lion_nop_ar1_output_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_output_s_reserved( const lion_nop_ar1_output_s* o ){return true;} \
   bl_t lion_nop_ar1_output_s_solve( const lion_nop_ar1_output_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
   sz_t lion_nop_ar1_output_s_mcode_push_dp_holor( const lion_nop_ar1_output_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
 #define TYPEOF_lion_nop_ar1_adaptive_s 1680611337
@@ -452,6 +478,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_adaptive_s ) \
     {aware_t _;tp_t name;}; \
   static inline sz_t lion_nop_ar1_adaptive_s_arity( const lion_nop_ar1_adaptive_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_adaptive_s_reserved( const lion_nop_ar1_adaptive_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_adaptive_s_priority( const lion_nop_ar1_adaptive_s* o ){return 8;} \
   static inline bl_t lion_nop_ar1_adaptive_s_is_adaptive( const lion_nop_ar1_adaptive_s* o ){return true;} \
   bl_t lion_nop_ar1_adaptive_s_solve( const lion_nop_ar1_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -461,14 +488,25 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_dimof_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_dimof_s_arity( const lion_nop_ar1_dimof_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_dimof_s_reserved( const lion_nop_ar1_dimof_s* o ){return true;} \
   static inline sc_t lion_nop_ar1_dimof_s_symbol( const lion_nop_ar1_dimof_s* o ){return "dimof";} \
   static inline sz_t lion_nop_ar1_dimof_s_priority( const lion_nop_ar1_dimof_s* o ){return 8;} \
   bl_t lion_nop_ar1_dimof_s_solve( const lion_nop_ar1_dimof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
+#define TYPEOF_lion_nop_ar1_volof_s 1383010665
+#define BETH_EXPAND_ITEM_lion_nop_ar1_volof_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_volof_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar1_volof_s_arity( const lion_nop_ar1_volof_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_volof_s_reserved( const lion_nop_ar1_volof_s* o ){return true;} \
+  static inline sc_t lion_nop_ar1_volof_s_symbol( const lion_nop_ar1_volof_s* o ){return "volof";} \
+  static inline sz_t lion_nop_ar1_volof_s_priority( const lion_nop_ar1_volof_s* o ){return 8;} \
+  bl_t lion_nop_ar1_volof_s_solve( const lion_nop_ar1_volof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
 #define TYPEOF_lion_nop_ar1_constof_s 2972022227
 #define BETH_EXPAND_ITEM_lion_nop_ar1_constof_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar1_constof_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_constof_s_arity( const lion_nop_ar1_constof_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_constof_s_reserved( const lion_nop_ar1_constof_s* o ){return true;} \
   static inline sc_t lion_nop_ar1_constof_s_symbol( const lion_nop_ar1_constof_s* o ){return "constof";} \
   static inline sz_t lion_nop_ar1_constof_s_priority( const lion_nop_ar1_constof_s* o ){return 8;} \
   bl_t lion_nop_ar1_constof_s_solve( const lion_nop_ar1_constof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
@@ -477,6 +515,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_zeroof_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_zeroof_s_arity( const lion_nop_ar1_zeroof_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_zeroof_s_reserved( const lion_nop_ar1_zeroof_s* o ){return true;} \
   static inline sc_t lion_nop_ar1_zeroof_s_symbol( const lion_nop_ar1_zeroof_s* o ){return "zeroof";} \
   static inline sz_t lion_nop_ar1_zeroof_s_priority( const lion_nop_ar1_zeroof_s* o ){return 8;} \
   bl_t lion_nop_ar1_zeroof_s_solve( const lion_nop_ar1_zeroof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
@@ -485,6 +524,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_shapeof_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_shapeof_s_arity( const lion_nop_ar1_shapeof_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_shapeof_s_reserved( const lion_nop_ar1_shapeof_s* o ){return true;} \
   static inline sc_t lion_nop_ar1_shapeof_s_symbol( const lion_nop_ar1_shapeof_s* o ){return "shapeof";} \
   static inline sz_t lion_nop_ar1_shapeof_s_priority( const lion_nop_ar1_shapeof_s* o ){return 8;} \
   bl_t lion_nop_ar1_shapeof_s_solve( const lion_nop_ar1_shapeof_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
@@ -493,6 +533,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_rand_s ) \
     {aware_t _;u2_t rseed;}; \
   static inline sz_t lion_nop_ar1_rand_s_arity( const lion_nop_ar1_rand_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_rand_s_reserved( const lion_nop_ar1_rand_s* o ){return true;} \
   static inline sc_t lion_nop_ar1_rand_s_symbol( const lion_nop_ar1_rand_s* o ){return "rand";} \
   static inline sz_t lion_nop_ar1_rand_s_priority( const lion_nop_ar1_rand_s* o ){return 8;} \
   bl_t lion_nop_ar1_rand_s_solve( const lion_nop_ar1_rand_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -502,11 +543,22 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar1_cast_htp_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar1_cast_htp_s_arity( const lion_nop_ar1_cast_htp_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_cast_htp_s_reserved( const lion_nop_ar1_cast_htp_s* o ){return true;} \
   static inline sz_t lion_nop_ar1_cast_htp_s_priority( const lion_nop_ar1_cast_htp_s* o ){return 12;} \
   static inline sc_t lion_nop_ar1_cast_htp_s_symbol( const lion_nop_ar1_cast_htp_s* o ){return "htp";} \
   bl_t lion_nop_ar1_cast_htp_s_solve( const lion_nop_ar1_cast_htp_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
   sz_t lion_nop_ar1_cast_htp_s_mcode_push_ap_holor( const lion_nop_ar1_cast_htp_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
   sz_t lion_nop_ar1_cast_htp_s_mcode_push_dp_holor( const lion_nop_ar1_cast_htp_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
+#define TYPEOF_lion_nop_ar1_reshape_s 3077918347
+#define BETH_EXPAND_ITEM_lion_nop_ar1_reshape_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar1_reshape_s ) \
+    {aware_t _;bhvm_shape_s shape;}; \
+  static inline sz_t lion_nop_ar1_reshape_s_arity( const lion_nop_ar1_reshape_s* o ){return 1;} \
+  static inline bl_t lion_nop_ar1_reshape_s_reserved( const lion_nop_ar1_reshape_s* o ){return true;} \
+  static inline sz_t lion_nop_ar1_reshape_s_priority( const lion_nop_ar1_reshape_s* o ){return 8;} \
+  bl_t lion_nop_ar1_reshape_s_solve( const lion_nop_ar1_reshape_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  sz_t lion_nop_ar1_reshape_s_mcode_push_ap_holor( const lion_nop_ar1_reshape_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
+  sz_t lion_nop_ar1_reshape_s_mcode_push_dp_holor( const lion_nop_ar1_reshape_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
 #define BETH_EXPAND_GROUP_lion_nop_ar1 \
   BCORE_FORWARD_OBJECT( lion_nop_ar1 ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_identity_s ); \
@@ -534,11 +586,13 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar1_output_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_adaptive_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_dimof_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_volof_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_constof_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_zeroof_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_shapeof_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_rand_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar1_cast_htp_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar1_reshape_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar1_identity_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_f3_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_f2_s \
@@ -564,11 +618,13 @@
   BETH_EXPAND_ITEM_lion_nop_ar1_output_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_adaptive_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_dimof_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_volof_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_constof_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_zeroof_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_shapeof_s \
   BETH_EXPAND_ITEM_lion_nop_ar1_rand_s \
-  BETH_EXPAND_ITEM_lion_nop_ar1_cast_htp_s
+  BETH_EXPAND_ITEM_lion_nop_ar1_cast_htp_s \
+  BETH_EXPAND_ITEM_lion_nop_ar1_reshape_s
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_nop_ar2
@@ -580,6 +636,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_add_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_add_s_arity( const lion_nop_ar2_add_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_add_s_reserved( const lion_nop_ar2_add_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_add_s_priority( const lion_nop_ar2_add_s* o ){return 8;} \
   static inline bl_t lion_nop_ar2_add_s_eci( const lion_nop_ar2_add_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_add_s_symbol( const lion_nop_ar2_add_s* o ){return "+";} \
@@ -591,6 +648,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_sub_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_sub_s_arity( const lion_nop_ar2_sub_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_sub_s_reserved( const lion_nop_ar2_sub_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_sub_s_priority( const lion_nop_ar2_sub_s* o ){return 8;} \
   static inline bl_t lion_nop_ar2_sub_s_eci( const lion_nop_ar2_sub_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_sub_s_symbol( const lion_nop_ar2_sub_s* o ){return "-";} \
@@ -603,6 +661,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_mul_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_mul_s_arity( const lion_nop_ar2_mul_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_mul_s_reserved( const lion_nop_ar2_mul_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_mul_s_priority( const lion_nop_ar2_mul_s* o ){return 10;} \
   static inline bl_t lion_nop_ar2_mul_s_eci( const lion_nop_ar2_mul_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_mul_s_symbol( const lion_nop_ar2_mul_s* o ){return "*";} \
@@ -614,6 +673,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_div_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_div_s_arity( const lion_nop_ar2_div_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_div_s_reserved( const lion_nop_ar2_div_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_div_s_priority( const lion_nop_ar2_div_s* o ){return 10;} \
   static inline bl_t lion_nop_ar2_div_s_eci( const lion_nop_ar2_div_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_div_s_symbol( const lion_nop_ar2_div_s* o ){return "/";} \
@@ -625,6 +685,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_pow_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_pow_s_arity( const lion_nop_ar2_pow_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_pow_s_reserved( const lion_nop_ar2_pow_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_pow_s_priority( const lion_nop_ar2_pow_s* o ){return 12;} \
   static inline bl_t lion_nop_ar2_pow_s_eci( const lion_nop_ar2_pow_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_pow_s_symbol( const lion_nop_ar2_pow_s* o ){return "^";} \
@@ -636,6 +697,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_bmul_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_bmul_s_arity( const lion_nop_ar2_bmul_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_bmul_s_reserved( const lion_nop_ar2_bmul_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_bmul_s_priority( const lion_nop_ar2_bmul_s* o ){return 10;} \
   static inline sc_t lion_nop_ar2_bmul_s_symbol( const lion_nop_ar2_bmul_s* o ){return "**";} \
   bl_t lion_nop_ar2_bmul_s_solve( const lion_nop_ar2_bmul_s* o, lion_holor_s** a, lion_nop_solve_result_s* result );
@@ -644,6 +706,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_equal_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_equal_s_arity( const lion_nop_ar2_logic_equal_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_equal_s_reserved( const lion_nop_ar2_logic_equal_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_equal_s_priority( const lion_nop_ar2_logic_equal_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_equal_s_eci( const lion_nop_ar2_logic_equal_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_equal_s_symbol( const lion_nop_ar2_logic_equal_s* o ){return "==";} \
@@ -654,6 +717,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_unequal_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_unequal_s_arity( const lion_nop_ar2_logic_unequal_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_unequal_s_reserved( const lion_nop_ar2_logic_unequal_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_unequal_s_priority( const lion_nop_ar2_logic_unequal_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_unequal_s_eci( const lion_nop_ar2_logic_unequal_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_unequal_s_symbol( const lion_nop_ar2_logic_unequal_s* o ){return "!=";} \
@@ -664,6 +728,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_larger_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_larger_s_arity( const lion_nop_ar2_logic_larger_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_larger_s_reserved( const lion_nop_ar2_logic_larger_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_larger_s_priority( const lion_nop_ar2_logic_larger_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_larger_s_eci( const lion_nop_ar2_logic_larger_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_larger_s_symbol( const lion_nop_ar2_logic_larger_s* o ){return ">";} \
@@ -674,6 +739,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_smaller_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_smaller_s_arity( const lion_nop_ar2_logic_smaller_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_smaller_s_reserved( const lion_nop_ar2_logic_smaller_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_smaller_s_priority( const lion_nop_ar2_logic_smaller_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_smaller_s_eci( const lion_nop_ar2_logic_smaller_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_smaller_s_symbol( const lion_nop_ar2_logic_smaller_s* o ){return "<";} \
@@ -684,6 +750,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_larger_equal_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_larger_equal_s_arity( const lion_nop_ar2_logic_larger_equal_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_larger_equal_s_reserved( const lion_nop_ar2_logic_larger_equal_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_larger_equal_s_priority( const lion_nop_ar2_logic_larger_equal_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_larger_equal_s_eci( const lion_nop_ar2_logic_larger_equal_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_larger_equal_s_symbol( const lion_nop_ar2_logic_larger_equal_s* o ){return ">=";} \
@@ -694,6 +761,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_smaller_equal_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_smaller_equal_s_arity( const lion_nop_ar2_logic_smaller_equal_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_smaller_equal_s_reserved( const lion_nop_ar2_logic_smaller_equal_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_smaller_equal_s_priority( const lion_nop_ar2_logic_smaller_equal_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_smaller_equal_s_eci( const lion_nop_ar2_logic_smaller_equal_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_smaller_equal_s_symbol( const lion_nop_ar2_logic_smaller_equal_s* o ){return "<=";} \
@@ -704,6 +772,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_and_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_and_s_arity( const lion_nop_ar2_logic_and_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_and_s_reserved( const lion_nop_ar2_logic_and_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_and_s_priority( const lion_nop_ar2_logic_and_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_and_s_eci( const lion_nop_ar2_logic_and_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_and_s_symbol( const lion_nop_ar2_logic_and_s* o ){return "&&";} \
@@ -714,6 +783,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_logic_or_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_logic_or_s_arity( const lion_nop_ar2_logic_or_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_logic_or_s_reserved( const lion_nop_ar2_logic_or_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_logic_or_s_priority( const lion_nop_ar2_logic_or_s* o ){return 6;} \
   static inline bl_t lion_nop_ar2_logic_or_s_eci( const lion_nop_ar2_logic_or_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_logic_or_s_symbol( const lion_nop_ar2_logic_or_s* o ){return "||";} \
@@ -724,6 +794,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_cat_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_cat_s_arity( const lion_nop_ar2_cat_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_cat_s_reserved( const lion_nop_ar2_cat_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_cat_s_priority( const lion_nop_ar2_cat_s* o ){return 6;} \
   static inline sc_t lion_nop_ar2_cat_s_symbol( const lion_nop_ar2_cat_s* o ){return ":";} \
   bl_t lion_nop_ar2_cat_s_solve( const lion_nop_ar2_cat_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -735,6 +806,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_ccat_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_ccat_s_arity( const lion_nop_ar2_ccat_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_ccat_s_reserved( const lion_nop_ar2_ccat_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_ccat_s_priority( const lion_nop_ar2_ccat_s* o ){return 8;} \
   static inline sc_t lion_nop_ar2_ccat_s_symbol( const lion_nop_ar2_ccat_s* o ){return "::";} \
   bl_t lion_nop_ar2_ccat_s_solve( const lion_nop_ar2_ccat_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -746,6 +818,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_order_inc_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_order_inc_s_arity( const lion_nop_ar2_order_inc_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_order_inc_s_reserved( const lion_nop_ar2_order_inc_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_order_inc_s_priority( const lion_nop_ar2_order_inc_s* o ){return 21;} \
   static inline sc_t lion_nop_ar2_order_inc_s_symbol( const lion_nop_ar2_order_inc_s* o ){return "[";} \
   bl_t lion_nop_ar2_order_inc_s_solve( const lion_nop_ar2_order_inc_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -757,6 +830,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_order_dec_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_order_dec_s_arity( const lion_nop_ar2_order_dec_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_order_dec_s_reserved( const lion_nop_ar2_order_dec_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_order_dec_s_priority( const lion_nop_ar2_order_dec_s* o ){return 20;} \
   static inline sc_t lion_nop_ar2_order_dec_s_symbol( const lion_nop_ar2_order_dec_s* o ){return "]";} \
   bl_t lion_nop_ar2_order_dec_s_solve( const lion_nop_ar2_order_dec_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -767,6 +841,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_cyclic_s ) \
     {aware_t _;tp_t name;}; \
   static inline sz_t lion_nop_ar2_cyclic_s_arity( const lion_nop_ar2_cyclic_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_cyclic_s_reserved( const lion_nop_ar2_cyclic_s* o ){return true;} \
   static inline sz_t lion_nop_ar2_cyclic_s_priority( const lion_nop_ar2_cyclic_s* o ){return 8;} \
   static inline bl_t lion_nop_ar2_cyclic_s_is_cyclic( const lion_nop_ar2_cyclic_s* o ){return true;} \
   bl_t lion_nop_ar2_cyclic_s_solve( const lion_nop_ar2_cyclic_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
@@ -779,10 +854,21 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar2_rands_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar2_rands_s_arity( const lion_nop_ar2_rands_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_rands_s_reserved( const lion_nop_ar2_rands_s* o ){return true;} \
   static inline sc_t lion_nop_ar2_rands_s_symbol( const lion_nop_ar2_rands_s* o ){return "rands";} \
   static inline sz_t lion_nop_ar2_rands_s_priority( const lion_nop_ar2_rands_s* o ){return 8;} \
   bl_t lion_nop_ar2_rands_s_solve( const lion_nop_ar2_rands_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
   void lion_nop_ar2_rands_s_settle( const lion_nop_ar2_rands_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result );
+#define TYPEOF_lion_nop_ar2_reshape_s 4210154574
+#define BETH_EXPAND_ITEM_lion_nop_ar2_reshape_s \
+  BCORE_DECLARE_OBJECT( lion_nop_ar2_reshape_s ) \
+    {aware_t _;}; \
+  static inline sz_t lion_nop_ar2_reshape_s_arity( const lion_nop_ar2_reshape_s* o ){return 2;} \
+  static inline bl_t lion_nop_ar2_reshape_s_reserved( const lion_nop_ar2_reshape_s* o ){return true;} \
+  static inline sc_t lion_nop_ar2_reshape_s_symbol( const lion_nop_ar2_reshape_s* o ){return "reshape";} \
+  static inline sz_t lion_nop_ar2_reshape_s_priority( const lion_nop_ar2_reshape_s* o ){return 8;} \
+  bl_t lion_nop_ar2_reshape_s_solve( const lion_nop_ar2_reshape_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
+  void lion_nop_ar2_reshape_s_solve_node( lion_nop_ar2_reshape_s* o, lion_net_node_s* node, lion_net_node_adl_s* deferred );
 #define BETH_EXPAND_GROUP_lion_nop_ar2 \
   BCORE_FORWARD_OBJECT( lion_nop_ar2 ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_add_s ); \
@@ -805,6 +891,7 @@
   BCORE_FORWARD_OBJECT( lion_nop_ar2_order_dec_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_cyclic_s ); \
   BCORE_FORWARD_OBJECT( lion_nop_ar2_rands_s ); \
+  BCORE_FORWARD_OBJECT( lion_nop_ar2_reshape_s ); \
   BETH_EXPAND_ITEM_lion_nop_ar2_add_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_sub_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_mul_s \
@@ -824,7 +911,8 @@
   BETH_EXPAND_ITEM_lion_nop_ar2_order_inc_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_order_dec_s \
   BETH_EXPAND_ITEM_lion_nop_ar2_cyclic_s \
-  BETH_EXPAND_ITEM_lion_nop_ar2_rands_s
+  BETH_EXPAND_ITEM_lion_nop_ar2_rands_s \
+  BETH_EXPAND_ITEM_lion_nop_ar2_reshape_s
 
 //----------------------------------------------------------------------------------------------------------------------
 // group: lion_nop_ar3
@@ -836,6 +924,7 @@
   BCORE_DECLARE_OBJECT( lion_nop_ar3_iff_s ) \
     {aware_t _;}; \
   static inline sz_t lion_nop_ar3_iff_s_arity( const lion_nop_ar3_iff_s* o ){return 3;} \
+  static inline bl_t lion_nop_ar3_iff_s_reserved( const lion_nop_ar3_iff_s* o ){return true;} \
   static inline sz_t lion_nop_ar3_iff_s_priority( const lion_nop_ar3_iff_s* o ){return 4;} \
   static inline bl_t lion_nop_ar3_iff_s_eci( const lion_nop_ar3_iff_s* o ){return true;} \
   static inline sc_t lion_nop_ar3_iff_s_symbol( const lion_nop_ar3_iff_s* o ){return "iff";} \

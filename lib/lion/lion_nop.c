@@ -287,6 +287,98 @@ sz_t lion_nop_ar1_cast_htp_s_mcode_push_dp_holor
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+// lion_nop_ar1_reshape_s
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bl_t lion_nop_ar1_reshape_s_solve( const lion_nop_ar1_reshape_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    if( a[0] )
+    {
+        lion_holor_s_attach( &result->h, lion_holor_s_create() );
+
+        bhvm_holor_s* ha = &a[0]->h;
+        bhvm_holor_s* hy = &result->h->h;
+        if( bhvm_shape_s_get_volume( &o->shape ) !=  bhvm_shape_s_get_volume( &ha->s ) )
+        {
+            st_s_attach( &result->msg, st_s_create() );
+            st_s_push_fa( result->msg, "Reshaping from volume #<sz_t> to volume #<sz_t>.", bhvm_shape_s_get_volume( &ha->s ), bhvm_shape_s_get_volume( &o->shape ) );
+            return false;
+        }
+
+        bhvm_shape_s_copy( &hy->s, &o->shape );
+        bhvm_value_s_fork( &hy->v, &ha->v );
+
+        lion_hmeta_s_copy( &result->h->m, &a[0]->m );
+        result->h->m.htp = false; // htp flag is being reset
+    }
+    result->settled = result->h && !result->h->m.active;
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+sz_t lion_nop_ar1_reshape_s_mcode_push_ap_holor
+(
+    const lion_nop_ar1_reshape_s* o,
+    const lion_nop_solve_result_s* result,
+    const bhvm_vop_arr_ci_s* arr_ci,
+    bhvm_mcode_frame_s* mcf
+)
+{
+    BLM_INIT();
+    bhvm_holor_s* h = &result->h->h;
+    lion_hmeta_s* m = &result->h->m;
+    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+    bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
+    bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'y', idx );
+
+    bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s_create();
+    vop_reshape->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'a' );
+    vop_reshape->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'y' );
+    bhvm_shape_s_copy( &vop_reshape->shape, &o->shape );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup, ( bhvm_vop* )vop_reshape );
+    bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap_shelve, ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create(), arr_ci_l );
+    BLM_RETURNV( sz_t, idx );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+sz_t lion_nop_ar1_reshape_s_mcode_push_dp_holor
+(
+    const lion_nop_ar1_reshape_s* o,
+    const lion_nop_solve_result_s* result,
+    const bhvm_vop_arr_ci_s* arr_ci,
+    bhvm_mcode_frame_s* mcf
+)
+{
+    BLM_INIT();
+
+    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
+    lion_hmeta_s* m = &result->h->m;
+    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+    bhvm_vop_arr_ci_s* arr_ci_l = BLM_CLONE( bhvm_vop_arr_ci_s, arr_ci );
+    bhvm_vop_arr_ci_s_push_ci( arr_ci_l, 'z', idx );
+
+    bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s_create();
+    vop_reshape->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'f' );
+    vop_reshape->i.v[ 1 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+    ASSERT( vop_reshape->i.v[ 0 ] >= 0 );
+    ASSERT( vop_reshape->i.v[ 1 ] >= 0 );
+    bhvm_shape_s_copy( &vop_reshape->shape, &o->shape );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup, ( bhvm_vop* )vop_reshape );
+
+    bhvm_vop_ar0_vacate_s* vacate = bhvm_vop_ar0_vacate_s_create();
+    vacate->i.v[ 0 ] = bhvm_vop_arr_ci_s_i_of_c( arr_ci_l, 'z' );
+    ASSERT( vacate->i.v[ 0 ] >= 0 );
+    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, ( bhvm_vop* )vacate );
+
+    BLM_RETURNV( sz_t, idx );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
 // lion_nop_ar2_mul_s
 
 // ---------------------------------------------------------------------------------------------------------------------
