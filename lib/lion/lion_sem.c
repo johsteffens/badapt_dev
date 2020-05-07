@@ -81,6 +81,7 @@ void lion_sem_context_setup()
     {
         lion_nop* nop = lion_nop_t_create( arr_tp->data[ i ] );
         sc_t symbol   = lion_nop_a_symbol( nop );
+
         // bcore_msg_fa( "#<sc_t>\n", symbol );
         if( symbol )
         {
@@ -93,6 +94,8 @@ void lion_sem_context_setup()
             }
             lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d( context_g->cell, nop );
             cell->name = typeof( symbol );
+
+            if( lion_nop_a_reserved( nop ) ) bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( symbol ) );
         }
         else
         {
@@ -107,14 +110,8 @@ void lion_sem_context_setup()
 
     /// register control types
     bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "cell" ) );
-//    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "if" ) );
-//    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "then" ) );
-//    bcore_hmap_tp_s_set( &context_g->control_types, lion_entypeof( "else" ) );
 
     /// register reserved keywords
-//    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "if"       ) );
-//    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "then"     ) );
-//    bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "else"     ) );
     bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "cell"     ) );
     bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "cyclic"   ) );
     bcore_hmap_tp_s_set( &context_g->reserved_names, lion_entypeof( "adaptive" ) );
@@ -593,19 +590,12 @@ lion_sem_cell_s* lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( lion_sem
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// v can be NULL pushing an undetermined scalar
-lion_sem_cell_s* lion_sem_cell_s_push_cell_scalar( lion_sem_cell_s* o, f3_t* v )
+lion_sem_cell_s* lion_sem_cell_s_push_cell_scalar( lion_sem_cell_s* o, tp_t type, f3_t* v )
 {
     lion_nop_ar0_literal_s* literal = lion_nop_ar0_literal_s_create();
     literal->h = lion_holor_s_create();
-    if( v )
-    {
-        bhvm_holor_s_set_scalar_f3( &literal->h->h, *v );
-        literal->h->m.active = false;
-    }
-    else
-    {
-        bhvm_holor_s_set_scalar_pf( &literal->h->h, TYPEOF_f3_t, NULL );
-    }
+    bhvm_holor_s_set_type_scalar_pf( &literal->h->h, type, TYPEOF_f3_t, v );
+    if( v ) literal->h->m.active = false;
     return lion_sem_cell_s_push_cell_nop_d_reset_name( o, ( lion_nop* )literal );
 }
 
@@ -1106,10 +1096,6 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
     {
         bl_t identifier = false;
 
-        // immediately terminating identifiers (not being removed from stream)
-//        if( bcore_source_a_parse_bl_fa( source, " #=?'then'" ) ) break;
-//        if( bcore_source_a_parse_bl_fa( source, " #=?'else'" ) ) break;
-
         // identifier
         if( stack_of_type( stack, 1, TYPEOF_st_s ) )
         {
@@ -1134,16 +1120,6 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                     lion_sem_cell_s_parse( cell, source );
                     stack_push( stack, cell );
                 }
-//                else if( tp_name == TYPEOF_if )
-//                {
-//                    lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( lion_nop* )lion_nop_ar3_branch_s_create(), source );
-//                    cell->encs.data[ 0 ]->up = lion_sem_cell_s_evaluate_link( o, source );
-//                    bcore_source_a_parse_fa( source, " #skip';' then" );
-//                    cell->encs.data[ 1 ]->up = lion_sem_cell_s_evaluate_link( o, source );
-//                    bcore_source_a_parse_fa( source, " #skip';' else" );
-//                    cell->encs.data[ 2 ]->up = lion_sem_cell_s_evaluate_link( o, source );
-//                    stack_push( stack, cell->excs.data[ 0 ] );
-//                }
                 else
                 {
                     bcore_source_a_parse_err_fa( source, "Unexpected keyword '#<sc_t>'. Did you miss ';' after previous statement?", name->sc );
@@ -1220,8 +1196,11 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
         else if( bcore_source_a_parse_bl_fa( source, " #?([0]>='0'&&[0]<='9')" ) )
         {
             f3_t val = 0;
+            tp_t type = TYPEOF_f3_t;
             bcore_source_a_parse_fa( source, " #<f3_t*>", &val );
-            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_scalar( o, &val );
+            if(      bcore_source_a_parse_bl_fa( source, "#?'f2'" ) ) type = TYPEOF_f2_t;
+            else if( bcore_source_a_parse_bl_fa( source, "#?'f3'" ) ) type = TYPEOF_f3_t;
+            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_scalar( o, type, &val );
             bcore_source_point_s_set( &cell->source_point, source );
             stack_push( stack, cell->excs.data[ 0 ] );
         }
@@ -1229,7 +1208,10 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // undetermined scalar
         else if( bcore_source_a_parse_bl_fa( source, " #?'#'" ) )
         {
-            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_scalar( o, NULL );
+            tp_t type = TYPEOF_f3_t;
+            if(      bcore_source_a_parse_bl_fa( source, "#?'f2'" ) ) type = TYPEOF_f2_t;
+            else if( bcore_source_a_parse_bl_fa( source, "#?'f3'" ) ) type = TYPEOF_f3_t;
+            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_scalar( o, type, NULL );
             bcore_source_point_s_set( &cell->source_point, source );
             stack_push( stack, cell->excs.data[ 0 ] );
         }

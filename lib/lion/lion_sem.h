@@ -181,7 +181,13 @@ TODO:
  *     - (done) Store the cyclic update to a hidden holor associated with the cyclic node
  *     - (done) After regular axon pass, copy all hidden cyclic holors to regular cyclic axons
  *     - (done) Disallow explicit use of a cyclic variable after it has been updated. (This prevents surprising syntax)
- *     - Add list of reserved keywords (not usable for variables)
+ *     - (done) Add list of reserved keywords (not usable for variables)
+ *     - (done) specify type by appending f2 or f3 to literal.
+ *     - (done) implement operator volof  (returning the volume as constant scalar)
+ *     - add cast operator 'reshape( new_shape, holor )' converting the shape of a holor
+ *     - rename lgst -> sig
+ *     - expand matrix multiplication to involve higher order holors using an eci-like-approch (elements being 2x2 matrices)
+ *     - implement ar3-convolution operator
  */
 
 /**********************************************************************************************************************/
@@ -219,9 +225,6 @@ stamp :context = aware bcore_inst
 
 // language control types
 name cell;
-//name if;
-//name then;
-//name else;
 
 signature   sz_t get_arity( const );
 signature   sz_t get_priority( const );
