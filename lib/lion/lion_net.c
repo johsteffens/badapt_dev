@@ -444,7 +444,7 @@ void lion_net_node_s_skip_identities( lion_net_node_s* o )
     BFOR_EACH( i, &o->upls )
     {
         lion_net_node_s* node = o->upls.data[ i ]->node;
-        while( node && node->nop && node->nop->_ == TYPEOF_lion_nop_ar1_identity_s ) node = node->upls.data[ i ]->node;
+        while( node && node->nop && node->nop->_ == TYPEOF_lion_nop_ar1_identity_s ) node = node->upls.data[ 0 ]->node;
         ASSERT( node );
         o->upls.data[ i ]->node = node;
         lion_net_node_s_skip_identities( node );
@@ -705,7 +705,11 @@ static void net_cell_s_from_sem_recursive
     tp_t name = link->name;
     if( log ) bcore_sink_a_push_fa( log, "Tracing link '#<sc_t>' at depth #<sz_t>\n", lion_ifnameof( name ), depth );
     link = lion_sem_link_s_trace_to_cell_membrane( link );
-    if( !link ) ERR_fa( "Backtracing '#<sc_t>':\nTrace ends in open link.", lion_ifnameof( name ) );
+    if( !link )
+    {
+        ERR_fa( "Backtracing '#<sc_t>':\nTrace terminates in an open link.", lion_ifnameof( name ) );
+    }
+
     lion_sem_cell_s* cell = link->cell;
     lion_sem_link_s* next_link = NULL;
 
@@ -855,7 +859,16 @@ static void net_cell_s_from_sem_recursive
             next_link = lion_sem_cell_s_get_enc_by_dn( ctr_node->cell, link );
             if( !next_link )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nTrace ends in open link.", lion_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa
+                (
+                    &cell->source_point,
+                    "Backtracing '#<sc_t>': Trace terminates in an open link.\n"
+                    "Possible Reasons:\n"
+                    "   * Dangling input channel.\n"
+                    "   * Cyclic node without update.\n"
+                    ,
+                    lion_ifnameof( name )
+                );
             }
         }
     }

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-05-07T21:41:18Z
+ *  Last File Update: 2020-05-09T12:33:58Z
  *
  *  Copyright and License of this File:
  *
@@ -591,30 +591,6 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_adaptive_s )
     "func lion_nop:solve;"
     "func lion_nop:settle;"
 "}";
-
-bl_t lion_nop_ar1_adaptive_s_solve( const lion_nop_ar1_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
-{
-    lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
-    if( result->h )
-    {
-        result->h->m.active = true;
-        result->settled = true;
-    }
-    result->reducible = false; // keep subsequent graph intact
-    result->codable = false;
-    return true;
-}
-
-void lion_nop_ar1_adaptive_s_settle( const lion_nop_ar1_adaptive_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result )
-{
-    lion_nop_ar0_adaptive_s* adaptive = lion_nop_ar0_adaptive_s_create();
-    adaptive->h = lion_holor_s_clone( result->h );
-    adaptive->h->m.name = o->name;
-    lion_nop_solve_result_s* r = lion_nop_solve_result_s_create();
-    r->h = bcore_fork( adaptive->h );
-    lion_nop_solve_result_s_attach( out_result, r );
-    lion_nop_a_attach( out_nop, (lion_nop*)adaptive );
-}
 
 BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_dimof_s )
 "aware lion_nop_ar1"
@@ -1946,7 +1922,7 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
         case TYPEOF_init1:
         {
             // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1113227816 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1024475285 ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h

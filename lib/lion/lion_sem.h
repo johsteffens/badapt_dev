@@ -97,15 +97,15 @@
 
 TODO:
    - (done) allow explicit output channel selection only on cells with no free input channels
-   - virtual machine: overhaul differentiating between micro- and macrocode
+   - (solved differently) virtual machine: overhaul differentiating between micro- and macrocode
    -                  add macro operations operating on the frame
    -                  add macro operations controlling program flow
-   - cyclic: implement unrolled inference and bp_grad
-   - allow elementwise operators mix with scalars (like mul)
+   - (done) cyclic: implement unrolled inference and bp_grad
+   - (done via eci) allow elementwise operators mix with scalars (like mul)
    - look for generally accepted offline problems for neural networks
-   - parameterize adaptive (e.g. adaptive( min, max, additional cost ))
-   - index operator should be a cast-operator
-   - add a cost operator or cost expression to generate specific costs like weight energy (producing weight decay)
+   - (solved differently via adaptor) parameterize adaptive (e.g. adaptive( min, max, additional cost ))
+   - (done) index operator should be a cast-operator
+   - (solved differently via adaptor) add a cost operator or cost expression to generate specific costs like weight energy (producing weight decay)
 */
 
 /**
@@ -185,9 +185,17 @@ TODO:
  *     - (done) specify type by appending f2 or f3 to literal.
  *     - (done) implement operator volof  (returning the volume as constant scalar)
  *     - (done) add cast operator 'reshape( new_shape, holor )' converting the shape of a holor
- *     - rename sigm -> sigm
- *     - expand matrix multiplication to involve higher order holors using an eci-like-approch (elements being 2x2 matrices)
+ *     - (done) rename lgst -> sigm
+ *     - expand matrix multiplication to involve higher order holors using an eci-like-approach (elements being 2x2 matrices)
  *     - implement ar3-convolution operator
+ *     - introduce a dedicated randomizer in root:
+ *            can be seeded and reset (concurrently)
+ *            is accessible via nop_context
+ *     - bhpt:
+ *            random seed for network creation is part of builder and can (optionally) be changed via builder feature
+ *            tutor, frame: frame should assume builder is part of tutor
+ *     - create a dedicated compiler; the compiler holds the context for a given build. (No more system wide global context)
+ *     - cells and nodes (via fork) reference the compiler's context instead of using the system global context
  */
 
 /**********************************************************************************************************************/

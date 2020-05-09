@@ -597,34 +597,10 @@ group :ar1 = retrievable
     stamp :adaptive =
     {
         tp_t name;
-
         func :: :priority    = { return 8; };
         func :: :is_adaptive = { return true; };
-
-        func :: :solve =
-        {
-            lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
-            if( result->h )
-            {
-                result->h->m.active = true;
-                result->settled = true;
-            }
-            result->reducible = false; // keep subsequent graph intact
-            result->codable = false;
-            return true;
-        };
-
-        func :: :settle =
-        {
-            ::ar0_adaptive_s* adaptive = ::ar0_adaptive_s_create();
-            adaptive->h = lion_holor_s_clone( result->h );
-            adaptive->h->m.name = o->name;
-            ::solve_result_s* r = ::solve_result_s_create();
-            r->h = bcore_fork( adaptive->h );
-            ::solve_result_s_attach( out_result, r );
-            ::a_attach( out_nop, (::*)adaptive );
-        };
-
+        func :: :solve;
+        func :: :settle;
     };
 
     /// special operators ------------------------------------------------------

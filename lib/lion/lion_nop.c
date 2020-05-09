@@ -122,6 +122,51 @@ bl_t lion_nop_solve__( const lion_nop* o, lion_holor_s** a, lion_nop_solve_resul
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+// lion_nop_ar1_adaptive_s
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bl_t lion_nop_ar1_adaptive_s_solve( const lion_nop_ar1_adaptive_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
+{
+    if( a[0] )
+    {
+        if( a[0]->m.active )
+        {
+            st_s_attach( &result->msg, st_s_create() );
+            st_s_push_fa
+            (
+                result->msg,
+                "\nAdaptive initialization evaluates to an active expression."
+                "\nConsider using 'constof' to turn the active expression into a constant."
+            );
+            return false;
+        }
+        lion_holor_s_attach( &result->h, lion_holor_s_clone( a[0] ) );
+        result->h->m.active = true;
+        result->settled = true;
+    }
+
+    result->reducible = false; // keep subsequent graph intact
+    result->codable = false;
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void lion_nop_ar1_adaptive_s_settle( const lion_nop_ar1_adaptive_s* o, const lion_nop_solve_result_s* result, lion_nop** out_nop, lion_nop_solve_result_s** out_result )
+{
+    lion_nop_ar0_adaptive_s* adaptive = lion_nop_ar0_adaptive_s_create();
+    adaptive->h = lion_holor_s_clone( result->h );
+    adaptive->h->m.name = o->name;
+    lion_nop_solve_result_s* r = lion_nop_solve_result_s_create();
+    r->h = bcore_fork( adaptive->h );
+    lion_nop_solve_result_s_attach( out_result, r );
+    lion_nop_a_attach( out_nop, (lion_nop*)adaptive );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
 // lion_nop_ar1_output_s
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -812,7 +857,7 @@ bl_t lion_nop_ar2_cyclic_s_solve( const lion_nop_ar2_cyclic_s* o, lion_holor_s**
             (
                 result->msg,
                 "\nCyclic initialization evaluates to an active expression."
-                "\nConsider using 'constof' or 'zeroof' to turn the active expression into a constant."
+                "\nConsider using 'constof' to turn the active expression into a constant."
             );
             return false;
         }

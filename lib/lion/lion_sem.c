@@ -1436,7 +1436,6 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 lion_sem_cell_s* cell2 = stack_pop_cell( stack, source );
                 stack_pop_of_value( stack, flag_cell_cat, source );
                 lion_sem_cell_s* cell1 = stack_pop_cell( stack, source );
-//                stack_push( stack, lion_sem_cell_s_cat_cell( o, cell1, cell2, source ) );
                 stack_push( stack, lion_sem_cell_s_recat_cell( o, cell1, cell2, source ) );
             }
             else if( stack_of_type( stack, 1, TYPEOF_lion_sem_link_s ) ) // cell : link
