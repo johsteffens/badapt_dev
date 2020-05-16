@@ -22,92 +22,6 @@
 
 /**********************************************************************************************************************/
 
-/** Syntax
-    MLP
-
-    cell layer( y <- hidden_nodes, a )
-    {
-        w = adaptive <: random <: ( hidden_nodes [ dimof( a ) [ # );
-        b = adaptive <: ( hidden_nodes [ 0 );
-        y = b + w ** a;
-    };
-
-    cell mlp( y <- a )
-    {
-        l1 = layer( 10, a );
-        l2 = layer( 20, relu( a ) );
-        l3 = layer(  1, relu( a ) );
-        y = tanh( l3.y );
-    };
-
-    ========================================
-    LSTM
-
-    cell layer( co, ho <- dim_h, x, ci, hi )
-    {
-        // adaptive holors
-        w_fx = adaptive : random( dim_h [ dimof( x ) [ # );
-        w_fh = adaptive : random( dim_h [ dimof( x ) [ # );
-        w_ix = adaptive : random( dim_h [ dimof( x ) [ # );
-        w_ih = adaptive : random( dim_h [ dimof( x ) [ # );
-        w_ox = adaptive : random( dim_h [ dimof( x ) [ # );
-        w_oh = adaptive : random( dim_h [ dimof( x ) [ # );
-        w_qx = adaptive : random( dim_h [ dimof( x ) [ # );
-        w_qh = adaptive : random( dim_h [ dimof( x ) [ # );
-
-        b_f = adaptive( dim_h [ 0 );
-        b_i = adaptive( dim_h [ 0 );
-        b_o = adaptive( dim_h [ 0 );
-        b_q = adaptive( dim_h [ 0 );
-
-        v_f = sigm( ( w_fx ** x ) + ( w_fh ** hi ) + b_f );
-        v_i = sigm( ( w_ix ** x ) + ( w_ih ** hi ) + b_i );
-        v_o = sigm( ( w_ox ** x ) + ( w_oh ** hi ) + b_o );
-        v_q = tanh( ( w_qx ** x ) + ( w_qh ** hi ) + b_q );
-
-        co  = ( v_f * ci ) + ( v_i * v_q );
-        v_d = tanh( co );
-        ho  = ( v_o * v_d );
-    };
-
-    cell lstm( y <- dim_h, x )
-    {
-        adaptive w_r = random( dim_h [ dimof( x ) [ # );
-        adaptive b_r = dim_h [ #;
-
-        cyclic c = dim_h [ 0;
-        cyclic h = dim_h [ 0;
-
-        l1 = layer( dim_h, x, ci = c, hi = h );
-
-        h = l1.ho; // updating a cyclic value ends its scope
-        c = l1.co;
-
-        y = tanh( w_r * l1.ho + b_r );
-    }
-
-    g_out = lstm( dim_h = 200, x = g_in ).y;
-
-    - parse into cell
-    - cell: tree of cell
-    - cell: inputs, outputs, body
-    - definition: stand-alone node with identifier
-    - operation: cell embedded in a cell
-    - once a cell is complete, data types can be finalized
-
-TODO:
-   - (done) allow explicit output channel selection only on cells with no free input channels
-   - (solved differently) virtual machine: overhaul differentiating between micro- and macrocode
-   -                  add macro operations operating on the frame
-   -                  add macro operations controlling program flow
-   - (done) cyclic: implement unrolled inference and bp_grad
-   - (done via eci) allow elementwise operators mix with scalars (like mul)
-   - look for generally accepted offline problems for neural networks
-   - (solved differently via adaptor) parameterize adaptive (e.g. adaptive( min, max, additional cost ))
-   - (done) index operator should be a cast-operator
-   - (solved differently via adaptor) add a cost operator or cost expression to generate specific costs like weight energy (producing weight decay)
-*/
-
 /**
  *  Symbolic language to describe a graph of operators on holors.
  *
@@ -149,24 +63,6 @@ TODO:
  *    #   Vacant scalar
  *    7   Determined Scalar
  *
- *  Possible name ?
- *     haptive (synonym to haptic) (no trademark (!) )
- *     holocell
- *     holorcell  (unused)
- *     holorframe (unused, term does not yet exist)
- *     holograph
- *     holorgraph
- *     holornova  (unused)
- *     helix   (mathematics, biology, earring, IT corporation)
- *     haptor  (biology: flatworm organ)
- *     hoptinet
- *     hoptivnet (unused)
- *     haptivnet (unused)
- *     adahonet  (unused)
- *     haptivscript (unused)
- *     haptivdown   // wordplay on markdown
- *
- *
  *  Dendpass-Algorithm:
  *  specific method to compute the local gradient via automatic differentiation
  *  using reverse accumulation to backpropagate gradients:
@@ -177,25 +73,7 @@ TODO:
  *  - The backpass procedure is compiled by recursively passing each node starting from the adaptive node downward through
  *    all downlinks.
  *
- *  TODO:
- *     - (done) Store the cyclic update to a hidden holor associated with the cyclic node
- *     - (done) After regular axon pass, copy all hidden cyclic holors to regular cyclic axons
- *     - (done) Disallow explicit use of a cyclic variable after it has been updated. (This prevents surprising syntax)
- *     - (done) Add list of reserved keywords (not usable for variables)
- *     - (done) specify type by appending f2 or f3 to literal.
- *     - (done) implement operator volof  (returning the volume as constant scalar)
- *     - (done) add cast operator 'reshape( new_shape, holor )' converting the shape of a holor
- *     - (done) rename lgst -> sigm
- *     - expand matrix multiplication to involve higher order holors using an eci-like-approach (elements being 2x2 matrices)
- *     - implement ar3-convolution operator
- *     - introduce a dedicated randomizer in root:
- *            can be seeded and reset (concurrently)
- *            is accessible via nop_context
- *     - bhpt:
- *            random seed for network creation is part of builder and can (optionally) be changed via builder feature
- *            tutor, frame: frame should assume builder is part of tutor
- *     - create a dedicated compiler; the compiler holds the context for a given build. (No more system wide global context)
- *     - cells and nodes (via fork) reference the compiler's context instead of using the system global context
+ *  More details: See lion_design.txt
  */
 
 /**********************************************************************************************************************/
