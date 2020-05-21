@@ -1,4 +1,4 @@
-/** Copyright 2019 Johannes Bernhard Steffens
+/** Copyright 2020 Johannes Bernhard Steffens
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,16 +13,19 @@
  *  limitations under the License.
  */
 
-#ifndef LION_SIGNAL_H
-#define LION_SIGNAL_H
+#ifndef BADAPT_DEV_PLANT_CONFIG_H
+#define BADAPT_DEV_PLANT_CONFIG_H
 
-/** Statically bound rudimentary runtime control of library items via signaling.
- */
+#include "bcore_std.h"
+#include "badapt_dev_planted.h"
+#include "badapt_dev_problem.h"
+#include "badapt_dev_ern.h"
+#include "badapt_dev_lstm.h"
 
-#include "bcore_feature.h"
-#include "bcore_signal.h"
+BETH_PLANT_CONFIG_OPEN_PLANT( badapt_dev )
+BETH_PLANT_CONFIG_USE_GROUP( badapt_dev_problem );
+BETH_PLANT_CONFIG_USE_GROUP( badapt_dev_ern );
+BETH_PLANT_CONFIG_USE_GROUP( badapt_dev_lstm );
+BETH_PLANT_CONFIG_CLOSE_PLANT( badapt_dev )
 
-/// broadcasts a signal within the library
-vd_t lion_signal_handler( const bcore_signal_s* o );
-
-#endif  // LION_SIGNAL_H
+#endif  // BADAPT_DEV_PLANT_CONFIG_H

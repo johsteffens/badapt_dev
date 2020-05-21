@@ -589,13 +589,12 @@ lion_sem_cell_s* lion_sem_cell_s_push_cell_nop_d_reset_name_set_source( lion_sem
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// v can be NULL pushing an undetermined scalar
-lion_sem_cell_s* lion_sem_cell_s_push_cell_scalar( lion_sem_cell_s* o, tp_t type, f3_t* v )
+lion_sem_cell_s* lion_sem_cell_s_push_cell_const_scalar( lion_sem_cell_s* o, tp_t type, f3_t v )
 {
     lion_nop_ar0_literal_s* literal = lion_nop_ar0_literal_s_create();
     literal->h = lion_holor_s_create();
-    bhvm_holor_s_set_type_scalar_pf( &literal->h->h, type, TYPEOF_f3_t, v );
-    if( v ) literal->h->m.active = false;
+    bhvm_holor_s_set_type_scalar( &literal->h->h, type, v );
+    literal->h->m.active = false;
     return lion_sem_cell_s_push_cell_nop_d_reset_name( o, ( lion_nop* )literal );
 }
 
@@ -1200,18 +1199,18 @@ void lion_sem_cell_s_evaluate_stack( lion_sem_cell_s* o, bcore_arr_vd_s* stack, 
             bcore_source_a_parse_fa( source, " #<f3_t*>", &val );
             if(      bcore_source_a_parse_bl_fa( source, "#?'f2'" ) ) type = TYPEOF_f2_t;
             else if( bcore_source_a_parse_bl_fa( source, "#?'f3'" ) ) type = TYPEOF_f3_t;
-            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_scalar( o, type, &val );
+            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_const_scalar( o, type, val );
             bcore_source_point_s_set( &cell->source_point, source );
             stack_push( stack, cell->excs.data[ 0 ] );
         }
 
-        // undetermined scalar
+        // undetermined scalar (falls back to 0)
         else if( bcore_source_a_parse_bl_fa( source, " #?'#'" ) )
         {
             tp_t type = TYPEOF_f3_t;
             if(      bcore_source_a_parse_bl_fa( source, "#?'f2'" ) ) type = TYPEOF_f2_t;
             else if( bcore_source_a_parse_bl_fa( source, "#?'f3'" ) ) type = TYPEOF_f3_t;
-            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_scalar( o, type, NULL );
+            lion_sem_cell_s* cell = lion_sem_cell_s_push_cell_const_scalar( o, type, 0 );
             bcore_source_point_s_set( &cell->source_point, source );
             stack_push( stack, cell->excs.data[ 0 ] );
         }
