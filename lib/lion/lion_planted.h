@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-05-09T12:33:58Z
+ *  Last File Update: 2020-05-27T10:59:02Z
  *
  *  Copyright and License of this File:
  *
@@ -25,6 +25,10 @@
 
 #include "bcore_control.h"
 
+//To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
+#define HKEYOF_lion_planted 1024475285
+
+#define TYPEOF_lion_planted 3067971884
 
 /**********************************************************************************************************************/
 // source: lion_root.h

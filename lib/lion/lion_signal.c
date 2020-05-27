@@ -13,9 +13,6 @@
  *  limitations under the License.
  */
 
-#ifndef LION_PLANT_CONFIG_H
-#define LION_PLANT_CONFIG_H
-
 #include "bcore_std.h"
 #include "lion_planted.h"
 
@@ -30,17 +27,15 @@
 #include "lion_adaptive_bhpt.h"
 #include "lion_adaptor.h"
 
-BETH_PLANT_CONFIG_OPEN_PLANT( lion )
-BETH_PLANT_CONFIG_USE_GROUP( lion_root );
-BETH_PLANT_CONFIG_USE_GROUP( lion_nop );
-BETH_PLANT_CONFIG_USE_GROUP( lion_eval_nop );
-BETH_PLANT_CONFIG_USE_GROUP( lion_sem );
-BETH_PLANT_CONFIG_USE_GROUP( lion_net );
-BETH_PLANT_CONFIG_USE_GROUP( lion_frame );
-BETH_PLANT_CONFIG_USE_GROUP( lion_eval_frame );
-BETH_PLANT_CONFIG_USE_GROUP( lion_adaptive );
-BETH_PLANT_CONFIG_USE_GROUP( lion_adaptor );
-BETH_PLANT_CONFIG_USE_GROUP( lion_adaptive_bhpt );
-BETH_PLANT_CONFIG_CLOSE_PLANT( lion )
-
-#endif  // LION_PLANT_CONFIG_H
+BETH_PLANT_SIGNAL_OPEN_PLANT( lion )
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_root );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_nop );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_eval_nop );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_sem );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_net );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_frame );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_eval_frame );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_adaptive );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_adaptor );
+BETH_PLANT_SIGNAL_USE_SOURCE( lion_adaptive_bhpt );
+BETH_PLANT_SIGNAL_CLOSE_PLANT( lion )

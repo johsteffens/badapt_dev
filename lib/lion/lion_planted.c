@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-05-09T12:33:58Z
+ *  Last File Update: 2020-05-27T10:59:02Z
  *
  *  Copyright and License of this File:
  *
@@ -1915,14 +1915,15 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_builder_s )
 
 /**********************************************************************************************************************/
 
+vd_t bhpt_general_signal_handler( const bcore_signal_s* o );
+
 vd_t lion_planted_signal_handler( const bcore_signal_s* o )
 {
     switch( bcore_signal_s_handle_type( o, typeof( "lion_planted" ) ) )
     {
         case TYPEOF_init1:
         {
-            // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( 1024475285 ) );
+            bcore_const_x_set_d( typeof( "lion_planted_hash" ), sr_tp( HKEYOF_lion_planted ) );
 
             // --------------------------------------------------------------------
             // source: lion_root.h
@@ -2678,6 +2679,13 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bhpt_builder_create_adaptive, lion_adaptive_bhpt_cyclic_builder_s_create_adaptive );
             BCORE_REGISTER_OBJECT( lion_adaptive_bhpt_cyclic_builder_s );
             BCORE_REGISTER_TRAIT( lion_adaptive_bhpt, bcore_inst );
+        }
+        break;
+        case TYPEOF_push_dependencies:
+        {
+            ASSERT( o->object && ( *( aware_t* )o->object ) == TYPEOF_bcore_arr_fp_s );
+            bcore_arr_fp_s* arr_fp = o->object;
+            bcore_arr_fp_s_push( arr_fp, ( fp_t )bhpt_general_signal_handler );
         }
         break;
         default: break;

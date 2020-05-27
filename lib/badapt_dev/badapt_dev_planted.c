@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
- *  Compiling Agent : bcore_plant_compiler (C) 2019 J.B.Steffens
- *  Last File Update: 2020-04-13T11:36:59Z
+ *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
+ *  Last File Update: 2020-05-27T10:51:35Z
  *
  *  Copyright and License of this File:
  *
@@ -131,14 +131,15 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_guide_utf8_encode_s )
 
 /**********************************************************************************************************************/
 
+vd_t badapt_general_signal_handler( const bcore_signal_s* o );
+
 vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
 {
     switch( bcore_signal_s_handle_type( o, typeof( "badapt_dev_planted" ) ) )
     {
         case TYPEOF_init1:
         {
-            // Comment or remove line below to rebuild this target.
-            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( 2621459360 ) );
+            bcore_const_x_set_d( typeof( "badapt_dev_planted_hash" ), sr_tp( HKEYOF_badapt_dev_planted ) );
 
             // --------------------------------------------------------------------
             // source: badapt_dev_problem.h
@@ -178,6 +179,13 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
 
             // --------------------------------------------------------------------
             // source: badapt_dev_lstm.h
+        }
+        break;
+        case TYPEOF_push_dependencies:
+        {
+            ASSERT( o->object && ( *( aware_t* )o->object ) == TYPEOF_bcore_arr_fp_s );
+            bcore_arr_fp_s* arr_fp = o->object;
+            bcore_arr_fp_s_push( arr_fp, ( fp_t )badapt_general_signal_handler );
         }
         break;
         default: break;
