@@ -13,7 +13,7 @@ int main( int argc, char** argv )
         BETH_PLANT_BUILD_FROM_DEFAULT();
         if( beth_plant_update_required() )
         {
-            beth_plant_update();
+            beth_plant_update( NULL );
             BETH_PLANT_CLOSEV( 1 );
             return 0;
         }
