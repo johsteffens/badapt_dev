@@ -7,21 +7,6 @@ int main( int argc, char** argv )
     BETH_PLANT_USE( badapt_dev );
     BETH_PLANT_USE( lion );
 
-    // plant
-    if( argc > 1 && sc_t_equal( argv[ 1 ], "-p" ) )
-    {
-        BETH_PLANT_BUILD_FROM_DEFAULT();
-        if( beth_plant_update_required() )
-        {
-            beth_plant_update( NULL );
-            BETH_PLANT_CLOSEV( 1 );
-            return 0;
-        }
-        argc--;
-        argv[ 1 ] = argv[ 0 ];
-        argv++;
-    }
-
     /// testing flects and spects
     bcore_flect_parse_all_flects();
     bcore_inst_test_all_types();
