@@ -36,7 +36,7 @@ stamp badapt_problem_recurrent_abc = badapt_supplier
     aware_t _;
     sz_t index = 0;
 
-    u2_t rval    = 1234;
+    u3_t rval    = 1234;
     f3_t pos_tgt =  1.0;
     f3_t neg_tgt =  0.0;
     aware badapt_loss* preferred_loss = badapt_loss_l2_s;
@@ -64,7 +64,7 @@ stamp badapt_problem_recurrent_text = aware badapt_supplier
     u0_t t_last_char = 0;
     u0_t v_last_char = 0;
 
-    u2_t rval       = 1234;
+    u3_t rval       = 1234;
     f3_t pos_tgt    =  1.0;
     f3_t neg_tgt    =  0.0;
     aware badapt_loss* preferred_loss = badapt_loss_l2_s;
@@ -113,7 +113,7 @@ stamp badapt_problem_recurrent_utf8 = aware badapt_supplier
     u0_t t_last_char = 0;
     u0_t v_last_char = 0;
 
-    u2_t rval       = 1234;
+    u3_t rval       = 1234;
     f3_t pos_tgt    =  1.0;
     f3_t neg_tgt    =  0.0;
     aware badapt_loss* preferred_loss = badapt_loss_l2_s;

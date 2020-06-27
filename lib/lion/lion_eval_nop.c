@@ -24,14 +24,14 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_eval_nop_generator_s_randomize_holor( const lion_eval_nop_generator_s* o, u2_t* rval, lion_holor_s* h )
+void lion_eval_nop_generator_s_randomize_holor( const lion_eval_nop_generator_s* o, u3_t* rval, lion_holor_s* h )
 {
-    if( o->set_htp ) h->m.htp = ( f3_xsg1_sym( rval ) > 0 );
+    if( o->set_htp ) h->m.htp = ( f3_rnd_sym( rval ) > 0 );
 
     if( o->set_shape )
     {
         ASSERT( o->set_dim );
-        sz_t size = f3_xsg1_pos( rval ) * o->max_shape_size * 23 /* some prime */;
+        sz_t size = f3_rnd_pos( rval ) * o->max_shape_size * 23 /* some prime */;
         size = size % ( o->max_shape_size + 1 );
         bhvm_shape_s_set_size( &h->h.s, size );
     }
@@ -42,7 +42,7 @@ void lion_eval_nop_generator_s_randomize_holor( const lion_eval_nop_generator_s*
         ASSERT( o->max_dim > 0 );
         BFOR_EACH( i, &h->h.s )
         {
-            sz_t size = f3_xsg1_pos( rval ) * o->max_dim * 23;
+            sz_t size = f3_rnd_pos( rval ) * o->max_dim * 23;
             size = size % ( o->max_dim );
             h->h.s.data[ i ] = size + 1;
         }
@@ -50,7 +50,7 @@ void lion_eval_nop_generator_s_randomize_holor( const lion_eval_nop_generator_s*
 
     if( o->set_v_type )
     {
-        tp_t type = ( f3_xsg1_sym( rval ) > 0 ) ? TYPEOF_f2_t : TYPEOF_f3_t;
+        tp_t type = ( f3_rnd_sym( rval ) > 0 ) ? TYPEOF_f2_t : TYPEOF_f3_t;
         bhvm_value_s_set_type( &h->h.v, type );
     }
 
@@ -73,12 +73,12 @@ void lion_eval_nop_generator_s_randomize_holor( const lion_eval_nop_generator_s*
 lion_eval_nop_result_s* lion_eval_nop_generator_s_run( const lion_eval_nop_generator_s* o, lion_eval_nop_result_s* result )
 {
     ASSERT( o->eval );
-    u2_t rval = o->param.rval;
+    u3_t rval = o->param.rval;
     for( sz_t i = 0; i < o->cycles; i++ )
     {
         BLM_INIT();
         lion_eval_nop_param_s* param = BLM_A_PUSH( lion_eval_nop_param_s_clone( &o->param ) );
-        param->rval = bcore_xsg3_u2( param->rval + rval );
+        param->rval = bcore_lcg00_u3( param->rval + rval );
         if( param->ha ) lion_eval_nop_generator_s_randomize_holor( o, &rval, param->ha );
         if( param->hb ) lion_eval_nop_generator_s_randomize_holor( o, &rval, param->hb );
         if( param->hc ) lion_eval_nop_generator_s_randomize_holor( o, &rval, param->hc );
@@ -124,7 +124,7 @@ lion_eval_nop_result_s* lion_eval_nop_ar1_s_run( const lion_eval_nop_ar1_s* o, l
 
     ASSERT( ha );
 
-    u2_t rval = o->param.rval;
+    u3_t rval = o->param.rval;
 
     if( o->param.verbosity >= 4 )
     {
@@ -344,7 +344,7 @@ lion_eval_nop_result_s* lion_eval_nop_ar2_s_run( const lion_eval_nop_ar2_s* o, l
     ASSERT( ha );
     ASSERT( hb );
 
-    u2_t rval = o->param.rval;
+    u3_t rval = o->param.rval;
 
     if( o->param.verbosity >= 4 )
     {

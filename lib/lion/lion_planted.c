@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-06-15T15:59:24Z
+ *  Last File Update: 2020-06-27T14:32:59Z
  *
  *  Copyright and License of this File:
  *
@@ -88,7 +88,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_context_s )
 "{"
     "hidden bcore_mutex_s randomizer_mutex;"
     "bl_t randomizer_is_locked = false;"
-    "u2_t randomizer_rval = 0;"
+    "u3_t randomizer_rval = 0;"
 "}";
 
 BCORE_DEFINE_SPECT( bcore_inst, lion_nop )
@@ -259,7 +259,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar0_rand_s )
     "f3_t min = -0.5;"
     "f3_t max = 0.5;"
     "f3_t density = 1.0;"
-    "u2_t rval = 7384;"
+    "u3_t rval = 7384;"
     "func lion_nop:solve;"
     "func lion_nop:mcode_push_ap_holor;"
 "}";
@@ -715,7 +715,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_nop_ar1_rand_s )
 "{"
     "func lion_nop:arity;"
     "func lion_nop:reserved;"
-    "u2_t rseed = 1234;"
+    "u3_t rseed = 1234;"
     "func lion_nop:symbol;"
     "func lion_nop:priority;"
     "func lion_nop:solve;"
@@ -1085,14 +1085,14 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_param_s )
     "lion_holor_s => hr;"
     "hidden aware bcore_sink -> log;"
     "sz_t verbosity = 1;"
-    "u2_t rval = 1234;"
+    "u3_t rval = 1234;"
     "func bcore_inst_call:init_x;"
 "}";
 
 void lion_eval_nop_param_s_set( lion_eval_nop_param_s* o, const lion_eval_nop_param_s* src )
 {
     o->verbosity = sz_max( o->verbosity, src->verbosity );
-    o->rval      = bcore_xsg3_u2( o->rval + src->rval );
+    o->rval      = bcore_lcg00_u3( o->rval + src->rval );
     bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
     if( !o->ha  ) o->ha  = lion_holor_s_clone( src->ha );
     if( !o->hb  ) o->hb  = lion_holor_s_clone( src->hb );
@@ -1620,7 +1620,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_param_s )
 "{"
     "hidden aware bcore_sink -> log;"
     "sz_t verbosity = 1;"
-    "u2_t rval = 1234;"
+    "u3_t rval = 1234;"
     "st_s name;"
     "aware => src;"
     "bhvm_holor_adl_s => in;"
@@ -1638,7 +1638,7 @@ void lion_eval_frame_param_s_set( lion_eval_frame_param_s* o, const lion_eval_fr
     o->jacobian_test = o->jacobian_test || src->jacobian_test;
     
     o->verbosity = sz_max( o->verbosity, src->verbosity );
-    o->rval      = bcore_xsg3_u2( o->rval + src->rval );
+    o->rval      = bcore_lcg00_u3( o->rval + src->rval );
     bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
     
     if( o->name.size == 0 )
@@ -2691,4 +2691,4 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE 2302319071
+// BETH_PLANT_SIGNATURE 3278228891

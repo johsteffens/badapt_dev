@@ -903,7 +903,7 @@ bl_t lion_nop_ar2_rands_s_solve( const lion_nop_ar2_rands_s* o, lion_holor_s** a
         f3_t min     = -0.5;
         f3_t max     =  0.5;
         f3_t density =  1.0;
-        u2_t rval    =  ( ( tanh( vseed ) + 1.0 ) * 0.5 ) * 0xFFFFFFFFu;
+        u3_t rval    =  ( ( tanh( vseed ) + 1.0 ) * 0.5 ) * 0xFFFFFFFFu;
 
         bhvm_value_s_set_random( &result->h->h.v, density, min, max, &rval );
         result->h->m.active = true;

@@ -194,7 +194,7 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
         badapt_adaptive_a_minfer( adaptive, vin, vout );
     }
 
-    u2_t rval = 12341234 * bmath_vf3_s_max( vout );
+    u3_t rval = 12341234 * bmath_vf3_s_max( vout );
 
     for( sz_t i = 0; i < o->txt_size; i++ )
     {
@@ -290,7 +290,7 @@ bl_t badapt_guide_utf8_encode_s_callback( const badapt_guide_utf8_encode_s* o, b
         badapt_adaptive_a_minfer( adaptive, vin, vout );
     }
 
-    u2_t rval = 12341234 * bmath_vf3_s_max( vout );
+    u3_t rval = 12341234 * bmath_vf3_s_max( vout );
 
     for( sz_t i = 0; i < o->txt_size; i++ )
     {

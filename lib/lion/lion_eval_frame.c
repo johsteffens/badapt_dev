@@ -263,7 +263,7 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
 
     if( o->param.jacobian_test )
     {
-        u2_t rval = 1234;
+        u3_t rval = 1234;
 
         if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "\nJacobian DP Test:\n" );
 
@@ -611,7 +611,7 @@ lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cy
 
     if( o->param.jacobian_test )
     {
-        u2_t rval = 1234;
+        u3_t rval = 1234;
 
         if( o->param.verbosity >= 10 ) bcore_sink_a_push_fa( o->param.log, "\nJacobian DP Test:\n" );
 

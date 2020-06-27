@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-06-15T15:59:24Z
+ *  Last File Update: 2020-06-27T14:32:59Z
  *
  *  Copyright and License of this File:
  *
@@ -26,7 +26,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_lion_planted 450263056
+#define HKEYOF_lion_planted 2597342317
 
 #define TYPEOF_lion_planted 3067971884
 
@@ -88,7 +88,7 @@
 #define TYPEOF_lion_nop_context_s 1954113275
 #define BETH_EXPAND_ITEM_lion_nop_context_s \
   BCORE_DECLARE_OBJECT( lion_nop_context_s ) \
-    {aware_t _;bcore_mutex_s randomizer_mutex;bl_t randomizer_is_locked;u2_t randomizer_rval;};
+    {aware_t _;bcore_mutex_s randomizer_mutex;bl_t randomizer_is_locked;u3_t randomizer_rval;};
 #define BETH_EXPAND_GROUP_lion_nop \
   BCORE_FORWARD_OBJECT( lion_nop ); \
   BCORE_FORWARD_OBJECT( lion_nop_solve_result_s ); \
@@ -232,7 +232,7 @@
 #define TYPEOF_lion_nop_ar0_rand_s 2499391049
 #define BETH_EXPAND_ITEM_lion_nop_ar0_rand_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar0_rand_s ) \
-    {aware_t _;lion_holor_s* h;f3_t min;f3_t max;f3_t density;u2_t rval;}; \
+    {aware_t _;lion_holor_s* h;f3_t min;f3_t max;f3_t density;u3_t rval;}; \
   static inline sz_t lion_nop_ar0_rand_s_arity( const lion_nop_ar0_rand_s* o ){return 0;} \
   bl_t lion_nop_ar0_rand_s_solve( const lion_nop_ar0_rand_s* o, lion_holor_s** a, lion_nop_solve_result_s* result ); \
   sz_t lion_nop_ar0_rand_s_mcode_push_ap_holor( const lion_nop_ar0_rand_s* o, const lion_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
@@ -535,7 +535,7 @@
 #define TYPEOF_lion_nop_ar1_rand_s 288306100
 #define BETH_EXPAND_ITEM_lion_nop_ar1_rand_s \
   BCORE_DECLARE_OBJECT( lion_nop_ar1_rand_s ) \
-    {aware_t _;u2_t rseed;}; \
+    {aware_t _;u3_t rseed;}; \
   static inline sz_t lion_nop_ar1_rand_s_arity( const lion_nop_ar1_rand_s* o ){return 1;} \
   static inline bl_t lion_nop_ar1_rand_s_reserved( const lion_nop_ar1_rand_s* o ){return true;} \
   static inline sc_t lion_nop_ar1_rand_s_symbol( const lion_nop_ar1_rand_s* o ){return "rand";} \
@@ -957,7 +957,7 @@
 #define TYPEOF_lion_eval_nop_param_s 1752596292
 #define BETH_EXPAND_ITEM_lion_eval_nop_param_s \
   BCORE_DECLARE_OBJECT( lion_eval_nop_param_s ) \
-    {aware_t _;lion_nop* nop;lion_holor_s* ha;lion_holor_s* hb;lion_holor_s* hc;lion_holor_s* hr;bcore_sink* log;sz_t verbosity;u2_t rval;}; \
+    {aware_t _;lion_nop* nop;lion_holor_s* ha;lion_holor_s* hb;lion_holor_s* hc;lion_holor_s* hr;bcore_sink* log;sz_t verbosity;u3_t rval;}; \
   static inline void lion_eval_nop_param_s_init_x( lion_eval_nop_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   void lion_eval_nop_param_s_set( lion_eval_nop_param_s* o, const lion_eval_nop_param_s* src );
 #define TYPEOF_lion_eval_nop_generator_s 4173681572
@@ -1415,7 +1415,7 @@
 #define TYPEOF_lion_eval_frame_param_s 1608970388
 #define BETH_EXPAND_ITEM_lion_eval_frame_param_s \
   BCORE_DECLARE_OBJECT( lion_eval_frame_param_s ) \
-    {aware_t _;bcore_sink* log;sz_t verbosity;u2_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;bl_t recovery_test;bl_t jacobian_test;f3_t max_dev;f3_t epsilon;}; \
+    {aware_t _;bcore_sink* log;sz_t verbosity;u3_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;bl_t recovery_test;bl_t jacobian_test;f3_t max_dev;f3_t epsilon;}; \
   static inline void lion_eval_frame_param_s_init_x( lion_eval_frame_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   void lion_eval_frame_param_s_set( lion_eval_frame_param_s* o, const lion_eval_frame_param_s* src );
 #define TYPEOF_lion_eval_frame_show_param_s 3596640144
@@ -1637,4 +1637,4 @@
 vd_t lion_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // LION_PLANTED_H
-// BETH_PLANT_SIGNATURE 2338759865
+// BETH_PLANT_SIGNATURE  497956539

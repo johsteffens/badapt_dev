@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-06-15T15:59:24Z
+ *  Last File Update: 2020-06-27T14:32:59Z
  *
  *  Copyright and License of this File:
  *
@@ -19,7 +19,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_badapt_dev_planted 3355861469
+#define HKEYOF_badapt_dev_planted 3757215941
 
 #define TYPEOF_badapt_dev_planted 1350687876
 
@@ -34,7 +34,7 @@
 #define TYPEOF_badapt_problem_recurrent_abc_s 3613882751
 #define BETH_EXPAND_ITEM_badapt_problem_recurrent_abc_s \
   BCORE_DECLARE_OBJECT( badapt_problem_recurrent_abc_s ) \
-    {aware_t _;sz_t index;u2_t rval;f3_t pos_tgt;f3_t neg_tgt;badapt_loss* preferred_loss;}; \
+    {aware_t _;sz_t index;u3_t rval;f3_t pos_tgt;f3_t neg_tgt;badapt_loss* preferred_loss;}; \
   static inline const badapt_loss* badapt_problem_recurrent_abc_s_preferred_loss( const badapt_problem_recurrent_abc_s* o ){return o->preferred_loss;} \
   sz_t badapt_problem_recurrent_abc_s_get_in_size( const badapt_problem_recurrent_abc_s* o ); \
   sz_t badapt_problem_recurrent_abc_s_get_out_size( const badapt_problem_recurrent_abc_s* o ); \
@@ -43,7 +43,7 @@
 #define TYPEOF_badapt_problem_recurrent_text_s 1449347910
 #define BETH_EXPAND_ITEM_badapt_problem_recurrent_text_s \
   BCORE_DECLARE_OBJECT( badapt_problem_recurrent_text_s ) \
-    {aware_t _;st_s text_file;st_s ignore_line_char;bcore_source* source;bcore_arr_sz_s* charmap;st_s* charset;u0_t t_last_char;u0_t v_last_char;u2_t rval;f3_t pos_tgt;f3_t neg_tgt;badapt_loss* preferred_loss;}; \
+    {aware_t _;st_s text_file;st_s ignore_line_char;bcore_source* source;bcore_arr_sz_s* charmap;st_s* charset;u0_t t_last_char;u0_t v_last_char;u3_t rval;f3_t pos_tgt;f3_t neg_tgt;badapt_loss* preferred_loss;}; \
   static inline const badapt_loss* badapt_problem_recurrent_text_s_preferred_loss( const badapt_problem_recurrent_text_s* o ){return o->preferred_loss;} \
   sz_t badapt_problem_recurrent_text_s_get_in_size( const badapt_problem_recurrent_text_s* o ); \
   sz_t badapt_problem_recurrent_text_s_get_out_size( const badapt_problem_recurrent_text_s* o ); \
@@ -58,7 +58,7 @@
 #define TYPEOF_badapt_problem_recurrent_utf8_s 3187411278
 #define BETH_EXPAND_ITEM_badapt_problem_recurrent_utf8_s \
   BCORE_DECLARE_OBJECT( badapt_problem_recurrent_utf8_s ) \
-    {aware_t _;st_s text_file;bcore_source* source;u0_t t_last_char;u0_t v_last_char;u2_t rval;f3_t pos_tgt;f3_t neg_tgt;badapt_loss* preferred_loss;}; \
+    {aware_t _;st_s text_file;bcore_source* source;u0_t t_last_char;u0_t v_last_char;u3_t rval;f3_t pos_tgt;f3_t neg_tgt;badapt_loss* preferred_loss;}; \
   static inline const badapt_loss* badapt_problem_recurrent_utf8_s_preferred_loss( const badapt_problem_recurrent_utf8_s* o ){return o->preferred_loss;} \
   static inline sz_t badapt_problem_recurrent_utf8_s_get_in_size( const badapt_problem_recurrent_utf8_s* o ){return 256;} \
   static inline sz_t badapt_problem_recurrent_utf8_s_get_out_size( const badapt_problem_recurrent_utf8_s* o ){return 256;} \
@@ -102,4 +102,4 @@
 vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // BADAPT_DEV_PLANTED_H
-// BETH_PLANT_SIGNATURE  979947552
+// BETH_PLANT_SIGNATURE 1018387652

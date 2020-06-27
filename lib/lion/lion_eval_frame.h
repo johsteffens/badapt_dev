@@ -67,7 +67,7 @@ stamp :param = aware bcore_inst
 {
     hidden aware bcore_sink -> log;
     sz_t verbosity = 1;
-    u2_t rval = 1234; // for random generators
+    u3_t rval = 1234; // for random generators
 
     st_s name;              // name of test (only for logging)
     aware => src;           // source (bcore_file_path_s or st_s with inline code)
@@ -89,7 +89,7 @@ stamp :param = aware bcore_inst
         o->jacobian_test = o->jacobian_test || src->jacobian_test;
 
         o->verbosity = sz_max( o->verbosity, src->verbosity );
-        o->rval      = bcore_xsg3_u2( o->rval + src->rval );
+        o->rval      = bcore_lcg00_u3( o->rval + src->rval );
         bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
 
         if( o->name.size == 0 )

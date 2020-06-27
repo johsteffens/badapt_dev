@@ -252,7 +252,7 @@ stamp :context = aware bcore_inst
      */
     hidden bcore_mutex_s randomizer_mutex;
     bl_t                 randomizer_is_locked = false;
-    u2_t                 randomizer_rval = 0;
+    u3_t                 randomizer_rval = 0;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -337,7 +337,7 @@ group :ar0 = retrievable
         f3_t min     = -0.5;
         f3_t max     =  0.5;
         f3_t density =  1.0;
-        u2_t rval    = 7384;
+        u3_t rval    = 7384;
 
         func :: :solve =
         {
@@ -713,7 +713,7 @@ group :ar1 = retrievable
      */
     stamp :rand =
     {
-        u2_t rseed = 1234;
+        u3_t rseed = 1234;
         func :: :symbol   = { return "rand"; };
         func :: :priority = { return 8; };
         func :: :solve;

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-06-15T15:59:24Z
+ *  Last File Update: 2020-06-27T14:32:59Z
  *
  *  Copyright and License of this File:
  *
@@ -32,7 +32,7 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_abc_s )
 "{"
     "aware_t _;"
     "sz_t index = 0;"
-    "u2_t rval = 1234;"
+    "u3_t rval = 1234;"
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
@@ -53,7 +53,7 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_text_s )
     "st_s => charset;"
     "u0_t t_last_char = 0;"
     "u0_t v_last_char = 0;"
-    "u2_t rval = 1234;"
+    "u3_t rval = 1234;"
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
@@ -91,7 +91,7 @@ BCORE_DEFINE_OBJECT_INST_P( badapt_problem_recurrent_utf8_s )
     "aware bcore_source => source;"
     "u0_t t_last_char = 0;"
     "u0_t v_last_char = 0;"
-    "u2_t rval = 1234;"
+    "u3_t rval = 1234;"
     "f3_t pos_tgt = 1.0;"
     "f3_t neg_tgt = 0.0;"
     "aware badapt_loss* preferred_loss = badapt_loss_l2_s;"
@@ -191,4 +191,4 @@ vd_t badapt_dev_planted_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE 1649799374
+// BETH_PLANT_SIGNATURE 1307487320
