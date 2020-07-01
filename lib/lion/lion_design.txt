@@ -167,6 +167,7 @@ TODO:
    - cells and nodes (via fork) reference the compiler's context instead of using the system global context
    - the state of cyclic holors should be retained when shelving (just like adaptive holors)
    - Reduction operators: min, max, sum, avg, ... should apply only to the last dimension; use 'r' as prefix? (rmin, rmax, ...)
+      these operators would then be suitable for pooling
    - bhpt-frame:
         - create log file(s)
         - create a plot with refresh while running

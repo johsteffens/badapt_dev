@@ -62,7 +62,7 @@ void lion_eval_nop_generator_s_randomize_holor( const lion_eval_nop_generator_s*
     if( o->set_value )
     {
         bhvm_holor_s_fit_size( &h->h );
-        bhvm_value_s_set_random( &h->h.v, 1.0, o->v_min, o->v_max, rval );
+        bhvm_value_s_set_random_u3( &h->h.v, 1.0, o->v_min, o->v_max, rval );
     }
 
     bhvm_holor_s_check_integrity( &h->h );
@@ -237,7 +237,7 @@ lion_eval_nop_result_s* lion_eval_nop_ar1_s_run( const lion_eval_nop_ar1_s* o, l
         bhvm_hop_ar0_zro_s_f( gina );
 
         /// choose fin such that energy is 1.0
-        bhvm_value_s_set_random( &fin->v, 1.0, -1.0, 1.0, &rval );
+        bhvm_value_s_set_random_u3( &fin->v, 1.0, -1.0, 1.0, &rval );
         bhvm_hop_ar1_sqrsum_s_f( fin, scl );
         bhvm_holor_s_set_scalar_f3( scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &scl->v, 0 ) ) );
         bhvm_hop_ar2_eci_mul_s_f( fin, scl, fin );
@@ -468,7 +468,7 @@ lion_eval_nop_result_s* lion_eval_nop_ar2_s_run( const lion_eval_nop_ar2_s* o, l
         bhvm_hop_ar0_zro_s_f( ginb );
 
         /// choose fin such that energy is 1.0
-        bhvm_value_s_set_random( &fin->v, 1.0, -1.0, 1.0, &rval );
+        bhvm_value_s_set_random_u3( &fin->v, 1.0, -1.0, 1.0, &rval );
         bhvm_hop_ar1_sqrsum_s_f( fin, scl );
         bhvm_holor_s_set_scalar_f3( scl, f3_srt( 1.0 / bhvm_value_s_get_f3( &scl->v, 0 ) ) );
         bhvm_hop_ar2_eci_mul_s_f( fin, scl, fin );

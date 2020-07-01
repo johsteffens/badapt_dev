@@ -273,7 +273,7 @@ lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_pla
 
         BFOR_EACH( i, adl_dp_ex )
         {
-            bhvm_value_s_set_random( &adl_dp_ex->data[ i ]->v, 1.0, -1, 1, &rval );
+            bhvm_value_s_set_random_u3( &adl_dp_ex->data[ i ]->v, 1.0, -1, 1, &rval );
             if( o->param.verbosity >= 10 )
             {
                 bcore_sink_a_push_fa( o->param.log, "Gradient exc #<sz_t>: ", i );
@@ -620,7 +620,7 @@ lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cy
 
         BFOR_EACH( i, adl_dp_ex )
         {
-            bhvm_value_s_set_random( &adl_dp_ex->data[ i ]->v, 1.0, -1, 1, &rval );
+            bhvm_value_s_set_random_u3( &adl_dp_ex->data[ i ]->v, 1.0, -1, 1, &rval );
             if( o->param.verbosity >= 10 )
             {
                 bcore_sink_a_push_fa( o->param.log, "Gradient exc #<sz_t>: ", i );

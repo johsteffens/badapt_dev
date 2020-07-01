@@ -220,7 +220,7 @@ bl_t lion_nop_ar1_rand_s_solve( const lion_nop_ar1_rand_s* o, lion_holor_s** a, 
         f3_t max     =  0.5;
         f3_t density =  1.0;
 
-        bhvm_value_s_set_random( &result->h->h.v, density, min, max, &context->randomizer_rval );
+        bhvm_value_s_set_random_u3( &result->h->h.v, density, min, max, &context->randomizer_rval );
         result->h->m.active = true;
         result->settled     = true;
         result->codable     = false;
@@ -905,7 +905,7 @@ bl_t lion_nop_ar2_rands_s_solve( const lion_nop_ar2_rands_s* o, lion_holor_s** a
         f3_t density =  1.0;
         u3_t rval    =  ( ( tanh( vseed ) + 1.0 ) * 0.5 ) * 0xFFFFFFFFu;
 
-        bhvm_value_s_set_random( &result->h->h.v, density, min, max, &rval );
+        bhvm_value_s_set_random_u3( &result->h->h.v, density, min, max, &rval );
         result->h->m.active = true;
         result->settled     = true;
         result->codable     = false;
