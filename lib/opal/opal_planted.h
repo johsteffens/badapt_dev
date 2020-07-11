@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-10T14:38:14Z
+ *  Last File Update: 2020-07-11T12:39:16Z
  *
  *  Copyright and License of this File:
  *
@@ -10,6 +10,7 @@
  *  opal_context.h
  *  opal_holor.h
  *  opal_nop.h
+ *  opal_eval_nop.h
  *
  */
 
@@ -19,7 +20,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_opal_planted 3826420720
+#define HKEYOF_opal_planted 545664339
 
 #define TYPEOF_opal_planted 1626965476
 
@@ -31,8 +32,14 @@
 
 #define TYPEOF_opal_context 3099042715
 #define TYPEOF_opal_context_s 434522221
+#define TYPEOF_opal_context_std_s 2227413215
+#define BETH_EXPAND_ITEM_opal_context_std_s \
+  BCORE_DECLARE_OBJECT( opal_context_std_s ) \
+    {aware_t _;bcore_prsg* prsg;}; \
+  static inline bcore_prsg* opal_context_std_s_get_prsg( opal_context_std_s* o ){return o->prsg;}
 #define BETH_EXPAND_GROUP_opal_context \
   BCORE_FORWARD_OBJECT( opal_context ); \
+  BCORE_FORWARD_OBJECT( opal_context_std_s ); \
   typedef bcore_prsg* (*opal_context_get_prsg)( opal_context* o ); \
   BCORE_DECLARE_SPECT( opal_context ) \
   { \
@@ -44,7 +51,8 @@
   BCORE_DECLARE_VIRTUAL_AWARE_OBJECT( opal_context ) \
   static inline bl_t opal_context_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_opal_context ); } \
   static inline bcore_prsg* opal_context_a_get_prsg( opal_context* o ) { const opal_context_s* p = opal_context_s_get_aware( o ); assert( p->get_prsg ); return p->get_prsg( o ); } \
-  static inline bl_t opal_context_a_defines_get_prsg( const opal_context* o ) { return opal_context_s_get_aware( o )->get_prsg != NULL; }
+  static inline bl_t opal_context_a_defines_get_prsg( const opal_context* o ) { return opal_context_s_get_aware( o )->get_prsg != NULL; } \
+  BETH_EXPAND_ITEM_opal_context_std_s
 
 /**********************************************************************************************************************/
 // source: opal_holor.h
@@ -544,7 +552,7 @@
 #define TYPEOF_opal_nop_ar1_rand_s 1983336028
 #define BETH_EXPAND_ITEM_opal_nop_ar1_rand_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_rand_s ) \
-    {aware_t _;u3_t rseed;}; \
+    {aware_t _;}; \
   static inline sz_t opal_nop_ar1_rand_s_arity( const opal_nop_ar1_rand_s* o ){return 1;} \
   static inline bl_t opal_nop_ar1_rand_s_reserved( const opal_nop_ar1_rand_s* o ){return true;} \
   static inline sc_t opal_nop_ar1_rand_s_symbol( const opal_nop_ar1_rand_s* o ){return "rand";} \
@@ -949,8 +957,112 @@
   BETH_EXPAND_ITEM_opal_nop_ar3_iff_s
 
 /**********************************************************************************************************************/
+// source: opal_eval_nop.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_eval_nop
+
+#define TYPEOF_opal_eval_nop 4188901640
+#define TYPEOF_opal_eval_nop_s 3173082098
+#define TYPEOF_opal_eval_nop_result_s 327116934
+#define BETH_EXPAND_ITEM_opal_eval_nop_result_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_result_s ) \
+    {aware_t _;sz_t total_tests;sz_t solvable_tests;sz_t tolerated_errors;bl_t error;st_s msg;}; \
+  void opal_eval_nop_result_s_resolve( const opal_eval_nop_result_s* o );
+#define TYPEOF_opal_eval_nop_param_s 3224023100
+#define BETH_EXPAND_ITEM_opal_eval_nop_param_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_param_s ) \
+    {aware_t _;opal_nop* nop;opal_holor_s* ha;opal_holor_s* hb;opal_holor_s* hc;opal_holor_s* hr;bcore_sink* log;sz_t verbosity;bcore_prsg* prsg;}; \
+  static inline void opal_eval_nop_param_s_init_x( opal_eval_nop_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
+  void opal_eval_nop_param_s_set( opal_eval_nop_param_s* o, const opal_eval_nop_param_s* src );
+#define TYPEOF_opal_eval_nop_generator_s 2743071660
+#define BETH_EXPAND_ITEM_opal_eval_nop_generator_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_generator_s ) \
+    {aware_t _;opal_eval_nop_param_s param;bl_t set_htp;bl_t set_value;bl_t set_shape;bl_t set_dim;bl_t set_v_type;sz_t max_shape_size;sz_t max_dim;f3_t v_min;f3_t v_max;sz_t cycles;bcore_arr_uz_s tolerated_cycles;opal_eval_nop* eval;}; \
+  opal_eval_nop_result_s* opal_eval_nop_generator_s_run( const opal_eval_nop_generator_s* o, opal_eval_nop_result_s* result ); \
+  static inline void opal_eval_nop_generator_s_set_param( opal_eval_nop_generator_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
+  s2_t opal_eval_nop_generator_s_main( opal_eval_nop_generator_s* o, const bcore_arr_st_s* args );
+#define TYPEOF_opal_eval_nop_show_param_s 47537560
+#define BETH_EXPAND_ITEM_opal_eval_nop_show_param_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_show_param_s ) \
+    {aware_t _;opal_eval_nop_param_s param;}; \
+  static inline void opal_eval_nop_show_param_s_set_param( opal_eval_nop_show_param_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
+  s2_t opal_eval_nop_show_param_s_main( opal_eval_nop_show_param_s* o, const bcore_arr_st_s* args ); \
+  static inline opal_eval_nop_result_s* opal_eval_nop_show_param_s_run( const opal_eval_nop_show_param_s* o, opal_eval_nop_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
+#define TYPEOF_opal_eval_nop_arr_s 271786002
+#define BETH_EXPAND_ITEM_opal_eval_nop_arr_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_arr_s ) \
+    {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_eval_nop, );}; \
+  static inline opal_eval_nop_arr_s* opal_eval_nop_arr_s_set_space( opal_eval_nop_arr_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_opal_eval_nop_arr_s, ( bcore_array* )o, size ); return o; } \
+  static inline opal_eval_nop_arr_s* opal_eval_nop_arr_s_set_size( opal_eval_nop_arr_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_opal_eval_nop_arr_s, ( bcore_array* )o, size ); return o; } \
+  static inline opal_eval_nop_arr_s* opal_eval_nop_arr_s_clear( opal_eval_nop_arr_s* o ) { bcore_array_t_set_space( TYPEOF_opal_eval_nop_arr_s, ( bcore_array* )o, 0 ); return o; } \
+  static inline opal_eval_nop* opal_eval_nop_arr_s_push_c( opal_eval_nop_arr_s* o, const opal_eval_nop* v ) { bcore_array_t_push( TYPEOF_opal_eval_nop_arr_s, ( bcore_array* )o, sr_awc( v ) ); return o->data[ o->size - 1 ]; } \
+  static inline opal_eval_nop* opal_eval_nop_arr_s_push_d( opal_eval_nop_arr_s* o,       opal_eval_nop* v ) { bcore_array_t_push( TYPEOF_opal_eval_nop_arr_s, ( bcore_array* )o, sr_asd( v ) ); return o->data[ o->size - 1 ]; } \
+  static inline opal_eval_nop* opal_eval_nop_arr_s_push_t( opal_eval_nop_arr_s* o, tp_t t ) \
+  { \
+      bcore_trait_assert_satisfied_type( TYPEOF_opal_eval_nop, t ); \
+      bcore_array_t_push( TYPEOF_opal_eval_nop_arr_s, ( bcore_array* )o, sr_t_create( t ) ); \
+      return o->data[ o->size - 1 ]; \
+  }
+#define TYPEOF_opal_eval_nop_set_s 802013493
+#define BETH_EXPAND_ITEM_opal_eval_nop_set_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_set_s ) \
+    {aware_t _;opal_eval_nop_param_s param;opal_eval_nop_arr_s arr;}; \
+  static inline void opal_eval_nop_set_s_set_param( opal_eval_nop_set_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
+  s2_t opal_eval_nop_set_s_main( opal_eval_nop_set_s* o, const bcore_arr_st_s* args ); \
+  opal_eval_nop_result_s* opal_eval_nop_set_s_run( const opal_eval_nop_set_s* o, opal_eval_nop_result_s* result );
+#define TYPEOF_opal_eval_nop_ar1_s 626857419
+#define BETH_EXPAND_ITEM_opal_eval_nop_ar1_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_ar1_s ) \
+    {aware_t _;opal_eval_nop_param_s param;opal_context* context;}; \
+  opal_eval_nop_result_s* opal_eval_nop_ar1_s_run( const opal_eval_nop_ar1_s* o, opal_eval_nop_result_s* result ); \
+  static inline void opal_eval_nop_ar1_s_set_param( opal_eval_nop_ar1_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
+  s2_t opal_eval_nop_ar1_s_main( opal_eval_nop_ar1_s* o, const bcore_arr_st_s* args );
+#define TYPEOF_opal_eval_nop_ar2_s 3619862610
+#define BETH_EXPAND_ITEM_opal_eval_nop_ar2_s \
+  BCORE_DECLARE_OBJECT( opal_eval_nop_ar2_s ) \
+    {aware_t _;opal_eval_nop_param_s param;opal_context* context;}; \
+  opal_eval_nop_result_s* opal_eval_nop_ar2_s_run( const opal_eval_nop_ar2_s* o, opal_eval_nop_result_s* result ); \
+  static inline void opal_eval_nop_ar2_s_set_param( opal_eval_nop_ar2_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
+  s2_t opal_eval_nop_ar2_s_main( opal_eval_nop_ar2_s* o, const bcore_arr_st_s* args );
+#define BETH_EXPAND_GROUP_opal_eval_nop \
+  BCORE_FORWARD_OBJECT( opal_eval_nop ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_result_s ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_param_s ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_generator_s ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_show_param_s ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_arr_s ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_set_s ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_ar1_s ); \
+  BCORE_FORWARD_OBJECT( opal_eval_nop_ar2_s ); \
+  typedef void (*opal_eval_nop_set_param)( opal_eval_nop* o, const opal_eval_nop_param_s* param ); \
+  typedef opal_eval_nop_result_s* (*opal_eval_nop_run)( const opal_eval_nop* o, opal_eval_nop_result_s* result ); \
+  BCORE_DECLARE_SPECT( opal_eval_nop ) \
+  { \
+      bcore_spect_header_s header; \
+      opal_eval_nop_set_param set_param; \
+      opal_eval_nop_run run; \
+  }; \
+  static inline opal_eval_nop* opal_eval_nop_t_create( tp_t t ) { bcore_trait_assert_satisfied_type( TYPEOF_opal_eval_nop, t ); return ( opal_eval_nop* )bcore_inst_t_create( t ); } \
+  static inline bl_t opal_eval_nop_t_is_trait_of( tp_t t ) { return bcore_trait_is_of( t, TYPEOF_opal_eval_nop ); } \
+  BCORE_DECLARE_VIRTUAL_AWARE_OBJECT( opal_eval_nop ) \
+  static inline bl_t opal_eval_nop_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_opal_eval_nop ); } \
+  BETH_EXPAND_ITEM_opal_eval_nop_result_s \
+  BETH_EXPAND_ITEM_opal_eval_nop_param_s \
+  static inline void opal_eval_nop_a_set_param( opal_eval_nop* o, const opal_eval_nop_param_s* param ) { const opal_eval_nop_s* p = opal_eval_nop_s_get_aware( o ); assert( p->set_param ); p->set_param( o, param ); } \
+  static inline bl_t opal_eval_nop_a_defines_set_param( const opal_eval_nop* o ) { return opal_eval_nop_s_get_aware( o )->set_param != NULL; } \
+  static inline opal_eval_nop_result_s* opal_eval_nop_a_run( const opal_eval_nop* o, opal_eval_nop_result_s* result ) { const opal_eval_nop_s* p = opal_eval_nop_s_get_aware( o ); assert( p->run ); return p->run( o, result ); } \
+  static inline bl_t opal_eval_nop_a_defines_run( const opal_eval_nop* o ) { return opal_eval_nop_s_get_aware( o )->run != NULL; } \
+  BETH_EXPAND_ITEM_opal_eval_nop_generator_s \
+  BETH_EXPAND_ITEM_opal_eval_nop_show_param_s \
+  BETH_EXPAND_ITEM_opal_eval_nop_arr_s \
+  BETH_EXPAND_ITEM_opal_eval_nop_set_s \
+  BETH_EXPAND_ITEM_opal_eval_nop_ar1_s \
+  BETH_EXPAND_ITEM_opal_eval_nop_ar2_s
+
+/**********************************************************************************************************************/
 
 vd_t opal_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // OPAL_PLANTED_H
-// BETH_PLANT_SIGNATURE 1453823227
+// BETH_PLANT_SIGNATURE 3080972944

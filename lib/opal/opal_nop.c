@@ -874,6 +874,7 @@ bl_t opal_nop_ar2_cyclic_s_solve( const opal_nop_ar2_cyclic_s* o, opal_context* 
 bl_t opal_nop_ar2_rands_s_solve( const opal_nop_ar2_rands_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result )
 {
     BLM_INIT();
+    ASSERT( context );
     opal_holor_s_attach( &result->h, ( a[0] && a[1] ) ? opal_holor_s_clone( a[1] ) : NULL );
     if( result->h )
     {

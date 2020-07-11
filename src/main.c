@@ -6,6 +6,7 @@ int main( int argc, char** argv )
 {
     BETH_PLANT_USE( badapt_dev );
     BETH_PLANT_USE( lion );
+    BETH_PLANT_USE( opal );
 
     /// testing flects and spects
     //bcore_flect_parse_all_flects();

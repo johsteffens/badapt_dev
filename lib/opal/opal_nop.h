@@ -695,10 +695,10 @@ group :ar1 = retrievable
      *  Evaluateds only the shape of the argument to determine output shape.
      *  Seeding and rval update is system-internal.
      *  The resulting mcode randomizer updates its seed after each call (thread safe)
+     *  See also: ar0_rand, bhvm_vop_ar0_rand_s
      */
     stamp :rand =
     {
-        u3_t rseed = 1234;
         func :: :symbol   = { return "rand"; };
         func :: :priority = { return 8; };
         func :: :solve;
