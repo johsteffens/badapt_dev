@@ -17,10 +17,6 @@
 
 /// node operator
 
-// TODO
-// resolve TODO's in code (*.c *.h)
-//
-
 /**********************************************************************************************************************/
 
 #ifndef OPAL_NOP_H
@@ -34,12 +30,21 @@
 
 /**********************************************************************************************************************/
 
-//TODO: deprecate forward declaration
 BCORE_FORWARD_OBJECT( opal_net_node_s );
 BCORE_FORWARD_OBJECT( opal_net_node_adl_s );
 
 BETH_PLANT_DEFINE_GROUP( opal_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+stamp :context = aware opal_context
+{
+    aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
+    func opal_context:get_prsg = { return o->prsg; };
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// tracks...
 
@@ -146,9 +151,10 @@ feature 'a' bl_t eci( const ) = { return false; };
   */
 feature 'a' bl_t solve( const, opal_context* context, opal_holor_s** a, :solve_result_s* result ) = solve__;
 
-// TODO: work into solve or settle using context
-/** Node-level solving. */
-feature 'a' void solve_node( mutable, opal_net_node_s* node, opal_net_node_adl_s* deferred ); //= solve_node__; // TODO: bind function
+/** Node-level solving.
+ *  Implemented in opel_net.c
+ */
+feature 'a' void solve_node( mutable, opal_net_node_s* node, opal_net_node_adl_s* deferred ) = solve_node__;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -930,7 +936,7 @@ group :ar2 = retrievable
         func :: :priority = { return 8; };
         func :: :is_cyclic = { return true; };
         func :: :solve;
-        //func :: :solve_node; // TODO: bind function
+        func :: :solve_node;  // Implemented in opal_net.c
         func :: :mcode_push_ap_track = { ERR_fa( "Not implemented." ); };
         func :: :mcode_push_dp_track = { ERR_fa( "Not implemented." ); };
         func :: :mcode_push_dp_holor = { ERR_fa( "Not implemented." ); return -1; };
@@ -963,8 +969,10 @@ group :ar2 = retrievable
             return false;
         };
 
-        /// Explicitly solves node with this operator; creates operator ar1_reshape replacing uplink channel 0 with channel 1.
-        // func :: :solve_node; // TODO: bind function
+        /** Explicitly solves node with this operator; creates operator ar1_reshape replacing uplink channel 0 with channel 1.
+         *  Implemented in opel_net.c
+         */
+        func :: :solve_node;
     };
 
 };

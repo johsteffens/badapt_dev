@@ -284,7 +284,7 @@ lion_frame_s* lion_frame_s_setup_from_source( lion_frame_s* o, bcore_source* sou
          *  We therefore construct an mnode formally to provide a holor for the input channel
          *  with the necessary setup and shelve routines.
          */
-        if( !node->mnode ) node_s_isolated_mcode_push( node, o->mcf );
+        if( !node->mnode ) lion_net_node_s_isolated_mcode_push( node, o->mcf );
 
         ASSERT( node->mnode->ax0 >= 0 );
         lion_frame_hidx_s_push( &o->hidx_en, node->mnode->ax0 );

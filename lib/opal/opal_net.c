@@ -15,7 +15,7 @@
 
 /**********************************************************************************************************************/
 
-#include "lion_net.h"
+#include "opal_net.h"
 
 /**********************************************************************************************************************/
 /// Prototypes
@@ -38,16 +38,16 @@
  *
  *  Returns 0 in case of success. !=0 is considered an error
  */
-s2_t lion_ctr_node_s_node_process
+s2_t opal_ctr_node_s_node_process
 (
-    lion_ctr_node_s* o,
-    lion_sem_cell_s* cell,
+    opal_ctr_node_s* o,
+    opal_sem_cell_s* cell,
     bl_t enter,
     bl_t exit_through_wrapper,
-    lion_ctr_node_s** node_out
+    opal_ctr_node_s** node_out
 )
 {
-    lion_ctr_node_s* node = NULL;
+    opal_ctr_node_s* node = NULL;
     if( enter )
     {
         for( sz_t i = 0; i < o->size; i++ )
@@ -59,7 +59,7 @@ s2_t lion_ctr_node_s_node_process
         }
         if( !node )
         {
-            node = lion_ctr_node_s_push_d( o, lion_ctr_node_s_create() );
+            node = opal_ctr_node_s_push_d( o, opal_ctr_node_s_create() );
             node->cell = cell;
             node->parent = o;
         }
@@ -86,9 +86,9 @@ s2_t lion_ctr_node_s_node_process
             {
                 node = node->parent;
 
-                if( exit_through_wrapper && node && lion_sem_cell_s_is_wrapper( node->cell ) )
+                if( exit_through_wrapper && node && opal_sem_cell_s_is_wrapper( node->cell ) )
                 {
-                    while( node && lion_sem_cell_s_is_wrapper( node->cell ) ) node = node->parent;
+                    while( node && opal_sem_cell_s_is_wrapper( node->cell ) ) node = node->parent;
                 }
 
                 *node_out = node;
@@ -104,22 +104,22 @@ s2_t lion_ctr_node_s_node_process
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-s2_t lion_ctr_tree_s_tree_process
+s2_t opal_ctr_tree_s_tree_process
 (
-    lion_ctr_tree_s* o,
-    lion_sem_cell_s* cell,
+    opal_ctr_tree_s* o,
+    opal_sem_cell_s* cell,
     bl_t enter,
     bl_t exit_through_wrapper,
-    lion_ctr_node_s* node_in,
-    lion_ctr_node_s** node_out
+    opal_ctr_node_s* node_in,
+    opal_ctr_node_s** node_out
 )
 {
     if( enter )
     {
-        lion_ctr_node_s* node = NULL;
+        opal_ctr_node_s* node = NULL;
         if( !o->root )
         {
-            o->root = lion_ctr_node_s_create();
+            o->root = opal_ctr_node_s_create();
             o->root->id = o->id_base++;
             o->root->cell = cell;
             node = o->root;
@@ -133,7 +133,7 @@ s2_t lion_ctr_tree_s_tree_process
         }
         else
         {
-            s2_t ret = lion_ctr_node_s_node_process( node_in, cell, enter, false, &node );
+            s2_t ret = opal_ctr_node_s_node_process( node_in, cell, enter, false, &node );
             if( ret ) return ret;
             if( node->id < 0 ) node->id = o->id_base++;
             *node_out = node;
@@ -142,18 +142,18 @@ s2_t lion_ctr_tree_s_tree_process
     }
     else
     {
-        return lion_ctr_node_s_node_process( node_in, cell, enter, exit_through_wrapper, node_out );
+        return opal_ctr_node_s_node_process( node_in, cell, enter, exit_through_wrapper, node_out );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bcore_source_point_s* lion_ctr_node_s_get_nearest_source_point( lion_ctr_node_s* o )
+bcore_source_point_s* opal_ctr_node_s_get_nearest_source_point( opal_ctr_node_s* o )
 {
     if( !o ) return NULL;
     if( !o->cell ) return NULL;
     if( o->cell->source_point.source ) return &o->cell->source_point;
-    return lion_ctr_node_s_get_nearest_source_point( o->parent );
+    return opal_ctr_node_s_get_nearest_source_point( o->parent );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ bcore_source_point_s* lion_ctr_node_s_get_nearest_source_point( lion_ctr_node_s*
 // net_node
 
 /// recursive trace; exits when the enter membrane of the root cell is reached
-void lion_net_node_s_trace_to_sink( lion_net_node_s* o, sz_t indent, bcore_sink* sink )
+void opal_net_node_s_trace_to_sink( opal_net_node_s* o, sz_t indent, bcore_sink* sink )
 {
     if( !o )
     {
@@ -178,13 +178,13 @@ void lion_net_node_s_trace_to_sink( lion_net_node_s* o, sz_t indent, bcore_sink*
 
     if( o->result )
     {
-        lion_holor_s_brief_to_sink( o->result->h, sink );
+        opal_holor_s_brief_to_sink( o->result->h, sink );
     }
 
     sc_t symbol = "";
     if( o->nop )
     {
-        sc_t symbol = lion_nop_a_symbol( o->nop );
+        sc_t symbol = opal_nop_a_symbol( o->nop );
         if( !symbol ) symbol = ifnameof( o->nop->_ );
         bcore_sink_a_push_fa( sink, "(#<sc_t>)", symbol );
     }
@@ -199,8 +199,8 @@ void lion_net_node_s_trace_to_sink( lion_net_node_s* o, sz_t indent, bcore_sink*
         {
             sz_t incr = 4;
             bcore_sink_a_push_fa( sink, "\n#rn{ }#rn{-}", indent, incr );
-            lion_net_node_s* node = o->upls.data[ i ]->node;
-            lion_net_node_s_trace_to_sink( node, indent + incr, sink );
+            opal_net_node_s* node = o->upls.data[ i ]->node;
+            opal_net_node_s_trace_to_sink( node, indent + incr, sink );
         }
     }
 
@@ -209,7 +209,7 @@ void lion_net_node_s_trace_to_sink( lion_net_node_s* o, sz_t indent, bcore_sink*
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_node_s_err_fa( lion_net_node_s* o, sc_t format, ... )
+void opal_net_node_s_err_fa( opal_net_node_s* o, sc_t format, ... )
 {
     va_list args;
     va_start( args, format );
@@ -227,14 +227,14 @@ void lion_net_node_s_err_fa( lion_net_node_s* o, sc_t format, ... )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// calls op-solve and sets node-holor
-static void net_node_s_nop_solve( lion_net_node_s* o, lion_holor_s** arg_h )
+static void net_node_s_nop_solve( opal_net_node_s* o, opal_holor_s** arg_h )
 {
-    lion_nop_solve_result_s_attach( &o->result, lion_nop_solve_result_s_create() );
+    opal_nop_solve_result_s_attach( &o->result, opal_nop_solve_result_s_create() );
 
-    if( !lion_nop_a_solve( o->nop, arg_h, o->result ) )
+    if( !opal_nop_a_solve( o->nop, o->context, arg_h, o->result ) )
     {
-        sz_t arity = lion_nop_a_arity( o->nop );
-        sc_t name = lion_nop_a_symbol( o->nop );
+        sz_t arity = opal_nop_a_arity( o->nop );
+        sc_t name = opal_nop_a_symbol( o->nop );
         if( !name ) name = ifnameof( o->nop->_ );
         st_s* msg = st_s_create();
         st_s_push_fa( msg, "Operator '#<sc_t>' failed:", name );
@@ -245,7 +245,7 @@ static void net_node_s_nop_solve( lion_net_node_s* o, lion_holor_s** arg_h )
             st_s_push_fa( msg, "arg[#<sz_t>]: ", i );
             if( arg_h[ i ] )
             {
-                lion_holor_s_brief_to_sink( arg_h[ i ], (bcore_sink*)msg );
+                opal_holor_s_brief_to_sink( arg_h[ i ], (bcore_sink*)msg );
             }
             else
             {
@@ -253,23 +253,23 @@ static void net_node_s_nop_solve( lion_net_node_s* o, lion_holor_s** arg_h )
             }
             st_s_push_fa( msg, "\n" );
         }
-        lion_net_node_s_err_fa( o, "#<sc_t>", msg->sc );
+        opal_net_node_s_err_fa( o, "#<sc_t>", msg->sc );
         st_s_discard( msg );
     }
 
     if( !o->result->h )
     {
-        lion_nop_solve_result_s_detach( &o->result );
+        opal_nop_solve_result_s_detach( &o->result );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// s. lion_nop_solve_node__
-void lion_net_node_s_solve( lion_net_node_s* o, lion_net_node_adl_s* deferred )
+/// s. opal_nop_solve_node__
+void opal_net_node_s_solve( opal_net_node_s* o, opal_net_node_adl_s* deferred )
 {
-    if( !o->nop ) lion_net_node_s_err_fa( o, "Node has no operator." );
-    lion_nop_a_solve_node( o->nop, o, deferred );
+    if( !o->nop ) opal_net_node_s_err_fa( o, "Node has no operator." );
+    opal_nop_a_solve_node( o->nop, o, deferred );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -279,10 +279,10 @@ void lion_net_node_s_solve( lion_net_node_s* o, lion_net_node_adl_s* deferred )
  *  If a holor can be computed (vacant or determined), the solve-route is considered finished
  *  and will not be processed again. A detached result (o->h == NULL) causes a route to be reentered.
  *  If operator->solve settles, all uplinks are removed and the operator is switched to a final arity0
- *  version via lion_op_a_settle.
+ *  version via opal_op_a_settle.
  *  After settling, the graph can be run through an optimizer minimizing its structure.
  */
-void lion_nop_solve_node__( lion_nop* o, lion_net_node_s* node, lion_net_node_adl_s* deferred )
+void opal_nop_solve_node__( opal_nop* o, opal_net_node_s* node, opal_net_node_adl_s* deferred )
 {
     if( node->flag ) return; // cyclic link
 
@@ -290,22 +290,22 @@ void lion_nop_solve_node__( lion_nop* o, lion_net_node_s* node, lion_net_node_ad
 
     if( node->result ) return;
 
-    sz_t arity = lion_nop_a_arity( o );
+    sz_t arity = opal_nop_a_arity( o );
     if( arity != node->upls.size )
     {
-        lion_net_node_s_err_fa( node, "Operator arity #<sz_t> differs from node arity #<sz_t>", arity, node->upls.size );
+        opal_net_node_s_err_fa( node, "Operator arity #<sz_t> differs from node arity #<sz_t>", arity, node->upls.size );
     }
 
-    #define lion_MAX_ARITY 4 /* increase this number when assertion below fails */
-    ASSERT( arity <= lion_MAX_ARITY );
-    lion_holor_s* arg_h[ lion_MAX_ARITY ] = { NULL };
+    #define opal_MAX_ARITY 4 /* increase this number when assertion below fails */
+    ASSERT( arity <= opal_MAX_ARITY );
+    opal_holor_s* arg_h[ opal_MAX_ARITY ] = { NULL };
 
     for( sz_t i = 0; i < arity; i++ )
     {
-        lion_net_node_s* arg_n = node->upls.data[ i ]->node;
+        opal_net_node_s* arg_n = node->upls.data[ i ]->node;
         if( arg_n )
         {
-            if( !arg_n->result ) lion_net_node_s_solve( arg_n, deferred );
+            if( !arg_n->result ) opal_net_node_s_solve( arg_n, deferred );
             ASSERT( arg_n->result );
             arg_h[ i ] = arg_n->result->h;
             ASSERT( arg_h[ i ] );
@@ -316,8 +316,8 @@ void lion_nop_solve_node__( lion_nop* o, lion_net_node_s* node, lion_net_node_ad
 
     if( node->result->settled )
     {
-        lion_nop_a_settle( o, node->result, &node->nop, &node->result );
-        lion_net_links_s_clear( &node->upls );
+        opal_nop_a_settle( o, node->context, node->result, &node->nop, &node->result );
+        opal_net_links_s_clear( &node->upls );
         if( !node->result->reducible )
         {
             if( node->result->h ) bhvm_value_s_clear( &node->result->h->h.v );
@@ -329,7 +329,7 @@ void lion_nop_solve_node__( lion_nop* o, lion_net_node_s* node, lion_net_node_ad
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_nop_ar2_cyclic_s_solve_node( lion_nop_ar2_cyclic_s* o, lion_net_node_s* node, lion_net_node_adl_s* deferred )
+void opal_nop_ar2_cyclic_s_solve_node( opal_nop_ar2_cyclic_s* o, opal_net_node_s* node, opal_net_node_adl_s* deferred )
 {
     if( node->flag ) return; // cyclic link
 
@@ -337,22 +337,22 @@ void lion_nop_ar2_cyclic_s_solve_node( lion_nop_ar2_cyclic_s* o, lion_net_node_s
 
     ASSERT( node->upls.size == 2 );
 
-    lion_holor_s* arg_h[ 2 ] = { NULL };
-    lion_net_node_s* arg_n = NULL;
+    opal_holor_s* arg_h[ 2 ] = { NULL };
+    opal_net_node_s* arg_n = NULL;
 
     arg_n = node->upls.data[ 0 ]->node;
-    lion_net_node_s_solve( arg_n, NULL );
+    opal_net_node_s_solve( arg_n, NULL );
     arg_h[ 0 ] = arg_n->result->h;
     net_node_s_nop_solve( node, arg_h );
 
     if( deferred )
     {
-        lion_net_node_adl_s_push_d( deferred, bcore_fork( node ) );
+        opal_net_node_adl_s_push_d( deferred, bcore_fork( node ) );
     }
     else
     {
         arg_n = node->upls.data[ 1 ]->node;
-        lion_net_node_s_solve( arg_n, NULL );
+        opal_net_node_s_solve( arg_n, NULL );
         arg_h[ 1 ] = arg_n->result->h;
         net_node_s_nop_solve( node, arg_h );
     }
@@ -366,7 +366,7 @@ void lion_nop_ar2_cyclic_s_solve_node( lion_nop_ar2_cyclic_s* o, lion_net_node_s
  *  Shape is extracted from the uplink channel 0.
  *  Channel 0 is then replaced by channel 1.
  */
-void lion_nop_ar2_reshape_s_solve_node( lion_nop_ar2_reshape_s* o, lion_net_node_s* node, lion_net_node_adl_s* deferred )
+void opal_nop_ar2_reshape_s_solve_node( opal_nop_ar2_reshape_s* o, opal_net_node_s* node, opal_net_node_adl_s* deferred )
 {
     if( node->flag ) return; // cyclic link
 
@@ -375,31 +375,31 @@ void lion_nop_ar2_reshape_s_solve_node( lion_nop_ar2_reshape_s* o, lion_net_node
     if( node->result ) return;
 
     ASSERT( node->upls.size == 2 );
-    lion_net_node_s* arg0 = node->upls.data[ 0 ]->node;
-    lion_net_node_s* arg1 = node->upls.data[ 1 ]->node;
+    opal_net_node_s* arg0 = node->upls.data[ 0 ]->node;
+    opal_net_node_s* arg1 = node->upls.data[ 1 ]->node;
 
     if( arg0 && arg1 )
     {
-        if( !arg0->result ) lion_net_node_s_solve( arg0, deferred );
-        if( !arg1->result ) lion_net_node_s_solve( arg1, deferred );
+        if( !arg0->result ) opal_net_node_s_solve( arg0, deferred );
+        if( !arg1->result ) opal_net_node_s_solve( arg1, deferred );
 
         ASSERT( arg0->result && arg0->result->h );
         ASSERT( arg1->result && arg1->result->h );
 
-        lion_nop_ar1_reshape_s* ar1_reshape = lion_nop_ar1_reshape_s_create();
+        opal_nop_ar1_reshape_s* ar1_reshape = opal_nop_ar1_reshape_s_create();
         bhvm_shape_s_copy( &ar1_reshape->shape, &arg0->result->h->h.s );
 
-        lion_net_links_s_clear( &node->upls );
-        lion_net_links_s_push_d( &node->upls, lion_net_link_s_create() );
+        opal_net_links_s_clear( &node->upls );
+        opal_net_links_s_push_d( &node->upls, opal_net_link_s_create() );
         node->upls.data[ 0 ]->node = arg1;
 
-        lion_nop_a_attach( &node->nop, ( lion_nop* )ar1_reshape );
+        opal_nop_a_attach( &node->nop, ( opal_nop* )ar1_reshape );
         net_node_s_nop_solve( node, &arg1->result->h );
 
         if( node->result->settled )
         {
-            lion_nop_a_settle( (lion_nop*)o, node->result, &node->nop, &node->result );
-            lion_net_links_s_clear( &node->upls );
+            opal_nop_a_settle( (opal_nop*)o, node->context, node->result, &node->nop, &node->result );
+            opal_net_links_s_clear( &node->upls );
         }
     }
 
@@ -409,9 +409,9 @@ void lion_nop_ar2_reshape_s_solve_node( lion_nop_ar2_reshape_s* o, lion_net_node
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Outputs the graph structure in text form to sink
-void lion_net_node_s_graph_to_sink( lion_net_node_s* o, bcore_sink* sink )
+void opal_net_node_s_graph_to_sink( opal_net_node_s* o, bcore_sink* sink )
 {
-    lion_net_node_s_trace_to_sink( o, 0, sink );
+    opal_net_node_s_trace_to_sink( o, 0, sink );
     bcore_sink_a_push_fa( sink, "\n" );
 }
 
@@ -420,15 +420,15 @@ void lion_net_node_s_graph_to_sink( lion_net_node_s* o, bcore_sink* sink )
 /** Recursively sets downlinks for all non-flagged uplinks.
  *  Assumes initial state was normal.
  */
-void lion_net_node_s_set_downlinks( lion_net_node_s* o )
+void opal_net_node_s_set_downlinks( opal_net_node_s* o )
 {
     if( o->flag ) return;
     o->flag = true;
     BFOR_EACH( i, &o->upls )
     {
-        lion_net_node_s* node = o->upls.data[ i ]->node;
-        lion_net_links_s_push( &node->dnls )->node = o;
-        lion_net_node_s_set_downlinks( node );
+        opal_net_node_s* node = o->upls.data[ i ]->node;
+        opal_net_links_s_push( &node->dnls )->node = o;
+        opal_net_node_s_set_downlinks( node );
     }
 }
 
@@ -437,17 +437,17 @@ void lion_net_node_s_set_downlinks( lion_net_node_s* o )
 /** Recursively skips identities.
  *  Assumes initial state was normal and downlinks not set
  */
-void lion_net_node_s_skip_identities( lion_net_node_s* o )
+void opal_net_node_s_skip_identities( opal_net_node_s* o )
 {
     if( o->flag ) return;
     o->flag = true;
     BFOR_EACH( i, &o->upls )
     {
-        lion_net_node_s* node = o->upls.data[ i ]->node;
-        while( node && node->nop && node->nop->_ == TYPEOF_lion_nop_ar1_identity_s ) node = node->upls.data[ 0 ]->node;
+        opal_net_node_s* node = o->upls.data[ i ]->node;
+        while( node && node->nop && node->nop->_ == TYPEOF_opal_nop_ar1_identity_s ) node = node->upls.data[ 0 ]->node;
         ASSERT( node );
         o->upls.data[ i ]->node = node;
-        lion_net_node_s_skip_identities( node );
+        opal_net_node_s_skip_identities( node );
     }
     o->flag = false;
 }
@@ -457,11 +457,11 @@ void lion_net_node_s_skip_identities( lion_net_node_s* o )
 /** Recursively sets flags for all nodes reachable via uplink.
  *  Assumes initial state was normal.
  */
-void lion_net_node_s_set_flags( lion_net_node_s* o )
+void opal_net_node_s_set_flags( opal_net_node_s* o )
 {
     if( o->flag ) return;
     o->flag = true;
-    BFOR_EACH( i, &o->upls ) lion_net_node_s_set_flags( o->upls.data[ i ]->node );
+    BFOR_EACH( i, &o->upls ) opal_net_node_s_set_flags( o->upls.data[ i ]->node );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -471,12 +471,12 @@ void lion_net_node_s_set_flags( lion_net_node_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_cell_s_solve( lion_net_cell_s* o )
+void opal_net_cell_s_solve( opal_net_cell_s* o )
 {
     BLM_INIT();
-    lion_net_node_adl_s* deferred = BLM_CREATE( lion_net_node_adl_s );
-    BFOR_EACH( i, &o->excs ) lion_net_node_s_solve( o->excs.data[ i ], deferred );
-    BFOR_EACH( i, deferred ) lion_net_node_s_solve( deferred->data[ i ], NULL );
+    opal_net_node_adl_s* deferred = BLM_CREATE( opal_net_node_adl_s );
+    BFOR_EACH( i, &o->excs ) opal_net_node_s_solve( o->excs.data[ i ], deferred );
+    BFOR_EACH( i, deferred ) opal_net_node_s_solve( deferred->data[ i ], NULL );
     BLM_DOWN();
 }
 
@@ -488,7 +488,7 @@ void lion_net_cell_s_solve( lion_net_cell_s* o )
  *  Node id is identical to body-index.
  */
 static s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 ) { return ( *( vd_t* )v2 > *( vd_t* )v1 ) ? 1 : ( *( vd_t* )v2 < *( vd_t* )v1 ) ? -1 : 0; }
-void lion_net_cell_s_normalize( lion_net_cell_s* o )
+void opal_net_cell_s_normalize( opal_net_cell_s* o )
 {
     bcore_arr_vd_s* arr = bcore_arr_vd_s_create();
     BFOR_EACH( i, &o->body ) bcore_arr_vd_s_push( arr, o->body.data[ i ] );
@@ -524,10 +524,10 @@ void lion_net_cell_s_normalize( lion_net_cell_s* o )
     BFOR_EACH( i, arr ) arr->data[ i ] = bcore_fork( arr->data[ i ] );
 
     // new body
-    lion_net_nodes_s_set_size( &o->body, 0 );
+    opal_net_nodes_s_set_size( &o->body, 0 );
     for( sz_t i = 0; i < arr->size; i++ )
     {
-        lion_net_node_s* node = lion_net_nodes_s_push_d( &o->body, arr->data[ i ] );
+        opal_net_node_s* node = opal_net_nodes_s_push_d( &o->body, arr->data[ i ] );
         assert( node == arr->data[ i ] );
         node->id = i;
         node->flag = false;
@@ -539,16 +539,16 @@ void lion_net_cell_s_normalize( lion_net_cell_s* o )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Checks consistency of a normalized cell
-bl_t lion_net_cell_s_is_consistent( const lion_net_cell_s* o )
+bl_t opal_net_cell_s_is_consistent( const opal_net_cell_s* o )
 {
     BFOR_EACH( i, &o->body )
     {
-        const lion_net_node_s* node = o->body.data[ i ];
+        const opal_net_node_s* node = o->body.data[ i ];
         if( node->flag ) return false;
         if( node->id != i ) return false;
         BFOR_EACH( i, &node->upls )
         {
-            const lion_net_node_s* node2 = node->upls.data[ i ]->node;
+            const opal_net_node_s* node2 = node->upls.data[ i ]->node;
             if( node2->id < 0 ) return false;
             if( node2->id >= o->body.size ) return false;
             if( node2 != o->body.data[ node2->id ] ) return false;
@@ -556,7 +556,7 @@ bl_t lion_net_cell_s_is_consistent( const lion_net_cell_s* o )
 
         BFOR_EACH( i, &node->dnls )
         {
-            const lion_net_node_s* node2 = node->dnls.data[ i ]->node;
+            const opal_net_node_s* node2 = node->dnls.data[ i ]->node;
             if( node2->id < 0 ) return false;
             if( node2->id >= o->body.size ) return false;
             if( node2 != o->body.data[ node2->id ] ) return false;
@@ -566,7 +566,7 @@ bl_t lion_net_cell_s_is_consistent( const lion_net_cell_s* o )
 
     BFOR_EACH( i, &o->encs )
     {
-        const lion_net_node_s* node2 = o->encs.data[ i ];
+        const opal_net_node_s* node2 = o->encs.data[ i ];
         if( node2->id < 0 ) return false;
         if( node2->id >= o->body.size ) return false;
         if( node2 != o->body.data[ node2->id ] ) return false;
@@ -575,7 +575,7 @@ bl_t lion_net_cell_s_is_consistent( const lion_net_cell_s* o )
 
     BFOR_EACH( i, &o->excs )
     {
-        const lion_net_node_s* node2 = o->excs.data[ i ];
+        const opal_net_node_s* node2 = o->excs.data[ i ];
         if( node2->id < 0 ) return false;
         if( node2->id >= o->body.size ) return false;
         if( node2 != o->body.data[ node2->id ] ) return false;
@@ -587,22 +587,22 @@ bl_t lion_net_cell_s_is_consistent( const lion_net_cell_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_cell_s_copy_x( lion_net_cell_s* o )
+void opal_net_cell_s_copy_x( opal_net_cell_s* o )
 {
     BFOR_EACH( i, &o->body )
     {
-        const lion_net_node_s* node = o->body.data[ i ];
+        const opal_net_node_s* node = o->body.data[ i ];
         ASSERT( node->id == i );
         BFOR_EACH( i, &node->upls )
         {
-            const lion_net_node_s* node2 = node->upls.data[ i ]->node;
+            const opal_net_node_s* node2 = node->upls.data[ i ]->node;
             ASSERT( node2->id >= 0 );
             ASSERT( node2->id < o->body.size );
             node->upls.data[ i ]->node = o->body.data[ node2->id ];
         }
         BFOR_EACH( i, &node->dnls )
         {
-            const lion_net_node_s* node2 = node->dnls.data[ i ]->node;
+            const opal_net_node_s* node2 = node->dnls.data[ i ]->node;
             ASSERT( node2->id >= 0 );
             ASSERT( node2->id < o->body.size );
             node->dnls.data[ i ]->node = o->body.data[ node2->id ];
@@ -614,7 +614,7 @@ void lion_net_cell_s_copy_x( lion_net_cell_s* o )
         sz_t id = o->encs.data[ i ]->id;
         ASSERT( id >= 0 );
         ASSERT( id < o->body.size );
-        lion_net_node_s_detach( &o->encs.data[ i ] );
+        opal_net_node_s_detach( &o->encs.data[ i ] );
         o->encs.data[ i ] = bcore_fork( o->body.data[ id ] );
     }
 
@@ -623,20 +623,20 @@ void lion_net_cell_s_copy_x( lion_net_cell_s* o )
         sz_t id = o->excs.data[ i ]->id;
         ASSERT( id >= 0 );
         ASSERT( id < o->body.size );
-        lion_net_node_s_detach( &o->excs.data[ i ] );
+        opal_net_node_s_detach( &o->excs.data[ i ] );
         o->excs.data[ i ] = bcore_fork( o->body.data[ id ] );
     }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_cell_s_set_downlinks( lion_net_cell_s* o )
+void opal_net_cell_s_set_downlinks( opal_net_cell_s* o )
 {
-    lion_net_cell_s_clear_flags( o );
-    lion_net_cell_s_clear_downlinks( o );
-    BFOR_EACH( i, &o->excs ) lion_net_node_s_set_downlinks( o->excs.data[ i ] );
-    lion_net_cell_s_clear_flags( o );
-    assert( lion_net_cell_s_is_consistent( o ) );
+    opal_net_cell_s_clear_flags( o );
+    opal_net_cell_s_clear_downlinks( o );
+    BFOR_EACH( i, &o->excs ) opal_net_node_s_set_downlinks( o->excs.data[ i ] );
+    opal_net_cell_s_clear_flags( o );
+    assert( opal_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -644,29 +644,36 @@ void lion_net_cell_s_set_downlinks( lion_net_cell_s* o )
 /** Removes all body-nodes not reachable via uplink from exit channels
  *  Creates a warning in case an entry channel is unreachable.
  */
-void lion_net_cell_s_remove_unreachable_nodes( lion_net_cell_s* o )
+void opal_net_cell_s_remove_unreachable_nodes( opal_net_cell_s* o )
 {
-    lion_net_cell_s_clear_flags( o );
-    BFOR_EACH( i, &o->excs ) lion_net_node_s_set_flags( o->excs.data[ i ] );
+    opal_net_cell_s_clear_flags( o );
+    BFOR_EACH( i, &o->excs ) opal_net_node_s_set_flags( o->excs.data[ i ] );
     BFOR_EACH( i, &o->encs )
     {
-        lion_net_node_s* node = o->encs.data[ i ];
+        opal_net_node_s* node = o->encs.data[ i ];
         if( !node->flag && ( !( node->result && node->result->h->h.v.size > 0 ) ) )
         {
-            bcore_source_point_s_parse_msg_to_sink_fa( node->source_point, BCORE_STDERR, "Warning: Entry channel [#<sz_t>] '#<sc_t>' has no effect.", i, lion_ifnameof( node->name ) );
+            bcore_source_point_s_parse_msg_to_sink_fa
+            (
+                node->source_point,
+                BCORE_STDERR,
+                "Warning: Entry channel [#<sz_t>] '#<sc_t>' has no effect.",
+                i,
+                opal_context_a_ifnameof( node->context, node->name )
+            );
         }
         node->flag = true;
     }
 
     BFOR_EACH( i, &o->body ) if( !o->body.data[ i ]->flag )
     {
-//        lion_net_node_s* node = o->body.data[ i ];
-//        bcore_source_point_s_parse_msg_to_sink_fa( node->source_point, BCORE_STDOUT, "Unreachable: '#<sc_t>'.", lion_ifnameof( node->name ) );
-        lion_net_node_s_detach( &o->body.data[ i ] );
+//        opal_net_node_s* node = o->body.data[ i ];
+//        bcore_source_point_s_parse_msg_to_sink_fa( node->source_point, BCORE_STDOUT, "Unreachable: '#<sc_t>'.", opal_ifnameof( node->name ) );
+        opal_net_node_s_detach( &o->body.data[ i ] );
     }
-    lion_net_cell_s_normalize( o );
+    opal_net_cell_s_normalize( o );
 
-    ASSERT( lion_net_cell_s_is_consistent( o ) );
+    ASSERT( opal_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -674,14 +681,14 @@ void lion_net_cell_s_remove_unreachable_nodes( lion_net_cell_s* o )
 /** Removes all body-nodes containing an identity operator and relinks remaining nodes accordingly
  *  Clears all downlinks;
  */
-void lion_net_cell_s_remove_identities( lion_net_cell_s* o )
+void opal_net_cell_s_remove_identities( opal_net_cell_s* o )
 {
-    lion_net_cell_s_clear_downlinks( o );
-    lion_net_cell_s_clear_flags( o );
-    BFOR_EACH( i, &o->excs ) lion_net_node_s_skip_identities( o->excs.data[ i ] );
-    lion_net_cell_s_clear_flags( o );
-    lion_net_cell_s_remove_unreachable_nodes( o );
-    assert( lion_net_cell_s_is_consistent( o ) );
+    opal_net_cell_s_clear_downlinks( o );
+    opal_net_cell_s_clear_flags( o );
+    BFOR_EACH( i, &o->excs ) opal_net_node_s_skip_identities( o->excs.data[ i ] );
+    opal_net_cell_s_clear_flags( o );
+    opal_net_cell_s_remove_unreachable_nodes( o );
+    assert( opal_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -692,66 +699,94 @@ void lion_net_cell_s_remove_identities( lion_net_cell_s* o )
  */
 static void net_cell_s_from_sem_recursive
 (
-    lion_net_cell_s* o,
-    lion_sem_link_s* link,
-    lion_ctr_tree_s* ctr_tree,
-    lion_ctr_node_s* ctr_node,
-    lion_net_node_s* net_node_dn,
+    opal_net_cell_s* o,
+    opal_sem_link_s* link,
+    opal_ctr_tree_s* ctr_tree,
+    opal_ctr_node_s* ctr_node,
+    opal_net_node_s* net_node_dn,
     sz_t             depth,
     bcore_sink*      log  // optional
 )
 {
     depth++;
     tp_t name = link->name;
-    if( log ) bcore_sink_a_push_fa( log, "Tracing link '#<sc_t>' at depth #<sz_t>\n", lion_ifnameof( name ), depth );
-    link = lion_sem_link_s_trace_to_cell_membrane( link );
-    if( !link )
+    if( log )
     {
-        ERR_fa( "Backtracing '#<sc_t>':\nTrace terminates in an open link.", lion_ifnameof( name ) );
+        bcore_sink_a_push_fa( log, "Tracing link '#<sc_t>' at depth #<sz_t>\n", opal_context_a_ifnameof( o->context, name ), depth );
     }
 
-    lion_sem_cell_s* cell = link->cell;
-    lion_sem_link_s* next_link = NULL;
+    link = opal_sem_link_s_trace_to_cell_membrane( link );
+    if( !link )
+    {
+        ERR_fa( "Backtracing '#<sc_t>':\nTrace terminates in an open link.", opal_context_a_ifnameof( o->context, name ) );
+    }
 
-    sc_t cell_type = cell->nop ? "node" : cell->body ? "graph" : lion_sem_cell_s_is_wrapper( cell ) ? "wrapper" : "";
+    opal_sem_cell_s* cell = link->cell;
+    opal_sem_link_s* next_link = NULL;
+
+    sc_t cell_type = cell->nop ? "node" : cell->body ? "graph" : opal_sem_cell_s_is_wrapper( cell ) ? "wrapper" : "";
 
     if( depth > o->max_depth )
     {
-        bcore_source_point_s_parse_err_fa( &cell->source_point, "Maximum depth '#<sz_t>' exceeded: This problem might be the result of an indefinite recursion.\n", o->max_depth );
+        bcore_source_point_s_parse_err_fa
+        (
+            &cell->source_point,
+            "Maximum depth '#<sz_t>' exceeded: This problem might be the result of an indefinite recursion.\n",
+            o->max_depth
+        );
     }
 
     if( link->exit )
     {
-        bcore_source_point_s_parse_msg_to_sink_fa( &cell->source_point, log, "entering #<sc_t>-cell: '#<sc_t>' \n", cell_type, lion_ifnameof( cell->name ) );
+        if( log )
+        {
+            bcore_source_point_s_parse_msg_to_sink_fa
+            (
+                &cell->source_point,
+                log,
+                "entering #<sc_t>-cell: '#<sc_t>' \n",
+                cell_type,
+                opal_context_a_ifnameof( o->context, name )
+            );
+        }
 
         // since we backtrace, a cell is entered through an 'exit' link
-        s2_t err = lion_ctr_tree_s_tree_process( ctr_tree, cell, true, false, ctr_node, &ctr_node );
+        s2_t err = opal_ctr_tree_s_tree_process( ctr_tree, cell, true, false, ctr_node, &ctr_node );
         if( err )
         {
-            bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nEntering cell failed.", lion_ifnameof( name ) );
+            bcore_source_point_s_parse_err_fa
+            (
+                &cell->source_point,
+                "Backtracing '#<sc_t>':\nEntering cell failed.",
+                opal_context_a_ifnameof( o->context, name )
+            );
         }
 
         if( cell->nop )
         {
-            if( log ) bcore_sink_a_push_fa( log, "cell nop: #<sc_t>\n", ifnameof( cell->nop->_ ) );
+            if( log )
+            {
+                bcore_sink_a_push_fa( log, "cell nop: #<sc_t>\n", ifnameof( cell->nop->_ ) );
+            }
 
             bl_t trace_up = false;
-            lion_net_node_s* net_node_up = lion_net_nodes_s_get_by_id( &o->body, ctr_node->id );
+            opal_net_node_s* net_node_up = opal_net_nodes_s_get_by_id( &o->body, ctr_node->id );
             if( !net_node_up )
             {
-                net_node_up = lion_net_nodes_s_push( &o->body );
+                net_node_up = opal_net_nodes_s_push( &o->body );
+                net_node_up->context = bcore_fork( o->context );
                 net_node_up->id = ctr_node->id;
-                lion_net_node_s_set_nop_d( net_node_up, bcore_fork( cell->nop ) );
+                opal_net_node_s_set_nop_d( net_node_up, bcore_fork( cell->nop ) );
 
-                bcore_source_point_s_attach( &net_node_up->source_point, bcore_fork( lion_ctr_node_s_get_nearest_source_point( ctr_node ) ) );
+                bcore_source_point_s_attach( &net_node_up->source_point, bcore_fork( opal_ctr_node_s_get_nearest_source_point( ctr_node ) ) );
 
-                trace_up = lion_nop_a_arity( net_node_up->nop ) > 0;
+                trace_up = opal_nop_a_arity( net_node_up->nop ) > 0;
                 if( log ) bcore_sink_a_push_fa( log, "new node id: '#<sz_t>'\n", net_node_up->id );
             }
 
             if( trace_up )
             {
-                sz_t arity = lion_nop_a_arity( net_node_up->nop );
+                sz_t arity = opal_nop_a_arity( net_node_up->nop );
                 ASSERT( arity == cell->encs.size );
 
                 /** If there is an iff-branch and the condition (arg0) is a constant scalar,
@@ -759,18 +794,26 @@ static void net_cell_s_from_sem_recursive
                  *  branch target based on the condition value.
                  *  Otherwise the branch code is left intact.
                  */
-                if( net_node_up->nop->_ == TYPEOF_lion_nop_ar3_iff_s )
+                if( net_node_up->nop->_ == TYPEOF_opal_nop_ar3_iff_s )
                 {
                     if( log ) bcore_sink_a_push_fa( log, "Branch channel 0:\n" );
                     net_cell_s_from_sem_recursive( o, cell->encs.data[ 0 ], ctr_tree, ctr_node, net_node_up, depth, log );
-                    lion_net_node_s* arg0 = net_node_up->upls.data[ 0 ]->node;
-                    lion_net_node_s_solve( arg0, NULL );
-                    lion_holor_s* result_h = arg0->result->h;
+                    opal_net_node_s* arg0 = net_node_up->upls.data[ 0 ]->node;
+                    opal_net_node_s_solve( arg0, NULL );
+                    opal_holor_s* result_h = arg0->result->h;
                     if( result_h->h.v.size == 1 && !result_h->m.active ) // determined constant holor
                     {
-                        lion_net_links_s_clear( &net_node_up->upls );
-                        lion_net_node_s_set_nop_d( net_node_up, ( lion_nop* )lion_nop_ar1_identity_s_create() );
-                        if( log ) bcore_sink_a_push_fa( log, "Condition check result: #<f3_t>. Identity to channel ", bhvm_value_s_get_f3( &result_h->h.v, 0 ) );
+                        opal_net_links_s_clear( &net_node_up->upls );
+                        opal_net_node_s_set_nop_d( net_node_up, ( opal_nop* )opal_nop_ar1_identity_s_create() );
+                        if( log )
+                        {
+                            bcore_sink_a_push_fa
+                            (
+                                log,
+                                "Condition check result: #<f3_t>. Identity to channel ",
+                                bhvm_value_s_get_f3( &result_h->h.v, 0 )
+                            );
+                        }
                         if( bhvm_value_s_get_f3( &result_h->h.v, 0 ) > 0 )
                         {
                             if( log ) bcore_sink_a_push_fa( log, "'TRUE'\n" );
@@ -801,7 +844,7 @@ static void net_cell_s_from_sem_recursive
                 }
             }
 
-            lion_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
+            opal_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
         }
         else if( link->up )
         {
@@ -809,43 +852,78 @@ static void net_cell_s_from_sem_recursive
         }
         else
         {
-            bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nOpen exit link '#<sc_t>'.", lion_ifnameof( name ), lion_ifnameof( link->name ) );
+            bcore_source_point_s_parse_err_fa
+            (
+                &cell->source_point,
+                "Backtracing '#<sc_t>':\nOpen exit link '#<sc_t>'.",
+                opal_context_a_ifnameof( o->context, name ),
+                opal_context_a_ifnameof( o->context, link->name )
+            );
         }
     }
     else
     {
-        if( log ) bcore_sink_a_push_fa( log, "exiting #<sc_t>-cell: '#<sc_t>' \n", cell_type, lion_ifnameof( cell->name ) );
+        if( log )
+        {
+            bcore_sink_a_push_fa
+            (
+                log,
+                "exiting #<sc_t>-cell: '#<sc_t>' \n",
+                cell_type,
+                opal_context_a_ifnameof( o->context, cell->name )
+            );
+        }
 
         bl_t exit_through_wrapper = link->up != NULL;
 
-        s2_t err = lion_ctr_tree_s_tree_process( ctr_tree, cell, false, exit_through_wrapper, ctr_node, &ctr_node );
+        s2_t err = opal_ctr_tree_s_tree_process( ctr_tree, cell, false, exit_through_wrapper, ctr_node, &ctr_node );
 
         if( err )
         {
             if( err == 1 )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nExiting from untraced cell.", lion_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa
+                (
+                    &cell->source_point,
+                    "Backtracing '#<sc_t>':\nExiting from untraced cell.",
+                    opal_context_a_ifnameof( o->context, name )
+                );
             }
             else
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nExiting cell failed.", lion_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa
+                (
+                    &cell->source_point,
+                    "Backtracing '#<sc_t>':\nExiting cell failed.",
+                    opal_context_a_ifnameof( o->context, name )
+                );
             }
         }
 
         if( !ctr_node ) // root membrane reached (trace ended)
         {
-            sz_t index = lion_sem_links_s_get_index_by_link( &cell->encs, link );
+            sz_t index = opal_sem_links_s_get_index_by_link( &cell->encs, link );
             if( index == -1 )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nEnding trace: No matching input channel.", lion_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa
+                (
+                    &cell->source_point,
+                    "Backtracing '#<sc_t>':\nEnding trace: No matching input channel.",
+                    opal_context_a_ifnameof( o->context, name )
+                );
             }
             if( index >= o->encs.size )
             {
-                bcore_source_point_s_parse_err_fa( &cell->source_point, "Backtracing '#<sc_t>':\nInput channel boundary exceeded.", lion_ifnameof( name ) );
+                bcore_source_point_s_parse_err_fa
+                (
+                    &cell->source_point,
+                    "Backtracing '#<sc_t>':\nInput channel boundary exceeded.",
+                    opal_context_a_ifnameof( o->context, name )
+                );
             }
 
-            lion_net_node_s* net_node_up = o->encs.data[ index ];
-            lion_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
+            opal_net_node_s* net_node_up = o->encs.data[ index ];
+            opal_net_links_s_push( &net_node_dn->upls )->node = net_node_up;
 
             next_link = NULL;
         }
@@ -856,7 +934,7 @@ static void net_cell_s_from_sem_recursive
         }
         else
         {
-            next_link = lion_sem_cell_s_get_enc_by_dn( ctr_node->cell, link );
+            next_link = opal_sem_cell_s_get_enc_by_dn( ctr_node->cell, link );
             if( !next_link )
             {
                 bcore_source_point_s_parse_err_fa
@@ -867,7 +945,7 @@ static void net_cell_s_from_sem_recursive
                     "   * Dangling input channel.\n"
                     "   * Cyclic node without update.\n"
                     ,
-                    lion_ifnameof( name )
+                    opal_context_a_ifnameof( o->context, name )
                 );
             }
         }
@@ -886,40 +964,43 @@ static void net_cell_s_from_sem_recursive
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Finalization steps: Solves graph and optimizes it
-void lion_net_cell_s_finalize( lion_net_cell_s* o )
+void opal_net_cell_s_finalize( opal_net_cell_s* o )
 {
-    lion_net_cell_s_solve( o );
-    lion_net_cell_s_remove_identities( o );
-    lion_net_cell_s_set_downlinks( o );
-    ASSERT( lion_net_cell_s_is_consistent( o ) );
+    opal_net_cell_s_solve( o );
+    opal_net_cell_s_remove_identities( o );
+    opal_net_cell_s_set_downlinks( o );
+    ASSERT( opal_net_cell_s_is_consistent( o ) );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_holor_s_from_sem_link( lion_holor_s* o, lion_sem_link_s* link, lion_sem_cell_s* root, bcore_sink* log )
+void opal_holor_s_from_sem_link( opal_holor_s* o, opal_sem_link_s* link, opal_sem_cell_s* root, bcore_sink* log )
 {
     BLM_INIT();
     ASSERT( link->up );
     ASSERT( link->cell );
     ASSERT( root );
     if( !root->parent ) ERR_fa( "(root->parent == NULL) Root is not nested. Using semantic context as root is discouraged. Preferably use a double-nested semantic frame." );
-    lion_sem_cell_s* cell = link->cell;
-    lion_ctr_tree_s* tree = BLM_CREATE( lion_ctr_tree_s );
-    lion_ctr_node_s* ctr_node = NULL;
-    lion_ctr_tree_s_tree_process( tree, root, true, false, ctr_node, &ctr_node );
-    lion_net_cell_s* net_frame = BLM_CREATE( lion_net_cell_s );
-    lion_net_node_s* up_node = BLM_CREATE( lion_net_node_s );
+    opal_sem_cell_s* cell = link->cell;
+    opal_ctr_tree_s* tree = BLM_CREATE( opal_ctr_tree_s );
+    opal_ctr_node_s* ctr_node = NULL;
+    opal_ctr_tree_s_tree_process( tree, root, true, false, ctr_node, &ctr_node );
+    opal_net_cell_s* net_frame = BLM_CREATE( opal_net_cell_s );
+    opal_net_node_s* up_node   = BLM_CREATE( opal_net_node_s );
+    net_frame->context = bcore_fork( root->context );
+    up_node->context   = bcore_fork( root->context );
+
     up_node->name = link->name;
     up_node->id = tree->id_base++;
     up_node->source_point = bcore_fork( &cell->source_point );
-    lion_net_node_s_set_nop_d( up_node, ( lion_nop* )lion_nop_ar1_output_s_create() );
+    opal_net_node_s_set_nop_d( up_node, ( opal_nop* )opal_nop_ar1_output_s_create() );
     net_cell_s_from_sem_recursive( net_frame, link->up, tree, ctr_node, up_node, 0, log );
-    lion_net_node_s_solve( up_node, NULL );
+    opal_net_node_s_solve( up_node, NULL );
 
     if( !up_node->result ) bcore_source_point_s_parse_err_fa( up_node->source_point, "Could not solve expression." );
     if( !up_node->result->h ) bcore_source_point_s_parse_err_fa( up_node->source_point, "Expression does not yield a holor." );
 
-    lion_holor_s_copy( o, up_node->result->h );
+    opal_holor_s_copy( o, up_node->result->h );
 
     BLM_DOWN();
 }
@@ -929,22 +1010,26 @@ void lion_holor_s_from_sem_link( lion_holor_s* o, lion_sem_link_s* link, lion_se
 /** Builds a net cell from a semantic cell
  *  This function locks and initializes the randomizer to ensure a deterministic sequence of random values.
  */
-void lion_net_cell_s_from_sem_cell
+void opal_net_cell_s_from_sem_cell
 (
-    lion_net_cell_s* o,
-    lion_sem_cell_s* sem_cell,
-    lion_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name, const lion_nop* cur_nop ),
+    opal_net_cell_s* o,
+    opal_sem_cell_s* sem_cell,
+    opal_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name, const opal_nop* cur_nop ),
     vd_t arg,
     bcore_sink* log
 )
 {
     ASSERT( sem_cell );
 
-    lion_ctr_tree_s* tree = lion_ctr_tree_s_create();
+    if( !o->context ) o->context = bcore_fork( sem_cell->context );
+
+    opal_ctr_tree_s* tree = opal_ctr_tree_s_create();
     for( sz_t i = 0; i < sem_cell->encs.size; i++ )
     {
-        lion_sem_link_s* sem_link = sem_cell->encs.data[ i ];
-        lion_net_node_s* net_node = lion_net_nodes_s_push( &o->encs );
+        opal_sem_link_s* sem_link = sem_cell->encs.data[ i ];
+        opal_net_node_s* net_node = opal_net_nodes_s_push( &o->encs );
+        net_node->context = bcore_fork( o->context );
+
         net_node->name = sem_link->name;
         net_node->id   = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
@@ -952,57 +1037,50 @@ void lion_net_cell_s_from_sem_cell
         if( sem_link->up )
         {
             if( log ) bcore_sink_a_push_fa( log, "Evaluating literal in root entry channel '#<sz_t>' ... \n", i );
-            lion_nop_ar0_param_s* param = lion_nop_ar0_param_s_create();
-            param->h = lion_holor_s_create();
+            opal_nop_ar0_param_s* param = opal_nop_ar0_param_s_create();
+            param->h = opal_holor_s_create();
 
-            lion_holor_s_from_sem_link( param->h, sem_link, sem_cell->parent, log );
-            lion_net_node_s_set_nop_d( net_node, (lion_nop*)param );
+            opal_holor_s_from_sem_link( param->h, sem_link, sem_cell->parent, log );
+            opal_net_node_s_set_nop_d( net_node, (opal_nop*)param );
             if( log )
             {
                 bcore_sink_a_push_fa( log, "Evaluating literal in root entry channel '#<sz_t>' finished. Resulting Holor: ", i );
-                lion_holor_s_brief_to_sink( param->h, log );
+                opal_holor_s_brief_to_sink( param->h, log );
                 bcore_sink_a_push_fa( log, "\n" );
             }
         }
 
-        lion_nop* new_nop = input_nop_create ? input_nop_create( arg, i, sem_link->name, net_node->nop ) : NULL;
-        if( new_nop ) lion_net_node_s_set_nop_d( net_node, new_nop );
+        opal_nop* new_nop = input_nop_create ? input_nop_create( arg, i, sem_link->name, net_node->nop ) : NULL;
+        if( new_nop ) opal_net_node_s_set_nop_d( net_node, new_nop );
     }
-
-    lion_nop_context_s* nop_context = lion_nop_get_context();
-    bcore_mutex_s_lock( &nop_context->randomizer_mutex );
-    ASSERT( !nop_context->randomizer_is_locked );
-    nop_context->randomizer_is_locked = true;
-    nop_context->randomizer_rval = 0; // rval == 0 causes randomizer to be seeded by functions using it.
 
     for( sz_t i = 0; i < sem_cell->excs.size; i++ )
     {
-        lion_sem_link_s* sem_link = sem_cell->excs.data[ i ];
-        lion_net_node_s* net_node = lion_net_nodes_s_push( &o->excs );
+        opal_sem_link_s* sem_link = sem_cell->excs.data[ i ];
+        opal_net_node_s* net_node = opal_net_nodes_s_push( &o->excs );
+        net_node->context = bcore_fork( o->context );
         net_node->name = sem_link->name;
         net_node->id = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
-        lion_net_node_s_set_nop_d( net_node, ( lion_nop* )lion_nop_ar1_output_s_create() );
+        opal_net_node_s_set_nop_d( net_node, ( opal_nop* )opal_nop_ar1_output_s_create() );
         net_cell_s_from_sem_recursive( o, sem_link, tree, NULL, net_node, 0, log );
     }
 
-    lion_ctr_tree_s_discard( tree );
+    opal_ctr_tree_s_discard( tree );
 
-    lion_net_cell_s_normalize( o );
+    opal_net_cell_s_normalize( o );
 
-    ASSERT( lion_net_cell_s_is_consistent( o ) );
-    lion_net_cell_s_finalize( o );
+    ASSERT( opal_net_cell_s_is_consistent( o ) );
+    opal_net_cell_s_finalize( o );
 
-    nop_context->randomizer_is_locked = false;
-    bcore_mutex_s_unlock( &nop_context->randomizer_mutex );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// outputs graph to sink
-void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink )
+void opal_net_cell_s_graph_to_sink( opal_net_cell_s* o, bcore_sink* sink )
 {
-    BFOR_EACH( i, &o->excs ) lion_net_node_s_graph_to_sink( o->excs.data[ i ], sink );
+    BFOR_EACH( i, &o->excs ) opal_net_node_s_graph_to_sink( o->excs.data[ i ], sink );
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -1013,7 +1091,7 @@ void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink )
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// node occurs in the downtree of o
-static bl_t node_s_recurses_in_downtree( lion_net_node_s* o, const lion_net_node_s* node )
+static bl_t node_s_recurses_in_downtree( opal_net_node_s* o, const opal_net_node_s* node )
 {
     if( o == node ) return true;
     if( o->probe ) return false;
@@ -1033,12 +1111,12 @@ static bl_t node_s_recurses_in_downtree( lion_net_node_s* o, const lion_net_node
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
-static void node_s_cyclic_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
+static void node_s_cyclic_mcode_push_ap_phase0( opal_net_node_s* o, bhvm_mcode_frame_s* mcf );
+static void node_s_cyclic_mcode_push_ap_phase1( opal_net_node_s* o, bhvm_mcode_frame_s* mcf );
 
-static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+static void node_s_mcode_push_ap( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
-    if( lion_net_node_s_is_cyclic( o ) )
+    if( opal_net_node_s_is_cyclic( o ) )
     {
         node_s_cyclic_mcode_push_ap_phase0( o, mcf );
         return;
@@ -1062,24 +1140,24 @@ static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
-        o->mnode->cyclic   = lion_nop_a_is_cyclic(   o->nop );
-        o->mnode->adaptive = lion_nop_a_is_adaptive( o->nop );
+        o->mnode->cyclic   = opal_nop_a_is_cyclic(   o->nop );
+        o->mnode->adaptive = opal_nop_a_is_adaptive( o->nop );
     }
 
     BFOR_EACH( i, &o->upls )
     {
-        lion_net_node_s* node = o->upls.data[ i ]->node;
+        opal_net_node_s* node = o->upls.data[ i ]->node;
         node_s_mcode_push_ap( node, mcf );
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->mnode->ax0 );
     }
 
-    o->mnode->ax0 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, arr_ci, mcf );
+    o->mnode->ax0 = opal_nop_a_mcode_push_ap_holor( o->nop, o->result, arr_ci, mcf );
     bhvm_vop_arr_ci_s_push_ci( arr_ci, 'y', o->mnode->ax0 );
-    lion_nop_a_mcode_push_ap_track( o->nop, o->result, arr_ci, mcf );
+    opal_nop_a_mcode_push_ap_track( o->nop, o->result, arr_ci, mcf );
 
     if( o->mnode->ax0 >= 0 )
     {
-        lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
+        opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
         if( !hmeta->name ) hmeta->name = o->name;
         hmeta->pclass   = TYPEOF_pclass_ax0;
         bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
@@ -1090,23 +1168,23 @@ static void node_s_mcode_push_ap( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
 
 // --------------------------------------------------------------------------------------------------------------------
 
-void lion_net_node_s_isolated_mcode_push( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+void opal_net_node_s_isolated_mcode_push( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
-    if( !o->result ) lion_net_node_s_solve( o, NULL );
+    if( !o->result ) opal_net_node_s_solve( o, NULL );
 
     if( !o->result )
     {
-        bcore_source_point_s_parse_err_fa( o->source_point, "Node '#<sc_t>' has no result.", lion_ifnameof( o->name ) );
+        bcore_source_point_s_parse_err_fa( o->source_point, "Node '#<sc_t>' has no result.", opal_context_a_ifnameof( o->context, o->name ) );
     }
 
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
-        o->mnode->cyclic   = lion_nop_a_is_cyclic(   o->nop );
-        o->mnode->adaptive = lion_nop_a_is_adaptive( o->nop );
+        o->mnode->cyclic   = opal_nop_a_is_cyclic(   o->nop );
+        o->mnode->adaptive = opal_nop_a_is_adaptive( o->nop );
     }
-    o->mnode->ax0 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
-    lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
+    o->mnode->ax0 = opal_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
+    opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
     if( !hmeta->name ) hmeta->name = o->name;
     hmeta->pclass   = TYPEOF_pclass_ax0;
     bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
@@ -1118,21 +1196,21 @@ void lion_net_node_s_isolated_mcode_push( lion_net_node_s* o, bhvm_mcode_frame_s
  *  node_s_mcode_push_ap for cyclic nodes.
  *  Processes only the non_cyclic (left) up-channel [0]
  */
-static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+static void node_s_cyclic_mcode_push_ap_phase0( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
-    ASSERT( lion_net_node_s_is_cyclic( o ) );
+    ASSERT( opal_net_node_s_is_cyclic( o ) );
 
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
         o->mnode->cyclic   = true;
-        o->mnode->adaptive = lion_nop_a_is_adaptive( o->nop );
+        o->mnode->adaptive = opal_nop_a_is_adaptive( o->nop );
 
-        o->mnode->ax0 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
-        o->mnode->ax1 = lion_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
+        o->mnode->ax0 = opal_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
+        o->mnode->ax1 = opal_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
 
-        lion_hmeta_s* hmeta0 = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
-        lion_hmeta_s* hmeta1 = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax1 ];
+        opal_holor_meta_s* hmeta0 = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
+        opal_holor_meta_s* hmeta1 = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax1 ];
 
         if( !hmeta0->name ) hmeta0->name = o->name;
         if( !hmeta1->name ) hmeta1->name = o->name;
@@ -1142,7 +1220,7 @@ static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_f
         bhvm_mcode_node_s_attach( &hmeta0->mnode, bcore_fork( o->mnode ) );
         bhvm_mcode_node_s_attach( &hmeta1->mnode, bcore_fork( o->mnode ) );
 
-        lion_net_node_s* node = o->upls.data[ 0 ]->node;
+        opal_net_node_s* node = o->upls.data[ 0 ]->node;
         node_s_mcode_push_ap( node, mcf );
 
         bhvm_mcode_frame_s_track_vop_push_d
@@ -1175,15 +1253,15 @@ static void node_s_cyclic_mcode_push_ap_phase0( lion_net_node_s* o, bhvm_mcode_f
  *  This function is called for all cyclic nodes after mcode_push_ap is completed for the entire network.
  *  Processes the cyclic (right) up-channel [1].
  */
-static void node_s_cyclic_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+static void node_s_cyclic_mcode_push_ap_phase1( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
-    ASSERT( lion_net_node_s_is_cyclic( o ) );
+    ASSERT( opal_net_node_s_is_cyclic( o ) );
     if( !o->mnode ) node_s_cyclic_mcode_push_ap_phase0( o, mcf );
 
     if( !o->flag )
     {
         o->flag = true;
-        lion_net_node_s* node = o->upls.data[ 1 ]->node;
+        opal_net_node_s* node = o->upls.data[ 1 ]->node;
         node_s_mcode_push_ap( node, mcf );
 
         bhvm_mcode_frame_s_track_vop_push_d
@@ -1197,11 +1275,11 @@ static void node_s_cyclic_mcode_push_ap_phase1( lion_net_node_s* o, bhvm_mcode_f
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf );
-static void node_s_cyclic_mcode_push_dp_phase1( lion_net_node_s* o,                bhvm_mcode_frame_s* mcf );
-static void node_s_cyclic_mcode_push_dp_phase2( lion_net_node_s* o,                bhvm_mcode_frame_s* mcf );
+static void node_s_cyclic_mcode_push_dp_phase0( opal_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf );
+static void node_s_cyclic_mcode_push_dp_phase1( opal_net_node_s* o,                bhvm_mcode_frame_s* mcf );
+static void node_s_cyclic_mcode_push_dp_phase2( opal_net_node_s* o,                bhvm_mcode_frame_s* mcf );
 
-static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
+static void node_s_mcode_push_dp( opal_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( o );
 
@@ -1211,7 +1289,7 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
     if( !o->nop ) ERR_fa( "Operator is missing." );
     if( !o->result ) ERR_fa( "Result is missing." );
 
-    if( lion_net_node_s_is_cyclic( o ) )
+    if( opal_net_node_s_is_cyclic( o ) )
     {
         node_s_cyclic_mcode_push_dp_phase0( o, up_index, mcf );
         return;
@@ -1225,7 +1303,7 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
 
     BFOR_EACH( i, &o->upls )
     {
-        lion_net_node_s* node = o->upls.data[ i ]->node;
+        opal_net_node_s* node = o->upls.data[ i ]->node;
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'a' + i, node->mnode->ax0 );
         sz_t agx = node->mnode->ag1 >= 0 ? node->mnode->ag1 : node->mnode->ag0;
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'f' + i, agx );
@@ -1237,24 +1315,24 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
     if( !o->flag ) // build gradient computation for this node
     {
         o->flag = true;
-        o->mnode->ag0 = lion_nop_a_mcode_push_dp_holor( o->nop, o->result, arr_ci, mcf );
+        o->mnode->ag0 = opal_nop_a_mcode_push_dp_holor( o->nop, o->result, arr_ci, mcf );
 
         if( o->mnode->ag0 >= 0 )
         {
             // build this gradient from all downlinks ...
             BFOR_EACH( i, &o->dnls )
             {
-                lion_net_node_s* node = o->dnls.data[ i ]->node;
+                opal_net_node_s* node = o->dnls.data[ i ]->node;
 
                 /// we do not accumulate downtree recurrences at this point
-                if( lion_nop_a_is_cyclic( o->nop ) ) if( node_s_recurses_in_downtree( node, o ) ) continue;
+                if( opal_nop_a_is_cyclic( o->nop ) ) if( node_s_recurses_in_downtree( node, o ) ) continue;
 
-                sz_t node_up_index = lion_net_node_s_up_index( node, o );
+                sz_t node_up_index = opal_net_node_s_up_index( node, o );
                 ASSERT( node_up_index >= 0 );
                 node_s_mcode_push_dp( node, node_up_index, mcf );
             }
 
-            lion_hmeta_s* hmeta = ( lion_hmeta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ag0 ];
+            opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ag0 ];
             if( !hmeta->name ) hmeta->name = o->name;
             hmeta->pclass = TYPEOF_pclass_ag0;
             bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
@@ -1264,7 +1342,7 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
     if( up_index_is_valid )
     {
         bhvm_vop_arr_ci_s_push_ci( arr_ci, 'z', o->mnode->ag0 );
-        lion_nop_a_mcode_push_dp_track( o->nop, o->result, 'a' + up_index, arr_ci, mcf );
+        opal_nop_a_mcode_push_dp_track( o->nop, o->result, 'a' + up_index, arr_ci, mcf );
     }
 
     BLM_DOWN();
@@ -1275,7 +1353,7 @@ static void node_s_mcode_push_dp( lion_net_node_s* o, sz_t up_index, bhvm_mcode_
 /** Recurrent dp phase0:
  *  node_s_mcode_push_dp for cyclic nodes.
  */
-static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
+static void node_s_cyclic_mcode_push_dp_phase0( opal_net_node_s* o, sz_t up_index, bhvm_mcode_frame_s* mcf )
 {
     BLM_INIT();
 
@@ -1284,7 +1362,7 @@ static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_inde
         o->flag = true;
 
         bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
-        lion_hmeta_s* m = BLM_CLONE( lion_hmeta_s, &o->result->h->m );
+        opal_holor_meta_s* m = BLM_CLONE( opal_holor_meta_s, &o->result->h->m );
         if( !m->name ) m->name = o->name;
         m->pclass = TYPEOF_pclass_ag0;
         bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );
@@ -1297,12 +1375,12 @@ static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_inde
         // build this gradient from all downlinks ...
         BFOR_EACH( i, &o->dnls )
         {
-            lion_net_node_s* node = o->dnls.data[ i ]->node;
+            opal_net_node_s* node = o->dnls.data[ i ]->node;
 
             /// we do not accumulate downtree recurrences at this point
             if( !node_s_recurses_in_downtree( node, o ) )
             {
-                sz_t node_up_index = lion_net_node_s_up_index( node, o );
+                sz_t node_up_index = opal_net_node_s_up_index( node, o );
                 ASSERT( node_up_index >= 0 );
                 node_s_mcode_push_dp( node, node_up_index, mcf );
             }
@@ -1312,7 +1390,7 @@ static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_inde
 
     if( up_index == 1 )
     {
-        lion_net_node_s* node1 = o->upls.data[ 1 ]->node;
+        opal_net_node_s* node1 = o->upls.data[ 1 ]->node;
         bhvm_vop_ar1_acc_s* identity_dp = bhvm_vop_ar1_acc_s_create();
         identity_dp->i.v[ 0 ] = o->mnode->ag0;
         identity_dp->i.v[ 1 ] = node1->mnode->ag1 >= 0 ? node1->mnode->ag1 : node1->mnode->ag0;
@@ -1324,18 +1402,18 @@ static void node_s_cyclic_mcode_push_dp_phase0( lion_net_node_s* o, sz_t up_inde
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void node_s_cyclic_mcode_push_dp_phase1( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+static void node_s_cyclic_mcode_push_dp_phase1( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( o );
     if( !o->nop ) ERR_fa( "Operator is missing." );
     if( !o->result ) ERR_fa( "Result is missing." );
-    ASSERT( lion_nop_a_is_cyclic( o->nop ) );
+    ASSERT( opal_nop_a_is_cyclic( o->nop ) );
 
     BLM_INIT();
 
     {
         bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
-        lion_hmeta_s* m = BLM_CLONE( lion_hmeta_s, &o->result->h->m );
+        opal_holor_meta_s* m = BLM_CLONE( opal_holor_meta_s, &o->result->h->m );
         if( !m->name ) m->name = o->name;
         m->pclass = TYPEOF_pclass_ag1;
         bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );
@@ -1348,12 +1426,12 @@ static void node_s_cyclic_mcode_push_dp_phase1( lion_net_node_s* o, bhvm_mcode_f
 
     BFOR_EACH( i, &o->dnls )
     {
-        lion_net_node_s* node = o->dnls.data[ i ]->node;
+        opal_net_node_s* node = o->dnls.data[ i ]->node;
 
         /// we only accumulate downtree recurrences at this point
         if( node_s_recurses_in_downtree( node, o ) )
         {
-            sz_t node_up_index = lion_net_node_s_up_index( node, o );
+            sz_t node_up_index = opal_net_node_s_up_index( node, o );
             ASSERT( node_up_index >= 0 );
             node_s_mcode_push_dp( node, node_up_index, mcf );
         }
@@ -1364,12 +1442,12 @@ static void node_s_cyclic_mcode_push_dp_phase1( lion_net_node_s* o, bhvm_mcode_f
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void node_s_cyclic_mcode_push_dp_phase2( lion_net_node_s* o, bhvm_mcode_frame_s* mcf )
+static void node_s_cyclic_mcode_push_dp_phase2( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
 {
     ASSERT( o );
     if( !o->nop ) ERR_fa( "Operator is missing." );
     if( !o->result ) ERR_fa( "Result is missing." );
-    ASSERT( lion_nop_a_is_cyclic( o->nop ) );
+    ASSERT( opal_nop_a_is_cyclic( o->nop ) );
     bhvm_vop* vop_cpy = ( bhvm_vop* )bhvm_vop_ar1_cpy_s_create();
     bhvm_vop_a_set_index( vop_cpy, 0, o->mnode->ag1 );
     bhvm_vop_a_set_index( vop_cpy, 1, o->mnode->ag0 );
@@ -1378,28 +1456,28 @@ static void node_s_cyclic_mcode_push_dp_phase2( lion_net_node_s* o, bhvm_mcode_f
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf )
+void opal_net_cell_s_mcode_push_ap( opal_net_cell_s* o, bhvm_mcode_frame_s* mcf )
 {
     BLM_INIT();
-    ASSERT( lion_net_cell_s_is_consistent( o ) );
+    ASSERT( opal_net_cell_s_is_consistent( o ) );
 
-    lion_net_node_adl_s* cyclic_adl = BLM_CREATE( lion_net_node_adl_s );
+    opal_net_node_adl_s* cyclic_adl = BLM_CREATE( opal_net_node_adl_s );
     BFOR_EACH( i, &o->body ) if( o->body.data[ i ]->nop )
     {
-        if( lion_nop_a_is_cyclic( o->body.data[ i ]->nop ) ) lion_net_node_adl_s_push_d( cyclic_adl, bcore_fork( o->body.data[ i ] ) );
+        if( opal_nop_a_is_cyclic( o->body.data[ i ]->nop ) ) opal_net_node_adl_s_push_d( cyclic_adl, bcore_fork( o->body.data[ i ] ) );
     }
 
     BFOR_EACH( i, &o->excs )
     {
-        lion_net_node_s* node = o->excs.data[ i ];
-        if( !node->result ) ERR_fa( "Unsolved node '#<sc_t>'\n", lion_ifnameof( node->name ) );
+        opal_net_node_s* node = o->excs.data[ i ];
+        if( !node->result ) ERR_fa( "Unsolved node '#<sc_t>'\n", opal_context_a_ifnameof( o->context, node->name ) );
         node_s_mcode_push_ap( node, mcf );
     }
 
     /// cyclic nodes phase 1, 2
     BFOR_EACH( i, cyclic_adl ) node_s_cyclic_mcode_push_ap_phase1( cyclic_adl->data[ i ], mcf );
 
-    lion_net_cell_s_clear_all_flags( o );
+    opal_net_cell_s_clear_all_flags( o );
 
     bhvm_mcode_frame_s_check_integrity( mcf );
 
@@ -1408,19 +1486,19 @@ void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf, bl_t entry_channels )
+void opal_net_cell_s_mcode_push_dp( opal_net_cell_s* o, bhvm_mcode_frame_s* mcf, bl_t entry_channels )
 {
     BLM_INIT();
-    ASSERT( lion_net_cell_s_is_consistent( o ) );
+    ASSERT( opal_net_cell_s_is_consistent( o ) );
 
-    lion_net_node_adl_s* cyclic_adl = BLM_CREATE( lion_net_node_adl_s );
-    lion_net_node_adl_s* adaptive_adl  = BLM_CREATE( lion_net_node_adl_s );
+    opal_net_node_adl_s* cyclic_adl = BLM_CREATE( opal_net_node_adl_s );
+    opal_net_node_adl_s* adaptive_adl  = BLM_CREATE( opal_net_node_adl_s );
 
     BFOR_EACH( i, &o->body ) if( o->body.data[ i ]->nop )
     {
-        lion_net_node_s* node = o->body.data[ i ];
-        if( lion_nop_a_is_cyclic( node->nop ) ) lion_net_node_adl_s_push_d( cyclic_adl, bcore_fork( node ) );
-        if( lion_nop_a_is_adaptive(  node->nop ) ) lion_net_node_adl_s_push_d( adaptive_adl,  bcore_fork( node ) );
+        opal_net_node_s* node = o->body.data[ i ];
+        if( opal_nop_a_is_cyclic( node->nop ) ) opal_net_node_adl_s_push_d( cyclic_adl, bcore_fork( node ) );
+        if( opal_nop_a_is_adaptive(  node->nop ) ) opal_net_node_adl_s_push_d( adaptive_adl,  bcore_fork( node ) );
     }
 
     if( entry_channels )
@@ -1435,7 +1513,7 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf,
     BFOR_EACH( i, cyclic_adl ) node_s_cyclic_mcode_push_dp_phase1( cyclic_adl->data[ i ], mcf );
     BFOR_EACH( i, cyclic_adl ) node_s_cyclic_mcode_push_dp_phase2( cyclic_adl->data[ i ], mcf );
 
-    lion_net_cell_s_clear_all_flags( o );
+    opal_net_cell_s_clear_all_flags( o );
 
     bhvm_mcode_frame_s_check_integrity( mcf );
     BLM_DOWN();
@@ -1447,9 +1525,9 @@ void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf,
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-vd_t lion_net_signal_handler( const bcore_signal_s* o )
+vd_t opal_net_signal_handler( const bcore_signal_s* o )
 {
-    switch( bcore_signal_s_handle_type( o, typeof( "lion_net" ) ) )
+    switch( bcore_signal_s_handle_type( o, typeof( "opal_net" ) ) )
     {
         case TYPEOF_init1:
         {

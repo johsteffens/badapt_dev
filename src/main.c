@@ -9,8 +9,8 @@ int main( int argc, char** argv )
     BETH_PLANT_USE( opal );
 
     /// testing flects and spects
-    //bcore_flect_parse_all_flects();
-    //bcore_inst_test_all_types();
+    bcore_flect_parse_all_flects();
+    bcore_inst_test_all_types();
 
     BLM_INIT();
     bcore_main_frame_s* main_frame = BLM_CREATE( bcore_main_frame_s );

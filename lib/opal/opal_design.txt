@@ -21,7 +21,8 @@ Development Codenames and Stages
 
   opal: successor of lion (Jul 2020)
     Opal-Goals:
-     - use contexts instead of global objects
+     - use a builder to construct network structure
+     - use (local) contexts inside builder instead of global context instances
      - simplify some features with contexts
      - use beth_prsg for all randomizations
      - global naming scheme for holors

@@ -17,50 +17,26 @@
 
 /// Network Objects
 
-// TODO
-// - (done) use double-nested-frame
-// - (done) bhvm_value_s_fdev:   (allow all type variations)
-// - (done) finish htp dp pass
-// - (done) replace '=<' by '<-'
-// - (done) current holor literal syntax: is problematic  (() clashes with expression evaluation in brackets), spaces (as catenation) clashes with operator interpretation
-//        ... use same syntax as multidimensional arrays in C? {{1,2},{3,4}}
-//        ... use ':' to cat holors? {{1:2}:{3:4}:{5:6}}  (seems most appropriate)
-//        ... could holor opening '{' clash with cell block opening?  (looking ahead?)
-//        ... should {1:2}:3 be {1:2:3}? (seems necessary if 1:2:3 == (1:2):3)
-//                   problem: {#:#}:{#:#} == 2[2[# or 1[4[# ?
-//        Solution: Use two catenation operators: constructive ':', conservative '::' (keeps order only increases leading dim)
-//                      (#:#) :(#:#) == 2[2[#
-//                      (#:#:#)      == 3[#
-//                      (#:#) :#     == 3[#
-//                      (#:#)::(#:#) == 4[#
-//       With constructive catenation one can build any holor from scalars.
-//       No dedicated rule of holor-bracing required because ':', '::' are just regular binary operators.
-//
-//
-//
-// - (done) replace ':' with '<:' for cell-cell or cell-holor concatenation
-// - (done) use     ':' for holor concatenation
-
 /**********************************************************************************************************************/
 
-#ifndef LION_NET_H
-#define LION_NET_H
+#ifndef OPAL_NET_H
+#define OPAL_NET_H
 
-#include "lion_sem.h"
-#include "lion_planted.h"
+#include "opal_sem.h"
+#include "opal_planted.h"
 
 /**********************************************************************************************************************/
 
 /// Tree group
-#ifdef TYPEOF_lion_ctr
+#ifdef TYPEOF_opal_ctr
 
-PLANT_GROUP( lion_ctr, bcore_inst )
+PLANT_GROUP( opal_ctr, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :node = aware bcore_array
 {
     sz_t id = -1;
-    private lion_sem_cell_s -> cell;
+    private opal_sem_cell_s -> cell;
     private :node_s -> parent;
     :node_s => [];
 };
@@ -75,13 +51,13 @@ stamp :tree = aware :
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#endif // TYPEOF_lion_ctr
+#endif // TYPEOF_opal_ctr
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_lion_net
+#ifdef TYPEOF_opal_net
 
-PLANT_GROUP( lion_net, bcore_inst )
+PLANT_GROUP( opal_net, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :link = aware :
@@ -95,7 +71,7 @@ signature void solve( mutable );
 
 /// returns the uplink index pointing to node; returns -1 if not found
 signature sz_t up_index( const, const :node_s* node );
-signature void set_nop_d( mutable, lion_nop* nop );
+signature void set_nop_d( mutable, opal_nop* nop );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -128,9 +104,11 @@ stamp :node = aware :
     /// mnode is externally stored in a given mcode_frame
     hidden bhvm_mcode_node_s -> mnode;
 
-    aware lion_nop -> nop;
+    aware opal_nop -> nop;
 
-    lion_nop_solve_result_s => result;
+    opal_nop_solve_result_s => result;
+
+    aware opal_context -> context;
 
     hidden bcore_source_point_s -> source_point;
 
@@ -145,10 +123,10 @@ stamp :node = aware :
     func : :set_nop_d =
     {
         ASSERT( o->result == NULL );
-        lion_nop_a_attach( &o->nop, nop );
+        opal_nop_a_attach( &o->nop, nop );
     };
 
-    func : :is_cyclic = { return ( o->mnode ) ? o->mnode->cyclic : lion_nop_a_is_cyclic( o->nop ); };
+    func : :is_cyclic = { return ( o->mnode ) ? o->mnode->cyclic : opal_nop_a_is_cyclic( o->nop ); };
 };
 
 stamp :node_adl = aware bcore_array { :node_s => []; };
@@ -180,6 +158,8 @@ stamp :cell = aware :
     :nodes_s body;
     :nodes_s encs; // entry channels
     :nodes_s excs; // exit channels
+
+    aware opal_context -> context;
 
     func : :is_consistent;
     func : :normalize; // re-entrant
@@ -221,33 +201,33 @@ stamp :cell = aware :
 /// node
 
 /// Provides necessary mcode and holor data for isolated nodes that do not actively participate in computing an output
-void lion_net_node_s_isolated_mcode_push( lion_net_node_s* o, bhvm_mcode_frame_s* mcf );
+void opal_net_node_s_isolated_mcode_push( opal_net_node_s* o, bhvm_mcode_frame_s* mcf );
 
 /**********************************************************************************************************************/
 /// cell
 
-/** Converts lion_sem_cell_s to lion_net_cell_s
+/** Converts opal_sem_cell_s to opal_net_cell_s
  *  Requires a double-nested frame to allow correct processing of input channels with assignments (checked).
  */
-void lion_net_cell_s_from_sem_cell
+void opal_net_cell_s_from_sem_cell
 (
-    lion_net_cell_s* o,
-    lion_sem_cell_s* sem_cell,
-    lion_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name, const lion_nop* cur_nop ),
+    opal_net_cell_s* o,
+    opal_sem_cell_s* sem_cell,
+    opal_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name, const opal_nop* cur_nop ),
     vd_t arg,
     bcore_sink* log
 );
 
-void lion_net_cell_s_graph_to_sink( lion_net_cell_s* o, bcore_sink* sink );
-void lion_net_cell_s_mcode_push_ap( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf );
-void lion_net_cell_s_mcode_push_dp( lion_net_cell_s* o, bhvm_mcode_frame_s* mcf, bl_t entry_channels );
+void opal_net_cell_s_graph_to_sink( opal_net_cell_s* o, bcore_sink* sink );
+void opal_net_cell_s_mcode_push_ap( opal_net_cell_s* o, bhvm_mcode_frame_s* mcf );
+void opal_net_cell_s_mcode_push_dp( opal_net_cell_s* o, bhvm_mcode_frame_s* mcf, bl_t entry_channels );
 
-#endif // TYPEOF_lion_net
-
-/**********************************************************************************************************************/
-
-vd_t lion_net_signal_handler( const bcore_signal_s* o );
+#endif // TYPEOF_opal_net
 
 /**********************************************************************************************************************/
 
-#endif // LION_NET_H
+vd_t opal_net_signal_handler( const bcore_signal_s* o );
+
+/**********************************************************************************************************************/
+
+#endif // OPAL_NET_H

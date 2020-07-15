@@ -27,20 +27,18 @@
 
 /**********************************************************************************************************************/
 
+#define OPAL_CONTEXT_ERR_NOT_IMPLEMENTED() ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) );
+
 BETH_PLANT_DEFINE_GROUP( opal_context, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' bcore_prsg* get_prsg( mutable );
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :std = aware :
-{
-    aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
-    func : :get_prsg = { return o->prsg; };
-};
+feature 'a' bcore_prsg* get_prsg( mutable )     = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
+feature 'a' sc_t   nameof(   const, tp_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
+feature 'a' sc_t ifnameof(   const, tp_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
+feature 'a' tp_t   typeof(   const, sc_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return 0; };
+feature 'a' tp_t entypeof( mutable, sc_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return 0; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

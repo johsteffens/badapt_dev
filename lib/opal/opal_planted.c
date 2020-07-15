@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-11T12:39:16Z
+ *  Last File Update: 2020-07-14T09:10:08Z
  *
  *  Copyright and License of this File:
  *
@@ -11,6 +11,8 @@
  *  opal_holor.h
  *  opal_nop.h
  *  opal_eval_nop.h
+ *  opal_sem.h
+ *  opal_net.h
  *
  */
 
@@ -28,17 +30,14 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_context
 
-BCORE_DEFINE_OBJECT_INST_P( opal_context_std_s )
-"aware opal_context"
-"{"
-    "aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;"
-    "func ^:get_prsg;"
-"}";
-
 BCORE_DEFINE_SPECT( bcore_inst, opal_context )
 "{"
     "bcore_spect_header_s header;"
-    "feature aware opal_context : get_prsg;"
+    "feature aware opal_context : get_prsg = opal_context_get_prsg__;"
+    "feature aware opal_context : nameof = opal_context_nameof__;"
+    "feature aware opal_context : ifnameof = opal_context_ifnameof__;"
+    "feature aware opal_context : typeof = opal_context_typeof__;"
+    "feature aware opal_context : entypeof = opal_context_entypeof__;"
 "}";
 
 /**********************************************************************************************************************/
@@ -82,6 +81,13 @@ BCORE_DEFINE_OBJECT_INST_P( opal_holor_s )
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_nop
 
+BCORE_DEFINE_OBJECT_INST_P( opal_nop_context_s )
+"aware opal_context"
+"{"
+    "aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;"
+    "func ^:get_prsg;"
+"}";
+
 BCORE_DEFINE_OBJECT_INST_P( opal_nop_solve_result_s )
 "aware bcore_inst"
 "{"
@@ -107,7 +113,7 @@ BCORE_DEFINE_SPECT( bcore_inst, opal_nop )
     "feature aware opal_nop : create_op_of_arn = opal_nop_create_op_of_arn__;"
     "feature aware opal_nop : eci = opal_nop_eci__;"
     "feature aware opal_nop : solve = opal_nop_solve__;"
-    "feature aware opal_nop : solve_node;"
+    "feature aware opal_nop : solve_node = opal_nop_solve_node__;"
     "feature aware opal_nop : is_cyclic = opal_nop_is_cyclic__;"
     "feature aware opal_nop : is_adaptive = opal_nop_is_adaptive__;"
     "feature aware opal_nop : settle = opal_nop_settle__;"
@@ -993,6 +999,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_nop_ar2_cyclic_s )
     "func opal_nop:priority;"
     "func opal_nop:is_cyclic;"
     "func opal_nop:solve;"
+    "func opal_nop:solve_node;"
     "func opal_nop:mcode_push_ap_track;"
     "func opal_nop:mcode_push_dp_track;"
     "func opal_nop:mcode_push_dp_holor;"
@@ -1017,6 +1024,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_nop_ar2_reshape_s )
     "func opal_nop:symbol;"
     "func opal_nop:priority;"
     "func opal_nop:solve;"
+    "func opal_nop:solve_node;"
 "}";
 
 bl_t opal_nop_ar2_reshape_s_solve( const opal_nop_ar2_reshape_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result )
@@ -1197,7 +1205,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_ar1_s )
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
-    "aware opal_context => context = opal_context_std_s;"
+    "aware opal_context => context = opal_nop_context_s;"
 "}";
 
 s2_t opal_eval_nop_ar1_s_main( opal_eval_nop_ar1_s* o, const bcore_arr_st_s* args )
@@ -1214,7 +1222,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_ar2_s )
     "func ^:run;"
     "func ^:set_param;"
     "func bcore_main:main;"
-    "aware opal_context => context = opal_context_std_s;"
+    "aware opal_context => context = opal_nop_context_s;"
 "}";
 
 s2_t opal_eval_nop_ar2_s_main( opal_eval_nop_ar2_s* o, const bcore_arr_st_s* args )
@@ -1232,6 +1240,273 @@ BCORE_DEFINE_SPECT( bcore_inst, opal_eval_nop )
 "}";
 
 /**********************************************************************************************************************/
+// source: opal_sem.h
+#include "opal_sem.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_sem
+
+BCORE_DEFINE_OBJECT_INST_P( opal_sem_link_s )
+"aware opal_sem"
+"{"
+    "tp_t name;"
+    "bl_t visible = true;"
+    "private opal_sem_link_s -> up;"
+    "private opal_sem_link_s -> dn;"
+    "private vd_t cell;"
+    "bl_t exit;"
+    "func ^:get_name;"
+    "func ^:is_visible;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_sem_links_s )
+"aware bcore_array"
+"{"
+    "opal_sem_link_s => [];"
+"}";
+
+opal_sem_link_s* opal_sem_links_s_get_link_by_name( opal_sem_links_s* o, tp_t name )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return o->data[ i ];
+    return NULL;
+}
+
+bl_t opal_sem_links_s_name_exists( const opal_sem_links_s* o, tp_t name )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return true;
+    return false;
+}
+
+opal_sem_link_s* opal_sem_links_s_get_link_by_up( opal_sem_links_s* o, opal_sem_link_s* up )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->up == up ) return o->data[ i ];
+    return NULL;
+}
+
+opal_sem_link_s* opal_sem_links_s_get_link_by_dn( opal_sem_links_s* o, opal_sem_link_s* dn )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
+    return NULL;
+}
+
+sz_t opal_sem_links_s_get_index_by_link( opal_sem_links_s* o, opal_sem_link_s* link )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ] == link ) return i;
+    return -1;
+}
+
+sz_t opal_sem_links_s_count_open( const opal_sem_links_s* o )
+{
+    sz_t count = 0;
+    BFOR_EACH( i, o ) count += ( o->data[ i ]->up == NULL );
+    return count;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( opal_sem_body_s )
+"aware bcore_array"
+"{"
+    "aware opal_sem=> [];"
+"}";
+
+bl_t opal_sem_body_s_name_exists( const opal_sem_body_s* o, tp_t name )
+{
+    BFOR_EACH( i, o ) if( opal_sem_a_get_name( o->data[ i ] ) == name ) return true;
+    return false;
+}
+
+opal_sem* opal_sem_body_s_get_sem_by_name( opal_sem_body_s* o, tp_t name )
+{
+    BFOR_EACH( i, o )
+    {
+        if( opal_sem_a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+    }
+    return NULL;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( opal_sem_cell_s )
+"aware opal_sem"
+"{"
+    "tp_t name;"
+    "opal_sem_links_s encs;"
+    "opal_sem_links_s excs;"
+    "opal_sem_body_s => body;"
+    "private opal_sem_cell_s* parent;"
+    "opal_sem_context_s -> context;"
+    "sz_t priority = 10;"
+    "aware opal_nop -> nop;"
+    "hidden bcore_source_point_s source_point;"
+    "private opal_sem_cell_s -> wrapped_cell;"
+    "func ^:get_name;"
+"}";
+
+opal_sem_cell_s* opal_sem_cell_s_get_cell_by_name( opal_sem_cell_s* o, tp_t name )
+{
+    opal_sem* sem = o->body ? opal_sem_body_s_get_sem_by_name( o->body, name ) : NULL;
+    if( sem && sem->_ == TYPEOF_opal_sem_cell_s ) return ( opal_sem_cell_s* )sem;
+    if( o->parent ) return opal_sem_cell_s_get_cell_by_name( o->parent, name );
+    return NULL;
+}
+
+opal_sem_link_s* opal_sem_cell_s_get_link_by_name( opal_sem_cell_s* o, tp_t name )
+{
+    opal_sem* sem = o->body ? opal_sem_body_s_get_sem_by_name( o->body, name ) : NULL;
+    if( sem && sem->_ == TYPEOF_opal_sem_link_s ) return ( opal_sem_link_s* )sem;
+    return NULL;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( opal_sem_stack_flag_s )
+"aware opal_sem"
+"{"
+"}";
+
+BCORE_DEFINE_SPECT( bcore_inst, opal_sem )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware opal_sem : get_name = opal_sem_get_name__;"
+    "feature aware opal_sem : is_visible = opal_sem_is_visible__;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_sem_context
+
+BCORE_DEFINE_OBJECT_INST_P( opal_sem_context_s )
+"aware opal_sem_context"
+"{"
+    "opal_nop_context_s nop_context;"
+    "func opal_context:get_prsg;"
+    "bcore_hmap_name_s hmap_name;"
+    "bcore_arr_st_s arr_symbol_op2;"
+    "bcore_hmap_tp_s control_types;"
+    "bcore_hmap_tp_s reserved_names;"
+    "func opal_context:nameof;"
+    "func opal_context:ifnameof;"
+    "func opal_context:typeof;"
+    "func opal_context:entypeof;"
+"}";
+
+/**********************************************************************************************************************/
+// source: opal_net.h
+#include "opal_net.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_ctr
+
+BCORE_DEFINE_OBJECT_INST_P( opal_ctr_node_s )
+"aware bcore_array"
+"{"
+    "sz_t id = -1;"
+    "private opal_sem_cell_s -> cell;"
+    "private opal_ctr_node_s -> parent;"
+    "opal_ctr_node_s => [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_ctr_tree_s )
+"aware opal_ctr"
+"{"
+    "sz_t id_base = 0;"
+    "opal_ctr_node_s => root;"
+"}";
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_net
+
+BCORE_DEFINE_OBJECT_INST_P( opal_net_link_s )
+"aware opal_net"
+"{"
+    "hidden vd_t node;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_net_links_s )
+"aware bcore_array"
+"{"
+    "opal_net_link_s => [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_net_node_s )
+"aware opal_net"
+"{"
+    "opal_net_links_s upls;"
+    "opal_net_links_s dnls;"
+    "tp_t name;"
+    "bl_t flag = false;"
+    "bl_t probe = false;"
+    "sz_t id;"
+    "hidden bhvm_mcode_node_s -> mnode;"
+    "aware opal_nop -> nop;"
+    "opal_nop_solve_result_s => result;"
+    "aware opal_context -> context;"
+    "hidden bcore_source_point_s -> source_point;"
+    "func ^:is_cyclic;"
+"}";
+
+sz_t opal_net_node_s_up_index( const opal_net_node_s* o, const opal_net_node_s* node )
+{
+    BFOR_EACH( i, &o->upls ) if( o->upls.data[ i ]->node == node ) return i;
+    return -1;
+}
+
+void opal_net_node_s_set_nop_d( opal_net_node_s* o, opal_nop* nop )
+{
+    ASSERT( o->result == NULL );
+    opal_nop_a_attach( &o->nop, nop );
+}
+
+BCORE_DEFINE_OBJECT_INST_P( opal_net_node_adl_s )
+"aware bcore_array"
+"{"
+    "opal_net_node_s => [];"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_net_nodes_s )
+"aware bcore_array"
+"{"
+    "opal_net_node_s => [];"
+"}";
+
+opal_net_node_s* opal_net_nodes_s_get_by_id( opal_net_nodes_s* o, sz_t id )
+{
+    BFOR_EACH( i, o ) if( o->data[ i ]->id == id ) return o->data[ i ];
+    return NULL;
+}
+
+BCORE_DEFINE_OBJECT_INST_P( opal_net_cell_s )
+"aware opal_net"
+"{"
+    "sz_t max_depth = 32768;"
+    "opal_net_nodes_s body;"
+    "opal_net_nodes_s encs;"
+    "opal_net_nodes_s excs;"
+    "aware opal_context -> context;"
+    "func bcore_inst_call:copy_x;"
+    "func bcore_via_call:mutated;"
+"}";
+
+void opal_net_cell_s_clear_flags( opal_net_cell_s* o )
+{
+    BFOR_EACH( i, &o->body ) o->body.data[ i ]->flag = false;
+}
+
+void opal_net_cell_s_clear_all_flags( opal_net_cell_s* o )
+{
+    BFOR_EACH( i, &o->body )
+    {
+        o->body.data[ i ]->flag = false;
+        o->body.data[ i ]->probe = false;
+    }
+}
+
+void opal_net_cell_s_clear_downlinks( opal_net_cell_s* o )
+{
+    BFOR_EACH( i, &o->body ) opal_net_links_s_clear( &o->body.data[ i ]->dnls );
+}
+
+BCORE_DEFINE_SPECT( bcore_inst, opal_net )
+"{"
+    "bcore_spect_header_s header;"
+    "feature aware opal_net : is_cyclic = opal_net_is_cyclic__;"
+"}";
+
+/**********************************************************************************************************************/
 
 
 vd_t opal_planted_signal_handler( const bcore_signal_s* o )
@@ -1246,8 +1521,15 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
 
             // group: opal_context
             BCORE_REGISTER_FEATURE( opal_context_get_prsg );
-            BCORE_REGISTER_FFUNC( opal_context_get_prsg, opal_context_std_s_get_prsg );
-            BCORE_REGISTER_OBJECT( opal_context_std_s );
+            BCORE_REGISTER_FFUNC( opal_context_get_prsg, opal_context_get_prsg__ );
+            BCORE_REGISTER_FEATURE( opal_context_nameof );
+            BCORE_REGISTER_FFUNC( opal_context_nameof, opal_context_nameof__ );
+            BCORE_REGISTER_FEATURE( opal_context_ifnameof );
+            BCORE_REGISTER_FFUNC( opal_context_ifnameof, opal_context_ifnameof__ );
+            BCORE_REGISTER_FEATURE( opal_context_typeof );
+            BCORE_REGISTER_FFUNC( opal_context_typeof, opal_context_typeof__ );
+            BCORE_REGISTER_FEATURE( opal_context_entypeof );
+            BCORE_REGISTER_FFUNC( opal_context_entypeof, opal_context_entypeof__ );
             BCORE_REGISTER_SPECT( opal_context );
 
             // --------------------------------------------------------------------
@@ -1271,6 +1553,8 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
             // source: opal_nop.h
 
             // group: opal_nop
+            BCORE_REGISTER_FFUNC( opal_context_get_prsg, opal_nop_context_s_get_prsg );
+            BCORE_REGISTER_OBJECT( opal_nop_context_s );
             BCORE_REGISTER_NAME( track_ap );
             BCORE_REGISTER_NAME( track_dp );
             BCORE_REGISTER_NAME( track_ap_setup );
@@ -1297,6 +1581,7 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FEATURE( opal_nop_solve );
             BCORE_REGISTER_FFUNC( opal_nop_solve, opal_nop_solve__ );
             BCORE_REGISTER_FEATURE( opal_nop_solve_node );
+            BCORE_REGISTER_FFUNC( opal_nop_solve_node, opal_nop_solve_node__ );
             BCORE_REGISTER_FEATURE( opal_nop_is_cyclic );
             BCORE_REGISTER_FFUNC( opal_nop_is_cyclic, opal_nop_is_cyclic__ );
             BCORE_REGISTER_FEATURE( opal_nop_is_adaptive );
@@ -1747,6 +2032,7 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( opal_nop_priority, opal_nop_ar2_cyclic_s_priority );
             BCORE_REGISTER_FFUNC( opal_nop_is_cyclic, opal_nop_ar2_cyclic_s_is_cyclic );
             BCORE_REGISTER_FFUNC( opal_nop_solve, opal_nop_ar2_cyclic_s_solve );
+            BCORE_REGISTER_FFUNC( opal_nop_solve_node, opal_nop_ar2_cyclic_s_solve_node );
             BCORE_REGISTER_FFUNC( opal_nop_mcode_push_ap_track, opal_nop_ar2_cyclic_s_mcode_push_ap_track );
             BCORE_REGISTER_FFUNC( opal_nop_mcode_push_dp_track, opal_nop_ar2_cyclic_s_mcode_push_dp_track );
             BCORE_REGISTER_FFUNC( opal_nop_mcode_push_dp_holor, opal_nop_ar2_cyclic_s_mcode_push_dp_holor );
@@ -1763,6 +2049,7 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( opal_nop_symbol, opal_nop_ar2_reshape_s_symbol );
             BCORE_REGISTER_FFUNC( opal_nop_priority, opal_nop_ar2_reshape_s_priority );
             BCORE_REGISTER_FFUNC( opal_nop_solve, opal_nop_ar2_reshape_s_solve );
+            BCORE_REGISTER_FFUNC( opal_nop_solve_node, opal_nop_ar2_reshape_s_solve_node );
             BCORE_REGISTER_OBJECT( opal_nop_ar2_reshape_s );
             BCORE_REGISTER_TRAIT( opal_nop_ar2, opal_nop );
             bcore_inst_s_get_typed( TYPEOF_opal_nop_ar2_add_s );
@@ -1832,10 +2119,60 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_main_main, opal_eval_nop_ar2_s_main );
             BCORE_REGISTER_OBJECT( opal_eval_nop_ar2_s );
             BCORE_REGISTER_SPECT( opal_eval_nop );
+
+            // --------------------------------------------------------------------
+            // source: opal_sem.h
+
+            // group: opal_sem
+            BCORE_REGISTER_NAME( cell );
+            BCORE_REGISTER_FEATURE( opal_sem_get_name );
+            BCORE_REGISTER_FFUNC( opal_sem_get_name, opal_sem_get_name__ );
+            BCORE_REGISTER_FEATURE( opal_sem_is_visible );
+            BCORE_REGISTER_FFUNC( opal_sem_is_visible, opal_sem_is_visible__ );
+            BCORE_REGISTER_FFUNC( opal_sem_get_name, opal_sem_link_s_get_name );
+            BCORE_REGISTER_FFUNC( opal_sem_is_visible, opal_sem_link_s_is_visible );
+            BCORE_REGISTER_OBJECT( opal_sem_link_s );
+            BCORE_REGISTER_OBJECT( opal_sem_links_s );
+            BCORE_REGISTER_OBJECT( opal_sem_body_s );
+            BCORE_REGISTER_FFUNC( opal_sem_get_name, opal_sem_cell_s_get_name );
+            BCORE_REGISTER_OBJECT( opal_sem_cell_s );
+            BCORE_REGISTER_OBJECT( opal_sem_stack_flag_s );
+            BCORE_REGISTER_SPECT( opal_sem );
+
+            // group: opal_sem_context
+            BCORE_REGISTER_FFUNC( opal_context_get_prsg, opal_sem_context_s_get_prsg );
+            BCORE_REGISTER_FFUNC( opal_context_nameof, opal_sem_context_s_nameof );
+            BCORE_REGISTER_FFUNC( opal_context_ifnameof, opal_sem_context_s_ifnameof );
+            BCORE_REGISTER_FFUNC( opal_context_typeof, opal_sem_context_s_typeof );
+            BCORE_REGISTER_FFUNC( opal_context_entypeof, opal_sem_context_s_entypeof );
+            BCORE_REGISTER_OBJECT( opal_sem_context_s );
+            BCORE_REGISTER_TRAIT( opal_sem_context, opal_context );
+
+            // --------------------------------------------------------------------
+            // source: opal_net.h
+
+            // group: opal_ctr
+            BCORE_REGISTER_OBJECT( opal_ctr_node_s );
+            BCORE_REGISTER_OBJECT( opal_ctr_tree_s );
+            BCORE_REGISTER_TRAIT( opal_ctr, bcore_inst );
+
+            // group: opal_net
+            BCORE_REGISTER_OBJECT( opal_net_link_s );
+            BCORE_REGISTER_OBJECT( opal_net_links_s );
+            BCORE_REGISTER_FEATURE( opal_net_is_cyclic );
+            BCORE_REGISTER_FFUNC( opal_net_is_cyclic, opal_net_is_cyclic__ );
+            BCORE_REGISTER_FFUNC( opal_net_is_cyclic, opal_net_node_s_is_cyclic );
+            BCORE_REGISTER_OBJECT( opal_net_node_s );
+            BCORE_REGISTER_OBJECT( opal_net_node_adl_s );
+            BCORE_REGISTER_OBJECT( opal_net_nodes_s );
+            BCORE_REGISTER_FFUNC( bcore_inst_call_copy_x, opal_net_cell_s_copy_x );
+            BCORE_REGISTER_FFUNC( bcore_via_call_mutated, opal_net_cell_s_mutated );
+            BCORE_REGISTER_OBJECT( opal_net_cell_s );
+            BCORE_REGISTER_SPECT( opal_net );
         }
         break;
         default: break;
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE     842945
+// BETH_PLANT_SIGNATURE 3146908565
