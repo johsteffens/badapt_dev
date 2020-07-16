@@ -184,6 +184,7 @@ TODO:
    - (done) implement operator volof  (returning the volume as constant scalar)
    - (done) add cast operator 'reshape( new_shape, holor )' converting the shape of a holor
    - (done) rename lgst -> sigm
+   - switch to er_t based error handling
    - expand matrix multiplication to involve higher order holors using an eci-like-approach (elements being 2x2 matrices)
    - implement ar3-convolution operator
    - bhpt:

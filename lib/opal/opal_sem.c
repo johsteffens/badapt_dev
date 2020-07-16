@@ -46,35 +46,6 @@ void             opal_sem_cell_s_set_channels(        opal_sem_cell_s* o, sz_t e
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-sc_t opal_sem_context_s_nameof( const opal_sem_context_s* o, tp_t name )
-{
-    return bcore_hmap_name_s_get_sc( &o->hmap_name, name );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-sc_t opal_sem_context_s_ifnameof( const opal_sem_context_s* o, tp_t name )
-{
-    sc_t sc = opal_sem_context_s_nameof( o, name );
-    return sc ? sc : "";
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-tp_t opal_sem_context_s_typeof( const opal_sem_context_s* o, sc_t name )
-{
-    return btypeof( name );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-tp_t opal_sem_context_s_entypeof( opal_sem_context_s* o, sc_t name )
-{
-    return bcore_hmap_name_s_set_sc( &o->hmap_name, name );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 tp_t opal_sem_context_s_entypeof_fv( opal_sem_context_s* o, sc_t format, va_list args )
 {
     st_s* s = st_s_create_fv( format, args );
@@ -1706,4 +1677,39 @@ opal_sem_cell_s* opal_sem_cell_s_evaluate_cell( opal_sem_cell_s* o, bcore_source
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+/// builder
 
+// ---------------------------------------------------------------------------------------------------------------------
+
+er_t opal_sem_builder_s_build_from_source( opal_sem_builder_s* o, opal_sem_cell_s* cell, bcore_source* source )
+{
+    BLM_INIT();
+
+    opal_sem_context_s_attach( &o->context, opal_sem_context_s_create() );
+
+    /** Triple-nested semantic cell-frame:
+     *  Level 0: context level: contains all global operators
+     *  Level 1: frame level  : holds operators defined outside the root cell
+     *  Level 2: root level   : represents the root cell defined in source
+     */
+
+    opal_sem_cell_s_attach( &o->cell_context, opal_sem_context_s_create_cell( o->context ) );
+    opal_sem_cell_s_attach( &o->cell_frame,   opal_sem_context_s_create_cell( o->context ) );
+    opal_sem_context_s_setup_cell( o->context, cell );
+    opal_sem_context_s_setup( o->context, o->cell_context );
+
+    o->cell_frame->parent = o->cell_context;
+       cell      ->parent = o->cell_frame;
+
+    bcore_source_point_s_set( &o->cell_frame->source_point, source );
+    bcore_source_point_s_set( &cell->source_point, source );
+
+    bcore_source_a_parse_fa( source, " #-?'cell'" ); // leading 'cell' keyword is optional
+    opal_sem_cell_s_parse( cell, source );
+
+    BLM_RETURNV( er_t, 0 );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/

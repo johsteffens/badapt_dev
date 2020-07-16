@@ -108,7 +108,7 @@ stamp :node = aware :
 
     opal_nop_solve_result_s => result;
 
-    aware opal_context -> context;
+    hidden aware opal_context -> context;
 
     hidden bcore_source_point_s -> source_point;
 
@@ -159,7 +159,7 @@ stamp :cell = aware :
     :nodes_s encs; // entry channels
     :nodes_s excs; // exit channels
 
-    aware opal_context -> context;
+    hidden aware opal_context -> context;
 
     func : :is_consistent;
     func : :normalize; // re-entrant

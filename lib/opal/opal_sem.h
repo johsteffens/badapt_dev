@@ -98,6 +98,8 @@ BETH_PLANT_DEFINE_GROUP( opal_sem, bcore_inst )
 group :context = opal_context
 {
     signature void setup( mutable, opal_sem_cell_s* frame );
+    signature opal_sem_cell_s* setup_cell( mutable, opal_sem_cell_s* cell ); // returns cell
+    signature opal_sem_cell_s* create_cell( mutable ); // creates and setups cell
 
     stamp : = aware :
     {
@@ -107,18 +109,26 @@ group :context = opal_context
         bcore_hmap_name_s hmap_name;
         bcore_arr_st_s    arr_symbol_op2;
 
-        /// TODO: Frame of a cell structure will be part of builder
-        //:cell_s => cell;
-
         bcore_hmap_tp_s control_types; // types reserved for control
         bcore_hmap_tp_s reserved_names; // reserved keywords (not allowed for variables)
 
         func : :setup;
 
-        func opal_context :nameof;
-        func opal_context :ifnameof;
-        func opal_context :typeof;
-        func opal_context :entypeof;
+        func opal_context :nameof   = { return bcore_hmap_name_s_get_sc( &o->hmap_name, name ); };
+        func opal_context :ifnameof = { sc_t sc = @_nameof( o, name ); return sc ? sc : "";     };
+        func opal_context :typeof   = { return btypeof( name );                                 };
+        func opal_context :entypeof = { return bcore_hmap_name_s_set_sc( &o->hmap_name, name ); };
+
+        func : :setup_cell =
+        {
+            @_attach( &cell->context, bcore_fork( o ) );
+            return cell;
+        };
+
+        func : :create_cell =
+        {
+            return @_setup_cell( o, ::cell_s_create() );
+        };
     };
 };
 
@@ -237,10 +247,10 @@ stamp :cell = aware :
             :links_s      excs;    // exit channels
             :body_s    => body;
     private :cell_s*      parent;  // lexical parent
-            :context_s -> context; // context for given cell structure
+    hidden  :context_s -> context; // context for given cell structure
              sz_t         priority = 10;
 
-    aware    opal_nop  -> nop;          // cell holds either operator (cell is a node) or body (cell is a graph) or neither (cell is a wrapper)
+    aware    opal_nop  -> nop;     // cell holds either operator (cell is a node) or body (cell is a graph) or neither (cell is a wrapper)
     hidden bcore_source_point_s source_point;
 
     // if cell is a wrapper, wrapped_cell is the cell being wrapped
@@ -281,6 +291,23 @@ stamp :stack_flag = aware : {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// semantic builder
+group :builder = :
+{
+    signature er_t build_from_source( mutable, opal_sem_cell_s* cell, bcore_source* source );
+
+    stamp : = aware :
+    {
+        opal_sem_context_s => context;
+        opal_sem_cell_s => cell_context;
+        opal_sem_cell_s => cell_frame;
+
+        func : :build_from_source;
+    };
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 opal_sem_link_s* opal_sem_link_s_trace_to_cell_membrane( opal_sem_link_s* o );
@@ -288,9 +315,6 @@ opal_sem_link_s* opal_sem_link_s_trace_to_cell_membrane( opal_sem_link_s* o );
 void opal_sem_cell_s_parse( opal_sem_cell_s* o, bcore_source* source );
 void opal_sem_cell_s_parse_signature( opal_sem_cell_s* o, bcore_source* source );
 void opal_sem_cell_s_parse_body( opal_sem_cell_s* o, bcore_source* source );
-
-// TODO: will be part of builder
-//opal_sem_cell_s* opal_sem_cell_s_create_frame( void );
 
 /**********************************************************************************************************************/
 
