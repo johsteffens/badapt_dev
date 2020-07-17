@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-16T10:51:44Z
+ *  Last File Update: 2020-07-17T11:05:46Z
  *
  *  Copyright and License of this File:
  *
@@ -1530,6 +1530,27 @@ BCORE_DEFINE_SPECT( bcore_inst, opal_net )
     "feature aware opal_net : is_cyclic = opal_net_is_cyclic__;"
 "}";
 
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_net_builder
+
+BCORE_DEFINE_OBJECT_INST_P( opal_net_builder_s )
+"aware opal_net_builder"
+"{"
+    "opal_sem_builder_s sem_builder;"
+    "hidden bhvm_holor_adl_s input_holors;"
+    "hidden aware bcore_sink -> log;"
+"}";
+
+void opal_net_builder_s_fork_input_holors( opal_net_builder_s* o, const bhvm_holor_s** input_holors, sz_t size_input_holors )
+{
+    bhvm_holor_adl_s_set_size( &o->input_holors, size_input_holors );
+    BFOR_EACH( i, &o->input_holors )
+    {
+        ASSERT( input_holors[ i ] );
+        bhvm_holor_s_attach( &o->input_holors.data[ i ], bcore_fork( ( bhvm_holor_s* )input_holors[ i ] ) );
+    }
+}
+
 /**********************************************************************************************************************/
 // source: opal_frame.h
 #include "opal_frame.h"
@@ -2473,6 +2494,10 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_OBJECT( opal_net_cell_s );
             BCORE_REGISTER_SPECT( opal_net );
 
+            // group: opal_net_builder
+            BCORE_REGISTER_OBJECT( opal_net_builder_s );
+            BCORE_REGISTER_TRAIT( opal_net_builder, opal_net );
+
             // --------------------------------------------------------------------
             // source: opal_frame.h
 
@@ -2526,4 +2551,4 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE  877262445
+// BETH_PLANT_SIGNATURE 3615503154

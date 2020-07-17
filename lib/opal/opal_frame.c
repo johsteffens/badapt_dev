@@ -22,49 +22,6 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static opal_nop* input_op_create( vd_t arg, sz_t in_idx, tp_t in_name, const opal_nop* current_nop )
-{
-    BLM_INIT();
-    const bhvm_holor_s** in = arg;
-
-    if( in ) ASSERT( in[ in_idx ] != NULL && *(aware_t*)in[ in_idx ] == TYPEOF_bhvm_holor_s );
-
-    const bhvm_holor_s* h_in = in ? in[ in_idx ] : NULL;
-
-    if( current_nop && current_nop->_ == TYPEOF_opal_nop_ar0_param_s )
-    {
-        const bhvm_holor_s* h_cur = &( ( opal_nop_ar0_param_s* )current_nop )->h->h;
-        if( !h_in )
-        {
-            h_in = h_cur;
-        }
-        else if( !bhvm_shape_s_is_equal( &h_cur->s, &h_in->s ) )
-        {
-            st_s* msg = BLM_CREATE( st_s );
-            bcore_sink_a_push_fa( (bcore_sink*)msg, "Shape deviation at input holor '#<sz_t>':", in_idx );
-            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Passed input} " );
-            bhvm_holor_s_brief_to_sink( h_in, (bcore_sink*)msg );
-            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Expected shape} " );
-            bhvm_holor_s_brief_to_sink( h_cur, (bcore_sink*)msg );
-            ERR_fa( "#<st_s*>\n", msg );
-        }
-    }
-
-    if( h_in )
-    {
-        opal_nop_ar0_param_s* param = opal_nop_ar0_param_s_create();
-        param->h = opal_holor_s_create();
-        bhvm_holor_s_copy( &param->h->h, h_in );
-        BLM_RETURNV( opal_nop*, ( opal_nop* )param );
-    }
-    else
-    {
-        BLM_RETURNV( opal_nop*, NULL );
-    }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 static void opal_frame_s_disassemble_hbase_to_sink( const opal_frame_s* o, const bhvm_mcode_hbase_s* hbase, sz_t indent, bcore_sink* sink )
 {
     sz_t hname_length = 0;
@@ -238,6 +195,7 @@ bcore_arr_sz_s* opal_frame_push_idx( bcore_arr_sz_s** o, sz_t idx )
 
 void opal_frame_s_check_integrity( const opal_frame_s* o )
 {
+    assert( o->context );
     assert( o->mcf );
     bhvm_mcode_frame_s_check_integrity( o->mcf );
 }
@@ -248,23 +206,19 @@ opal_frame_s* opal_frame_s_setup_from_source( opal_frame_s* o, bcore_source* sou
 {
     BLM_INIT();
 
+    opal_net_cell_s* net_cell = BLM_CREATE( opal_net_cell_s );
+    opal_net_builder_s* net_builder = BLM_CREATE( opal_net_builder_s );
+
+    opal_net_builder_s_fork_log( net_builder, o->log );
+    opal_net_builder_s_fork_input_holors( net_builder, en, size_en );
+    opal_net_builder_s_build_from_source( net_builder, net_cell, source );
+
     opal_frame_hidx_s_clear( &o->hidx_en );
     opal_frame_hidx_s_clear( &o->hidx_ex );
     opal_frame_hidx_s_clear( &o->hidx_ada );
 
-    opal_sem_cell_s*    sem_cell    = BLM_CREATE( opal_sem_cell_s );
-    opal_sem_builder_s* sem_builder = BLM_CREATE( opal_sem_builder_s );
-    opal_sem_builder_s_build_from_source( sem_builder, sem_cell, source );
-    opal_context_a_attach( &o->context, bcore_fork( sem_cell->context ) );
-
-    if( en ) ASSERT( size_en >= sem_cell->encs.size );
-
+    opal_context_a_attach( &o->context, bcore_fork( net_cell->context ) );
     bhvm_mcode_frame_s_attach( &o->mcf, bhvm_mcode_frame_s_create() );
-
-    /// network cell
-    opal_net_cell_s* net_cell = BLM_CREATE( opal_net_cell_s );
-
-    opal_net_cell_s_from_sem_cell( net_cell, sem_cell, input_op_create, ( vd_t )en, o->log );
 
     opal_net_cell_s_mcode_push_ap( net_cell, o->mcf );
     opal_net_cell_s_mcode_push_dp( net_cell, o->mcf, true );
@@ -817,7 +771,7 @@ void opal_frame_cyclic_s_run_ap_adl_flat( opal_frame_cyclic_s* o, const bhvm_hol
 void opal_frame_cyclic_s_run_dp_adl_flat( opal_frame_cyclic_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en )
 {
     ASSERT( o->frame );
-    assert( o->setup );
+    ASSERT( o->setup );
 
     sz_t size_en = opal_frame_s_get_size_en( o->frame );
     sz_t size_ex = opal_frame_s_get_size_ex( o->frame );

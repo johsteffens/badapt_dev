@@ -1522,6 +1522,76 @@ void opal_net_cell_s_mcode_push_dp( opal_net_cell_s* o, bhvm_mcode_frame_s* mcf,
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
+// builder
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static opal_nop* opal_net_builder_s_callback_input_op_create( vd_t arg, sz_t in_idx, tp_t in_name, const opal_nop* current_nop )
+{
+    BLM_INIT();
+
+    ASSERT( *(aware_t*)arg == TYPEOF_opal_net_builder_s );
+
+    opal_net_builder_s* o = arg;
+    ASSERT( in_idx < o->input_holors.size );
+
+    const bhvm_holor_s* h_in = o->input_holors.data[ in_idx ];
+
+    if( current_nop && current_nop->_ == TYPEOF_opal_nop_ar0_param_s )
+    {
+        const bhvm_holor_s* h_cur = &( ( opal_nop_ar0_param_s* )current_nop )->h->h;
+        if( !h_in )
+        {
+            h_in = h_cur;
+        }
+        else if( !bhvm_shape_s_is_equal( &h_cur->s, &h_in->s ) )
+        {
+            st_s* msg = BLM_CREATE( st_s );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "Shape deviation at input holor '#<sz_t>':", in_idx );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Passed input} " );
+            bhvm_holor_s_brief_to_sink( h_in, (bcore_sink*)msg );
+            bcore_sink_a_push_fa( (bcore_sink*)msg, "\n#p20.{Expected shape} " );
+            bhvm_holor_s_brief_to_sink( h_cur, (bcore_sink*)msg );
+            ERR_fa( "#<st_s*>\n", msg );
+        }
+    }
+
+    if( h_in )
+    {
+        opal_nop_ar0_param_s* param = opal_nop_ar0_param_s_create();
+        param->h = opal_holor_s_create();
+        bhvm_holor_s_copy( &param->h->h, h_in );
+        BLM_RETURNV( opal_nop*, ( opal_nop* )param );
+    }
+    else
+    {
+        BLM_RETURNV( opal_nop*, NULL );
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void opal_net_builder_s_build_from_source( opal_net_builder_s* o, opal_net_cell_s* net_cell, bcore_source* source )
+{
+    BLM_INIT();
+    opal_sem_cell_s* sem_cell = BLM_CREATE( opal_sem_cell_s );
+    opal_sem_builder_s_build_from_source( &o->sem_builder, sem_cell, source );
+
+    opal_net_cell_s_from_sem_cell
+    (
+        net_cell,
+        sem_cell,
+        opal_net_builder_s_callback_input_op_create,
+        o,
+        o->log
+    );
+
+    BLM_DOWN();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
 
 // ---------------------------------------------------------------------------------------------------------------------
 

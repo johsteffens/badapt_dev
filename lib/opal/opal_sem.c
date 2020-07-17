@@ -676,17 +676,6 @@ void opal_sem_cell_s_assert_identifier_not_yet_defined( const opal_sem_cell_s* o
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-// TODO: will be part of builder
-//opal_sem_cell_s* opal_sem_cell_s_create_frame( void )
-//{
-//    if( !context_g ) opal_sem_context_setup();
-//    opal_sem_cell_s* o = opal_sem_cell_s_create();
-//    o->parent = context_g->cell;
-//    return o;
-//}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 /// parses ( ... <- ... )
 void opal_sem_cell_s_parse_signature( opal_sem_cell_s* o, bcore_source* source )
 {

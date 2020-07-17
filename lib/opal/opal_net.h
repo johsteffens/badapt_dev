@@ -195,6 +195,37 @@ stamp :cell = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// network builder
+group :builder = :
+{
+    signature void fork_log( mutable, bcore_sink* log );
+    signature void fork_input_holors( mutable, const bhvm_holor_s** input_holors, sz_t size_input_holors );
+    signature void build_from_source( mutable, opal_net_cell_s* net_cell, bcore_source* source );
+
+    stamp : = aware :
+    {
+        opal_sem_builder_s sem_builder;
+        hidden bhvm_holor_adl_s input_holors;
+        hidden aware bcore_sink -> log;
+
+        func : :fork_log = { bcore_sink_a_attach( &o->log, bcore_fork( log ) ); };
+
+        func : :fork_input_holors =
+        {
+            bhvm_holor_adl_s_set_size( &o->input_holors, size_input_holors );
+            BFOR_EACH( i, &o->input_holors )
+            {
+                ASSERT( input_holors[ i ] );
+                bhvm_holor_s_attach( &o->input_holors.data[ i ], bcore_fork( ( bhvm_holor_s* )input_holors[ i ] ) );
+            }
+        };
+
+        func : :build_from_source;
+    };
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /**********************************************************************************************************************/

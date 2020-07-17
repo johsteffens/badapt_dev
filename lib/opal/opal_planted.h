@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-16T10:51:44Z
+ *  Last File Update: 2020-07-17T11:05:46Z
  *
  *  Copyright and License of this File:
  *
@@ -24,7 +24,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_opal_planted 409849943
+#define HKEYOF_opal_planted 710708549
 
 #define TYPEOF_opal_planted 1626965476
 
@@ -1343,6 +1343,7 @@
   BCORE_FORWARD_OBJECT( opal_net_node_adl_s ); \
   BCORE_FORWARD_OBJECT( opal_net_nodes_s ); \
   BCORE_FORWARD_OBJECT( opal_net_cell_s ); \
+  BCORE_FORWARD_OBJECT( opal_net_builder ); \
   typedef bl_t (*opal_net_is_cyclic)( const opal_net* o ); \
   BCORE_DECLARE_SPECT( opal_net ) \
   { \
@@ -1361,7 +1362,25 @@
   BETH_EXPAND_ITEM_opal_net_node_s \
   BETH_EXPAND_ITEM_opal_net_node_adl_s \
   BETH_EXPAND_ITEM_opal_net_nodes_s \
-  BETH_EXPAND_ITEM_opal_net_cell_s
+  BETH_EXPAND_ITEM_opal_net_cell_s \
+  BETH_EXPAND_GROUP_opal_net_builder
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_net_builder
+
+#define TYPEOF_opal_net_builder 685280419
+#define TYPEOF_opal_net_builder_s 2298087749
+#define TYPEOF_opal_net_builder_s 2298087749
+#define BETH_EXPAND_ITEM_opal_net_builder_s \
+  BCORE_DECLARE_OBJECT( opal_net_builder_s ) \
+    {aware_t _;opal_sem_builder_s sem_builder;bhvm_holor_adl_s input_holors;bcore_sink* log;}; \
+  static inline void opal_net_builder_s_fork_log( opal_net_builder_s* o, bcore_sink* log ){bcore_sink_a_attach( &o->log, bcore_fork( log ) );} \
+  void opal_net_builder_s_fork_input_holors( opal_net_builder_s* o, const bhvm_holor_s** input_holors, sz_t size_input_holors ); \
+  void opal_net_builder_s_build_from_source( opal_net_builder_s* o, opal_net_cell_s* net_cell, bcore_source* source );
+#define BETH_EXPAND_GROUP_opal_net_builder \
+  BCORE_FORWARD_OBJECT( opal_net_builder ); \
+  BCORE_FORWARD_OBJECT( opal_net_builder_s ); \
+  BETH_EXPAND_ITEM_opal_net_builder_s
 
 /**********************************************************************************************************************/
 // source: opal_frame.h
@@ -1577,4 +1596,4 @@
 vd_t opal_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // OPAL_PLANTED_H
-// BETH_PLANT_SIGNATURE 3814363119
+// BETH_PLANT_SIGNATURE 3908035242
