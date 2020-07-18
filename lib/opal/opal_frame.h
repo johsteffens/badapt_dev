@@ -285,7 +285,7 @@ stamp :cyclic = aware :
 void opal_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex );
 void opal_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en );
 
-/// resets all cyclic values to the initialization
+/// resets all cyclic values to the initialization value
 void opal_frame_s_cyclic_reset( opal_frame_s* o );
 
 void opal_frame_s_disassemble_to_sink( const opal_frame_s* o, bcore_sink* sink );

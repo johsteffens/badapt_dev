@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-17T11:05:46Z
+ *  Last File Update: 2020-07-17T14:30:10Z
  *
  *  Copyright and License of this File:
  *
@@ -15,6 +15,8 @@
  *  opal_net.h
  *  opal_frame.h
  *  opal_eval_frame.h
+ *  opal_adaptive.h
+ *  opal_adaptor.h
  *
  */
 
@@ -1827,6 +1829,88 @@ BCORE_DEFINE_SPECT( bcore_inst, opal_eval_frame )
 "}";
 
 /**********************************************************************************************************************/
+// source: opal_adaptive.h
+#include "opal_adaptive.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_adaptive
+
+BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_s )
+"aware bhpt_adaptive"
+"{"
+    "aware => src;"
+    "opal_frame_s frame;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "func ^:get_format_en;"
+    "func ^:get_format_ex;"
+    "func ^:axon_pass;"
+    "func ^:dendrite_pass;"
+    "func ^:cyclic_reset;"
+    "func ^:get_adaptor_probe;"
+    "func ^:rebind_holors;"
+    "func ^:status_to_sink;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_builder_s )
+"aware bhpt_builder"
+"{"
+    "aware => src;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "func ^:set_format_en;"
+    "func ^:set_format_ex;"
+    "func ^:create_adaptive;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_cyclic_s )
+"aware bhpt_adaptive"
+"{"
+    "aware => src;"
+    "opal_frame_cyclic_s frame;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "bhvm_holor_adl_s => dp_buffer;"
+    "bl_t dp_value;"
+    "func ^:get_format_en;"
+    "func ^:get_format_ex;"
+    "func ^:axon_pass;"
+    "func ^:dendrite_pass;"
+    "func ^:cyclic_reset;"
+    "func ^:get_adaptor_probe;"
+    "func ^:rebind_holors;"
+    "func ^:status_to_sink;"
+"}";
+
+BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_cyclic_builder_s )
+"aware bhpt_builder"
+"{"
+    "aware => src;"
+    "bhvm_holor_s holor_frame_en;"
+    "bhvm_holor_s holor_frame_ex;"
+    "sz_t unroll_size;"
+    "func ^:set_format_en;"
+    "func ^:set_format_ex;"
+    "func ^:create_adaptive;"
+"}";
+
+/**********************************************************************************************************************/
+// source: opal_adaptor.h
+#include "opal_adaptor.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_adaptor
+
+BCORE_DEFINE_OBJECT_INST_P( opal_adaptor_frame_s )
+"aware bhpt_adaptor"
+"{"
+    "aware => src;"
+    "hidden opal_frame_s => frame;"
+    "func ^:reset;"
+    "func ^:adapt;"
+"}";
+
+/**********************************************************************************************************************/
 
 
 vd_t opal_planted_signal_handler( const bcore_signal_s* o )
@@ -2545,10 +2629,51 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
             BCORE_REGISTER_FFUNC( bcore_main_main, opal_eval_frame_cyclic_s_main );
             BCORE_REGISTER_OBJECT( opal_eval_frame_cyclic_s );
             BCORE_REGISTER_SPECT( opal_eval_frame );
+
+            // --------------------------------------------------------------------
+            // source: opal_adaptive.h
+
+            // group: opal_adaptive
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_en, opal_adaptive_s_get_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_ex, opal_adaptive_s_get_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_axon_pass, opal_adaptive_s_axon_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_dendrite_pass, opal_adaptive_s_dendrite_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_cyclic_reset, opal_adaptive_s_cyclic_reset );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_adaptor_probe, opal_adaptive_s_get_adaptor_probe );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_rebind_holors, opal_adaptive_s_rebind_holors );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_status_to_sink, opal_adaptive_s_status_to_sink );
+            BCORE_REGISTER_OBJECT( opal_adaptive_s );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_en, opal_adaptive_builder_s_set_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_ex, opal_adaptive_builder_s_set_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_builder_create_adaptive, opal_adaptive_builder_s_create_adaptive );
+            BCORE_REGISTER_OBJECT( opal_adaptive_builder_s );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_en, opal_adaptive_cyclic_s_get_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_format_ex, opal_adaptive_cyclic_s_get_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_axon_pass, opal_adaptive_cyclic_s_axon_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_dendrite_pass, opal_adaptive_cyclic_s_dendrite_pass );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_cyclic_reset, opal_adaptive_cyclic_s_cyclic_reset );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_get_adaptor_probe, opal_adaptive_cyclic_s_get_adaptor_probe );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_rebind_holors, opal_adaptive_cyclic_s_rebind_holors );
+            BCORE_REGISTER_FFUNC( bhpt_adaptive_status_to_sink, opal_adaptive_cyclic_s_status_to_sink );
+            BCORE_REGISTER_OBJECT( opal_adaptive_cyclic_s );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_en, opal_adaptive_cyclic_builder_s_set_format_en );
+            BCORE_REGISTER_FFUNC( bhpt_builder_set_format_ex, opal_adaptive_cyclic_builder_s_set_format_ex );
+            BCORE_REGISTER_FFUNC( bhpt_builder_create_adaptive, opal_adaptive_cyclic_builder_s_create_adaptive );
+            BCORE_REGISTER_OBJECT( opal_adaptive_cyclic_builder_s );
+            BCORE_REGISTER_TRAIT( opal_adaptive, bcore_inst );
+
+            // --------------------------------------------------------------------
+            // source: opal_adaptor.h
+
+            // group: opal_adaptor
+            BCORE_REGISTER_FFUNC( bhpt_adaptor_reset, opal_adaptor_frame_s_reset );
+            BCORE_REGISTER_FFUNC( bhpt_adaptor_adapt, opal_adaptor_frame_s_adapt );
+            BCORE_REGISTER_OBJECT( opal_adaptor_frame_s );
+            BCORE_REGISTER_TRAIT( opal_adaptor, bcore_inst );
         }
         break;
         default: break;
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE 3615503154
+// BETH_PLANT_SIGNATURE 3698833183

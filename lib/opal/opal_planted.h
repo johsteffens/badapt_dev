@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-17T11:05:46Z
+ *  Last File Update: 2020-07-17T14:30:10Z
  *
  *  Copyright and License of this File:
  *
@@ -15,6 +15,8 @@
  *  opal_net.h
  *  opal_frame.h
  *  opal_eval_frame.h
+ *  opal_adaptive.h
+ *  opal_adaptor.h
  *
  */
 
@@ -24,7 +26,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_opal_planted 710708549
+#define HKEYOF_opal_planted 36733612
 
 #define TYPEOF_opal_planted 1626965476
 
@@ -1592,8 +1594,84 @@
   BETH_EXPAND_ITEM_opal_eval_frame_cyclic_s
 
 /**********************************************************************************************************************/
+// source: opal_adaptive.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_adaptive
+
+#define TYPEOF_opal_adaptive 1058255374
+#define TYPEOF_opal_adaptive_s 431057104
+#define TYPEOF_opal_adaptive_s 431057104
+#define BETH_EXPAND_ITEM_opal_adaptive_s \
+  BCORE_DECLARE_OBJECT( opal_adaptive_s ) \
+    {aware_t _;vd_t src;opal_frame_s frame;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;}; \
+  static inline bhvm_holor_s* opal_adaptive_s_get_format_en( const opal_adaptive_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_en ); return format;} \
+  static inline bhvm_holor_s* opal_adaptive_s_get_format_ex( const opal_adaptive_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format;} \
+  void opal_adaptive_s_axon_pass( opal_adaptive_s* o, const bhvm_holor_s* ax_en, bhvm_holor_s* ax_ex ); \
+  void opal_adaptive_s_dendrite_pass( opal_adaptive_s* o, const bhvm_holor_s* ag_ex, bhvm_holor_s* ag_en ); \
+  void opal_adaptive_s_cyclic_reset( opal_adaptive_s* o ); \
+  bhpt_adaptor_probe_s* opal_adaptive_s_get_adaptor_probe( const opal_adaptive_s* o, bhpt_adaptor_probe_s* probe ); \
+  static inline void opal_adaptive_s_rebind_holors( opal_adaptive_s* o ){opal_frame_s_bind_holors( &o->frame );} \
+  void opal_adaptive_s_status_to_sink( const opal_adaptive_s* o, sz_t verbosity, bcore_sink* sink );
+#define TYPEOF_opal_adaptive_builder_s 3443060476
+#define BETH_EXPAND_ITEM_opal_adaptive_builder_s \
+  BCORE_DECLARE_OBJECT( opal_adaptive_builder_s ) \
+    {aware_t _;vd_t src;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;}; \
+  static inline void opal_adaptive_builder_s_set_format_en( opal_adaptive_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_en, format );} \
+  static inline void opal_adaptive_builder_s_set_format_ex( opal_adaptive_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_ex, format );} \
+  bhpt_adaptive* opal_adaptive_builder_s_create_adaptive( const opal_adaptive_builder_s* o );
+#define TYPEOF_opal_adaptive_cyclic_s 3324695814
+#define BETH_EXPAND_ITEM_opal_adaptive_cyclic_s \
+  BCORE_DECLARE_OBJECT( opal_adaptive_cyclic_s ) \
+    {aware_t _;vd_t src;opal_frame_cyclic_s frame;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;bhvm_holor_adl_s* dp_buffer;bl_t dp_value;}; \
+  static inline bhvm_holor_s* opal_adaptive_cyclic_s_get_format_en( const opal_adaptive_cyclic_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_en ); return format;} \
+  static inline bhvm_holor_s* opal_adaptive_cyclic_s_get_format_ex( const opal_adaptive_cyclic_s* o, bhvm_holor_s* format ){bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format;} \
+  void opal_adaptive_cyclic_s_axon_pass( opal_adaptive_cyclic_s* o, const bhvm_holor_s* ax_en, bhvm_holor_s* ax_ex ); \
+  void opal_adaptive_cyclic_s_dendrite_pass( opal_adaptive_cyclic_s* o, const bhvm_holor_s* ag_ex, bhvm_holor_s* ag_en ); \
+  void opal_adaptive_cyclic_s_cyclic_reset( opal_adaptive_cyclic_s* o ); \
+  bhpt_adaptor_probe_s* opal_adaptive_cyclic_s_get_adaptor_probe( const opal_adaptive_cyclic_s* o, bhpt_adaptor_probe_s* probe ); \
+  static inline void opal_adaptive_cyclic_s_rebind_holors( opal_adaptive_cyclic_s* o ){opal_frame_cyclic_s_bind_holors( &o->frame );} \
+  void opal_adaptive_cyclic_s_status_to_sink( const opal_adaptive_cyclic_s* o, sz_t verbosity, bcore_sink* sink );
+#define TYPEOF_opal_adaptive_cyclic_builder_s 649113942
+#define BETH_EXPAND_ITEM_opal_adaptive_cyclic_builder_s \
+  BCORE_DECLARE_OBJECT( opal_adaptive_cyclic_builder_s ) \
+    {aware_t _;vd_t src;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;sz_t unroll_size;}; \
+  static inline void opal_adaptive_cyclic_builder_s_set_format_en( opal_adaptive_cyclic_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_en, format );} \
+  static inline void opal_adaptive_cyclic_builder_s_set_format_ex( opal_adaptive_cyclic_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_ex, format );} \
+  bhpt_adaptive* opal_adaptive_cyclic_builder_s_create_adaptive( const opal_adaptive_cyclic_builder_s* o );
+#define BETH_EXPAND_GROUP_opal_adaptive \
+  BCORE_FORWARD_OBJECT( opal_adaptive ); \
+  BCORE_FORWARD_OBJECT( opal_adaptive_s ); \
+  BCORE_FORWARD_OBJECT( opal_adaptive_builder_s ); \
+  BCORE_FORWARD_OBJECT( opal_adaptive_cyclic_s ); \
+  BCORE_FORWARD_OBJECT( opal_adaptive_cyclic_builder_s ); \
+  BETH_EXPAND_ITEM_opal_adaptive_s \
+  BETH_EXPAND_ITEM_opal_adaptive_builder_s \
+  BETH_EXPAND_ITEM_opal_adaptive_cyclic_s \
+  BETH_EXPAND_ITEM_opal_adaptive_cyclic_builder_s
+
+/**********************************************************************************************************************/
+// source: opal_adaptor.h
+
+//----------------------------------------------------------------------------------------------------------------------
+// group: opal_adaptor
+
+#define TYPEOF_opal_adaptor 3603928821
+#define TYPEOF_opal_adaptor_s 3242609687
+#define TYPEOF_opal_adaptor_frame_s 842723161
+#define BETH_EXPAND_ITEM_opal_adaptor_frame_s \
+  BCORE_DECLARE_OBJECT( opal_adaptor_frame_s ) \
+    {aware_t _;vd_t src;opal_frame_s* frame;}; \
+  static inline void opal_adaptor_frame_s_reset( opal_adaptor_frame_s* o ){if( o->frame ) opal_frame_s_cyclic_reset( o->frame );} \
+  void opal_adaptor_frame_s_adapt( opal_adaptor_frame_s* o, const bhpt_adaptor_node_s* node );
+#define BETH_EXPAND_GROUP_opal_adaptor \
+  BCORE_FORWARD_OBJECT( opal_adaptor ); \
+  BCORE_FORWARD_OBJECT( opal_adaptor_frame_s ); \
+  BETH_EXPAND_ITEM_opal_adaptor_frame_s
+
+/**********************************************************************************************************************/
 
 vd_t opal_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // OPAL_PLANTED_H
-// BETH_PLANT_SIGNATURE 3908035242
+// BETH_PLANT_SIGNATURE 1098023799

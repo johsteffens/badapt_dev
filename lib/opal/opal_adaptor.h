@@ -15,24 +15,22 @@
 
 /**********************************************************************************************************************/
 
-/// bhpt adaptor
+/// The adaptor defines a method for updating adaptive holors from accumulated gradients.
 
 /**********************************************************************************************************************/
 
-#ifndef LION_ADAPTOR_H
-#define LION_ADAPTOR_H
+#ifndef OPAL_ADAPTOR_H
+#define OPAL_ADAPTOR_H
 
 #include "bmath_std.h"
 #include "bhpt_sketch.h"
-#include "lion_net.h"
-#include "lion_frame.h"
-#include "lion_planted.h"
+#include "opal_net.h"
+#include "opal_frame.h"
+#include "opal_planted.h"
 
 /**********************************************************************************************************************/
 
-#ifdef TYPEOF_lion_adaptor
-
-PLANT_GROUP( lion_adaptor, bcore_inst )
+BETH_PLANT_DEFINE_GROUP( opal_adaptor, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,9 +40,9 @@ stamp :frame = aware bhpt_adaptor
     /// source should define cell ( axon_out, grad_out <- axon_in, grad_in ) { ... };
     aware => src; // source (bcore_file_path_s or st_s with inline code)
 
-    hidden lion_frame_s => frame;
+    hidden opal_frame_s => frame;
 
-    func bhpt_adaptor : reset = { if( o->frame ) lion_frame_s_cyclic_reset( o->frame ); };
+    func bhpt_adaptor : reset = { if( o->frame ) opal_frame_s_cyclic_reset( o->frame ); };
     func bhpt_adaptor : adapt;
 };
 
@@ -52,12 +50,6 @@ stamp :frame = aware bhpt_adaptor
 
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#endif // TYPEOF_lion_adaptor
-
 /**********************************************************************************************************************/
 
-vd_t lion_adaptor_signal_handler( const bcore_signal_s* o );
-
-/**********************************************************************************************************************/
-
-#endif // LION_ADAPTOR_H
+#endif // OPAL_ADAPTOR_H
