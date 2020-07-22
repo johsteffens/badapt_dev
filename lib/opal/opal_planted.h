@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-17T14:30:10Z
+ *  Last File Update: 2020-07-21T17:30:06Z
  *
  *  Copyright and License of this File:
  *
@@ -26,7 +26,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_opal_planted 36733612
+#define HKEYOF_opal_planted 468853037
 
 #define TYPEOF_opal_planted 1626965476
 
@@ -1011,13 +1011,13 @@
     {aware_t _;opal_eval_nop_param_s param;bl_t set_htp;bl_t set_value;bl_t set_shape;bl_t set_dim;bl_t set_v_type;sz_t max_shape_size;sz_t max_dim;f3_t v_min;f3_t v_max;sz_t cycles;bcore_arr_uz_s tolerated_cycles;opal_eval_nop* eval;}; \
   opal_eval_nop_result_s* opal_eval_nop_generator_s_run( const opal_eval_nop_generator_s* o, opal_eval_nop_result_s* result ); \
   static inline void opal_eval_nop_generator_s_set_param( opal_eval_nop_generator_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
-  s2_t opal_eval_nop_generator_s_main( opal_eval_nop_generator_s* o, const bcore_arr_st_s* args );
+  er_t opal_eval_nop_generator_s_main( opal_eval_nop_generator_s* o, bcore_main_frame_s* frame );
 #define TYPEOF_opal_eval_nop_show_param_s 47537560
 #define BETH_EXPAND_ITEM_opal_eval_nop_show_param_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_show_param_s ) \
     {aware_t _;opal_eval_nop_param_s param;}; \
   static inline void opal_eval_nop_show_param_s_set_param( opal_eval_nop_show_param_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
-  s2_t opal_eval_nop_show_param_s_main( opal_eval_nop_show_param_s* o, const bcore_arr_st_s* args ); \
+  er_t opal_eval_nop_show_param_s_main( opal_eval_nop_show_param_s* o, bcore_main_frame_s* frame ); \
   static inline opal_eval_nop_result_s* opal_eval_nop_show_param_s_run( const opal_eval_nop_show_param_s* o, opal_eval_nop_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
 #define TYPEOF_opal_eval_nop_arr_s 271786002
 #define BETH_EXPAND_ITEM_opal_eval_nop_arr_s \
@@ -1039,7 +1039,7 @@
   BCORE_DECLARE_OBJECT( opal_eval_nop_set_s ) \
     {aware_t _;opal_eval_nop_param_s param;opal_eval_nop_arr_s arr;}; \
   static inline void opal_eval_nop_set_s_set_param( opal_eval_nop_set_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
-  s2_t opal_eval_nop_set_s_main( opal_eval_nop_set_s* o, const bcore_arr_st_s* args ); \
+  er_t opal_eval_nop_set_s_main( opal_eval_nop_set_s* o, bcore_main_frame_s* frame ); \
   opal_eval_nop_result_s* opal_eval_nop_set_s_run( const opal_eval_nop_set_s* o, opal_eval_nop_result_s* result );
 #define TYPEOF_opal_eval_nop_ar1_s 626857419
 #define BETH_EXPAND_ITEM_opal_eval_nop_ar1_s \
@@ -1047,14 +1047,14 @@
     {aware_t _;opal_eval_nop_param_s param;opal_context* context;}; \
   opal_eval_nop_result_s* opal_eval_nop_ar1_s_run( const opal_eval_nop_ar1_s* o, opal_eval_nop_result_s* result ); \
   static inline void opal_eval_nop_ar1_s_set_param( opal_eval_nop_ar1_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
-  s2_t opal_eval_nop_ar1_s_main( opal_eval_nop_ar1_s* o, const bcore_arr_st_s* args );
+  er_t opal_eval_nop_ar1_s_main( opal_eval_nop_ar1_s* o, bcore_main_frame_s* frame );
 #define TYPEOF_opal_eval_nop_ar2_s 3619862610
 #define BETH_EXPAND_ITEM_opal_eval_nop_ar2_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_ar2_s ) \
     {aware_t _;opal_eval_nop_param_s param;opal_context* context;}; \
   opal_eval_nop_result_s* opal_eval_nop_ar2_s_run( const opal_eval_nop_ar2_s* o, opal_eval_nop_result_s* result ); \
   static inline void opal_eval_nop_ar2_s_set_param( opal_eval_nop_ar2_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
-  s2_t opal_eval_nop_ar2_s_main( opal_eval_nop_ar2_s* o, const bcore_arr_st_s* args );
+  er_t opal_eval_nop_ar2_s_main( opal_eval_nop_ar2_s* o, bcore_main_frame_s* frame );
 #define BETH_EXPAND_GROUP_opal_eval_nop \
   BCORE_FORWARD_OBJECT( opal_eval_nop ); \
   BCORE_FORWARD_OBJECT( opal_eval_nop_result_s ); \
@@ -1522,7 +1522,7 @@
   BCORE_DECLARE_OBJECT( opal_eval_frame_show_param_s ) \
     {aware_t _;opal_eval_frame_param_s param;}; \
   static inline void opal_eval_frame_show_param_s_set_param( opal_eval_frame_show_param_s* o, const opal_eval_frame_param_s* param ){opal_eval_frame_param_s_set( &o->param, param );} \
-  s2_t opal_eval_frame_show_param_s_main( opal_eval_frame_show_param_s* o, const bcore_arr_st_s* args ); \
+  er_t opal_eval_frame_show_param_s_main( opal_eval_frame_show_param_s* o, bcore_main_frame_s* frame ); \
   static inline opal_eval_frame_result_s* opal_eval_frame_show_param_s_run( const opal_eval_frame_show_param_s* o, opal_eval_frame_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
 #define TYPEOF_opal_eval_frame_arr_s 528657778
 #define BETH_EXPAND_ITEM_opal_eval_frame_arr_s \
@@ -1544,7 +1544,7 @@
   BCORE_DECLARE_OBJECT( opal_eval_frame_set_s ) \
     {aware_t _;opal_eval_frame_param_s param;opal_eval_frame_arr_s arr;}; \
   static inline void opal_eval_frame_set_s_set_param( opal_eval_frame_set_s* o, const opal_eval_frame_param_s* param ){opal_eval_frame_param_s_set( &o->param, param );} \
-  s2_t opal_eval_frame_set_s_main( opal_eval_frame_set_s* o, const bcore_arr_st_s* args ); \
+  er_t opal_eval_frame_set_s_main( opal_eval_frame_set_s* o, bcore_main_frame_s* frame ); \
   opal_eval_frame_result_s* opal_eval_frame_set_s_run( const opal_eval_frame_set_s* o, opal_eval_frame_result_s* result );
 #define TYPEOF_opal_eval_frame_plain_s 3361958737
 #define BETH_EXPAND_ITEM_opal_eval_frame_plain_s \
@@ -1552,14 +1552,14 @@
     {aware_t _;opal_eval_frame_param_s param;sz_t ap_cycles;}; \
   opal_eval_frame_result_s* opal_eval_frame_plain_s_run( const opal_eval_frame_plain_s* o, opal_eval_frame_result_s* result ); \
   static inline void opal_eval_frame_plain_s_set_param( opal_eval_frame_plain_s* o, const opal_eval_frame_param_s* param ){opal_eval_frame_param_s_set( &o->param, param );} \
-  s2_t opal_eval_frame_plain_s_main( opal_eval_frame_plain_s* o, const bcore_arr_st_s* args );
+  er_t opal_eval_frame_plain_s_main( opal_eval_frame_plain_s* o, bcore_main_frame_s* frame );
 #define TYPEOF_opal_eval_frame_cyclic_s 1180851996
 #define BETH_EXPAND_ITEM_opal_eval_frame_cyclic_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_cyclic_s ) \
     {aware_t _;opal_eval_frame_param_s param;}; \
   opal_eval_frame_result_s* opal_eval_frame_cyclic_s_run( const opal_eval_frame_cyclic_s* o, opal_eval_frame_result_s* result ); \
   static inline void opal_eval_frame_cyclic_s_set_param( opal_eval_frame_cyclic_s* o, const opal_eval_frame_param_s* param ){opal_eval_frame_param_s_set( &o->param, param );} \
-  s2_t opal_eval_frame_cyclic_s_main( opal_eval_frame_cyclic_s* o, const bcore_arr_st_s* args );
+  er_t opal_eval_frame_cyclic_s_main( opal_eval_frame_cyclic_s* o, bcore_main_frame_s* frame );
 #define BETH_EXPAND_GROUP_opal_eval_frame \
   BCORE_FORWARD_OBJECT( opal_eval_frame ); \
   BCORE_FORWARD_OBJECT( opal_eval_frame_result_s ); \
@@ -1674,4 +1674,4 @@
 vd_t opal_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // OPAL_PLANTED_H
-// BETH_PLANT_SIGNATURE 1098023799
+// BETH_PLANT_SIGNATURE 3577473262

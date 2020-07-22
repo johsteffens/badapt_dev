@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-17T14:30:10Z
+ *  Last File Update: 2020-07-21T17:30:06Z
  *
  *  Copyright and License of this File:
  *
@@ -1137,7 +1137,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_generator_s )
     "aware opal_eval_nop=> eval;"
 "}";
 
-s2_t opal_eval_nop_generator_s_main( opal_eval_nop_generator_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_nop_generator_s_main( opal_eval_nop_generator_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_nop_result_s_resolve( opal_eval_nop_generator_s_run( o, BLM_CREATE( opal_eval_nop_result_s ) ) );
@@ -1153,7 +1153,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_show_param_s )
     "func ^:run;"
 "}";
 
-s2_t opal_eval_nop_show_param_s_main( opal_eval_nop_show_param_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_nop_show_param_s_main( opal_eval_nop_show_param_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_nop_result_s_resolve( opal_eval_nop_show_param_s_run( o, BLM_CREATE( opal_eval_nop_result_s ) ) );
@@ -1176,7 +1176,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_set_s )
     "func ^:run;"
 "}";
 
-s2_t opal_eval_nop_set_s_main( opal_eval_nop_set_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_nop_set_s_main( opal_eval_nop_set_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_nop_result_s_resolve( opal_eval_nop_set_s_run( o, BLM_CREATE( opal_eval_nop_result_s ) ) );
@@ -1212,7 +1212,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_ar1_s )
     "aware opal_context => context = opal_nop_context_s;"
 "}";
 
-s2_t opal_eval_nop_ar1_s_main( opal_eval_nop_ar1_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_nop_ar1_s_main( opal_eval_nop_ar1_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_nop_result_s_resolve( opal_eval_nop_ar1_s_run( o, BLM_CREATE( opal_eval_nop_result_s ) ) );
@@ -1229,7 +1229,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_ar2_s )
     "aware opal_context => context = opal_nop_context_s;"
 "}";
 
-s2_t opal_eval_nop_ar2_s_main( opal_eval_nop_ar2_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_nop_ar2_s_main( opal_eval_nop_ar2_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_nop_result_s_resolve( opal_eval_nop_ar2_s_run( o, BLM_CREATE( opal_eval_nop_result_s ) ) );
@@ -1740,7 +1740,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_show_param_s )
     "func ^:run;"
 "}";
 
-s2_t opal_eval_frame_show_param_s_main( opal_eval_frame_show_param_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_frame_show_param_s_main( opal_eval_frame_show_param_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_frame_result_s_resolve( opal_eval_frame_show_param_s_run( o, BLM_CREATE( opal_eval_frame_result_s ) ) );
@@ -1763,7 +1763,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_set_s )
     "func ^:run;"
 "}";
 
-s2_t opal_eval_frame_set_s_main( opal_eval_frame_set_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_frame_set_s_main( opal_eval_frame_set_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_frame_result_s_resolve( opal_eval_frame_set_s_run( o, BLM_CREATE( opal_eval_frame_result_s ) ) );
@@ -1798,7 +1798,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_plain_s )
     "sz_t ap_cycles = 1;"
 "}";
 
-s2_t opal_eval_frame_plain_s_main( opal_eval_frame_plain_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_frame_plain_s_main( opal_eval_frame_plain_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_frame_result_s_resolve( opal_eval_frame_plain_s_run( o, BLM_CREATE( opal_eval_frame_result_s ) ) );
@@ -1814,7 +1814,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_cyclic_s )
     "func bcore_main:main;"
 "}";
 
-s2_t opal_eval_frame_cyclic_s_main( opal_eval_frame_cyclic_s* o, const bcore_arr_st_s* args )
+er_t opal_eval_frame_cyclic_s_main( opal_eval_frame_cyclic_s* o, bcore_main_frame_s* frame )
 {
     BLM_INIT();
     opal_eval_frame_result_s_resolve( opal_eval_frame_cyclic_s_run( o, BLM_CREATE( opal_eval_frame_result_s ) ) );
@@ -2676,4 +2676,4 @@ vd_t opal_planted_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE 3698833183
+// BETH_PLANT_SIGNATURE  882824193

@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-06-27T14:32:59Z
+ *  Last File Update: 2020-07-21T17:41:00Z
  *
  *  Copyright and License of this File:
  *
@@ -26,7 +26,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_lion_planted 2597342317
+#define HKEYOF_lion_planted 3312337248
 
 #define TYPEOF_lion_planted 3067971884
 
@@ -966,13 +966,13 @@
     {aware_t _;lion_eval_nop_param_s param;bl_t set_htp;bl_t set_value;bl_t set_shape;bl_t set_dim;bl_t set_v_type;sz_t max_shape_size;sz_t max_dim;f3_t v_min;f3_t v_max;sz_t cycles;bcore_arr_uz_s tolerated_cycles;lion_eval_nop* eval;}; \
   lion_eval_nop_result_s* lion_eval_nop_generator_s_run( const lion_eval_nop_generator_s* o, lion_eval_nop_result_s* result ); \
   static inline void lion_eval_nop_generator_s_set_param( lion_eval_nop_generator_s* o, const lion_eval_nop_param_s* param ){lion_eval_nop_param_s_set( &o->param, param );} \
-  s2_t lion_eval_nop_generator_s_main( lion_eval_nop_generator_s* o, const bcore_arr_st_s* args );
+  er_t lion_eval_nop_generator_s_main( lion_eval_nop_generator_s* o, bcore_main_frame_s* frame );
 #define TYPEOF_lion_eval_nop_show_param_s 1900711168
 #define BETH_EXPAND_ITEM_lion_eval_nop_show_param_s \
   BCORE_DECLARE_OBJECT( lion_eval_nop_show_param_s ) \
     {aware_t _;lion_eval_nop_param_s param;}; \
   static inline void lion_eval_nop_show_param_s_set_param( lion_eval_nop_show_param_s* o, const lion_eval_nop_param_s* param ){lion_eval_nop_param_s_set( &o->param, param );} \
-  s2_t lion_eval_nop_show_param_s_main( lion_eval_nop_show_param_s* o, const bcore_arr_st_s* args ); \
+  er_t lion_eval_nop_show_param_s_main( lion_eval_nop_show_param_s* o, bcore_main_frame_s* frame ); \
   static inline lion_eval_nop_result_s* lion_eval_nop_show_param_s_run( const lion_eval_nop_show_param_s* o, lion_eval_nop_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
 #define TYPEOF_lion_eval_nop_arr_s 2430604906
 #define BETH_EXPAND_ITEM_lion_eval_nop_arr_s \
@@ -994,7 +994,7 @@
   BCORE_DECLARE_OBJECT( lion_eval_nop_set_s ) \
     {aware_t _;lion_eval_nop_param_s param;lion_eval_nop_arr_s arr;}; \
   static inline void lion_eval_nop_set_s_set_param( lion_eval_nop_set_s* o, const lion_eval_nop_param_s* param ){lion_eval_nop_param_s_set( &o->param, param );} \
-  s2_t lion_eval_nop_set_s_main( lion_eval_nop_set_s* o, const bcore_arr_st_s* args ); \
+  er_t lion_eval_nop_set_s_main( lion_eval_nop_set_s* o, bcore_main_frame_s* frame ); \
   lion_eval_nop_result_s* lion_eval_nop_set_s_run( const lion_eval_nop_set_s* o, lion_eval_nop_result_s* result );
 #define TYPEOF_lion_eval_nop_ar1_s 4184047427
 #define BETH_EXPAND_ITEM_lion_eval_nop_ar1_s \
@@ -1002,14 +1002,14 @@
     {aware_t _;lion_eval_nop_param_s param;}; \
   lion_eval_nop_result_s* lion_eval_nop_ar1_s_run( const lion_eval_nop_ar1_s* o, lion_eval_nop_result_s* result ); \
   static inline void lion_eval_nop_ar1_s_set_param( lion_eval_nop_ar1_s* o, const lion_eval_nop_param_s* param ){lion_eval_nop_param_s_set( &o->param, param );} \
-  s2_t lion_eval_nop_ar1_s_main( lion_eval_nop_ar1_s* o, const bcore_arr_st_s* args );
+  er_t lion_eval_nop_ar1_s_main( lion_eval_nop_ar1_s* o, bcore_main_frame_s* frame );
 #define TYPEOF_lion_eval_nop_ar2_s 3377495594
 #define BETH_EXPAND_ITEM_lion_eval_nop_ar2_s \
   BCORE_DECLARE_OBJECT( lion_eval_nop_ar2_s ) \
     {aware_t _;lion_eval_nop_param_s param;}; \
   lion_eval_nop_result_s* lion_eval_nop_ar2_s_run( const lion_eval_nop_ar2_s* o, lion_eval_nop_result_s* result ); \
   static inline void lion_eval_nop_ar2_s_set_param( lion_eval_nop_ar2_s* o, const lion_eval_nop_param_s* param ){lion_eval_nop_param_s_set( &o->param, param );} \
-  s2_t lion_eval_nop_ar2_s_main( lion_eval_nop_ar2_s* o, const bcore_arr_st_s* args );
+  er_t lion_eval_nop_ar2_s_main( lion_eval_nop_ar2_s* o, bcore_main_frame_s* frame );
 #define BETH_EXPAND_GROUP_lion_eval_nop \
   BCORE_FORWARD_OBJECT( lion_eval_nop ); \
   BCORE_FORWARD_OBJECT( lion_eval_nop_result_s ); \
@@ -1423,7 +1423,7 @@
   BCORE_DECLARE_OBJECT( lion_eval_frame_show_param_s ) \
     {aware_t _;lion_eval_frame_param_s param;}; \
   static inline void lion_eval_frame_show_param_s_set_param( lion_eval_frame_show_param_s* o, const lion_eval_frame_param_s* param ){lion_eval_frame_param_s_set( &o->param, param );} \
-  s2_t lion_eval_frame_show_param_s_main( lion_eval_frame_show_param_s* o, const bcore_arr_st_s* args ); \
+  er_t lion_eval_frame_show_param_s_main( lion_eval_frame_show_param_s* o, bcore_main_frame_s* frame ); \
   static inline lion_eval_frame_result_s* lion_eval_frame_show_param_s_run( const lion_eval_frame_show_param_s* o, lion_eval_frame_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
 #define TYPEOF_lion_eval_frame_arr_s 1320617274
 #define BETH_EXPAND_ITEM_lion_eval_frame_arr_s \
@@ -1445,7 +1445,7 @@
   BCORE_DECLARE_OBJECT( lion_eval_frame_set_s ) \
     {aware_t _;lion_eval_frame_param_s param;lion_eval_frame_arr_s arr;}; \
   static inline void lion_eval_frame_set_s_set_param( lion_eval_frame_set_s* o, const lion_eval_frame_param_s* param ){lion_eval_frame_param_s_set( &o->param, param );} \
-  s2_t lion_eval_frame_set_s_main( lion_eval_frame_set_s* o, const bcore_arr_st_s* args ); \
+  er_t lion_eval_frame_set_s_main( lion_eval_frame_set_s* o, bcore_main_frame_s* frame ); \
   lion_eval_frame_result_s* lion_eval_frame_set_s_run( const lion_eval_frame_set_s* o, lion_eval_frame_result_s* result );
 #define TYPEOF_lion_eval_frame_plain_s 229993865
 #define BETH_EXPAND_ITEM_lion_eval_frame_plain_s \
@@ -1453,14 +1453,14 @@
     {aware_t _;lion_eval_frame_param_s param;sz_t ap_cycles;}; \
   lion_eval_frame_result_s* lion_eval_frame_plain_s_run( const lion_eval_frame_plain_s* o, lion_eval_frame_result_s* result ); \
   static inline void lion_eval_frame_plain_s_set_param( lion_eval_frame_plain_s* o, const lion_eval_frame_param_s* param ){lion_eval_frame_param_s_set( &o->param, param );} \
-  s2_t lion_eval_frame_plain_s_main( lion_eval_frame_plain_s* o, const bcore_arr_st_s* args );
+  er_t lion_eval_frame_plain_s_main( lion_eval_frame_plain_s* o, bcore_main_frame_s* frame );
 #define TYPEOF_lion_eval_frame_cyclic_s 2923935876
 #define BETH_EXPAND_ITEM_lion_eval_frame_cyclic_s \
   BCORE_DECLARE_OBJECT( lion_eval_frame_cyclic_s ) \
     {aware_t _;lion_eval_frame_param_s param;}; \
   lion_eval_frame_result_s* lion_eval_frame_cyclic_s_run( const lion_eval_frame_cyclic_s* o, lion_eval_frame_result_s* result ); \
   static inline void lion_eval_frame_cyclic_s_set_param( lion_eval_frame_cyclic_s* o, const lion_eval_frame_param_s* param ){lion_eval_frame_param_s_set( &o->param, param );} \
-  s2_t lion_eval_frame_cyclic_s_main( lion_eval_frame_cyclic_s* o, const bcore_arr_st_s* args );
+  er_t lion_eval_frame_cyclic_s_main( lion_eval_frame_cyclic_s* o, bcore_main_frame_s* frame );
 #define BETH_EXPAND_GROUP_lion_eval_frame \
   BCORE_FORWARD_OBJECT( lion_eval_frame ); \
   BCORE_FORWARD_OBJECT( lion_eval_frame_result_s ); \
@@ -1637,4 +1637,4 @@
 vd_t lion_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // LION_PLANTED_H
-// BETH_PLANT_SIGNATURE  497956539
+// BETH_PLANT_SIGNATURE  134122925

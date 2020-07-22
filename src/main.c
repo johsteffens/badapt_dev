@@ -15,7 +15,7 @@ int main( int argc, char** argv )
     BLM_INIT();
     bcore_main_frame_s* main_frame = BLM_CREATE( bcore_main_frame_s );
     main_frame->use_first_argument = true;
-    s2_t retv = bcore_main_frame_s_main( main_frame, argc, argv );
+    er_t retv = bcore_main_frame_s_main( main_frame, argc, argv );
     BLM_DOWN();
 
     BETH_PLANT_CLOSEV( 1 );
