@@ -639,8 +639,9 @@ static void net_cell_s_from_sem_recursive
 
                 if( !net_node_up->context ) net_node_up->context = bcore_fork( cell->context );
                 opal_net_node_s_set_nop_d( net_node_up, bcore_fork( cell->nop ) );
-                if( !net_node_up->scid    ) net_node_up->scid = opal_scid_s_create();
-                opal_sem_tree_node_s_get_scid( sem_tree_node, net_node_up->scid );
+
+                if( !net_node_up->sem_id    ) net_node_up->sem_id = opal_sem_id_s_create();
+                opal_sem_tree_node_s_get_sem_id( sem_tree_node, net_node_up->sem_id );
 
                 net_node_up->id = sem_tree_node->id;
 
@@ -902,8 +903,10 @@ void opal_net_cell_s_from_sem_cell
         net_node->context = bcore_fork( o->context );
 
         net_node->name = sem_link->name;
-        net_node->scid = opal_scid_s_create();
-        opal_scid_s_set( net_node->scid, opal_sem_cell_s_ifnameof( sem_cell, net_node->name ) );
+
+        net_node->sem_id = opal_sem_id_s_create();
+        opal_sem_id_s_set( net_node->sem_id, net_node->name );
+
         net_node->id   = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
 
@@ -933,8 +936,10 @@ void opal_net_cell_s_from_sem_cell
         opal_net_node_s* net_node = opal_net_nodes_s_push( &o->excs );
         net_node->context = bcore_fork( o->context );
         net_node->name = sem_link->name;
-        net_node->scid = opal_scid_s_create();
-        opal_scid_s_set( net_node->scid, opal_sem_cell_s_ifnameof( sem_cell, net_node->name ) );
+
+        net_node->sem_id = opal_sem_id_s_create();
+        opal_sem_id_s_set( net_node->sem_id, net_node->name );
+
         net_node->id = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
         opal_net_node_s_set_nop_d( net_node, ( opal_nop* )opal_nop_ar1_output_s_create() );
@@ -1035,7 +1040,7 @@ static void node_s_mcode_push_ap( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
     {
         opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
         if( !hmeta->name ) hmeta->name = o->name;
-        if( !hmeta->scid ) hmeta->scid = bcore_fork( o->scid );
+        if( !hmeta->sem_id ) hmeta->sem_id = bcore_fork( o->sem_id );
 
         hmeta->pclass   = TYPEOF_pclass_ax0;
         bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
@@ -1065,7 +1070,7 @@ void opal_net_node_s_isolated_mcode_push( opal_net_node_s* o, bhvm_mcode_frame_s
     o->mnode->ax0 = opal_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
     opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
     if( !hmeta->name ) hmeta->name = o->name;
-    if( !hmeta->scid ) hmeta->scid = bcore_fork( o->scid );
+    if( !hmeta->sem_id ) hmeta->sem_id = bcore_fork( o->sem_id );
 
     hmeta->pclass   = TYPEOF_pclass_ax0;
     bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
@@ -1095,9 +1100,9 @@ static void node_s_cyclic_mcode_push_ap_phase0( opal_net_node_s* o, bhvm_mcode_f
         opal_holor_meta_s* hmeta1 = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax1 ];
 
         if( !hmeta0->name ) hmeta0->name = o->name;
-        if( !hmeta0->scid ) hmeta0->scid = bcore_fork( o->scid );
+        if( !hmeta0->sem_id ) hmeta0->sem_id = bcore_fork( o->sem_id );
         if( !hmeta1->name ) hmeta1->name = o->name;
-        if( !hmeta1->scid ) hmeta1->scid = bcore_fork( o->scid );
+        if( !hmeta1->sem_id ) hmeta1->sem_id = bcore_fork( o->sem_id );
 
         hmeta0->pclass = TYPEOF_pclass_ax0;
         hmeta1->pclass = TYPEOF_pclass_ax1;
@@ -1219,7 +1224,7 @@ static void node_s_mcode_push_dp( opal_net_node_s* o, sz_t up_index, bhvm_mcode_
 
             opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ag0 ];
             if( !hmeta->name ) hmeta->name = o->name;
-            if( !hmeta->scid ) hmeta->scid = bcore_fork( o->scid );
+            if( !hmeta->sem_id ) hmeta->sem_id = bcore_fork( o->sem_id );
             hmeta->pclass = TYPEOF_pclass_ag0;
             bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
         }
@@ -1250,7 +1255,7 @@ static void node_s_cyclic_mcode_push_dp_phase0( opal_net_node_s* o, sz_t up_inde
         bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
         opal_holor_meta_s* m = BLM_CLONE( opal_holor_meta_s, &o->result->h->m );
         if( !m->name ) m->name = o->name;
-        if( !m->scid ) m->scid = bcore_fork( o->scid );
+        if( !m->sem_id ) m->sem_id = bcore_fork( o->sem_id );
 
         m->pclass = TYPEOF_pclass_ag0;
         bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );
@@ -1303,7 +1308,7 @@ static void node_s_cyclic_mcode_push_dp_phase1( opal_net_node_s* o, bhvm_mcode_f
         bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
         opal_holor_meta_s* m = BLM_CLONE( opal_holor_meta_s, &o->result->h->m );
         if( !m->name ) m->name = o->name;
-        if( !m->scid ) m->scid = bcore_fork( o->scid );
+        if( !m->sem_id ) m->sem_id = bcore_fork( o->sem_id );
 
         m->pclass = TYPEOF_pclass_ag1;
         bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );

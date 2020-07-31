@@ -80,7 +80,6 @@
 
 #include "bmath_std.h"
 #include "opal_nop.h"
-#include "opal_scid.h"
 #include "opal_planted.h"
 
 /**********************************************************************************************************************/
@@ -131,6 +130,42 @@ group :context = opal_context
             return @_setup_cell( o, ::cell_s_create() );
         };
     };
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/** Semantic Identifier.
+ *  Identifies objects in a semantic tree by storing the tree elements
+ *  from root to leaf in form of hashed names in a tp_t-array.
+ */
+group :id = :
+{
+    signature void clear(       mutable );
+    signature void set(         mutable, tp_t tp );
+    signature void push_child(  mutable, tp_t tp );
+    signature void push_parent( mutable, tp_t tp );
+    signature void to_string(   const, const opal_context* context, st_s* s );
+
+    stamp : = aware :
+    {
+        bcore_arr_tp_s arr_tp;
+        func : :clear       = { bcore_arr_tp_s_clear( &o->arr_tp ); };
+        func : :set         = { bcore_arr_tp_s_clear( &o->arr_tp ); bcore_arr_tp_s_push( &o->arr_tp, tp ); };
+        func : :push_child  = { bcore_arr_tp_s_push( &o->arr_tp, tp ); };
+        func : :push_parent = { bcore_arr_tp_s_push_left( &o->arr_tp, tp ); };
+        func : :to_string   =
+        {
+            st_s_clear( s );
+            BFOR_EACH( i, &o->arr_tp )
+            {
+                if( i > 0 ) st_s_push_char( s, '.' );
+                st_s_push_sc( s, opal_context_a_ifnameof( context, o->arr_tp.data[ i ] ) );
+            }
+        };
+    };
+
+    /// for use in other objects
+    signature void get_sem_id( const, :s* sem_id );
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -342,7 +377,8 @@ group :builder = :
  */
 group :tree = :
 {
-    signature void push_parents_to_scid( const, opal_scid_s* scid );
+    signature void push_parents_to_sem_id( const, ::id_s* sem_id );
+    signature void get_sem_id(             const, ::id_s* sem_id );
 
     stamp :node = aware bcore_array
     {
@@ -351,16 +387,16 @@ group :tree = :
         private :node_s -> parent; // semantic parent of cell (note that cell.parent is a lexical parent)
         :node_s => [];
 
-        func : :push_parents_to_scid =
+        func : :push_parents_to_sem_id =
         {
-            opal_scid_s_push_parent( scid, o->cell ? ::cell_s_ifnameof( o->cell, o->cell->name ) : "" );
-            if( o->parent ) @_push_parents_to_scid( o->parent, scid );
+            opal_sem_id_s_push_parent( sem_id, o->cell ? o->cell->name : 0 );
+            if( o->parent ) @_push_parents_to_sem_id( o->parent, sem_id );
         };
 
-        func opal_scid :get_scid =
+        func : :get_sem_id =
         {
-            opal_scid_s_set( scid, o->cell ? ::cell_s_ifnameof( o->cell, o->cell->name ) : "" );
-            if( o->parent ) @_push_parents_to_scid( o->parent, scid );
+            opal_sem_id_s_set( sem_id, o->cell ? o->cell->name : 0 );
+            if( o->parent ) @_push_parents_to_sem_id( o->parent, sem_id );
         };
     };
 

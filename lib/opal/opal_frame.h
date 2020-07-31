@@ -95,9 +95,9 @@ group :hidx =
 signature @* mutab_from_source( mutable, bcore_source* source );
 signature @* mutab_from_st(     mutable, const st_s* st );
 signature @* mutab_from_sc(     mutable,       sc_t  sc );
-signature @* plain_from_source(   plain,  bcore_source* source );
-signature @* plain_from_st(       plain,  const st_s* st );
-signature @* plain_from_sc(       plain,        sc_t  sc );
+signature @* plain_from_source(   plain, bcore_source* source );
+signature @* plain_from_st(       plain, const st_s* st );
+signature @* plain_from_sc(       plain,       sc_t  sc );
 
 signature void reset( mutable );
 signature void setup( mutable );

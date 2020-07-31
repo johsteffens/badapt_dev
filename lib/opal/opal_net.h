@@ -56,7 +56,7 @@ stamp :node = aware :
 
     tp_t name;
 
-    opal_scid_s => scid;
+    opal_sem_id_s => sem_id;
 
     /** Primary flag used for various tracing routines.
       * It is typically used to ensure a node is visited only once.

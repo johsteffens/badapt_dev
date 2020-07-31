@@ -22,8 +22,26 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+static st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, const opal_context* context, st_s* st )
+{
+    st_s_clear( st );
+    if( hmeta && hmeta->_ == TYPEOF_opal_holor_meta_s )
+    {
+        opal_holor_meta_s* holor_meta = ( opal_holor_meta_s* )hmeta;
+        if( holor_meta->sem_id && *( aware_t* )holor_meta->sem_id == TYPEOF_opal_sem_id_s )
+        {
+            opal_sem_id_s_to_string( ( opal_sem_id_s* )holor_meta->sem_id, context, st );
+        }
+    }
+    return st;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 static void opal_frame_s_disassemble_hbase_to_sink( const opal_frame_s* o, const bhvm_mcode_hbase_s* hbase, sz_t indent, bcore_sink* sink )
 {
+    BLM_INIT();
+    st_s* st_buf = BLM_CREATE( st_s );
     sz_t hname_length = 0;
     sz_t hbrief_length = 0;
 
@@ -33,7 +51,7 @@ static void opal_frame_s_disassemble_hbase_to_sink( const opal_frame_s* o, const
         bhvm_holor_s* h = hbase->holor_adl.data[ i ];
         bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ i ];
         //sc_t sc_name = opal_context_a_ifnameof( o->context, bhvm_mcode_hmeta_a_get_name( hmeta ) );
-        sc_t sc_name = bhvm_mcode_hmeta_a_get_global_name( hmeta );
+        sc_t sc_name = hmeta_get_global_name_st( hmeta, o->context, st_buf )->sc;
         hname_length = sz_max( hname_length, bcore_strlen( sc_name ) );
 
         st_s* st = BLM_CREATE( st_s );
@@ -52,7 +70,7 @@ static void opal_frame_s_disassemble_hbase_to_sink( const opal_frame_s* o, const
 
         tp_t pclass = bhvm_mcode_hmeta_a_get_pclass( hmeta );
         //sc_t sc_name = opal_context_a_ifnameof( o->context, bhvm_mcode_hmeta_a_get_name( hmeta ) );
-        sc_t sc_name = bhvm_mcode_hmeta_a_get_global_name( hmeta );
+        sc_t sc_name = hmeta_get_global_name_st( hmeta, o->context, st_buf )->sc;
 
         st_s_push_fa( msg, "#rn{ }#pl3 {#<sz_t>}", indent, i );
 
@@ -90,20 +108,24 @@ static void opal_frame_s_disassemble_hbase_to_sink( const opal_frame_s* o, const
 
         BLM_DOWN();
     }
+    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 static void opal_frame_s_disassemble_hidx_to_sink( const opal_frame_s* o, const bhvm_mcode_hbase_s* hbase, const bcore_arr_sz_s* hidx, sz_t indent, bcore_sink* sink )
 {
+    BLM_INIT();
+    st_s* st_buf = BLM_CREATE( st_s );
     sz_t hname_length = 0;
 
     BFOR_EACH( i, hidx )
     {
+        BLM_INIT();
         sz_t idx_ap = hidx->data[ i ];
         bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ idx_ap ];
-        assert( hmeta );
-        hname_length = sz_max( hname_length, sc_t_len( bhvm_mcode_hmeta_a_get_global_name( hmeta ) ) );
+        hname_length = sz_max( hname_length, hmeta_get_global_name_st( hmeta, o->context, st_buf )->size );
+        BLM_DOWN();
     }
 
     BFOR_EACH( i, hidx )
@@ -111,7 +133,7 @@ static void opal_frame_s_disassemble_hidx_to_sink( const opal_frame_s* o, const 
         sz_t idx_ap = hidx->data[ i ];
         bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ idx_ap ];
         assert( hmeta );
-        bcore_sink_a_push_fa( sink, "#rn{ }#pn'.'{#<sc_t> } :", indent, hname_length + 1, bhvm_mcode_hmeta_a_get_global_name( hmeta ) );
+        bcore_sink_a_push_fa( sink, "#rn{ }#pn'.'{#<sc_t> } :", indent, hname_length + 1, hmeta_get_global_name_st( hmeta, o->context, st_buf )->sc );
 
         if( idx_ap >= 0 ) bcore_sink_a_push_fa( sink, " (ap)#<sz_t>", idx_ap );
 
@@ -124,6 +146,7 @@ static void opal_frame_s_disassemble_hidx_to_sink( const opal_frame_s* o, const 
 
         bcore_sink_a_push_fa( sink, "\n" );
     }
+    BLM_DOWN();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

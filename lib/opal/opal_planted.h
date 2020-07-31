@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-30T16:29:22Z
+ *  Last File Update: 2020-07-31T15:51:49Z
  *
  *  Copyright and License of this File:
  *
@@ -9,7 +9,6 @@
  *
  *  opal_context.h
  *  opal_holor.h
- *  opal_scid.h
  *  opal_nop.h
  *  opal_eval_nop.h
  *  opal_sem.h
@@ -27,7 +26,7 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_opal_planted 2311578453
+#define HKEYOF_opal_planted 2662219966
 
 #define TYPEOF_opal_planted 1626965476
 
@@ -86,10 +85,9 @@
 #define TYPEOF_opal_holor_meta_s 3624388628
 #define BETH_EXPAND_ITEM_opal_holor_meta_s \
   BCORE_DECLARE_OBJECT( opal_holor_meta_s ) \
-    {aware_t _;bcore_inst* custom;bhvm_mcode_node_s* mnode;tp_t name;opal_scid_s* scid;tp_t pclass;bl_t htp;bl_t active;}; \
+    {aware_t _;bcore_inst* custom;bhvm_mcode_node_s* mnode;tp_t name;bcore_inst* sem_id;tp_t pclass;bl_t htp;bl_t active;}; \
   static inline void opal_holor_meta_s_clear( opal_holor_meta_s* o ){o->name = 0; o->htp = false;} \
   static inline tp_t opal_holor_meta_s_get_name( const opal_holor_meta_s* o ){return o->name;} \
-  static inline sc_t opal_holor_meta_s_get_global_name( const opal_holor_meta_s* o ){return o->scid ? o->scid->st.sc : "";} \
   static inline tp_t opal_holor_meta_s_get_pclass( const opal_holor_meta_s* o ){return o->pclass;} \
   static inline bl_t opal_holor_meta_s_is_rollable( const opal_holor_meta_s* o ){return !o->active || o->mnode->adaptive || ( o->mnode->cyclic && o->pclass == TYPEOF_pclass_ax1 );} \
   static inline bl_t opal_holor_meta_s_is_active( const opal_holor_meta_s* o ){return  o->active;} \
@@ -108,27 +106,6 @@
   BCORE_FORWARD_OBJECT( opal_holor_s ); \
   BETH_EXPAND_ITEM_opal_holor_meta_s \
   BETH_EXPAND_ITEM_opal_holor_s
-
-/**********************************************************************************************************************/
-// source: opal_scid.h
-
-//----------------------------------------------------------------------------------------------------------------------
-// group: opal_scid
-
-#define TYPEOF_opal_scid 935326907
-#define TYPEOF_opal_scid_s 3442974797
-#define TYPEOF_opal_scid_s 3442974797
-#define BETH_EXPAND_ITEM_opal_scid_s \
-  BCORE_DECLARE_OBJECT( opal_scid_s ) \
-    {aware_t _;st_s st;}; \
-  static inline void opal_scid_s_clear( opal_scid_s* o ){st_s_clear(     &o->st );} \
-  static inline void opal_scid_s_set( opal_scid_s* o, sc_t sc ){st_s_copy_sc(   &o->st, sc );} \
-  static inline void opal_scid_s_push_child( opal_scid_s* o, sc_t sc ){st_s_push_fa(   &o->st,    ".#<sc_t>", sc );} \
-  static inline void opal_scid_s_push_parent( opal_scid_s* o, sc_t sc ){st_s_insert_fa( &o->st, 0, "#<sc_t>.", sc );}
-#define BETH_EXPAND_GROUP_opal_scid \
-  BCORE_FORWARD_OBJECT( opal_scid ); \
-  BCORE_FORWARD_OBJECT( opal_scid_s ); \
-  BETH_EXPAND_ITEM_opal_scid_s
 
 /**********************************************************************************************************************/
 // source: opal_nop.h
@@ -1208,6 +1185,7 @@
 #define BETH_EXPAND_GROUP_opal_sem \
   BCORE_FORWARD_OBJECT( opal_sem ); \
   BCORE_FORWARD_OBJECT( opal_sem_context ); \
+  BCORE_FORWARD_OBJECT( opal_sem_id ); \
   BCORE_FORWARD_OBJECT( opal_sem_link_s ); \
   BCORE_FORWARD_OBJECT( opal_sem_links_s ); \
   BCORE_FORWARD_OBJECT( opal_sem_body_s ); \
@@ -1232,6 +1210,7 @@
   BCORE_DECLARE_VIRTUAL_AWARE_OBJECT( opal_sem ) \
   static inline bl_t opal_sem_a_is_trait_of( vc_t o ) { return bcore_trait_is_of( o ? *(aware_t*)o : 0, TYPEOF_opal_sem ); } \
   BETH_EXPAND_GROUP_opal_sem_context \
+  BETH_EXPAND_GROUP_opal_sem_id \
   static inline tp_t opal_sem_a_get_name( const opal_sem* o ) { const opal_sem_s* p = opal_sem_s_get_aware( o ); assert( p->get_name ); return p->get_name( o ); } \
   static inline bl_t opal_sem_a_defines_get_name( const opal_sem* o ) { return true; } \
   static inline tp_t opal_sem_get_name__( const opal_sem* o ){return 0;} \
@@ -1273,6 +1252,25 @@
   BETH_EXPAND_ITEM_opal_sem_context_s
 
 //----------------------------------------------------------------------------------------------------------------------
+// group: opal_sem_id
+
+#define TYPEOF_opal_sem_id 450404681
+#define TYPEOF_opal_sem_id_s 4106934275
+#define TYPEOF_opal_sem_id_s 4106934275
+#define BETH_EXPAND_ITEM_opal_sem_id_s \
+  BCORE_DECLARE_OBJECT( opal_sem_id_s ) \
+    {aware_t _;bcore_arr_tp_s arr_tp;}; \
+  static inline void opal_sem_id_s_clear( opal_sem_id_s* o ){bcore_arr_tp_s_clear( &o->arr_tp );} \
+  static inline void opal_sem_id_s_set( opal_sem_id_s* o, tp_t tp ){bcore_arr_tp_s_clear( &o->arr_tp ); bcore_arr_tp_s_push( &o->arr_tp, tp );} \
+  static inline void opal_sem_id_s_push_child( opal_sem_id_s* o, tp_t tp ){bcore_arr_tp_s_push( &o->arr_tp, tp );} \
+  static inline void opal_sem_id_s_push_parent( opal_sem_id_s* o, tp_t tp ){bcore_arr_tp_s_push_left( &o->arr_tp, tp );} \
+  void opal_sem_id_s_to_string( const opal_sem_id_s* o, const opal_context* context, st_s* s );
+#define BETH_EXPAND_GROUP_opal_sem_id \
+  BCORE_FORWARD_OBJECT( opal_sem_id ); \
+  BCORE_FORWARD_OBJECT( opal_sem_id_s ); \
+  BETH_EXPAND_ITEM_opal_sem_id_s
+
+//----------------------------------------------------------------------------------------------------------------------
 // group: opal_sem_builder
 
 #define TYPEOF_opal_sem_builder 1308999267
@@ -1296,8 +1294,8 @@
 #define BETH_EXPAND_ITEM_opal_sem_tree_node_s \
   BCORE_DECLARE_OBJECT( opal_sem_tree_node_s ) \
     {aware_t _;sz_t id;opal_sem_cell_s* cell;opal_sem_tree_node_s* parent;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_sem_tree_node_s, );}; \
-  void opal_sem_tree_node_s_push_parents_to_scid( const opal_sem_tree_node_s* o, opal_scid_s* scid ); \
-  void opal_sem_tree_node_s_get_scid( const opal_sem_tree_node_s* o, opal_scid_s* scid ); \
+  void opal_sem_tree_node_s_push_parents_to_sem_id( const opal_sem_tree_node_s* o, opal_sem_id_s* sem_id ); \
+  void opal_sem_tree_node_s_get_sem_id( const opal_sem_tree_node_s* o, opal_sem_id_s* sem_id ); \
   static inline opal_sem_tree_node_s* opal_sem_tree_node_s_set_space( opal_sem_tree_node_s* o, sz_t size ) { bcore_array_t_set_space( TYPEOF_opal_sem_tree_node_s, ( bcore_array* )o, size ); return o; } \
   static inline opal_sem_tree_node_s* opal_sem_tree_node_s_set_size( opal_sem_tree_node_s* o, sz_t size ) { bcore_array_t_set_size( TYPEOF_opal_sem_tree_node_s, ( bcore_array* )o, size ); return o; } \
   static inline opal_sem_tree_node_s* opal_sem_tree_node_s_clear( opal_sem_tree_node_s* o ) { bcore_array_t_set_space( TYPEOF_opal_sem_tree_node_s, ( bcore_array* )o, 0 ); return o; } \
@@ -1350,7 +1348,7 @@
 #define TYPEOF_opal_net_node_s 3101198586
 #define BETH_EXPAND_ITEM_opal_net_node_s \
   BCORE_DECLARE_OBJECT( opal_net_node_s ) \
-    {aware_t _;opal_net_links_s upls;opal_net_links_s dnls;tp_t name;opal_scid_s* scid;bl_t flag;bl_t probe;sz_t id;bhvm_mcode_node_s* mnode;opal_nop* nop;opal_nop_solve_result_s* result;opal_context* context;bcore_source_point_s* source_point;}; \
+    {aware_t _;opal_net_links_s upls;opal_net_links_s dnls;tp_t name;opal_sem_id_s* sem_id;bl_t flag;bl_t probe;sz_t id;bhvm_mcode_node_s* mnode;opal_nop* nop;opal_nop_solve_result_s* result;opal_context* context;bcore_source_point_s* source_point;}; \
   sz_t opal_net_node_s_up_index( const opal_net_node_s* o, const opal_net_node_s* node ); \
   void opal_net_node_s_set_nop_d( opal_net_node_s* o, opal_nop* nop ); \
   static inline bl_t opal_net_node_s_is_cyclic( const opal_net_node_s* o ){return ( o->mnode ) ? o->mnode->cyclic : opal_nop_a_is_cyclic( o->nop );}
@@ -1733,4 +1731,4 @@
 vd_t opal_planted_signal_handler( const bcore_signal_s* o );
 
 #endif // OPAL_PLANTED_H
-// BETH_PLANT_SIGNATURE 1727961777
+// BETH_PLANT_SIGNATURE 3431007675
