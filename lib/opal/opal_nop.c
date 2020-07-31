@@ -93,7 +93,7 @@ bl_t opal_nop_solve__( const opal_nop* o, opal_context* context, opal_holor_s** 
 
         for( sz_t i = 0; i <= arity; i++ )
         {
-            bhvm_holor_s_init_weak_from_holor( &hbase->holor_ads.data[ i ], ( i < arity ) ? &a[ i ]->h : hr );
+            bhvm_holor_s_init_weak_from_holor( hbase->holor_adl.data[ i ], ( i < arity ) ? &a[ i ]->h : hr );
             arr_ci->data[ i ].i = i;
             arr_ci->data[ i ].c = ( i < arity ) ? 'a' + i : 'y';
         }
@@ -101,7 +101,7 @@ bl_t opal_nop_solve__( const opal_nop* o, opal_context* context, opal_holor_s** 
         result->type_vop_ap = opal_nop_a_defines_type_vop_ap( o ) ? opal_nop_a_type_vop_ap( o ) : 0;
         assert( result->type_vop_ap );
 
-        bhvm_vop_a_run( bhvm_vop_a_set_args( BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) ), arr_ci ), hbase->holor_ads.data );
+        bhvm_vop_a_run( bhvm_vop_a_set_args( BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) ), arr_ci ), hbase->holor_adl.data );
     }
 
     result->can_settle = can_settle;

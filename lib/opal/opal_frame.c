@@ -27,10 +27,10 @@ static void opal_frame_s_disassemble_hbase_to_sink( const opal_frame_s* o, const
     sz_t hname_length = 0;
     sz_t hbrief_length = 0;
 
-    BFOR_EACH( i, &hbase->holor_ads )
+    BFOR_EACH( i, &hbase->holor_adl )
     {
         BLM_INIT();
-        bhvm_holor_s* h = &hbase->holor_ads.data[ i ];
+        bhvm_holor_s* h = hbase->holor_adl.data[ i ];
         bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ i ];
         //sc_t sc_name = opal_context_a_ifnameof( o->context, bhvm_mcode_hmeta_a_get_name( hmeta ) );
         sc_t sc_name = bhvm_mcode_hmeta_a_get_global_name( hmeta );
@@ -43,11 +43,11 @@ static void opal_frame_s_disassemble_hbase_to_sink( const opal_frame_s* o, const
         BLM_DOWN();
     }
 
-    BFOR_EACH( i, &hbase->holor_ads )
+    BFOR_EACH( i, &hbase->holor_adl )
     {
         BLM_INIT();
         st_s* msg = BLM_CREATE( st_s );
-        bhvm_holor_s* h = &hbase->holor_ads.data[ i ];
+        bhvm_holor_s* h = hbase->holor_adl.data[ i ];
         bhvm_mcode_hmeta* hmeta  = hbase->hmeta_adl.data[ i ];
 
         tp_t pclass = bhvm_mcode_hmeta_a_get_pclass( hmeta );
@@ -492,7 +492,7 @@ opal_frame_cyclic_s* opal_frame_cyclic_s_bind_holors( opal_frame_cyclic_s* o )
 {
     opal_frame_s_bind_holors( o->frame );
     bhvm_mcode_hbase_s* hbase = o->frame->mcf->hbase;
-    for( sz_t i = 1; i < o->unroll_size; i++ ) bhvm_mcode_track_s_run( o->track_adl_ap_setup->data[ i ], hbase->holor_ads.data );
+    for( sz_t i = 1; i < o->unroll_size; i++ ) bhvm_mcode_track_s_run( o->track_adl_ap_setup->data[ i ], hbase->holor_adl.data );
     return o;
 }
 
@@ -519,7 +519,7 @@ void opal_frame_cyclic_s_setup( opal_frame_cyclic_s* o )
     bhvm_mcode_track_s* track0_ap_setup  = bhvm_mcode_frame_s_track_get( o->frame->mcf, TYPEOF_track_ap_setup );
     bhvm_mcode_hbase_s* hbase = o->frame->mcf->hbase;
 
-    sz_t rolled_hbase_size = hbase->holor_ads.size;
+    sz_t rolled_hbase_size = hbase->holor_adl.size;
     hbase->copy_size_limit = rolled_hbase_size;
 
     bcore_arr_sz_s* idx_arr_track0_ap = BLM_CREATE( bcore_arr_sz_s );
@@ -582,7 +582,7 @@ void opal_frame_cyclic_s_setup( opal_frame_cyclic_s* o )
     }
 
     opal_frame_s_setup( frame );
-    for( sz_t i = 1; i < o->unroll_size; i++ ) bhvm_mcode_track_s_run( o->track_adl_ap_setup->data[ i ], hbase->holor_ads.data );
+    for( sz_t i = 1; i < o->unroll_size; i++ ) bhvm_mcode_track_s_run( o->track_adl_ap_setup->data[ i ], hbase->holor_adl.data );
 
     o->setup = true;
     BLM_DOWN();
@@ -625,7 +625,7 @@ opal_frame_cyclic_s* opal_frame_cyclic_s_run_ap( opal_frame_cyclic_s* o, const b
     }
 
     if( o->unroll_index == 0 ) bhvm_mcode_frame_s_track_run( frame->mcf, TYPEOF_track_ap_cyclic_update );
-    bhvm_mcode_track_s_run( track, hbase->holor_ads.data );
+    bhvm_mcode_track_s_run( track, hbase->holor_adl.data );
 
     if( ex )
     {
@@ -823,7 +823,7 @@ void opal_frame_cyclic_s_run_dp_adl_flat( opal_frame_cyclic_s* o, const bhvm_hol
             bhvm_value_s_cpy( &h_i->v, &h_m->v );
         }
 
-        bhvm_mcode_track_s_run( track_dp, hbase->holor_ads.data );
+        bhvm_mcode_track_s_run( track_dp, hbase->holor_adl.data );
 
         if( p_en )
         {

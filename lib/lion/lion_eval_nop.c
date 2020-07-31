@@ -215,10 +215,10 @@ lion_eval_nop_result_s* lion_eval_nop_ar1_s_run( const lion_eval_nop_ar1_s* o, l
         sz_t i_gina = bhvm_mcode_frame_s_push_hmc( frame, &ha->h, NULL, 'f', arr_ci );
         sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame,  &r->h, NULL, 'z', arr_ci );
 
-        bhvm_holor_s* ina  = &frame->hbase->holor_ads.data[ i_ina  ];
-        bhvm_holor_s* out  = &frame->hbase->holor_ads.data[ i_out  ];
-        bhvm_holor_s* gina = &frame->hbase->holor_ads.data[ i_gina ];
-        bhvm_holor_s* gout = &frame->hbase->holor_ads.data[ i_gout ];
+        bhvm_holor_s* ina  = frame->hbase->holor_adl.data[ i_ina  ];
+        bhvm_holor_s* out  = frame->hbase->holor_adl.data[ i_out  ];
+        bhvm_holor_s* gina = frame->hbase->holor_adl.data[ i_gina ];
+        bhvm_holor_s* gout = frame->hbase->holor_adl.data[ i_gout ];
 
         bhvm_holor_s*  fin = BLM_A_PUSH( bhvm_holor_s_clone( out ) );
         bhvm_holor_s*  scl = BLM_CREATE( bhvm_holor_s );
@@ -442,12 +442,12 @@ lion_eval_nop_result_s* lion_eval_nop_ar2_s_run( const lion_eval_nop_ar2_s* o, l
         sz_t i_ginb = bhvm_mcode_frame_s_push_hmc( frame, &hb->h, NULL, 'g', arr_ci );
         sz_t i_gout = bhvm_mcode_frame_s_push_hmc( frame,  &r->h, NULL, 'z', arr_ci );
 
-        bhvm_holor_s* ina  = &frame->hbase->holor_ads.data[ i_ina  ];
-        bhvm_holor_s* inb  = &frame->hbase->holor_ads.data[ i_inb  ];
-        bhvm_holor_s* out  = &frame->hbase->holor_ads.data[ i_out  ];
-        bhvm_holor_s* gina = &frame->hbase->holor_ads.data[ i_gina ];
-        bhvm_holor_s* ginb = &frame->hbase->holor_ads.data[ i_ginb ];
-        bhvm_holor_s* gout = &frame->hbase->holor_ads.data[ i_gout ];
+        bhvm_holor_s* ina  = frame->hbase->holor_adl.data[ i_ina  ];
+        bhvm_holor_s* inb  = frame->hbase->holor_adl.data[ i_inb  ];
+        bhvm_holor_s* out  = frame->hbase->holor_adl.data[ i_out  ];
+        bhvm_holor_s* gina = frame->hbase->holor_adl.data[ i_gina ];
+        bhvm_holor_s* ginb = frame->hbase->holor_adl.data[ i_ginb ];
+        bhvm_holor_s* gout = frame->hbase->holor_adl.data[ i_gout ];
 
         bhvm_holor_s*  fin = BLM_A_PUSH( bhvm_holor_s_clone( out ) );
         bhvm_holor_s*  scl = BLM_CREATE( bhvm_holor_s );
