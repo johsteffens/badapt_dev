@@ -18,147 +18,6 @@
 #include "opal_net.h"
 
 /**********************************************************************************************************************/
-/// Prototypes
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/**********************************************************************************************************************/
-/// ctr
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/** Node process for a semantic cell.
- *  Entering a cell:
- *    Ascend the tree if matching or add a new node to the tree.
- *    node_out is set to the node referencing the cell
- *  Exiting a cell:
- *     Descend the tree until a matching node is found.
- *     node_out is set to the parent of the node referencing the cell.
- *     Returns 1 in case no match is found.
- *
- *  Returns 0 in case of success. !=0 is considered an error
- */
-s2_t opal_ctr_node_s_node_process
-(
-    opal_ctr_node_s* o,
-    opal_sem_cell_s* cell,
-    bl_t enter,
-    bl_t exit_through_wrapper,
-    opal_ctr_node_s** node_out
-)
-{
-    opal_ctr_node_s* node = NULL;
-    if( enter )
-    {
-        for( sz_t i = 0; i < o->size; i++ )
-        {
-            if( o->data[ i ]->cell == cell )
-            {
-                node = o->data[ i ];
-            }
-        }
-        if( !node )
-        {
-            node = opal_ctr_node_s_push_d( o, opal_ctr_node_s_create() );
-            node->cell = cell;
-            node->parent = o;
-        }
-        *node_out = node;
-        return 0;
-    }
-    else
-    {
-        node = o;
-
-        {
-            /** Descend tree until node->cell == cell.
-              * This part covers specific (rare) situations in which a link exits a cell without passing through its membrane
-              * It is unclear if this handling is sensitive. Probably all relevant cases are covered using exit_through_wrapper
-              * scheme.
-              */
-            while( node && node->cell != cell )
-            {
-                //bcore_msg_fa( "descending...\n" );
-                node = node->parent;
-            }
-
-            if( node && node->cell == cell )
-            {
-                node = node->parent;
-
-                if( exit_through_wrapper && node && opal_sem_cell_s_is_wrapper( node->cell ) )
-                {
-                    while( node && opal_sem_cell_s_is_wrapper( node->cell ) ) node = node->parent;
-                }
-
-                *node_out = node;
-                return 0;
-            }
-            else
-            {
-                return 1; // exiting from untraced cell
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-s2_t opal_ctr_tree_s_tree_process
-(
-    opal_ctr_tree_s* o,
-    opal_sem_cell_s* cell,
-    bl_t enter,
-    bl_t exit_through_wrapper,
-    opal_ctr_node_s* node_in,
-    opal_ctr_node_s** node_out
-)
-{
-    if( enter )
-    {
-        opal_ctr_node_s* node = NULL;
-        if( !o->root )
-        {
-            o->root = opal_ctr_node_s_create();
-            o->root->id = o->id_base++;
-            o->root->cell = cell;
-            node = o->root;
-            *node_out = node;
-            return 0;
-        }
-        else if( !node_in ) // we just entered the tree frame
-        {
-            *node_out = o->root;
-            return 0;
-        }
-        else
-        {
-            s2_t ret = opal_ctr_node_s_node_process( node_in, cell, enter, false, &node );
-            if( ret ) return ret;
-            if( node->id < 0 ) node->id = o->id_base++;
-            *node_out = node;
-            return 0;
-        }
-    }
-    else
-    {
-        return opal_ctr_node_s_node_process( node_in, cell, enter, exit_through_wrapper, node_out );
-    }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-bcore_source_point_s* opal_ctr_node_s_get_nearest_source_point( opal_ctr_node_s* o )
-{
-    if( !o ) return NULL;
-    if( !o->cell ) return NULL;
-    if( o->cell->source_point.source ) return &o->cell->source_point;
-    return opal_ctr_node_s_get_nearest_source_point( o->parent );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/**********************************************************************************************************************/
 // net_node
 
 /// recursive trace; exits when the enter membrane of the root cell is reached
@@ -314,7 +173,7 @@ void opal_nop_solve_node__( opal_nop* o, opal_net_node_s* node, opal_net_node_ad
 
     net_node_s_nop_solve( node, arg_h );
 
-    if( node->result->settled )
+    if( node->result->can_settle )
     {
         opal_nop_a_settle( o, node->context, node->result, &node->nop, &node->result );
         opal_net_links_s_clear( &node->upls );
@@ -396,7 +255,7 @@ void opal_nop_ar2_reshape_s_solve_node( opal_nop_ar2_reshape_s* o, opal_net_node
         opal_nop_a_attach( &node->nop, ( opal_nop* )ar1_reshape );
         net_node_s_nop_solve( node, &arg1->result->h );
 
-        if( node->result->settled )
+        if( node->result->can_settle )
         {
             opal_nop_a_settle( (opal_nop*)o, node->context, node->result, &node->nop, &node->result );
             opal_net_links_s_clear( &node->upls );
@@ -696,13 +555,14 @@ void opal_net_cell_s_remove_identities( opal_net_cell_s* o )
 /** Recursively building a network cell from a semantic cell using membrane-technique.
  *  Exits when the enter membrane of the root cell is reached.
  *  This function does not set downlinks.
+ *  Note: This recursion reflects the network structure (not the semantic cell structure)
  */
 static void net_cell_s_from_sem_recursive
 (
     opal_net_cell_s* o,
     opal_sem_link_s* link,
-    opal_ctr_tree_s* ctr_tree,
-    opal_ctr_node_s* ctr_node,
+    opal_sem_tree_s* sem_tree,
+    opal_sem_tree_node_s* sem_tree_node,
     opal_net_node_s* net_node_dn,
     sz_t             depth,
     bcore_sink*      log  // optional
@@ -736,7 +596,7 @@ static void net_cell_s_from_sem_recursive
         );
     }
 
-    if( link->exit )
+    if( link->exit ) // we are backtracing: Thus entering a cell though an exit link
     {
         if( log )
         {
@@ -751,7 +611,9 @@ static void net_cell_s_from_sem_recursive
         }
 
         // since we backtrace, a cell is entered through an 'exit' link
-        s2_t err = opal_ctr_tree_s_tree_process( ctr_tree, cell, true, false, ctr_node, &ctr_node );
+        er_t err = opal_sem_tree_s_enter( sem_tree, cell, /*node_in*/ sem_tree_node, /*node_out*/ &sem_tree_node );
+
+
         if( err )
         {
             bcore_source_point_s_parse_err_fa
@@ -770,15 +632,19 @@ static void net_cell_s_from_sem_recursive
             }
 
             bl_t trace_up = false;
-            opal_net_node_s* net_node_up = opal_net_nodes_s_get_by_id( &o->body, ctr_node->id );
+            opal_net_node_s* net_node_up = opal_net_nodes_s_get_by_id( &o->body, sem_tree_node->id );
             if( !net_node_up )
             {
                 net_node_up = opal_net_nodes_s_push( &o->body );
-                net_node_up->context = bcore_fork( o->context );
-                net_node_up->id = ctr_node->id;
-                opal_net_node_s_set_nop_d( net_node_up, bcore_fork( cell->nop ) );
 
-                bcore_source_point_s_attach( &net_node_up->source_point, bcore_fork( opal_ctr_node_s_get_nearest_source_point( ctr_node ) ) );
+                if( !net_node_up->context ) net_node_up->context = bcore_fork( cell->context );
+                opal_net_node_s_set_nop_d( net_node_up, bcore_fork( cell->nop ) );
+                if( !net_node_up->scid    ) net_node_up->scid = opal_scid_s_create();
+                opal_sem_tree_node_s_get_scid( sem_tree_node, net_node_up->scid );
+
+                net_node_up->id = sem_tree_node->id;
+
+                bcore_source_point_s_attach( &net_node_up->source_point, bcore_fork( opal_sem_tree_node_s_get_nearest_source_point( sem_tree_node ) ) );
 
                 trace_up = opal_nop_a_arity( net_node_up->nop ) > 0;
                 if( log ) bcore_sink_a_push_fa( log, "new node id: '#<sz_t>'\n", net_node_up->id );
@@ -789,6 +655,8 @@ static void net_cell_s_from_sem_recursive
                 sz_t arity = opal_nop_a_arity( net_node_up->nop );
                 ASSERT( arity == cell->encs.size );
 
+                /// ==== BEGIN SPECIAL BRANCH HANDLING ====
+
                 /** If there is an iff-branch and the condition (arg0) is a constant scalar,
                  *  then the branch code is replaced by an identity linking to the
                  *  branch target based on the condition value.
@@ -797,7 +665,7 @@ static void net_cell_s_from_sem_recursive
                 if( net_node_up->nop->_ == TYPEOF_opal_nop_ar3_iff_s )
                 {
                     if( log ) bcore_sink_a_push_fa( log, "Branch channel 0:\n" );
-                    net_cell_s_from_sem_recursive( o, cell->encs.data[ 0 ], ctr_tree, ctr_node, net_node_up, depth, log );
+                    net_cell_s_from_sem_recursive( o, cell->encs.data[ 0 ], sem_tree, sem_tree_node, net_node_up, depth, log );
                     opal_net_node_s* arg0 = net_node_up->upls.data[ 0 ]->node;
                     opal_net_node_s_solve( arg0, NULL );
                     opal_holor_s* result_h = arg0->result->h;
@@ -817,29 +685,32 @@ static void net_cell_s_from_sem_recursive
                         if( bhvm_value_s_get_f3( &result_h->h.v, 0 ) > 0 )
                         {
                             if( log ) bcore_sink_a_push_fa( log, "'TRUE'\n" );
-                            net_cell_s_from_sem_recursive( o, cell->encs.data[ 1 ], ctr_tree, ctr_node, net_node_up, depth, log );
+                            net_cell_s_from_sem_recursive( o, cell->encs.data[ 1 ], sem_tree, sem_tree_node, net_node_up, depth, log );
                         }
                         else
                         {
                             if( log ) bcore_sink_a_push_fa( log, "'FALSE'\n" );
-                            net_cell_s_from_sem_recursive( o, cell->encs.data[ 2 ], ctr_tree, ctr_node, net_node_up, depth, log );
+                            net_cell_s_from_sem_recursive( o, cell->encs.data[ 2 ], sem_tree, sem_tree_node, net_node_up, depth, log );
                         }
                     }
                     else /// leaving the branch code intact
                     {
                         if( log ) bcore_sink_a_push_fa( log, "Branching to channel " );
                         if( log ) bcore_sink_a_push_fa( log, "'TRUE'\n" );
-                        net_cell_s_from_sem_recursive( o, cell->encs.data[ 1 ], ctr_tree, ctr_node, net_node_up, depth, log );
+                        net_cell_s_from_sem_recursive( o, cell->encs.data[ 1 ], sem_tree, sem_tree_node, net_node_up, depth, log );
                         if( log ) bcore_sink_a_push_fa( log, "'FALSE'\n" );
-                        net_cell_s_from_sem_recursive( o, cell->encs.data[ 2 ], ctr_tree, ctr_node, net_node_up, depth, log );
+                        net_cell_s_from_sem_recursive( o, cell->encs.data[ 2 ], sem_tree, sem_tree_node, net_node_up, depth, log );
                     }
                 }
-                else
+
+                /// ==== END SPECIAL BRANCH HANDLING ====
+
+                else // normal processing
                 {
                     for( sz_t i = 0; i < arity; i++ )
                     {
                         if( log ) bcore_sink_a_push_fa( log, "node id #<sz_t>: up channel #<sz_t> of #<sz_t>:\n", net_node_up->id, i, arity );
-                        net_cell_s_from_sem_recursive( o, cell->encs.data[ i ], ctr_tree, ctr_node, net_node_up, depth, log );
+                        net_cell_s_from_sem_recursive( o, cell->encs.data[ i ], sem_tree, sem_tree_node, net_node_up, depth, log );
                     }
                 }
             }
@@ -876,7 +747,7 @@ static void net_cell_s_from_sem_recursive
 
         bl_t exit_through_wrapper = link->up != NULL;
 
-        s2_t err = opal_ctr_tree_s_tree_process( ctr_tree, cell, false, exit_through_wrapper, ctr_node, &ctr_node );
+        er_t err = opal_sem_tree_s_exit( sem_tree, cell, exit_through_wrapper, /*node_in*/ sem_tree_node, /*node_out*/ &sem_tree_node );
 
         if( err )
         {
@@ -900,7 +771,7 @@ static void net_cell_s_from_sem_recursive
             }
         }
 
-        if( !ctr_node ) // root membrane reached (trace ended)
+        if( !sem_tree_node ) // root membrane reached (trace ended)
         {
             sz_t index = opal_sem_links_s_get_index_by_link( &cell->encs, link );
             if( index == -1 )
@@ -934,7 +805,7 @@ static void net_cell_s_from_sem_recursive
         }
         else
         {
-            next_link = opal_sem_cell_s_get_enc_by_dn( ctr_node->cell, link );
+            next_link = opal_sem_cell_s_get_enc_by_dn( sem_tree_node->cell, link );
             if( !next_link )
             {
                 bcore_source_point_s_parse_err_fa
@@ -953,7 +824,7 @@ static void net_cell_s_from_sem_recursive
 
     if( next_link )
     {
-        net_cell_s_from_sem_recursive( o, next_link, ctr_tree, ctr_node, net_node_dn, depth, log );
+        net_cell_s_from_sem_recursive( o, next_link, sem_tree, sem_tree_node, net_node_dn, depth, log );
     }
     else
     {
@@ -982,9 +853,9 @@ void opal_holor_s_from_sem_link( opal_holor_s* o, opal_sem_link_s* link, opal_se
     ASSERT( root );
     if( !root->parent ) ERR_fa( "(root->parent == NULL) Root is not nested. Using semantic context as root is discouraged. Preferably use a double-nested semantic frame." );
     opal_sem_cell_s* cell = link->cell;
-    opal_ctr_tree_s* tree = BLM_CREATE( opal_ctr_tree_s );
-    opal_ctr_node_s* ctr_node = NULL;
-    opal_ctr_tree_s_tree_process( tree, root, true, false, ctr_node, &ctr_node );
+    opal_sem_tree_s* tree = BLM_CREATE( opal_sem_tree_s );
+    opal_sem_tree_node_s* sem_tree_node = NULL;
+    opal_sem_tree_s_enter( tree, root, sem_tree_node, &sem_tree_node );
     opal_net_cell_s* net_frame = BLM_CREATE( opal_net_cell_s );
     opal_net_node_s* up_node   = BLM_CREATE( opal_net_node_s );
     net_frame->context = bcore_fork( root->context );
@@ -994,7 +865,7 @@ void opal_holor_s_from_sem_link( opal_holor_s* o, opal_sem_link_s* link, opal_se
     up_node->id = tree->id_base++;
     up_node->source_point = bcore_fork( &cell->source_point );
     opal_net_node_s_set_nop_d( up_node, ( opal_nop* )opal_nop_ar1_output_s_create() );
-    net_cell_s_from_sem_recursive( net_frame, link->up, tree, ctr_node, up_node, 0, log );
+    net_cell_s_from_sem_recursive( net_frame, link->up, tree, sem_tree_node, up_node, 0, log );
     opal_net_node_s_solve( up_node, NULL );
 
     if( !up_node->result ) bcore_source_point_s_parse_err_fa( up_node->source_point, "Could not solve expression." );
@@ -1023,7 +894,7 @@ void opal_net_cell_s_from_sem_cell
 
     if( !o->context ) o->context = bcore_fork( sem_cell->context );
 
-    opal_ctr_tree_s* tree = opal_ctr_tree_s_create();
+    opal_sem_tree_s* tree = opal_sem_tree_s_create();
     for( sz_t i = 0; i < sem_cell->encs.size; i++ )
     {
         opal_sem_link_s* sem_link = sem_cell->encs.data[ i ];
@@ -1031,6 +902,8 @@ void opal_net_cell_s_from_sem_cell
         net_node->context = bcore_fork( o->context );
 
         net_node->name = sem_link->name;
+        net_node->scid = opal_scid_s_create();
+        opal_scid_s_set( net_node->scid, opal_sem_cell_s_ifnameof( sem_cell, net_node->name ) );
         net_node->id   = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
 
@@ -1060,13 +933,15 @@ void opal_net_cell_s_from_sem_cell
         opal_net_node_s* net_node = opal_net_nodes_s_push( &o->excs );
         net_node->context = bcore_fork( o->context );
         net_node->name = sem_link->name;
+        net_node->scid = opal_scid_s_create();
+        opal_scid_s_set( net_node->scid, opal_sem_cell_s_ifnameof( sem_cell, net_node->name ) );
         net_node->id = tree->id_base++;
         net_node->source_point = bcore_fork( &sem_cell->source_point );
         opal_net_node_s_set_nop_d( net_node, ( opal_nop* )opal_nop_ar1_output_s_create() );
         net_cell_s_from_sem_recursive( o, sem_link, tree, NULL, net_node, 0, log );
     }
 
-    opal_ctr_tree_s_discard( tree );
+    opal_sem_tree_s_discard( tree );
 
     opal_net_cell_s_normalize( o );
 
@@ -1140,6 +1015,7 @@ static void node_s_mcode_push_ap( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
+        o->mnode->param    = opal_nop_a_is_param(    o->nop );
         o->mnode->cyclic   = opal_nop_a_is_cyclic(   o->nop );
         o->mnode->adaptive = opal_nop_a_is_adaptive( o->nop );
     }
@@ -1159,6 +1035,8 @@ static void node_s_mcode_push_ap( opal_net_node_s* o, bhvm_mcode_frame_s* mcf )
     {
         opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
         if( !hmeta->name ) hmeta->name = o->name;
+        if( !hmeta->scid ) hmeta->scid = bcore_fork( o->scid );
+
         hmeta->pclass   = TYPEOF_pclass_ax0;
         bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
     }
@@ -1180,12 +1058,15 @@ void opal_net_node_s_isolated_mcode_push( opal_net_node_s* o, bhvm_mcode_frame_s
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
+        o->mnode->param    = opal_nop_a_is_param(    o->nop );
         o->mnode->cyclic   = opal_nop_a_is_cyclic(   o->nop );
         o->mnode->adaptive = opal_nop_a_is_adaptive( o->nop );
     }
     o->mnode->ax0 = opal_nop_a_mcode_push_ap_holor( o->nop, o->result, NULL, mcf );
     opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax0 ];
     if( !hmeta->name ) hmeta->name = o->name;
+    if( !hmeta->scid ) hmeta->scid = bcore_fork( o->scid );
+
     hmeta->pclass   = TYPEOF_pclass_ax0;
     bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
 }
@@ -1203,6 +1084,7 @@ static void node_s_cyclic_mcode_push_ap_phase0( opal_net_node_s* o, bhvm_mcode_f
     if( !o->mnode )
     {
         o->mnode = bcore_fork( bhvm_mcode_frame_s_push_node( mcf ) );
+        o->mnode->param    = opal_nop_a_is_param(    o->nop );
         o->mnode->cyclic   = true;
         o->mnode->adaptive = opal_nop_a_is_adaptive( o->nop );
 
@@ -1213,7 +1095,10 @@ static void node_s_cyclic_mcode_push_ap_phase0( opal_net_node_s* o, bhvm_mcode_f
         opal_holor_meta_s* hmeta1 = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ax1 ];
 
         if( !hmeta0->name ) hmeta0->name = o->name;
+        if( !hmeta0->scid ) hmeta0->scid = bcore_fork( o->scid );
         if( !hmeta1->name ) hmeta1->name = o->name;
+        if( !hmeta1->scid ) hmeta1->scid = bcore_fork( o->scid );
+
         hmeta0->pclass = TYPEOF_pclass_ax0;
         hmeta1->pclass = TYPEOF_pclass_ax1;
 
@@ -1334,6 +1219,7 @@ static void node_s_mcode_push_dp( opal_net_node_s* o, sz_t up_index, bhvm_mcode_
 
             opal_holor_meta_s* hmeta = ( opal_holor_meta_s* )mcf->hbase->hmeta_adl.data[ o->mnode->ag0 ];
             if( !hmeta->name ) hmeta->name = o->name;
+            if( !hmeta->scid ) hmeta->scid = bcore_fork( o->scid );
             hmeta->pclass = TYPEOF_pclass_ag0;
             bhvm_mcode_node_s_attach( &hmeta->mnode, bcore_fork( o->mnode ) );
         }
@@ -1364,6 +1250,8 @@ static void node_s_cyclic_mcode_push_dp_phase0( opal_net_node_s* o, sz_t up_inde
         bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
         opal_holor_meta_s* m = BLM_CLONE( opal_holor_meta_s, &o->result->h->m );
         if( !m->name ) m->name = o->name;
+        if( !m->scid ) m->scid = bcore_fork( o->scid );
+
         m->pclass = TYPEOF_pclass_ag0;
         bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );
         sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
@@ -1415,6 +1303,8 @@ static void node_s_cyclic_mcode_push_dp_phase1( opal_net_node_s* o, bhvm_mcode_f
         bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &o->result->h->h );
         opal_holor_meta_s* m = BLM_CLONE( opal_holor_meta_s, &o->result->h->m );
         if( !m->name ) m->name = o->name;
+        if( !m->scid ) m->scid = bcore_fork( o->scid );
+
         m->pclass = TYPEOF_pclass_ag1;
         bhvm_mcode_node_s_attach( &m->mnode, bcore_fork( o->mnode ) );
         sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );

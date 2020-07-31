@@ -80,6 +80,7 @@
 
 #include "bmath_std.h"
 #include "opal_nop.h"
+#include "opal_scid.h"
 #include "opal_planted.h"
 
 /**********************************************************************************************************************/
@@ -140,7 +141,10 @@ name cell;
 signature   sz_t get_arity( const );
 signature   sz_t get_priority( const );
 feature 'a' tp_t get_name( const ) = { return 0; };
-feature 'a' bl_t is_visible( const ) = { return true; }; // an object can be made syntactically invisible
+feature 'a' bl_t is_visible( const ) = { return true; }; // invisible objects are not searchable via get_by_name functions
+feature 'a' void set_name_visible(   mutable, tp_t name );
+feature 'a' void set_name_invisible( mutable, tp_t name );
+
 body             get_name_ = { return o->name; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -149,13 +153,17 @@ body             get_name_ = { return o->name; };
 stamp :link = aware :
 {
     tp_t name;
-    bl_t visible = true;
+    bl_t protected = false; // a protected link may not be used (used for cyclic syntax error detection)
+    bl_t visible   = true;
+
     private :link_s -> up;   // up link
     private :link_s -> dn;   // down link
     private  vd_t cell; // cell owning the link (only if link is part of membrane)
     bl_t     exit; // true: link is of cell's exit membrane. false: entry membrane
     func : : get_name = :get_name_;
-    func : : is_visible = { return o->visible; };
+    func : :set_name_visible   = { o->name = name; o->visible = true; };
+    func : :set_name_invisible = { o->name = name; o->visible = false; };
+    func : :is_visible = { return o->visible; };
 };
 
 signature bl_t     name_exists(       const,   tp_t name );
@@ -223,7 +231,10 @@ stamp :body = aware bcore_array
     {
         BFOR_EACH( i, o )
         {
-            if( :a_get_name( o->data[ i ] ) == name ) return o->data[ i ];
+            if( :a_get_name( o->data[ i ] ) == name )
+            {
+                if( :a_is_visible( o->data[ i ] ) ) return o->data[ i ];
+            }
         }
         return NULL;
     };
@@ -243,6 +254,7 @@ signature bl_t is_wrapper( const );
 stamp :cell = aware :
 {
              tp_t         name;
+             bl_t visible = true;  // an invisible cell cannot be retrieved in get_cell_by_name
             :links_s      encs;    // entry channels
             :links_s      excs;    // exit channels
             :body_s    => body;
@@ -257,6 +269,10 @@ stamp :cell = aware :
     private :cell_s    -> wrapped_cell;
 
     func : :get_name = :get_name_;
+
+    func : :set_name_visible   = { o->name = name; o->visible = true; };
+    func : :set_name_invisible = { o->name = name; o->visible = false; };
+    func : :is_visible = { return o->visible; };
     func : :get_arity       = { return :links_s_count_open(       &o->encs       ); };
     func : :get_enc_by_name = { return :links_s_get_link_by_name( &o->encs, name ); };
     func : :get_exc_by_name = { return :links_s_get_link_by_name( &o->excs, name ); };
@@ -281,7 +297,6 @@ stamp :cell = aware :
         if( sem && sem->_ == TYPEOF_:link_s ) return ( :link_s* )sem;
         return NULL;
     };
-
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -308,13 +323,77 @@ group :builder = :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/** Semantic tree
+ *  The semantic tree is an intermediate and temporary representation
+ *  of a partial semantic cell structure expressed as physical tree.
+ *  It is used in functions net ... from_sem ... (in opal_net.c).
+ *  This structure is necessary because the semantic cell structure
+ *  only presents a logical tree. E.g. existing cells can be reused at
+ *  different semantic places where the semantic parent is from the lexical
+ *  parent.
+ *
+ *  In order to proper navigate inside the semantic tree, we build this
+ *  physical tree during network conversion.
+ *  This method is more economic than representing the cell structure as
+ *  physical tree.
+ *
+ *  This solution permits describing the logical tree semantically in form
+ *  of recursions. It also allows wrapper cells.
+ */
+group :tree = :
+{
+    signature void push_parents_to_scid( const, opal_scid_s* scid );
+
+    stamp :node = aware bcore_array
+    {
+        sz_t id = -1;
+        private opal_sem_cell_s -> cell;
+        private :node_s -> parent; // semantic parent of cell (note that cell.parent is a lexical parent)
+        :node_s => [];
+
+        func : :push_parents_to_scid =
+        {
+            opal_scid_s_push_parent( scid, o->cell ? ::cell_s_ifnameof( o->cell, o->cell->name ) : "" );
+            if( o->parent ) @_push_parents_to_scid( o->parent, scid );
+        };
+
+        func opal_scid :get_scid =
+        {
+            opal_scid_s_set( scid, o->cell ? ::cell_s_ifnameof( o->cell, o->cell->name ) : "" );
+            if( o->parent ) @_push_parents_to_scid( o->parent, scid );
+        };
+    };
+
+    signature er_t enter( mutable, ::cell_s* cell,                        :node_s* node_in, :node_s** node_out );
+    signature er_t exit ( mutable, ::cell_s* cell, bl_t test_for_wrapper, :node_s* node_in, :node_s** node_out );
+
+    stamp : = aware :
+    {
+        sz_t id_base = 0; // (incremented when adding nodes)
+        :node_s => root;
+
+        func : :enter;
+        func : :exit;
+    };
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+sc_t opal_sem_cell_s_nameof(      const opal_sem_cell_s* o, tp_t name );
+sc_t opal_sem_cell_s_ifnameof(    const opal_sem_cell_s* o, tp_t name );
+tp_t opal_sem_cell_s_entypeof(    const opal_sem_cell_s* o, sc_t name );
+tp_t opal_sem_cell_s_entypeof_fv( const opal_sem_cell_s* o, sc_t format, va_list args );
+tp_t opal_sem_cell_s_entypeof_fa( const opal_sem_cell_s* o, sc_t format, ... );
 
 opal_sem_link_s* opal_sem_link_s_trace_to_cell_membrane( opal_sem_link_s* o );
 
 void opal_sem_cell_s_parse( opal_sem_cell_s* o, bcore_source* source );
 void opal_sem_cell_s_parse_signature( opal_sem_cell_s* o, bcore_source* source );
 void opal_sem_cell_s_parse_body( opal_sem_cell_s* o, bcore_source* source );
+
+bcore_source_point_s* opal_sem_tree_node_s_get_nearest_source_point( opal_sem_tree_node_s* o );
 
 /**********************************************************************************************************************/
 

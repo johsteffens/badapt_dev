@@ -29,7 +29,7 @@ bl_t opal_nop_solve__( const opal_nop* o, opal_context* context, opal_holor_s** 
     opal_holor_s** r = &result->h;
     opal_holor_s_detach( r );
     sz_t arity = opal_nop_a_arity( o );
-    bl_t settled = ( arity > 0 );
+    bl_t can_settle = ( arity > 0 );
     bl_t vacant = ( arity == 0 );
     tp_t r_type = TYPEOF_f2_t;
     bl_t r_htp  = false;
@@ -72,7 +72,7 @@ bl_t opal_nop_solve__( const opal_nop* o, opal_context* context, opal_holor_s** 
         vacant = vacant || ( a[i]->h.v.size == 0 );
     }
 
-    settled = !active;
+    can_settle = !active;
 
     opal_holor_s_attach( r, opal_holor_s_create() );
     bhvm_holor_s* hr = &(*r)->h;
@@ -104,8 +104,36 @@ bl_t opal_nop_solve__( const opal_nop* o, opal_context* context, opal_holor_s** 
         bhvm_vop_a_run( bhvm_vop_a_set_args( BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) ), arr_ci ), hbase->holor_ads.data );
     }
 
-    result->settled = settled;
+    result->can_settle = can_settle;
     BLM_RETURNV( bl_t, true );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+// opal_nop_ar1_param_s
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bl_t opal_nop_ar1_param_s_solve( const opal_nop_ar1_param_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result )
+{
+    opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
+    result->can_settle    = !a[0]->m.active;
+    result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
+    result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void opal_nop_ar1_param_s_settle( const opal_nop_ar1_param_s* o, opal_context* context, const opal_nop_solve_result_s* result, opal_nop** out_nop, opal_nop_solve_result_s** out_result )
+{
+    opal_nop_ar0_param_s* nop_param = opal_nop_ar0_param_s_create();
+    nop_param->h = opal_holor_s_clone( result->h );
+    opal_nop_a_attach( out_nop, ( opal_nop* )nop_param );
+    opal_nop_solve_result_s* r = opal_nop_solve_result_s_create();
+    r->h = bcore_fork( nop_param->h );
+    opal_nop_solve_result_s_attach( out_result, r );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -132,7 +160,7 @@ bl_t opal_nop_ar1_adaptive_s_solve( const opal_nop_ar1_adaptive_s* o, opal_conte
         }
         opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
         result->h->m.active = true;
-        result->settled = true;
+        result->can_settle = true;
     }
 
     result->reducible = false; // keep subsequent graph intact
@@ -166,7 +194,7 @@ bl_t opal_nop_ar1_output_s_solve( const opal_nop_ar1_output_s* o, opal_context* 
     bhvm_holor_s_fork( &result->h->h, &a[0]->h );
     result->h->m.htp = a[0]->m.htp;
     result->h->m.active = a[0]->m.active;
-    result->settled = (result->h) && !result->h->m.active;
+    result->can_settle = (result->h) && !result->h->m.active;
     result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
     result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
     return true;
@@ -217,7 +245,7 @@ bl_t opal_nop_ar1_rand_s_solve( const opal_nop_ar1_rand_s* o, opal_context* cont
         nop_rand->h = opal_holor_s_clone( result->h );
 
         result->h->m.active = true;
-        result->settled     = true;
+        result->can_settle  = true;
         result->codable     = false;
 
         bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)nop_rand );
@@ -254,7 +282,7 @@ bl_t opal_nop_ar1_cast_htp_s_solve( const opal_nop_ar1_cast_htp_s* o, opal_conte
         opal_holor_meta_s_copy( &result->h->m, &a[0]->m );
         result->h->m.htp = !a[0]->m.htp;
     }
-    result->settled = result->h && !result->h->m.active;
+    result->can_settle = result->h && !result->h->m.active;
     return true;
 }
 
@@ -345,7 +373,7 @@ bl_t opal_nop_ar1_reshape_s_solve( const opal_nop_ar1_reshape_s* o, opal_context
         opal_holor_meta_s_copy( &result->h->m, &a[0]->m );
         result->h->m.htp = false; // htp flag is being reset
     }
-    result->settled = result->h && !result->h->m.active;
+    result->can_settle = result->h && !result->h->m.active;
     return true;
 }
 
@@ -642,7 +670,7 @@ bl_t opal_nop_ar2_bmul_s_solve( const opal_nop_ar2_bmul_s* o, opal_context* cont
         }
     }
 
-    result->settled = ( result->h && !result->h->m.active );
+    result->can_settle = ( result->h && !result->h->m.active );
     BLM_RETURNV( bl_t, true );
 }
 
@@ -665,7 +693,7 @@ bl_t opal_nop_ar2_cat_s_solve( const opal_nop_ar2_cat_s* o, opal_context* contex
         if( !bhvm_holor_s_cat_can( ha, hb ) ) return false;
         bhvm_holor_s_cat_set( ha, hb, hr );
     }
-    result->settled = ( result->h && !result->h->m.active );
+    result->can_settle = ( result->h && !result->h->m.active );
     return true;
 }
 
@@ -683,7 +711,7 @@ bl_t opal_nop_ar2_ccat_s_solve( const opal_nop_ar2_ccat_s* o, opal_context* cont
         if( !bhvm_holor_s_ccat_can( ha, hb ) ) return false;
         bhvm_holor_s_ccat_set( ha, hb, hr );
     }
-    result->settled = ( result->h && !result->h->m.active );
+    result->can_settle = ( result->h && !result->h->m.active );
     return true;
 }
 
@@ -715,7 +743,7 @@ bl_t opal_nop_ar2_order_inc_s_solve( const opal_nop_ar2_order_inc_s* o, opal_con
         bhvm_vop_arr_s_push_d( vop_arr, ( bhvm_vop* )order_inc );
         bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)vop_arr );
     }
-    result->settled = ( result->h && !result->h->m.active );
+    result->can_settle = ( result->h && !result->h->m.active );
     return true;
 }
 
@@ -772,7 +800,7 @@ bl_t opal_nop_ar2_order_dec_s_solve( const opal_nop_ar2_order_dec_s* o, opal_con
         bhvm_vop_arr_s_push_d( vop_arr, ( bhvm_vop* )order_dec_weak );
         bcore_inst_a_attach( (bcore_inst**)&result->attached, (bcore_inst*)vop_arr );
     }
-    result->settled = ( result->h && !result->h->m.active );
+    result->can_settle = ( result->h && !result->h->m.active );
     return true;
 }
 
@@ -829,7 +857,7 @@ bl_t opal_nop_ar2_cyclic_s_solve( const opal_nop_ar2_cyclic_s* o, opal_context* 
     if( a[0] )
     {
         opal_holor_s_attach( &result->h, opal_holor_s_create() );
-        result->settled     = false; // cyclic results never settle
+        result->can_settle  = false; // cyclic results never settle
         result->h->m.active = true;  // cyclic results are always active
         result->h->m.name   = o->name;
 
@@ -900,7 +928,7 @@ bl_t opal_nop_ar2_rands_s_solve( const opal_nop_ar2_rands_s* o, opal_context* co
 
         bhvm_value_s_set_random( &result->h->h.v, density, min, max, prsg );
         result->h->m.active = true;
-        result->settled     = true;
+        result->can_settle  = true;
         result->codable     = false;
 
         opal_nop_ar0_rand_s* nop_rand = opal_nop_ar0_rand_s_create();

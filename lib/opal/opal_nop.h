@@ -106,9 +106,9 @@ feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n
   *   Determined - This represents a holor computed from literals and can itself be treated as literal.
   *
   *   Settled:
-  *     The result is considered settled when the top-spanning graph of the result is not relevant for
+  *     The result is considered settlable when the top-spanning graph of the result is not relevant for
   *     the virtual machine. This is generally (not always) the case when the result is not active (e.g. a constant).
-  *     If the result is settled, the top-spanning graph is removed, which turn the node into and arity-0 node.
+  *     If the result can settle, the top-spanning graph is removed, which turn the node into and arity-0 node.
   *     The feature 'settle' is triggered, which switches the operator to an arity0 operator. By default this is a literal.
   *     Overload 'settle' when a different operator is desired.
   */
@@ -121,13 +121,13 @@ stamp :solve_result = aware bcore_inst
     /// optional message in case of failure
     st_s => msg;
 
-    /// Output is settled: Triggers operator settling and removes top-spanning graph.
-    bl_t settled = false;
+    /// Output can settle: Triggers operator settling and removes top-spanning graph.
+    bl_t can_settle = false;
 
     /// Non-codabe operators should not enter code generation.
     bl_t codable = true;
 
-    /// If settled 'reducible' allows subsequent graph to be disconnected (solution needs not retain a reference to this node)
+    /// If can_settle 'reducible' allows subsequent graph to be disconnected (solution needs not retain a reference to this node)
     bl_t reducible = true;
 
     /// preferred axon-pass vop type (0: not set)
@@ -158,7 +158,13 @@ feature 'a' void solve_node( mutable, opal_net_node_s* node, opal_net_node_adl_s
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// indicates that node is a parameter
+feature 'a' bl_t is_param(    const ) = { return false; };
+
+/// indicates that node is cyclic
 feature 'a' bl_t is_cyclic(   const ) = { return false; };
+
+/// indicates that node is adaptive
 feature 'a' bl_t is_adaptive( const ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -263,19 +269,21 @@ group :ar0 = retrievable
         func :: :solve =
         {
             opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->settled = true;
+            result->can_settle = true;
             return true;
         };
     };
 
-    /// parameter/variable (does not settle); used for cell-frame input and system accessible parameters
+    /// parameter/variable (does not settle); used for cell-frame input and other system accessible parameters
     stamp :param =
     {
         opal_holor_s -> h;
+        func :: :is_param = { return true; };
+
         func :: :solve =
         {
             opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->settled = false;
+            result->can_settle = false;
             return true;
         };
     };
@@ -290,7 +298,7 @@ group :ar0 = retrievable
         func :: :solve =
         {
             opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->settled = false;
+            result->can_settle = false;
             return true;
         };
 
@@ -335,7 +343,7 @@ group :ar0 = retrievable
         func :: :solve =
         {
             opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->settled = false;
+            result->can_settle = false;
             return true;
         };
 
@@ -377,13 +385,20 @@ group :ar1 = retrievable
         {
             opal_holor_s_attach( &result->h, opal_holor_s_create() );
             bhvm_holor_s_fork( &result->h->h, &a[0]->h );
-            result->h->m.htp = a[0]->m.htp;
-            result->h->m.active = a[0]->m.active;
-            result->settled = (result->h) && !result->h->m.active;
+            result->h->m.htp      =  a[0]->m.htp;
+            result->h->m.active   =  a[0]->m.active;
+            result->can_settle       = !a[0]->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
+    };
+
+    stamp :param =
+    {
+        func :: :priority = { return 8; };
+        func :: :solve;
+        func :: :settle;
     };
 
     stamp :f3 =
@@ -394,7 +409,7 @@ group :ar1 = retrievable
         {
             opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
             bhvm_holor_s_set_type( &result->h->h, TYPEOF_f3_t );
-            result->settled = ( result->h ) && !result->h->m.active;
+            result->can_settle = ( result->h ) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
@@ -409,7 +424,7 @@ group :ar1 = retrievable
         {
             opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
             bhvm_holor_s_set_type( &result->h->h, TYPEOF_f2_t );
-            result->settled = ( result->h ) && !result->h->m.active;
+            result->can_settle = ( result->h ) && !result->h->m.active;
             result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
@@ -582,7 +597,7 @@ group :ar1 = retrievable
     };
 
     /** marks a holor or expression to be adaptive
-     *  Operation is settled when at least a vacant holor can be computed.
+     *  Operation can settle when at least a vacant holor can be computed.
      *  If the holor is vacant, it is initialized in the virtual machine.
      */
     stamp :adaptive =
@@ -608,7 +623,7 @@ group :ar1 = retrievable
                 opal_holor_s_attach( &result->h, opal_holor_s_create() );
                 bhvm_holor_s_set_scalar_f3( &result->h->h, a[0]->h.s.size ? a[0]->h.s.data[ a[0]->h.s.size - 1 ] : 1 );
                 result->h->m.active = false;
-                result->settled = true;
+                result->can_settle = true;
             }
             result->codable = false;
             return true;
@@ -627,7 +642,7 @@ group :ar1 = retrievable
                 opal_holor_s_attach( &result->h, opal_holor_s_create() );
                 bhvm_holor_s_set_scalar_f3( &result->h->h, bhvm_shape_s_get_volume( &a[0]->h.s ) );
                 result->h->m.active = false;
-                result->settled = true;
+                result->can_settle = true;
             }
             result->codable = false;
             return true;
@@ -649,7 +664,7 @@ group :ar1 = retrievable
                 opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
                 if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
                 result->h->m.active = false;
-                result->settled = true;
+                result->can_settle = true;
             }
             result->codable = false;
             return true;
@@ -669,7 +684,7 @@ group :ar1 = retrievable
                 if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
                 bhvm_value_s_zro( &result->h->h.v );
                 result->h->m.active = false;
-                result->settled = true;
+                result->can_settle = true;
             }
             result->codable = false;
             return true;
@@ -690,7 +705,7 @@ group :ar1 = retrievable
                 bhvm_value_s_set_type( &result->h->h.v, a[0]->h.v.type );
                 result->h->m.htp = &a[0]->m.htp;
                 result->h->m.active = false;
-                result->settled = true;
+                result->can_settle = true;
             }
             result->codable = false;
             return true;

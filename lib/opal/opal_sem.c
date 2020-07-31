@@ -36,7 +36,7 @@ opal_sem_cell_s* opal_sem_cell_s_evaluate_cell_stack( opal_sem_cell_s* o, bcore_
 opal_sem_link_s* opal_sem_cell_s_evaluate_link(       opal_sem_cell_s* o,                        bcore_source* source );
 opal_sem_link_s* opal_sem_cell_s_evaluate_link_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, bcore_source* source );
 opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d(     opal_sem_cell_s* o,       opal_nop* nop );
-opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d_reset_name( opal_sem_cell_s* o, opal_nop* nop );
+opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d_invisible( opal_sem_cell_s* o, opal_nop* nop );
 void             opal_sem_cell_s_set_channels(        opal_sem_cell_s* o, sz_t excs, sz_t encs );
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -156,7 +156,7 @@ void opal_sem_context_s_setup( opal_sem_context_s* o, opal_sem_cell_s* frame )
                 default: break;
             }
             opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d( frame, nop );
-            cell->name = typeof( symbol );
+            opal_sem_cell_s_set_name_visible( cell, typeof( symbol ) );
 
             if( opal_nop_a_reserved( nop ) ) bcore_hmap_tp_s_set( &o->reserved_names, opal_sem_context_s_entypeof( o, symbol ) );
         }
@@ -178,6 +178,7 @@ void opal_sem_context_s_setup( opal_sem_context_s* o, opal_sem_cell_s* frame )
     bcore_hmap_tp_s_set( &o->reserved_names, opal_sem_context_s_entypeof( o, "cell"     ) );
     bcore_hmap_tp_s_set( &o->reserved_names, opal_sem_context_s_entypeof( o, "cyclic"   ) );
     bcore_hmap_tp_s_set( &o->reserved_names, opal_sem_context_s_entypeof( o, "adaptive" ) );
+    bcore_hmap_tp_s_set( &o->reserved_names, opal_sem_context_s_entypeof( o, "param"    ) );
 
     BLM_DOWN();
 }
@@ -371,7 +372,7 @@ static opal_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source*
 opal_sem_link_s* opal_sem_link_s_create_setup( tp_t name, opal_sem_link_s* up, opal_sem_link_s* dn, opal_sem_cell_s* cell, bl_t exit )
 {
     opal_sem_link_s* o = opal_sem_link_s_create();
-    o->name = name;
+    opal_sem_link_s_set_name_visible( o, name );
     o->up = up;
     o->dn = dn;
     o->cell = cell;
@@ -545,6 +546,7 @@ opal_sem_cell_s* opal_sem_cell_s_push_cell( opal_sem_cell_s* o )
     opal_sem_cell_s* cell = ( opal_sem_cell_s* )opal_sem_cell_s_push_sem( o, TYPEOF_opal_sem_cell_s );
     cell->parent = o;
     cell->context = bcore_fork( o->context );
+    opal_sem_cell_s_set_name_invisible( cell, opal_sem_cell_s_entypeof_fa( o, "$#<sz_t>", o->body->size - 1 ) );
     return cell;
 }
 
@@ -569,17 +571,17 @@ opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d( opal_sem_cell_s* o, opal_nop* 
     opal_sem_cell_s* cell = ( opal_sem_cell_s* )opal_sem_cell_s_push_cell( o );
     opal_sem_cell_s_set_channels( cell, 1, opal_nop_a_arity( nop ) );
     sc_t symbol = opal_nop_a_symbol( nop );
-    if( symbol ) cell->name = opal_sem_cell_s_entypeof( o, symbol );
+    if( symbol ) opal_sem_cell_s_set_name_visible( cell, opal_sem_cell_s_entypeof( o, symbol ) );
     cell->nop = nop;
 
     cell->priority = opal_nop_a_priority( nop );
-    cell->excs.data[ 0 ]->name = opal_sem_cell_s_entypeof( o, "y" );
+    opal_sem_link_s_set_name_visible( cell->excs.data[ 0 ], opal_sem_cell_s_entypeof( o, "y" ) );
 
     for( sz_t i = 0; i < cell->encs.size; i++ )
     {
         if( i < 'y' - 'a' )
         {
-            cell->encs.data[ 0 ]->name = opal_sem_cell_s_entypeof_fa( o, "#<char>", 'a' + i );
+            opal_sem_link_s_set_name_visible( cell->encs.data[ 0 ], opal_sem_cell_s_entypeof_fa( o, "#<char>", 'a' + i ) );
         }
     }
 
@@ -588,10 +590,10 @@ opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d( opal_sem_cell_s* o, opal_nop* 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d_reset_name( opal_sem_cell_s* o, opal_nop* nop )
+opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d_invisible( opal_sem_cell_s* o, opal_nop* nop )
 {
     opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d( o, nop );
-    cell->name = 0;
+    cell->visible = false;
     return cell;
 }
 
@@ -606,9 +608,9 @@ opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d_set_source( opal_sem_cell_s* o,
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d_reset_name_set_source( opal_sem_cell_s* o, opal_nop* nop, bcore_source* source )
+opal_sem_cell_s* opal_sem_cell_s_push_cell_nop_d_invisible_set_source( opal_sem_cell_s* o, opal_nop* nop, bcore_source* source )
 {
-    opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_reset_name( o, nop );
+    opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_invisible( o, nop );
     bcore_source_point_s_set( &cell->source_point, source );
     return cell;
 }
@@ -621,7 +623,7 @@ opal_sem_cell_s* opal_sem_cell_s_push_cell_const_scalar( opal_sem_cell_s* o, tp_
     literal->h = opal_holor_s_create();
     bhvm_holor_s_set_type_scalar( &literal->h->h, type, v );
     literal->h->m.active = false;
-    return opal_sem_cell_s_push_cell_nop_d_reset_name( o, ( opal_nop* )literal );
+    return opal_sem_cell_s_push_cell_nop_d_invisible( o, ( opal_nop* )literal );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -724,7 +726,7 @@ void opal_sem_cell_s_parse( opal_sem_cell_s* o, bcore_source* source )
     {
         tp_t tp_cell_name = opal_sem_cell_s_parse_var_name( o, source );
         if( frame ) opal_sem_cell_s_assert_identifier_not_yet_defined( frame, tp_cell_name, source );
-        o->name = tp_cell_name;
+        opal_sem_cell_s_set_name_visible( o, tp_cell_name );
     }
 
     bcore_source_point_s_set( &o->source_point, source );
@@ -826,16 +828,34 @@ void opal_sem_cell_s_parse_body( opal_sem_cell_s* o, bcore_source* source )
         {
             opal_sem_cell_s_parse_verify_signature( o, source );
         }
+        else if( bcore_source_a_parse_bl_fa( source, " #?'param'" ) ) // defining a link to a parameter operator
+        {
+            tp_t tp_name = opal_sem_cell_s_parse_var_name( o, source );
+            opal_sem_link_s* link = opal_sem_cell_s_push_link( o );
+            opal_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
+            opal_sem_link_s_set_name_visible( link, tp_name );
+
+            opal_nop_ar1_param_s* nop_param = opal_nop_ar1_param_s_create();
+
+            opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_invisible_set_source( o, ( opal_nop* )nop_param, source );
+            opal_sem_cell_s_set_name_invisible( cell, tp_name );
+
+            bcore_source_a_parse_fa( source, " =" );
+            cell->encs.data[ 0 ]->up = opal_sem_cell_s_evaluate_link( o, source );
+            link->up = cell->excs.data[ 0 ];
+        }
         else if( bcore_source_a_parse_bl_fa( source, " #?'adaptive'" ) ) // defining a link to an adaptive operator
         {
             tp_t tp_name = opal_sem_cell_s_parse_var_name( o, source );
             opal_sem_link_s* link = opal_sem_cell_s_push_link( o );
             opal_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
-            link->name = tp_name;
+            opal_sem_link_s_set_name_visible( link, tp_name );
+
             opal_nop_ar1_adaptive_s* nop_adaptive = opal_nop_ar1_adaptive_s_create();
             nop_adaptive->name = tp_name;
 
-            opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( opal_nop* )nop_adaptive, source );
+            opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_invisible_set_source( o, ( opal_nop* )nop_adaptive, source );
+            opal_sem_cell_s_set_name_invisible( cell, tp_name );
 
             bcore_source_a_parse_fa( source, " =" );
             cell->encs.data[ 0 ]->up = opal_sem_cell_s_evaluate_link( o, source );
@@ -846,11 +866,12 @@ void opal_sem_cell_s_parse_body( opal_sem_cell_s* o, bcore_source* source )
             tp_t tp_name = opal_sem_cell_s_parse_var_name( o, source );
             opal_sem_link_s* link = opal_sem_cell_s_push_link( o );
             opal_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
-            link->name = tp_name;
+            opal_sem_link_s_set_name_visible( link, tp_name );
+
             opal_nop_ar2_cyclic_s* nop_cyclic = opal_nop_ar2_cyclic_s_create();
             nop_cyclic->name = tp_name;
-            opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( opal_nop* )nop_cyclic, source );
-
+            opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_invisible_set_source( o, ( opal_nop* )nop_cyclic, source );
+            opal_sem_cell_s_set_name_invisible( cell, tp_name );
             bcore_source_a_parse_fa( source, " =" );
             cell->encs.data[ 0 ]->up = opal_sem_cell_s_evaluate_link( o, source );
             link->up = cell->excs.data[ 0 ];
@@ -892,7 +913,7 @@ void opal_sem_cell_s_parse_body( opal_sem_cell_s* o, bcore_source* source )
                     {
                         bcore_source_a_parse_fa( source, " =" );
                         cell->encs.data[ 1 ]->up = opal_sem_cell_s_evaluate_link( o, source );
-                        link->visible = false;
+                        link->protected = true;
                     }
                     else
                     {
@@ -908,7 +929,7 @@ void opal_sem_cell_s_parse_body( opal_sem_cell_s* o, bcore_source* source )
             {
                 opal_sem_link_s* link = opal_sem_cell_s_push_link( o );
                 opal_sem_cell_s_assert_identifier_not_yet_defined( o, tp_name, source );
-                link->name = tp_name;
+                opal_sem_link_s_set_name_visible( link, tp_name );
                 bcore_source_a_parse_fa( source, " =" );
                 link->up = opal_sem_cell_s_evaluate_link( o, source );
             }
@@ -996,58 +1017,6 @@ void opal_sem_cell_s_evaluate_set_encs( opal_sem_cell_s* o, opal_sem_cell_s* par
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/** In body of o: creates new cell wrapping the catenated cells: cell = { c1 <: c2 }
- *  Deprecated approach. Prefer opal_sem_cell_s_recat_cell below.
- */
-opal_sem_cell_s* opal_sem_cell_s_cat_cell( opal_sem_cell_s* o, opal_sem_cell_s* c1, opal_sem_cell_s* c2, bcore_source* source )
-{
-    opal_sem_cell_s* cell = opal_sem_cell_s_push_cell( o );
-    bcore_source_point_s_set( &cell->source_point, source );
-
-    c1 = opal_sem_cell_s_push_wrap_cell_soft( cell, c1 );
-    c2 = opal_sem_cell_s_push_wrap_cell_soft( cell, c2 );
-
-    // only free input channels get wrapped (code below must change in case wrapping scheme changes)
-    assert( c1->encs.size == opal_sem_cell_s_get_arity( c1 ) );
-    assert( c2->encs.size == opal_sem_cell_s_get_arity( c2 ) );
-
-    /// free input channels of n1 must match output channels of n2
-    if( c1->encs.size != c2->excs.size )
-    {
-        bcore_source_point_s_parse_err_fa
-        (
-            &cell->source_point,
-            "Catenating cells: Number of left cell's open entry channels (#<sz_t>) differs from right cells's exit channels (#<sz_t>).",
-            c1->encs.size,
-            c2->excs.size
-        );
-    }
-
-    /// channels of wrapping cell
-    opal_sem_cell_s_set_channels( cell, c1->excs.size, c2->encs.size );
-
-    for( sz_t i = 0; i < c2->encs.size; i++ )
-    {
-        c2->encs.data[ i ]->up = cell->encs.data[ i ];
-        cell->encs.data[ i ]->name = c2->encs.data[ i ]->name;
-    }
-
-    for( sz_t i = 0; i < c1->encs.size; i++ )
-    {
-        c1->encs.data[ i ]->up = c2->excs.data[ i ];
-    }
-
-    for( sz_t i = 0; i < c1->excs.size; i++ )
-    {
-        cell->excs.data[ i ]->up   = c1->excs.data[ i ];
-        cell->excs.data[ i ]->name = c1->excs.data[ i ]->name;
-    }
-
-    return cell;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 /** In body of o: creates new cell rewrapping the catenated cells: cell = { c1 <: c2 }
  *  This function rewraps c1, c2 making sure that all defined uplinks are moved to the outermost membrane.
  *  The catenated cell is then wrapped again to leave only undefined input links exposed.
@@ -1060,6 +1029,9 @@ opal_sem_cell_s* opal_sem_cell_s_recat_cell( opal_sem_cell_s* o, opal_sem_cell_s
 
     c1 = opal_sem_cell_s_push_rewrap_cell_soft( cell, c1 );
     c2 = opal_sem_cell_s_push_rewrap_cell_soft( cell, c2 );
+
+    opal_sem_cell_s_set_name_invisible( c1, opal_sem_cell_s_entypeof( o, "$CAT1" ) );
+    opal_sem_cell_s_set_name_invisible( c2, opal_sem_cell_s_entypeof( o, "$CAT2" ) );
 
     sz_t arity_c1 = opal_sem_cell_s_get_arity( c1 );
 
@@ -1081,7 +1053,7 @@ opal_sem_cell_s* opal_sem_cell_s_recat_cell( opal_sem_cell_s* o, opal_sem_cell_s
     sz_t k = 0;
     for( sz_t i = 0; i < c2->encs.size; i++ )
     {
-        cell->encs.data[ k ]->name =   c2->encs.data[ i ]->name;
+        opal_sem_link_s_set_name_visible( cell->encs.data[ k ], c2->encs.data[ i ]->name );
         cell->encs.data[ k ]->up   =   c2->encs.data[ i ]->up;
           c2->encs.data[ i ]->up   = cell->encs.data[ k ];
         k++;
@@ -1093,7 +1065,7 @@ opal_sem_cell_s* opal_sem_cell_s_recat_cell( opal_sem_cell_s* o, opal_sem_cell_s
         if( c1->encs.data[ i ]->up )
         {
             assert( k < cell->encs.size );
-            cell->encs.data[ k ]->name =   c1->encs.data[ i ]->name;
+            opal_sem_link_s_set_name_visible( cell->encs.data[ k ], c1->encs.data[ i ]->name );
             cell->encs.data[ k ]->up   =   c1->encs.data[ i ]->up;
               c1->encs.data[ i ]->up   = cell->encs.data[ k ];
             k++;
@@ -1111,12 +1083,14 @@ opal_sem_cell_s* opal_sem_cell_s_recat_cell( opal_sem_cell_s* o, opal_sem_cell_s
 
     for( sz_t i = 0; i < c1->excs.size; i++ )
     {
-        cell->excs.data[ i ]->up   = c1->excs.data[ i ];
-        cell->excs.data[ i ]->name = c1->excs.data[ i ]->name;
+        cell->excs.data[ i ]->up = c1->excs.data[ i ];
+        opal_sem_link_s_set_name_visible( cell->excs.data[ i ], c1->excs.data[ i ]->name );
     }
 
     /// the last soft-wrap is convenience (consider changing dependent code using arity rather then encs.size to determine open links)
-    return opal_sem_cell_s_push_wrap_cell_soft( o, opal_sem_cell_s_push_wrap_cell_hard( o, cell ) );
+    opal_sem_cell_s* cat_out = opal_sem_cell_s_push_wrap_cell_soft( o, opal_sem_cell_s_push_wrap_cell_hard( o, cell ) );
+
+    return cat_out;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1196,7 +1170,6 @@ void opal_sem_cell_s_evaluate_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, 
                 {
                     case TYPEOF_opal_sem_cell_s:
                     {
-                        if( !opal_sem_a_is_visible( item ) ) bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' is not visible at this point.", name->sc );
                         opal_sem_cell_s* cell = item;
                         stack_push( stack, cell );
                     }
@@ -1204,9 +1177,9 @@ void opal_sem_cell_s_evaluate_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, 
 
                     case TYPEOF_opal_sem_link_s:
                     {
-                        if( !opal_sem_a_is_visible( item ) )
+                        opal_sem_link_s* link = item;
+                        if( link->protected )
                         {
-                            opal_sem_link_s* link = item;
                             if( link->up && link->up->cell )
                             {
                                 opal_sem_cell_s* cell = link->up->cell;
@@ -1217,7 +1190,7 @@ void opal_sem_cell_s_evaluate_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, 
                             }
                             else
                             {
-                                bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' is not visible at this point.", name->sc );
+                                bcore_source_a_parse_err_fa( source, "Identifier '#<sc_t>' is protected (unusable) at this point.", name->sc );
                             }
                         }
                         stack_push( stack, item );
@@ -1290,19 +1263,18 @@ void opal_sem_cell_s_evaluate_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // binary operator from predefined symbols
         else if( ( op2_symbol = opal_sem_cell_s_parse_op2_symbol( o, source ) ) )
         {
-            if
+            if // if( binary op not applicable):
             (
                  stack->size == 0 ||
                ( stack->size >= 1 && stack_of_value( stack, 1, flag_una_op ) ) ||
                ( stack->size >= 3 && stack_of_value( stack, 3, flag_bin_op ) )
             )
             {
-                // binary op not applicable, try unary
                 opal_sem_cell_s* cell = opal_sem_cell_s_get_cell_by_name( o, op2_symbol );
                 opal_nop* nop_unary = opal_nop_a_create_op_of_arn( cell->nop, 1 );
                 if( nop_unary )
                 {
-                    opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, nop_unary, source );
+                    opal_sem_cell_s* cell = opal_sem_cell_s_push_cell_nop_d_invisible_set_source( o, nop_unary, source );
                     stack_push( stack, cell );
                     stack_push( stack, flag_una_op ); // flag after cell to avoid incorrect stack evaluation
                 }
@@ -1328,11 +1300,13 @@ void opal_sem_cell_s_evaluate_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, 
                     }
                 }
             }
-            else
+            else // else of: if( binary op not applicable):
             {
                 opal_sem_cell_s* cell = opal_sem_cell_s_get_cell_by_name( o, op2_symbol );
                 if( !cell ) bcore_source_a_parse_err_fa( source, "Syntax error." );
+
                 cell = opal_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
+
                 stack_push( stack, flag_bin_op );
                 stack_push( stack, cell );
             }
@@ -1345,7 +1319,9 @@ void opal_sem_cell_s_evaluate_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, 
             if( stack->size == 0 ) bcore_source_a_parse_err_fa( source, "Operator '#<sc_t>': Left operand missing.", name->sc );
             opal_sem_cell_s* cell = opal_sem_cell_s_get_cell_by_name( o, typeof( name->sc ) );
             if( !cell ) bcore_source_a_parse_err_fa( source, "Cell '#<sc_t>' not found.", name->sc );
+
             cell = opal_sem_cell_s_push_wrap_cell_set_source( o, cell, source );
+
             stack_push( stack, flag_bin_op );
             stack_push( stack, cell );
         }
@@ -1390,7 +1366,7 @@ void opal_sem_cell_s_evaluate_stack( opal_sem_cell_s* o, bcore_arr_vd_s* stack, 
         // postfix htp
         else if( bcore_source_a_parse_bl_fa( source, " #?'~'" ) )
         {
-            opal_sem_cell_s* htp_cell = opal_sem_cell_s_push_cell_nop_d_reset_name_set_source( o, ( opal_nop* )opal_nop_ar1_cast_htp_s_create(), source );
+            opal_sem_cell_s* htp_cell = opal_sem_cell_s_push_cell_nop_d_invisible_set_source( o, ( opal_nop* )opal_nop_ar1_cast_htp_s_create(), source );
             if( stack_of_type( stack, 1, TYPEOF_opal_sem_link_s ) )
             {
                 htp_cell->encs.data[ 0 ]->up = stack_pop_of_type( stack, TYPEOF_opal_sem_link_s, source );
@@ -1687,6 +1663,9 @@ er_t opal_sem_builder_s_build_from_source( opal_sem_builder_s* o, opal_sem_cell_
     opal_sem_context_s_setup_cell( o->context, cell );
     opal_sem_context_s_setup( o->context, o->cell_context );
 
+    opal_sem_cell_s_set_name_invisible( o->cell_context, opal_sem_context_s_entypeof( o->context, "$CX" ) );
+    opal_sem_cell_s_set_name_invisible( o->cell_frame,   opal_sem_context_s_entypeof( o->context, "$CF" ) );
+
     o->cell_frame->parent = o->cell_context;
        cell      ->parent = o->cell_frame;
 
@@ -1697,6 +1676,153 @@ er_t opal_sem_builder_s_build_from_source( opal_sem_builder_s* o, opal_sem_cell_
     opal_sem_cell_s_parse( cell, source );
 
     BLM_RETURNV( er_t, 0 );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+/// ctr
+
+/** Node process for a semantic cell.
+ *
+ *  Entering a cell:
+ *    Ascend the tree if matching or add a new node to the tree.
+ *    node_out is set to the node referencing the cell
+ *
+ *  Exiting a cell:
+ *     Descend the tree until a matching node is found.
+ *     node_out is set to the parent of the node referencing the cell.
+ *     Returns 1 in case no match is found.
+ *
+ *  Enter/Exit functions return 0 in case of success. !=0 is considered an error
+ */
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+er_t opal_sem_tree_node_s_enter
+(
+    opal_sem_tree_node_s* o,
+    opal_sem_cell_s* cell,
+    opal_sem_tree_node_s** node_out
+)
+{
+    opal_sem_tree_node_s* node = NULL;
+    for( sz_t i = 0; i < o->size; i++ )
+    {
+        if( o->data[ i ]->cell == cell )
+        {
+            node = o->data[ i ];
+        }
+    }
+    if( !node )
+    {
+        node = opal_sem_tree_node_s_push_d( o, opal_sem_tree_node_s_create() );
+        node->cell = cell;
+        node->parent = o;
+    }
+    *node_out = node;
+    return 0;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+er_t opal_sem_tree_node_s_exit
+(
+    opal_sem_tree_node_s* o,
+    opal_sem_cell_s* cell,
+    bl_t test_for_wrapper,
+    opal_sem_tree_node_s** node_out
+)
+{
+    opal_sem_tree_node_s* node = NULL;
+    node = o;
+
+    /** Descend tree until node->cell == cell.
+      * This part covers specific (rare) situations in which a link exits a cell without passing through its membrane
+      * It is unclear if this handling is sensitive. Probably all relevant cases are covered using test_for_wrapper
+      * scheme.
+      */
+    while( node && node->cell != cell )
+    {
+        //bcore_msg_fa( "descending...\n" );
+        node = node->parent;
+    }
+
+    if( node && node->cell == cell )
+    {
+        node = node->parent;
+
+        if( test_for_wrapper && node && opal_sem_cell_s_is_wrapper( node->cell ) )
+        {
+            while( node && opal_sem_cell_s_is_wrapper( node->cell ) ) node = node->parent;
+        }
+
+        *node_out = node;
+        return 0;
+    }
+    else
+    {
+        return TYPEOF_general_error; // exiting from untraced cell
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+er_t opal_sem_tree_s_enter
+(
+    opal_sem_tree_s* o,
+    opal_sem_cell_s* cell,
+    opal_sem_tree_node_s* node_in,
+    opal_sem_tree_node_s** node_out
+)
+{
+    opal_sem_tree_node_s* node = NULL;
+    if( !o->root )
+    {
+        o->root = opal_sem_tree_node_s_create();
+        o->root->id = o->id_base++;
+        o->root->cell = cell;
+        node = o->root;
+        *node_out = node;
+        return 0;
+    }
+    else if( !node_in ) // we just entered the tree frame
+    {
+        *node_out = o->root;
+        return 0;
+    }
+    else
+    {
+        er_t ret = opal_sem_tree_node_s_enter( node_in, cell, &node );
+        if( ret ) return ret;
+        if( node->id < 0 ) node->id = o->id_base++;
+        *node_out = node;
+        return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+er_t opal_sem_tree_s_exit
+(
+    opal_sem_tree_s* o,
+    opal_sem_cell_s* cell,
+    bl_t test_for_wrapper,
+    opal_sem_tree_node_s* node_in,
+    opal_sem_tree_node_s** node_out
+)
+{
+    return opal_sem_tree_node_s_exit( node_in, cell, test_for_wrapper, node_out );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+bcore_source_point_s* opal_sem_tree_node_s_get_nearest_source_point( opal_sem_tree_node_s* o )
+{
+    if( !o ) return NULL;
+    if( !o->cell ) return NULL;
+    if( o->cell->source_point.source ) return &o->cell->source_point;
+    return opal_sem_tree_node_s_get_nearest_source_point( o->parent );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

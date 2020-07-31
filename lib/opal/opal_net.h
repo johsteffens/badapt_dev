@@ -27,34 +27,6 @@
 
 /**********************************************************************************************************************/
 
-/// Tree group
-#ifdef TYPEOF_opal_ctr
-
-PLANT_GROUP( opal_ctr, bcore_inst )
-#ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-stamp :node = aware bcore_array
-{
-    sz_t id = -1;
-    private opal_sem_cell_s -> cell;
-    private :node_s -> parent;
-    :node_s => [];
-};
-
-stamp :tree = aware :
-{
-    sz_t id_base = 0; // (incremented when adding nodes)
-    :node_s => root;
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#endif // PLANT_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#endif // TYPEOF_opal_ctr
-
-/**********************************************************************************************************************/
-
 #ifdef TYPEOF_opal_net
 
 PLANT_GROUP( opal_net, bcore_inst )
@@ -84,6 +56,8 @@ stamp :node = aware :
 
     tp_t name;
 
+    opal_scid_s => scid;
+
     /** Primary flag used for various tracing routines.
       * It is typically used to ensure a node is visited only once.
       * Normalized state: false
@@ -96,7 +70,7 @@ stamp :node = aware :
       */
     bl_t probe = false;
 
-    /** Node ID.
+    /** Low Level Node ID.
      *  When the network cell is normalized, id is identical with the cell->body index.
      */
     sz_t id;
