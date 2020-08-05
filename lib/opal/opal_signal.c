@@ -14,18 +14,7 @@
  */
 
 #include "bcore_std.h"
-#include "opal_planted.h"
-
-// #include "opal_holor.h"
-// #include "opal_nop.h"
-// #include "opal_eval_nop.h"
-// #include "opal_sem.h"
-// #include "opal_net.h"
-// #include "opal_frame.h"
-// #include "opal_eval_frame.h"
-// #include "opal_adaptive.h"
-// #include "opal_adaptor.h"
+#include "opal_xoi_out.h"
 
 BETH_PLANT_SIGNAL_OPEN_PLANT( opal )
-//BETH_PLANT_SIGNAL_USE_SOURCE( opal_holor );
 BETH_PLANT_SIGNAL_CLOSE_PLANT( opal )

@@ -28,13 +28,13 @@
 #include "bcore_std.h"
 #include "badapt_activator.h"
 #include "badapt_adaptive.h"
-#include "badapt_dev_planted.h"
+#include "badapt_dev_xoi_out.h"
 #include "badapt_ern.h"
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_badapt_dev_ern
-PLANT_GROUP( badapt_dev_ern, bcore_inst )
+XOI_DEFINE_GROUP( badapt_dev_ern, bcore_inst )
 #ifdef PLANT_SECTION
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

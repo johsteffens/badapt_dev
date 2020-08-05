@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
- *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-31T15:51:49Z
+ *  Compiling Agent : xoico_compiler (C) 2020 J.B.Steffens
+ *  Last File Update: 2020-08-05T14:09:33Z
  *
  *  Copyright and License of this File:
  *
@@ -20,15 +20,15 @@
  *
  */
 
-#ifndef LION_PLANTED_H
-#define LION_PLANTED_H
+#ifndef LION_XOI_OUT_H
+#define LION_XOI_OUT_H
 
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_lion_planted 1293826544
+#define HKEYOF_lion_xoi_out 1915870405
 
-#define TYPEOF_lion_planted 3067971884
+#define TYPEOF_lion_xoi_out 705909595
 
 /**********************************************************************************************************************/
 // source: lion_root.h
@@ -1634,7 +1634,7 @@
 
 /**********************************************************************************************************************/
 
-vd_t lion_planted_signal_handler( const bcore_signal_s* o );
+vd_t lion_xoi_out_signal_handler( const bcore_signal_s* o );
 
-#endif // LION_PLANTED_H
-// BETH_PLANT_SIGNATURE  134387020
+#endif // LION_XOI_OUT_H
+// BETH_PLANT_SIGNATURE 2887851270

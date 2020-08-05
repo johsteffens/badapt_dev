@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
- *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-31T15:51:49Z
+ *  Compiling Agent : xoico_compiler (C) 2020 J.B.Steffens
+ *  Last File Update: 2020-08-05T14:09:33Z
  *
  *  Copyright and License of this File:
  *
@@ -20,7 +20,7 @@
  *
  */
 
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 #include "bcore_spect.h"
 #include "bcore_spect_inst.h"
 #include "bcore_sr.h"
@@ -1917,9 +1917,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_builder_s )
 
 vd_t bhpt_general_signal_handler( const bcore_signal_s* o );
 
-vd_t lion_planted_signal_handler( const bcore_signal_s* o )
+vd_t lion_xoi_out_signal_handler( const bcore_signal_s* o )
 {
-    switch( bcore_signal_s_handle_type( o, typeof( "lion_planted" ) ) )
+    switch( bcore_signal_s_handle_type( o, typeof( "lion_xoi_out" ) ) )
     {
         case TYPEOF_init1:
         {
@@ -2691,4 +2691,4 @@ vd_t lion_planted_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE  498517541
+// BETH_PLANT_SIGNATURE 1529941660

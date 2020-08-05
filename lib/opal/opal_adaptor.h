@@ -26,11 +26,11 @@
 #include "bhpt_sketch.h"
 #include "opal_net.h"
 #include "opal_frame.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 
 /**********************************************************************************************************************/
 
-BETH_PLANT_DEFINE_GROUP( opal_adaptor, bcore_inst )
+XOI_DEFINE_GROUP( opal_adaptor, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

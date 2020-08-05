@@ -23,13 +23,13 @@
 #define OPAL_CONTEXT_H
 
 #include "bcore_std.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 #define OPAL_CONTEXT_ERR_NOT_IMPLEMENTED() ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) );
 
-BETH_PLANT_DEFINE_GROUP( opal_context, bcore_inst )
+XOI_DEFINE_GROUP( opal_context, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

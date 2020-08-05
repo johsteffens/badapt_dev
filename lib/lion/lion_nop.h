@@ -25,7 +25,7 @@
 #include "bmath_std.h"
 #include "bhvm_mcode.h"
 #include "lion_root.h"
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 
 /**********************************************************************************************************************/
 
@@ -38,7 +38,7 @@ BCORE_FORWARD_OBJECT( lion_net_node_adl_s );
 /// returns global context
 lion_nop_context_s* lion_nop_get_context( void );
 
-PLANT_GROUP( lion_nop, bcore_inst )
+XOI_DEFINE_GROUP( lion_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// tracks...

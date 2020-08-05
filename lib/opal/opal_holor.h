@@ -24,11 +24,11 @@
 
 #include "bhvm_holor.h"
 #include "bhvm_mcode.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 
 /**********************************************************************************************************************/
 
-BETH_PLANT_DEFINE_GROUP( opal_holor, bcore_inst )
+XOI_DEFINE_GROUP( opal_holor, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void clear( mutable );

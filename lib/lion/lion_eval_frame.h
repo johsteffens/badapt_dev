@@ -24,13 +24,13 @@
 
 #include "lion_net.h"
 #include "lion_frame.h"
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_lion_eval_frame
 
-PLANT_GROUP( lion_eval_frame, bcore_inst )
+XOI_DEFINE_GROUP( lion_eval_frame, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( mutable );

@@ -27,13 +27,13 @@
 #include "bhvm_mcode.h"
 #include "lion_net.h"
 #include "lion_frame.h"
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_lion_adaptive
 
-PLANT_GROUP( lion_adaptive, bcore_inst )
+XOI_DEFINE_GROUP( lion_adaptive, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp : = aware badapt_adaptive

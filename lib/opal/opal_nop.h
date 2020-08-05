@@ -26,14 +26,14 @@
 #include "bhvm_mcode.h"
 #include "opal_holor.h"
 #include "opal_context.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 BCORE_FORWARD_OBJECT( opal_net_node_s );
 BCORE_FORWARD_OBJECT( opal_net_node_adl_s );
 
-BETH_PLANT_DEFINE_GROUP( opal_nop, bcore_inst )
+XOI_DEFINE_GROUP( opal_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

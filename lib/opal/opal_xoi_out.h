@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
- *  Compiling Agent : bcore_plant_compiler (C) 2019, 2020 J.B.Steffens
- *  Last File Update: 2020-07-31T15:51:49Z
+ *  Compiling Agent : xoico_compiler (C) 2020 J.B.Steffens
+ *  Last File Update: 2020-08-05T14:13:26Z
  *
  *  Copyright and License of this File:
  *
@@ -20,15 +20,15 @@
  *
  */
 
-#ifndef OPAL_PLANTED_H
-#define OPAL_PLANTED_H
+#ifndef OPAL_XOI_OUT_H
+#define OPAL_XOI_OUT_H
 
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_opal_planted 2662219966
+#define HKEYOF_opal_xoi_out 1504821437
 
-#define TYPEOF_opal_planted 1626965476
+#define TYPEOF_opal_xoi_out 3684175843
 
 /**********************************************************************************************************************/
 // source: opal_context.h
@@ -1728,7 +1728,7 @@
 
 /**********************************************************************************************************************/
 
-vd_t opal_planted_signal_handler( const bcore_signal_s* o );
+vd_t opal_xoi_out_signal_handler( const bcore_signal_s* o );
 
-#endif // OPAL_PLANTED_H
-// BETH_PLANT_SIGNATURE 3431007675
+#endif // OPAL_XOI_OUT_H
+// BETH_PLANT_SIGNATURE 1544715997

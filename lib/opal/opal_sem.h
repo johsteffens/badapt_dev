@@ -80,7 +80,7 @@
 
 #include "bmath_std.h"
 #include "opal_nop.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 
 /**********************************************************************************************************************/
 
@@ -89,7 +89,7 @@ BCORE_FORWARD_OBJECT( opal_sem_context_s );
 /// returns global context
 opal_sem_context_s* opal_sem_get_context( void );
 
-BETH_PLANT_DEFINE_GROUP( opal_sem, bcore_inst )
+XOI_DEFINE_GROUP( opal_sem, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

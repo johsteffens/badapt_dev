@@ -80,7 +80,7 @@
 
 #include "bmath_std.h"
 #include "lion_nop.h"
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 
 /**********************************************************************************************************************/
 
@@ -91,7 +91,7 @@ BCORE_FORWARD_OBJECT( lion_sem_context_s );
 /// returns global context
 lion_sem_context_s* lion_sem_get_context( void );
 
-PLANT_GROUP( lion_sem, bcore_inst )
+XOI_DEFINE_GROUP( lion_sem, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -24,13 +24,13 @@
 
 #include "bhvm_holor.h"
 #include "bhvm_mcode.h"
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_lion
 
-PLANT_GROUP( lion, bcore_inst )
+XOI_DEFINE_GROUP( lion, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void clear( mutable );

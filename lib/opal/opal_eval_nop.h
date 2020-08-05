@@ -24,12 +24,12 @@
 
 #include "bmath_std.h"
 #include "bhvm_mcode.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 #include "opal_nop.h"
 
 /**********************************************************************************************************************/
 
-BETH_PLANT_DEFINE_GROUP( opal_eval_nop, bcore_inst )
+XOI_DEFINE_GROUP( opal_eval_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( const );

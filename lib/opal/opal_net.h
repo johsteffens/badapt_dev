@@ -23,13 +23,13 @@
 #define OPAL_NET_H
 
 #include "opal_sem.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_opal_net
 
-PLANT_GROUP( opal_net, bcore_inst )
+XOI_DEFINE_GROUP( opal_net, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :link = aware :

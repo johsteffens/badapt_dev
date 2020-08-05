@@ -24,14 +24,14 @@
 
 #include "bmath_std.h"
 #include "bhvm_mcode.h"
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 #include "lion_nop.h"
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_lion_eval_nop
 
-PLANT_GROUP( lion_eval_nop, bcore_inst )
+XOI_DEFINE_GROUP( lion_eval_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( const );

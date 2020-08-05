@@ -47,14 +47,14 @@
 #define LION_NET_H
 
 #include "lion_sem.h"
-#include "lion_planted.h"
+#include "lion_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 /// Tree group
 #ifdef TYPEOF_lion_ctr
 
-PLANT_GROUP( lion_ctr, bcore_inst )
+XOI_DEFINE_GROUP( lion_ctr, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :node = aware bcore_array
@@ -81,7 +81,7 @@ stamp :tree = aware :
 
 #ifdef TYPEOF_lion_net
 
-PLANT_GROUP( lion_net, bcore_inst )
+XOI_DEFINE_GROUP( lion_net, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :link = aware :

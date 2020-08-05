@@ -19,11 +19,11 @@
 #include "bmath_std.h"
 #include "badapt_loss.h"
 #include "badapt_training.h"
-#include "badapt_dev_planted.h"
+#include "badapt_dev_xoi_out.h"
 
 /**********************************************************************************************************************/
 
-PLANT_GROUP( badapt_dev_problem_objects, bcore_inst )
+XOI_DEFINE_GROUP( badapt_dev_problem_objects, bcore_inst )
 #ifdef PLANT_SECTION
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

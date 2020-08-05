@@ -24,13 +24,13 @@
 
 #include "opal_net.h"
 #include "opal_frame.h"
-#include "opal_planted.h"
+#include "opal_xoi_out.h"
 
 /**********************************************************************************************************************/
 
 #ifdef TYPEOF_opal_eval_frame
 
-BETH_PLANT_DEFINE_GROUP( opal_eval_frame, bcore_inst )
+XOI_DEFINE_GROUP( opal_eval_frame, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( mutable );
