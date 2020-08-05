@@ -38,7 +38,7 @@ BCORE_FORWARD_OBJECT( lion_net_node_adl_s );
 /// returns global context
 lion_nop_context_s* lion_nop_get_context( void );
 
-XOI_DEFINE_GROUP( lion_nop, bcore_inst )
+XOILA_DEFINE_GROUP( lion_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// tracks...

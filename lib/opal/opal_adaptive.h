@@ -31,7 +31,7 @@
 
 /**********************************************************************************************************************/
 
-XOI_DEFINE_GROUP( opal_adaptive, bcore_inst )
+XOILA_DEFINE_GROUP( opal_adaptive, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp : = aware bhpt_adaptive

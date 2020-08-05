@@ -33,7 +33,7 @@
 BCORE_FORWARD_OBJECT( opal_net_node_s );
 BCORE_FORWARD_OBJECT( opal_net_node_adl_s );
 
-XOI_DEFINE_GROUP( opal_nop, bcore_inst )
+XOILA_DEFINE_GROUP( opal_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -30,7 +30,7 @@
 
 #ifdef TYPEOF_lion
 
-XOI_DEFINE_GROUP( lion, bcore_inst )
+XOILA_DEFINE_GROUP( lion, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void clear( mutable );

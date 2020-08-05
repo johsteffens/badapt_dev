@@ -29,7 +29,7 @@
 
 /**********************************************************************************************************************/
 
-XOI_DEFINE_GROUP( opal_eval_nop, bcore_inst )
+XOILA_DEFINE_GROUP( opal_eval_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( const );

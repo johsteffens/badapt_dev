@@ -29,7 +29,7 @@
 
 #ifdef TYPEOF_opal_net
 
-XOI_DEFINE_GROUP( opal_net, bcore_inst )
+XOILA_DEFINE_GROUP( opal_net, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :link = aware :

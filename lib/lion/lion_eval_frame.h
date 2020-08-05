@@ -30,7 +30,7 @@
 
 #ifdef TYPEOF_lion_eval_frame
 
-XOI_DEFINE_GROUP( lion_eval_frame, bcore_inst )
+XOILA_DEFINE_GROUP( lion_eval_frame, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( mutable );

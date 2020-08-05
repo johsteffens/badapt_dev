@@ -91,7 +91,7 @@ BCORE_FORWARD_OBJECT( lion_sem_context_s );
 /// returns global context
 lion_sem_context_s* lion_sem_get_context( void );
 
-XOI_DEFINE_GROUP( lion_sem, bcore_inst )
+XOILA_DEFINE_GROUP( lion_sem, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

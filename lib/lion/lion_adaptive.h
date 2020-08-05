@@ -33,7 +33,7 @@
 
 #ifdef TYPEOF_lion_adaptive
 
-XOI_DEFINE_GROUP( lion_adaptive, bcore_inst )
+XOILA_DEFINE_GROUP( lion_adaptive, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp : = aware badapt_adaptive

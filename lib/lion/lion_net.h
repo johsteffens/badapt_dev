@@ -54,7 +54,7 @@
 /// Tree group
 #ifdef TYPEOF_lion_ctr
 
-XOI_DEFINE_GROUP( lion_ctr, bcore_inst )
+XOILA_DEFINE_GROUP( lion_ctr, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :node = aware bcore_array
@@ -81,7 +81,7 @@ stamp :tree = aware :
 
 #ifdef TYPEOF_lion_net
 
-XOI_DEFINE_GROUP( lion_net, bcore_inst )
+XOILA_DEFINE_GROUP( lion_net, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :link = aware :

@@ -31,7 +31,7 @@
 
 #ifdef TYPEOF_lion_eval_nop
 
-XOI_DEFINE_GROUP( lion_eval_nop, bcore_inst )
+XOILA_DEFINE_GROUP( lion_eval_nop, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void resolve( const );

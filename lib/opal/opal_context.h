@@ -29,7 +29,7 @@
 
 #define OPAL_CONTEXT_ERR_NOT_IMPLEMENTED() ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) );
 
-XOI_DEFINE_GROUP( opal_context, bcore_inst )
+XOILA_DEFINE_GROUP( opal_context, bcore_inst )
 #ifdef PLANT_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
