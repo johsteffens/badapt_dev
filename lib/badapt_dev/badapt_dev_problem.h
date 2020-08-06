@@ -19,7 +19,7 @@
 #include "bmath_std.h"
 #include "badapt_loss.h"
 #include "badapt_training.h"
-#include "badapt_dev_xoi_out.h"
+#include "badapt_dev_xoila_out.h"
 
 /**********************************************************************************************************************/
 

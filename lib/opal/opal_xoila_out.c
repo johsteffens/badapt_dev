@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : xoico_compiler (C) 2020 J.B.Steffens
- *  Last File Update: 2020-08-05T14:13:26Z
+ *  Last File Update: 2020-08-06T10:04:15Z
  *
  *  Copyright and License of this File:
  *
@@ -160,15 +160,15 @@ sz_t opal_nop_mcode_push_ap_holor__( const opal_nop* o, const opal_nop_solve_res
 sz_t opal_nop_mcode_push_dp_holor__( const opal_nop* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf )
 {
     BLM_INIT();
-
+    
     bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
     opal_holor_meta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-
+    
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-
+    
     BLM_RETURNV( sz_t, idx );
 }
 
@@ -263,7 +263,7 @@ sz_t opal_nop_ar0_adaptive_s_mcode_push_dp_holor( const opal_nop_ar0_adaptive_s*
     bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
     opal_holor_meta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-
+    
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_adaptive_zero_grad,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
@@ -295,17 +295,17 @@ sz_t opal_nop_ar0_rand_s_mcode_push_ap_holor( const opal_nop_ar0_rand_s* o, cons
     bhvm_holor_s* h = &result->h->h;
     opal_holor_meta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
-
+    
     bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s_create();
     vop_rand->prsg = bcore_prsg_a_clone( o->prsg );
     vop_rand->min = o->min;
     vop_rand->max = o->max;
     vop_rand->density = o->density;
-
+    
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap,        bhvm_vop_a_set_index( ( ( bhvm_vop* )vop_rand ),                          0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-
+    
     return idx;
 }
 
@@ -1765,11 +1765,11 @@ void opal_eval_frame_param_s_set( opal_eval_frame_param_s* o, const opal_eval_fr
 {
     o->recovery_test = o->recovery_test || src->recovery_test;
     o->jacobian_test = o->jacobian_test || src->jacobian_test;
-
+    
     o->verbosity = sz_max( o->verbosity, src->verbosity );
     o->rval      = bcore_lcg00_u3( o->rval + src->rval );
     bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
-
+    
     if( o->name.size == 0 )
     {
         st_s_copy( &o->name, &src->name );
@@ -1780,11 +1780,11 @@ void opal_eval_frame_param_s_set( opal_eval_frame_param_s* o, const opal_eval_fr
         st_s_copy( &o->name, new_name );
         st_s_discard( new_name );
     }
-
+    
     if( !o->src ) o->src = bcore_fork( src->src );
     if( !o->in  ) o->in  = bcore_fork( src->in );
     if( !o->out ) o->out = bcore_fork( src->out );
-
+    
     o->max_dev = f3_max( o->max_dev, src->max_dev );
 }
 
@@ -2754,4 +2754,4 @@ vd_t opal_xoila_out_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// BETH_PLANT_SIGNATURE 1047424378
+// BETH_PLANT_SIGNATURE 4178678366

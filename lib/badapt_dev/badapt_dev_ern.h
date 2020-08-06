@@ -28,7 +28,7 @@
 #include "bcore_std.h"
 #include "badapt_activator.h"
 #include "badapt_adaptive.h"
-#include "badapt_dev_xoi_out.h"
+#include "badapt_dev_xoila_out.h"
 #include "badapt_ern.h"
 
 /**********************************************************************************************************************/

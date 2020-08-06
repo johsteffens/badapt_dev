@@ -80,7 +80,7 @@
 
 #include "bmath_std.h"
 #include "opal_nop.h"
-#include "opal_xoi_out.h"
+#include "opal_xoila_out.h"
 
 /**********************************************************************************************************************/
 

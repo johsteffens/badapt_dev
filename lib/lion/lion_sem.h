@@ -80,7 +80,7 @@
 
 #include "bmath_std.h"
 #include "lion_nop.h"
-#include "lion_xoi_out.h"
+#include "lion_xoila_out.h"
 
 /**********************************************************************************************************************/
 

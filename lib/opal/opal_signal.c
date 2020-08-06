@@ -14,7 +14,6 @@
  */
 
 #include "bcore_std.h"
-#include "opal_xoi_out.h"
+#include "opal_xoila_out.h"
 
-BETH_PLANT_SIGNAL_OPEN_PLANT( opal )
-BETH_PLANT_SIGNAL_CLOSE_PLANT( opal )
+BETH_SIGNAL_DEFINE( opal )

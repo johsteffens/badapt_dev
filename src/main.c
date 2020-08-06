@@ -4,9 +4,9 @@
 
 int main( int argc, char** argv )
 {
-    BETH_PLANT_USE( badapt_dev );
-    BETH_PLANT_USE( lion );
-    BETH_PLANT_USE( opal );
+    BETH_USE( badapt_dev );
+    BETH_USE( lion );
+    BETH_USE( opal );
 
     /// testing flects and spects
     bcore_flect_parse_all_flects();
@@ -18,6 +18,6 @@ int main( int argc, char** argv )
     er_t retv = bcore_main_frame_s_main( main_frame, argc, argv );
     BLM_DOWN();
 
-    BETH_PLANT_CLOSEV( 1 );
+    BETH_CLOSEV( 1 );
     return retv;
 }

@@ -24,7 +24,7 @@
 
 #include "bmath_std.h"
 #include "bhvm_mcode.h"
-#include "lion_xoi_out.h"
+#include "lion_xoila_out.h"
 #include "lion_nop.h"
 
 /**********************************************************************************************************************/

@@ -25,7 +25,7 @@
 #define OPAL_FRAME_H
 
 #include "opal_net.h"
-#include "opal_xoi_out.h"
+#include "opal_xoila_out.h"
 
 /**********************************************************************************************************************/
 

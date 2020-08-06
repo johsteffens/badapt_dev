@@ -14,13 +14,13 @@
  */
 
 #include "bcore_std.h"
-#include "badapt_dev_xoi_out.h"
+#include "badapt_dev_xoila_out.h"
 #include "badapt_dev_problem.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"
 
-BETH_PLANT_SIGNAL_OPEN_PLANT( badapt_dev )
-BETH_PLANT_SIGNAL_USE_SOURCE( badapt_dev_problem );
-BETH_PLANT_SIGNAL_USE_SOURCE( badapt_dev_ern );
-BETH_PLANT_SIGNAL_USE_SOURCE( badapt_dev_lstm );
-BETH_PLANT_SIGNAL_CLOSE_PLANT( badapt_dev )
+BETH_SIGNAL_OPEN( badapt_dev )
+BETH_SIGNAL_USE_SOURCE( badapt_dev_problem );
+BETH_SIGNAL_USE_SOURCE( badapt_dev_ern );
+BETH_SIGNAL_USE_SOURCE( badapt_dev_lstm );
+BETH_SIGNAL_CLOSE()
