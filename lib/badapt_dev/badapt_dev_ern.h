@@ -35,12 +35,12 @@
 
 #ifdef TYPEOF_badapt_dev_ern
 XOILA_DEFINE_GROUP( badapt_dev_ern, bcore_inst )
-#ifdef PLANT_SECTION
+#ifdef XOILA_SECTION
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#endif // PLANT_SECTION
+#endif // XOILA_SECTION
 #endif // TYPEOF_badapt_dev_ern
 
 
