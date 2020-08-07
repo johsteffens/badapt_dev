@@ -1,6 +1,6 @@
 /** This file was generated from beth-plant source code.
  *  Compiling Agent : xoico_compiler (C) 2020 J.B.Steffens
- *  Last File Update: 2020-08-06T10:04:15Z
+ *  Last File Update: 2020-08-07T21:23:06Z
  *
  *  Copyright and License of this File:
  *
@@ -26,9 +26,9 @@
 #include "bcore_control.h"
 
 //To force a rebuild of this target by the plant-compiler, reset the hash key value below to 0.
-#define HKEYOF_opal_xoila_out 2787505930
+#define HKEYOF_opal_xoila_out 13163764986116785865
 
-#define TYPEOF_opal_xoila_out 2896734280
+#define TYPEOF_opal_xoila_out 0x3F1A4D1A90868F08ull
 
 /**********************************************************************************************************************/
 // source: opal_context.h
@@ -36,8 +36,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_context
 
-#define TYPEOF_opal_context 3099042715
-#define TYPEOF_opal_context_s 434522221
+#define TYPEOF_opal_context 0x6A3588D344C618FBull
+#define TYPEOF_opal_context_s 0xC44A545DDCDBB4EDull
 #define BETH_EXPAND_GROUP_opal_context \
   BCORE_FORWARD_OBJECT( opal_context ); \
   typedef bcore_prsg* (*opal_context_get_prsg)( opal_context* o ); \
@@ -80,9 +80,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_holor
 
-#define TYPEOF_opal_holor 490103714
-#define TYPEOF_opal_holor_s 703559388
-#define TYPEOF_opal_holor_meta_s 3624388628
+#define TYPEOF_opal_holor 0x5E258D3F8532A302ull
+#define TYPEOF_opal_holor_s 0x91F077AD82B25A1Cull
+#define TYPEOF_opal_holor_meta_s 0x2D7EAC11889E62F4ull
 #define BETH_EXPAND_ITEM_opal_holor_meta_s \
   BCORE_DECLARE_OBJECT( opal_holor_meta_s ) \
     {aware_t _;bcore_inst* custom;bhvm_mcode_node_s* mnode;tp_t name;bcore_inst* sem_id;tp_t pclass;bl_t htp;bl_t active;}; \
@@ -95,7 +95,7 @@
   static inline bcore_inst* opal_holor_meta_s_set_custom( opal_holor_meta_s* o, const bcore_inst* custom ){bcore_inst_a_attach( &o->custom, bcore_inst_a_clone( custom ) ); return o->custom;} \
   static inline bhvm_mcode_node_s* opal_holor_meta_s_get_node( const opal_holor_meta_s* o ){return o->mnode;} \
   static inline void opal_holor_meta_s_set_node( opal_holor_meta_s* o, bhvm_mcode_node_s* node ){bhvm_mcode_node_s_attach( &o->mnode, bcore_fork( node ) );}
-#define TYPEOF_opal_holor_s 703559388
+#define TYPEOF_opal_holor_s 0x91F077AD82B25A1Cull
 #define BETH_EXPAND_ITEM_opal_holor_s \
   BCORE_DECLARE_OBJECT( opal_holor_s ) \
     {aware_t _;opal_holor_meta_s m;bhvm_holor_s h;}; \
@@ -113,24 +113,24 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_nop
 
-#define TYPEOF_opal_nop 2985948757
-#define TYPEOF_opal_nop_s 2514142647
-#define TYPEOF_opal_nop_context_s 1495285475
+#define TYPEOF_opal_nop 0x5D8297C19F02FCB5ull
+#define TYPEOF_opal_nop_s 0x1D81C708179285B7ull
+#define TYPEOF_opal_nop_context_s 0x79C53054B56D41E3ull
 #define BETH_EXPAND_ITEM_opal_nop_context_s \
   BCORE_DECLARE_OBJECT( opal_nop_context_s ) \
     {aware_t _;bcore_prsg* prsg;}; \
   static inline bcore_prsg* opal_nop_context_s_get_prsg( opal_nop_context_s* o ){return o->prsg;}
-#define TYPEOF_track_ap 2993192456
-#define TYPEOF_track_dp 2960475861
-#define TYPEOF_track_ap_setup 3800687238
-#define TYPEOF_track_dp_setup 1874372795
-#define TYPEOF_track_ap_shelve 3671763698
-#define TYPEOF_track_dp_shelve 2171378817
-#define TYPEOF_track_dp_cyclic_zero_grad 3106917965
-#define TYPEOF_track_ap_cyclic_reset 3819301030
-#define TYPEOF_track_ap_cyclic_update 4132214
-#define TYPEOF_track_dp_adaptive_zero_grad 1201855212
-#define TYPEOF_opal_nop_solve_result_s 2394002165
+#define TYPEOF_track_ap 0x21E3A89A8C4A41E8ull
+#define TYPEOF_track_dp 0x21F4A69A8C58B1B5ull
+#define TYPEOF_track_ap_setup 0x78F0792E15C7E5C6ull
+#define TYPEOF_track_dp_setup 0x2069E5DBBC7B0BBBull
+#define TYPEOF_track_ap_shelve 0xBFC4C545E92192D2ull
+#define TYPEOF_track_dp_shelve 0x56C690F342C2E701ull
+#define TYPEOF_track_dp_cyclic_zero_grad 0x8DB5B98827B54B0Dull
+#define TYPEOF_track_ap_cyclic_reset 0xFC2295E35CF7B886ull
+#define TYPEOF_track_ap_cyclic_update 0xC5E85A23C30AD256ull
+#define TYPEOF_track_dp_adaptive_zero_grad 0x48EB409A91B4D6ECull
+#define TYPEOF_opal_nop_solve_result_s 0xEF49212A771B03F5ull
 #define BETH_EXPAND_ITEM_opal_nop_solve_result_s \
   BCORE_DECLARE_OBJECT( opal_nop_solve_result_s ) \
     {aware_t _;opal_holor_s* h;st_s* msg;bl_t can_settle;bl_t codable;bl_t reducible;tp_t type_vop_ap;tp_t type_vop_dp_a;tp_t type_vop_dp_b;tp_t type_vop_dp_c;vd_t attached;};
@@ -256,22 +256,22 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_nop_ar0
 
-#define TYPEOF_opal_nop_ar0 3082113767
-#define TYPEOF_opal_nop_ar0_s 3946507713
-#define TYPEOF_opal_nop_ar0_literal_s 2921523873
+#define TYPEOF_opal_nop_ar0 0xE97C6858169E7CA7ull
+#define TYPEOF_opal_nop_ar0_s 0x22D58267222168E1ull
+#define TYPEOF_opal_nop_ar0_literal_s 0x631CD4B122107E81ull
 #define BETH_EXPAND_ITEM_opal_nop_ar0_literal_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar0_literal_s ) \
     {aware_t _;opal_holor_s* h;}; \
   static inline sz_t opal_nop_ar0_literal_s_arity( const opal_nop_ar0_literal_s* o ){return 0;} \
   bl_t opal_nop_ar0_literal_s_solve( const opal_nop_ar0_literal_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar0_param_s 4145390963
+#define TYPEOF_opal_nop_ar0_param_s 0xABC662B39BED96B3ull
 #define BETH_EXPAND_ITEM_opal_nop_ar0_param_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar0_param_s ) \
     {aware_t _;opal_holor_s* h;}; \
   static inline sz_t opal_nop_ar0_param_s_arity( const opal_nop_ar0_param_s* o ){return 0;} \
   static inline bl_t opal_nop_ar0_param_s_is_param( const opal_nop_ar0_param_s* o ){return true;} \
   bl_t opal_nop_ar0_param_s_solve( const opal_nop_ar0_param_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar0_adaptive_s 4191624816
+#define TYPEOF_opal_nop_ar0_adaptive_s 0x9D0B1A56C88471D0ull
 #define BETH_EXPAND_ITEM_opal_nop_ar0_adaptive_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar0_adaptive_s ) \
     {aware_t _;opal_holor_s* h;}; \
@@ -280,7 +280,7 @@
   bl_t opal_nop_ar0_adaptive_s_solve( const opal_nop_ar0_adaptive_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   sz_t opal_nop_ar0_adaptive_s_mcode_push_ap_holor( const opal_nop_ar0_adaptive_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
   sz_t opal_nop_ar0_adaptive_s_mcode_push_dp_holor( const opal_nop_ar0_adaptive_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
-#define TYPEOF_opal_nop_ar0_rand_s 330543217
+#define TYPEOF_opal_nop_ar0_rand_s 0x70D10473CFDDF3F1ull
 #define BETH_EXPAND_ITEM_opal_nop_ar0_rand_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar0_rand_s ) \
     {aware_t _;opal_holor_s* h;bcore_prsg* prsg;f3_t min;f3_t max;f3_t density;}; \
@@ -301,9 +301,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_nop_ar1
 
-#define TYPEOF_opal_nop_ar1 3065336148
-#define TYPEOF_opal_nop_ar1_s 1846751622
-#define TYPEOF_opal_nop_ar1_identity_s 1126997449
+#define TYPEOF_opal_nop_ar1 0xE97C6758169E7AF4ull
+#define TYPEOF_opal_nop_ar1_s 0x182149671B7DD006ull
+#define TYPEOF_opal_nop_ar1_identity_s 0x3CC80AE8128EE529ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_identity_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_identity_s ) \
     {aware_t _;}; \
@@ -311,7 +311,7 @@
   static inline bl_t opal_nop_ar1_identity_s_reserved( const opal_nop_ar1_identity_s* o ){return true;} \
   static inline sz_t opal_nop_ar1_identity_s_priority( const opal_nop_ar1_identity_s* o ){return 8;} \
   bl_t opal_nop_ar1_identity_s_solve( const opal_nop_ar1_identity_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_param_s 3762375216
+#define TYPEOF_opal_nop_ar1_param_s 0xDD6D775FCE2B0850ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_param_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_param_s ) \
     {aware_t _;}; \
@@ -320,7 +320,7 @@
   static inline sz_t opal_nop_ar1_param_s_priority( const opal_nop_ar1_param_s* o ){return 8;} \
   bl_t opal_nop_ar1_param_s_solve( const opal_nop_ar1_param_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   void opal_nop_ar1_param_s_settle( const opal_nop_ar1_param_s* o, opal_context* context, const opal_nop_solve_result_s* result, opal_nop** out_nop, opal_nop_solve_result_s** out_result );
-#define TYPEOF_opal_nop_ar1_f3_s 2901120332
+#define TYPEOF_opal_nop_ar1_f3_s 0x7DAC139B2B550F0Cull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_f3_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_f3_s ) \
     {aware_t _;}; \
@@ -329,7 +329,7 @@
   static inline sz_t opal_nop_ar1_f3_s_priority( const opal_nop_ar1_f3_s* o ){return 8;} \
   static inline sc_t opal_nop_ar1_f3_s_symbol( const opal_nop_ar1_f3_s* o ){return "f3_t";} \
   bl_t opal_nop_ar1_f3_s_solve( const opal_nop_ar1_f3_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_f2_s 705909127
+#define TYPEOF_opal_nop_ar1_f2_s 0x84FB4C9B2F1731E7ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_f2_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_f2_s ) \
     {aware_t _;}; \
@@ -338,7 +338,7 @@
   static inline sz_t opal_nop_ar1_f2_s_priority( const opal_nop_ar1_f2_s* o ){return 8;} \
   static inline sc_t opal_nop_ar1_f2_s_symbol( const opal_nop_ar1_f2_s* o ){return "f2_t";} \
   bl_t opal_nop_ar1_f2_s_solve( const opal_nop_ar1_f2_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_neg_s 2319373791
+#define TYPEOF_opal_nop_ar1_neg_s 0x8479714F149FD1BFull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_neg_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_neg_s ) \
     {aware_t _;}; \
@@ -349,7 +349,7 @@
   static inline tp_t opal_nop_ar1_neg_s_type_vop_ap( const opal_nop_ar1_neg_s* o ){return TYPEOF_bhvm_vop_ar1_neg_s;} \
   static inline tp_t opal_nop_ar1_neg_s_type_vop_dp_a( const opal_nop_ar1_neg_s* o ){return TYPEOF_bhvm_vop_ar1_neg_dp_s;} \
   opal_nop* opal_nop_ar1_neg_s_create_op_of_arn( const opal_nop_ar1_neg_s* o, sz_t n );
-#define TYPEOF_opal_nop_ar1_floor_s 2947439403
+#define TYPEOF_opal_nop_ar1_floor_s 0xEA452BD529DF7D8Bull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_floor_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_floor_s ) \
     {aware_t _;}; \
@@ -359,7 +359,7 @@
   static inline sc_t opal_nop_ar1_floor_s_symbol( const opal_nop_ar1_floor_s* o ){return "floor";} \
   static inline tp_t opal_nop_ar1_floor_s_type_vop_ap( const opal_nop_ar1_floor_s* o ){return TYPEOF_bhvm_vop_ar1_floor_s;} \
   static inline sz_t opal_nop_ar1_floor_s_mcode_push_dp_holor( const opal_nop_ar1_floor_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar1_ceil_s 2292597622
+#define TYPEOF_opal_nop_ar1_ceil_s 0xF05F26790FDE2CB6ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_ceil_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_ceil_s ) \
     {aware_t _;}; \
@@ -369,7 +369,7 @@
   static inline sc_t opal_nop_ar1_ceil_s_symbol( const opal_nop_ar1_ceil_s* o ){return "ceil";} \
   static inline tp_t opal_nop_ar1_ceil_s_type_vop_ap( const opal_nop_ar1_ceil_s* o ){return TYPEOF_bhvm_vop_ar1_ceil_s;} \
   static inline sz_t opal_nop_ar1_ceil_s_mcode_push_dp_holor( const opal_nop_ar1_ceil_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar1_abs_s 2379512073
+#define TYPEOF_opal_nop_ar1_abs_s 0x54039A0BA0D6BB49ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_abs_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_abs_s ) \
     {aware_t _;}; \
@@ -379,7 +379,7 @@
   static inline sc_t opal_nop_ar1_abs_s_symbol( const opal_nop_ar1_abs_s* o ){return "abs";} \
   static inline tp_t opal_nop_ar1_abs_s_type_vop_ap( const opal_nop_ar1_abs_s* o ){return TYPEOF_bhvm_vop_ar1_abs_s;} \
   static inline tp_t opal_nop_ar1_abs_s_type_vop_dp_a( const opal_nop_ar1_abs_s* o ){return TYPEOF_bhvm_vop_ar2_abs_dp_s;}
-#define TYPEOF_opal_nop_ar1_exp_s 2669670406
+#define TYPEOF_opal_nop_ar1_exp_s 0x64762F0893163AE6ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_exp_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_exp_s ) \
     {aware_t _;}; \
@@ -389,7 +389,7 @@
   static inline sc_t opal_nop_ar1_exp_s_symbol( const opal_nop_ar1_exp_s* o ){return "exp";} \
   static inline tp_t opal_nop_ar1_exp_s_type_vop_ap( const opal_nop_ar1_exp_s* o ){return TYPEOF_bhvm_vop_ar1_exp_s;} \
   static inline tp_t opal_nop_ar1_exp_s_type_vop_dp_a( const opal_nop_ar1_exp_s* o ){return TYPEOF_bhvm_vop_ar2_exp_dp_s;}
-#define TYPEOF_opal_nop_ar1_log_s 1656194559
+#define TYPEOF_opal_nop_ar1_log_s 0xA9BA311A3E621C9Full
 #define BETH_EXPAND_ITEM_opal_nop_ar1_log_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_log_s ) \
     {aware_t _;}; \
@@ -399,7 +399,7 @@
   static inline sc_t opal_nop_ar1_log_s_symbol( const opal_nop_ar1_log_s* o ){return "log";} \
   static inline tp_t opal_nop_ar1_log_s_type_vop_ap( const opal_nop_ar1_log_s* o ){return TYPEOF_bhvm_vop_ar1_log_s;} \
   static inline tp_t opal_nop_ar1_log_s_type_vop_dp_a( const opal_nop_ar1_log_s* o ){return TYPEOF_bhvm_vop_ar2_log_dp_s;}
-#define TYPEOF_opal_nop_ar1_inv_s 183938606
+#define TYPEOF_opal_nop_ar1_inv_s 0xABD3D42B29A3D8CEull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_inv_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_inv_s ) \
     {aware_t _;}; \
@@ -409,7 +409,7 @@
   static inline sc_t opal_nop_ar1_inv_s_symbol( const opal_nop_ar1_inv_s* o ){return "inv";} \
   static inline tp_t opal_nop_ar1_inv_s_type_vop_ap( const opal_nop_ar1_inv_s* o ){return TYPEOF_bhvm_vop_ar1_inv_s;} \
   static inline tp_t opal_nop_ar1_inv_s_type_vop_dp_a( const opal_nop_ar1_inv_s* o ){return TYPEOF_bhvm_vop_ar2_inv_dp_s;}
-#define TYPEOF_opal_nop_ar1_sqr_s 237451399
+#define TYPEOF_opal_nop_ar1_sqr_s 0x70972B637342AF27ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_sqr_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_sqr_s ) \
     {aware_t _;}; \
@@ -419,7 +419,7 @@
   static inline sc_t opal_nop_ar1_sqr_s_symbol( const opal_nop_ar1_sqr_s* o ){return "sqr";} \
   static inline tp_t opal_nop_ar1_sqr_s_type_vop_ap( const opal_nop_ar1_sqr_s* o ){return TYPEOF_bhvm_vop_ar1_sqr_s;} \
   static inline tp_t opal_nop_ar1_sqr_s_type_vop_dp_a( const opal_nop_ar1_sqr_s* o ){return TYPEOF_bhvm_vop_ar2_sqr_dp_s;}
-#define TYPEOF_opal_nop_ar1_srt_s 3061013986
+#define TYPEOF_opal_nop_ar1_srt_s 0x868C634B8CC45102ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_srt_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_srt_s ) \
     {aware_t _;}; \
@@ -429,7 +429,7 @@
   static inline sc_t opal_nop_ar1_srt_s_symbol( const opal_nop_ar1_srt_s* o ){return "srt";} \
   static inline tp_t opal_nop_ar1_srt_s_type_vop_ap( const opal_nop_ar1_srt_s* o ){return TYPEOF_bhvm_vop_ar1_srt_s;} \
   static inline tp_t opal_nop_ar1_srt_s_type_vop_dp_a( const opal_nop_ar1_srt_s* o ){return TYPEOF_bhvm_vop_ar2_srt_dp_s;}
-#define TYPEOF_opal_nop_ar1_sigm_s 3531812595
+#define TYPEOF_opal_nop_ar1_sigm_s 0xB6E9B117BCD52AD3ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_sigm_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_sigm_s ) \
     {aware_t _;}; \
@@ -439,7 +439,7 @@
   static inline sc_t opal_nop_ar1_sigm_s_symbol( const opal_nop_ar1_sigm_s* o ){return "sigm";} \
   static inline tp_t opal_nop_ar1_sigm_s_type_vop_ap( const opal_nop_ar1_sigm_s* o ){return TYPEOF_bhvm_vop_ar1_sigm_s;} \
   static inline tp_t opal_nop_ar1_sigm_s_type_vop_dp_a( const opal_nop_ar1_sigm_s* o ){return TYPEOF_bhvm_vop_ar2_sigm_dp_s;}
-#define TYPEOF_opal_nop_ar1_sigm_hard_s 1420344077
+#define TYPEOF_opal_nop_ar1_sigm_hard_s 0xC611260169036C0Dull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_sigm_hard_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_sigm_hard_s ) \
     {aware_t _;}; \
@@ -449,7 +449,7 @@
   static inline sc_t opal_nop_ar1_sigm_hard_s_symbol( const opal_nop_ar1_sigm_hard_s* o ){return "sigm_hard";} \
   static inline tp_t opal_nop_ar1_sigm_hard_s_type_vop_ap( const opal_nop_ar1_sigm_hard_s* o ){return TYPEOF_bhvm_vop_ar1_sigm_hard_s;} \
   static inline tp_t opal_nop_ar1_sigm_hard_s_type_vop_dp_a( const opal_nop_ar1_sigm_hard_s* o ){return TYPEOF_bhvm_vop_ar2_sigm_hard_dp_s;}
-#define TYPEOF_opal_nop_ar1_sigm_leaky_s 579189838
+#define TYPEOF_opal_nop_ar1_sigm_leaky_s 0x6EF06A77671A69AEull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_sigm_leaky_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_sigm_leaky_s ) \
     {aware_t _;}; \
@@ -459,7 +459,7 @@
   static inline sc_t opal_nop_ar1_sigm_leaky_s_symbol( const opal_nop_ar1_sigm_leaky_s* o ){return "sigm_leaky";} \
   static inline tp_t opal_nop_ar1_sigm_leaky_s_type_vop_ap( const opal_nop_ar1_sigm_leaky_s* o ){return TYPEOF_bhvm_vop_ar1_sigm_leaky_s;} \
   static inline tp_t opal_nop_ar1_sigm_leaky_s_type_vop_dp_a( const opal_nop_ar1_sigm_leaky_s* o ){return TYPEOF_bhvm_vop_ar2_sigm_leaky_dp_s;}
-#define TYPEOF_opal_nop_ar1_tanh_s 1003648350
+#define TYPEOF_opal_nop_ar1_tanh_s 0x5E4008F12305DCDEull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_tanh_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_tanh_s ) \
     {aware_t _;}; \
@@ -469,7 +469,7 @@
   static inline sc_t opal_nop_ar1_tanh_s_symbol( const opal_nop_ar1_tanh_s* o ){return "tanh";} \
   static inline tp_t opal_nop_ar1_tanh_s_type_vop_ap( const opal_nop_ar1_tanh_s* o ){return TYPEOF_bhvm_vop_ar1_tanh_s;} \
   static inline tp_t opal_nop_ar1_tanh_s_type_vop_dp_a( const opal_nop_ar1_tanh_s* o ){return TYPEOF_bhvm_vop_ar2_tanh_dp_s;}
-#define TYPEOF_opal_nop_ar1_tanh_hard_s 3927447666
+#define TYPEOF_opal_nop_ar1_tanh_hard_s 0xDED6AB2822172EF2ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_tanh_hard_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_tanh_hard_s ) \
     {aware_t _;}; \
@@ -479,7 +479,7 @@
   static inline sc_t opal_nop_ar1_tanh_hard_s_symbol( const opal_nop_ar1_tanh_hard_s* o ){return "tanh_hard";} \
   static inline tp_t opal_nop_ar1_tanh_hard_s_type_vop_ap( const opal_nop_ar1_tanh_hard_s* o ){return TYPEOF_bhvm_vop_ar1_tanh_hard_s;} \
   static inline tp_t opal_nop_ar1_tanh_hard_s_type_vop_dp_a( const opal_nop_ar1_tanh_hard_s* o ){return TYPEOF_bhvm_vop_ar2_tanh_hard_dp_s;}
-#define TYPEOF_opal_nop_ar1_tanh_leaky_s 3582257179
+#define TYPEOF_opal_nop_ar1_tanh_leaky_s 0xD4378B03EDF8F55Bull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_tanh_leaky_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_tanh_leaky_s ) \
     {aware_t _;}; \
@@ -489,7 +489,7 @@
   static inline sc_t opal_nop_ar1_tanh_leaky_s_symbol( const opal_nop_ar1_tanh_leaky_s* o ){return "tanh_leaky";} \
   static inline tp_t opal_nop_ar1_tanh_leaky_s_type_vop_ap( const opal_nop_ar1_tanh_leaky_s* o ){return TYPEOF_bhvm_vop_ar1_tanh_leaky_s;} \
   static inline tp_t opal_nop_ar1_tanh_leaky_s_type_vop_dp_a( const opal_nop_ar1_tanh_leaky_s* o ){return TYPEOF_bhvm_vop_ar2_tanh_leaky_dp_s;}
-#define TYPEOF_opal_nop_ar1_softplus_s 3580288627
+#define TYPEOF_opal_nop_ar1_softplus_s 0xC7D764105D304A53ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_softplus_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_softplus_s ) \
     {aware_t _;}; \
@@ -499,7 +499,7 @@
   static inline sc_t opal_nop_ar1_softplus_s_symbol( const opal_nop_ar1_softplus_s* o ){return "softplus";} \
   static inline tp_t opal_nop_ar1_softplus_s_type_vop_ap( const opal_nop_ar1_softplus_s* o ){return TYPEOF_bhvm_vop_ar1_softplus_s;} \
   static inline tp_t opal_nop_ar1_softplus_s_type_vop_dp_a( const opal_nop_ar1_softplus_s* o ){return TYPEOF_bhvm_vop_ar2_softplus_dp_s;}
-#define TYPEOF_opal_nop_ar1_softmax_s 3481254879
+#define TYPEOF_opal_nop_ar1_softmax_s 0xEF97C56CCDDFB71Full
 #define BETH_EXPAND_ITEM_opal_nop_ar1_softmax_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_softmax_s ) \
     {aware_t _;}; \
@@ -509,7 +509,7 @@
   static inline sc_t opal_nop_ar1_softmax_s_symbol( const opal_nop_ar1_softmax_s* o ){return "softmax";} \
   static inline tp_t opal_nop_ar1_softmax_s_type_vop_ap( const opal_nop_ar1_softmax_s* o ){return TYPEOF_bhvm_vop_ar1_softmax_s;} \
   static inline tp_t opal_nop_ar1_softmax_s_type_vop_dp_a( const opal_nop_ar1_softmax_s* o ){return TYPEOF_bhvm_vop_ar2_softmax_dp_s;}
-#define TYPEOF_opal_nop_ar1_relu_s 1795153249
+#define TYPEOF_opal_nop_ar1_relu_s 0xBFEE43BD8082FD01ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_relu_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_relu_s ) \
     {aware_t _;}; \
@@ -519,7 +519,7 @@
   static inline sc_t opal_nop_ar1_relu_s_symbol( const opal_nop_ar1_relu_s* o ){return "relu";} \
   static inline tp_t opal_nop_ar1_relu_s_type_vop_ap( const opal_nop_ar1_relu_s* o ){return TYPEOF_bhvm_vop_ar1_relu_s;} \
   static inline tp_t opal_nop_ar1_relu_s_type_vop_dp_a( const opal_nop_ar1_relu_s* o ){return TYPEOF_bhvm_vop_ar2_relu_dp_s;}
-#define TYPEOF_opal_nop_ar1_relu_leaky_s 1252957948
+#define TYPEOF_opal_nop_ar1_relu_leaky_s 0xCBF43165ADC9871Cull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_relu_leaky_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_relu_leaky_s ) \
     {aware_t _;}; \
@@ -529,7 +529,7 @@
   static inline sc_t opal_nop_ar1_relu_leaky_s_symbol( const opal_nop_ar1_relu_leaky_s* o ){return "relu_leaky";} \
   static inline tp_t opal_nop_ar1_relu_leaky_s_type_vop_ap( const opal_nop_ar1_relu_leaky_s* o ){return TYPEOF_bhvm_vop_ar1_relu_leaky_s;} \
   static inline tp_t opal_nop_ar1_relu_leaky_s_type_vop_dp_a( const opal_nop_ar1_relu_leaky_s* o ){return TYPEOF_bhvm_vop_ar2_relu_leaky_dp_s;}
-#define TYPEOF_opal_nop_ar1_output_s 2930607458
+#define TYPEOF_opal_nop_ar1_output_s 0xFA4DD8BFC5ED8422ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_output_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_output_s ) \
     {aware_t _;}; \
@@ -537,7 +537,7 @@
   static inline bl_t opal_nop_ar1_output_s_reserved( const opal_nop_ar1_output_s* o ){return true;} \
   bl_t opal_nop_ar1_output_s_solve( const opal_nop_ar1_output_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   sz_t opal_nop_ar1_output_s_mcode_push_dp_holor( const opal_nop_ar1_output_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
-#define TYPEOF_opal_nop_ar1_adaptive_s 3358937521
+#define TYPEOF_opal_nop_ar1_adaptive_s 0x2667C807DFE25151ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_adaptive_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_adaptive_s ) \
     {aware_t _;tp_t name;}; \
@@ -547,7 +547,7 @@
   static inline bl_t opal_nop_ar1_adaptive_s_is_adaptive( const opal_nop_ar1_adaptive_s* o ){return true;} \
   bl_t opal_nop_ar1_adaptive_s_solve( const opal_nop_ar1_adaptive_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   void opal_nop_ar1_adaptive_s_settle( const opal_nop_ar1_adaptive_s* o, opal_context* context, const opal_nop_solve_result_s* result, opal_nop** out_nop, opal_nop_solve_result_s** out_result );
-#define TYPEOF_opal_nop_ar1_dimof_s 3680486330
+#define TYPEOF_opal_nop_ar1_dimof_s 0xCAD96736ED89269Aull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_dimof_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_dimof_s ) \
     {aware_t _;}; \
@@ -556,7 +556,7 @@
   static inline sc_t opal_nop_ar1_dimof_s_symbol( const opal_nop_ar1_dimof_s* o ){return "dimof";} \
   static inline sz_t opal_nop_ar1_dimof_s_priority( const opal_nop_ar1_dimof_s* o ){return 8;} \
   bl_t opal_nop_ar1_dimof_s_solve( const opal_nop_ar1_dimof_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_volof_s 1766689793
+#define TYPEOF_opal_nop_ar1_volof_s 0x4E3C7B4BDA366E81ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_volof_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_volof_s ) \
     {aware_t _;}; \
@@ -565,7 +565,7 @@
   static inline sc_t opal_nop_ar1_volof_s_symbol( const opal_nop_ar1_volof_s* o ){return "volof";} \
   static inline sz_t opal_nop_ar1_volof_s_priority( const opal_nop_ar1_volof_s* o ){return 8;} \
   bl_t opal_nop_ar1_volof_s_solve( const opal_nop_ar1_volof_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_constof_s 1513942155
+#define TYPEOF_opal_nop_ar1_constof_s 0x086B3BCCE9284E6Bull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_constof_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_constof_s ) \
     {aware_t _;}; \
@@ -574,7 +574,7 @@
   static inline sc_t opal_nop_ar1_constof_s_symbol( const opal_nop_ar1_constof_s* o ){return "constof";} \
   static inline sz_t opal_nop_ar1_constof_s_priority( const opal_nop_ar1_constof_s* o ){return 8;} \
   bl_t opal_nop_ar1_constof_s_solve( const opal_nop_ar1_constof_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_zeroof_s 432562780
+#define TYPEOF_opal_nop_ar1_zeroof_s 0x9A876F08A728A8BCull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_zeroof_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_zeroof_s ) \
     {aware_t _;}; \
@@ -583,7 +583,7 @@
   static inline sc_t opal_nop_ar1_zeroof_s_symbol( const opal_nop_ar1_zeroof_s* o ){return "zeroof";} \
   static inline sz_t opal_nop_ar1_zeroof_s_priority( const opal_nop_ar1_zeroof_s* o ){return 8;} \
   bl_t opal_nop_ar1_zeroof_s_solve( const opal_nop_ar1_zeroof_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_shapeof_s 3455027109
+#define TYPEOF_opal_nop_ar1_shapeof_s 0x607FFB5CE289C145ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_shapeof_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_shapeof_s ) \
     {aware_t _;}; \
@@ -592,7 +592,7 @@
   static inline sc_t opal_nop_ar1_shapeof_s_symbol( const opal_nop_ar1_shapeof_s* o ){return "shapeof";} \
   static inline sz_t opal_nop_ar1_shapeof_s_priority( const opal_nop_ar1_shapeof_s* o ){return 8;} \
   bl_t opal_nop_ar1_shapeof_s_solve( const opal_nop_ar1_shapeof_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar1_rand_s 1983336028
+#define TYPEOF_opal_nop_ar1_rand_s 0x0B773E0B122403DCull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_rand_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_rand_s ) \
     {aware_t _;}; \
@@ -602,7 +602,7 @@
   static inline sz_t opal_nop_ar1_rand_s_priority( const opal_nop_ar1_rand_s* o ){return 8;} \
   bl_t opal_nop_ar1_rand_s_solve( const opal_nop_ar1_rand_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   void opal_nop_ar1_rand_s_settle( const opal_nop_ar1_rand_s* o, opal_context* context, const opal_nop_solve_result_s* result, opal_nop** out_nop, opal_nop_solve_result_s** out_result );
-#define TYPEOF_opal_nop_ar1_cast_htp_s 3755972059
+#define TYPEOF_opal_nop_ar1_cast_htp_s 0x1032F115DF7DD21Bull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_cast_htp_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_cast_htp_s ) \
     {aware_t _;}; \
@@ -613,7 +613,7 @@
   bl_t opal_nop_ar1_cast_htp_s_solve( const opal_nop_ar1_cast_htp_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   sz_t opal_nop_ar1_cast_htp_s_mcode_push_ap_holor( const opal_nop_ar1_cast_htp_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
   sz_t opal_nop_ar1_cast_htp_s_mcode_push_dp_holor( const opal_nop_ar1_cast_htp_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
-#define TYPEOF_opal_nop_ar1_reshape_s 3136133987
+#define TYPEOF_opal_nop_ar1_reshape_s 0xB239B8D91930E8C3ull
 #define BETH_EXPAND_ITEM_opal_nop_ar1_reshape_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar1_reshape_s ) \
     {aware_t _;bhvm_shape_s shape;}; \
@@ -695,9 +695,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_nop_ar2
 
-#define TYPEOF_opal_nop_ar2 3115669005
-#define TYPEOF_opal_nop_ar2_s 3190290431
-#define TYPEOF_opal_nop_ar2_add_s 2635304359
+#define TYPEOF_opal_nop_ar2 0xE97C6A58169E800Dull
+#define TYPEOF_opal_nop_ar2_s 0x33FFCC672BCEEFDFull
+#define TYPEOF_opal_nop_ar2_add_s 0xB96052B9BA4582E7ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_add_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_add_s ) \
     {aware_t _;}; \
@@ -709,7 +709,7 @@
   static inline tp_t opal_nop_ar2_add_s_type_vop_ap( const opal_nop_ar2_add_s* o ){return TYPEOF_bhvm_vop_ar2_add_s;} \
   static inline tp_t opal_nop_ar2_add_s_type_vop_dp_a( const opal_nop_ar2_add_s* o ){return TYPEOF_bhvm_vop_ar1_add_dp_a_s;} \
   static inline tp_t opal_nop_ar2_add_s_type_vop_dp_b( const opal_nop_ar2_add_s* o ){return TYPEOF_bhvm_vop_ar1_add_dp_b_s;}
-#define TYPEOF_opal_nop_ar2_sub_s 2073966342
+#define TYPEOF_opal_nop_ar2_sub_s 0x2A19BB45DAC68786ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_sub_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_sub_s ) \
     {aware_t _;}; \
@@ -722,7 +722,7 @@
   static inline tp_t opal_nop_ar2_sub_s_type_vop_dp_a( const opal_nop_ar2_sub_s* o ){return TYPEOF_bhvm_vop_ar1_sub_dp_a_s;} \
   static inline tp_t opal_nop_ar2_sub_s_type_vop_dp_b( const opal_nop_ar2_sub_s* o ){return TYPEOF_bhvm_vop_ar1_sub_dp_b_s;} \
   opal_nop* opal_nop_ar2_sub_s_create_op_of_arn( const opal_nop_ar2_sub_s* o, sz_t n );
-#define TYPEOF_opal_nop_ar2_mul_s 2786603658
+#define TYPEOF_opal_nop_ar2_mul_s 0xEB7B4439E877710Aull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_mul_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_mul_s ) \
     {aware_t _;}; \
@@ -734,7 +734,7 @@
   static inline tp_t opal_nop_ar2_mul_s_type_vop_ap( const opal_nop_ar2_mul_s* o ){return TYPEOF_bhvm_vop_ar2_mul_s;} \
   static inline tp_t opal_nop_ar2_mul_s_type_vop_dp_a( const opal_nop_ar2_mul_s* o ){return TYPEOF_bhvm_vop_ar2_mul_dp_a_s;} \
   static inline tp_t opal_nop_ar2_mul_s_type_vop_dp_b( const opal_nop_ar2_mul_s* o ){return TYPEOF_bhvm_vop_ar2_mul_dp_b_s;}
-#define TYPEOF_opal_nop_ar2_div_s 3463025611
+#define TYPEOF_opal_nop_ar2_div_s 0x46DAFD544F0AC1EBull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_div_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_div_s ) \
     {aware_t _;}; \
@@ -746,7 +746,7 @@
   static inline tp_t opal_nop_ar2_div_s_type_vop_ap( const opal_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar2_div_s;} \
   static inline tp_t opal_nop_ar2_div_s_type_vop_dp_a( const opal_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar2_div_dp_a_s;} \
   static inline tp_t opal_nop_ar2_div_s_type_vop_dp_b( const opal_nop_ar2_div_s* o ){return TYPEOF_bhvm_vop_ar3_div_dp_b_s;}
-#define TYPEOF_opal_nop_ar2_pow_s 344626922
+#define TYPEOF_opal_nop_ar2_pow_s 0x6A2BDCA5372CC0EAull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_pow_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_pow_s ) \
     {aware_t _;}; \
@@ -758,7 +758,7 @@
   static inline tp_t opal_nop_ar2_pow_s_type_vop_ap( const opal_nop_ar2_pow_s* o ){return TYPEOF_bhvm_vop_ar2_pow_s;} \
   static inline tp_t opal_nop_ar2_pow_s_type_vop_dp_a( const opal_nop_ar2_pow_s* o ){return TYPEOF_bhvm_vop_ar3_pow_dp_a_s;} \
   static inline tp_t opal_nop_ar2_pow_s_type_vop_dp_b( const opal_nop_ar2_pow_s* o ){return TYPEOF_bhvm_vop_ar3_pow_dp_b_s;}
-#define TYPEOF_opal_nop_ar2_bmul_s 4009502772
+#define TYPEOF_opal_nop_ar2_bmul_s 0xA6779907ABFBCBF4ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_bmul_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_bmul_s ) \
     {aware_t _;}; \
@@ -767,7 +767,7 @@
   static inline sz_t opal_nop_ar2_bmul_s_priority( const opal_nop_ar2_bmul_s* o ){return 10;} \
   static inline sc_t opal_nop_ar2_bmul_s_symbol( const opal_nop_ar2_bmul_s* o ){return "**";} \
   bl_t opal_nop_ar2_bmul_s_solve( const opal_nop_ar2_bmul_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result );
-#define TYPEOF_opal_nop_ar2_logic_equal_s 802904141
+#define TYPEOF_opal_nop_ar2_logic_equal_s 0xDB53FF1855A0762Dull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_equal_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_equal_s ) \
     {aware_t _;}; \
@@ -778,7 +778,7 @@
   static inline sc_t opal_nop_ar2_logic_equal_s_symbol( const opal_nop_ar2_logic_equal_s* o ){return "==";} \
   static inline tp_t opal_nop_ar2_logic_equal_s_type_vop_ap( const opal_nop_ar2_logic_equal_s* o ){return TYPEOF_bhvm_vop_ar2_logic_equal_s;} \
   static inline sz_t opal_nop_ar2_logic_equal_s_mcode_push_dp_holor( const opal_nop_ar2_logic_equal_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_logic_unequal_s 1311373380
+#define TYPEOF_opal_nop_ar2_logic_unequal_s 0x7293E2BD53EA6004ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_unequal_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_unequal_s ) \
     {aware_t _;}; \
@@ -789,7 +789,7 @@
   static inline sc_t opal_nop_ar2_logic_unequal_s_symbol( const opal_nop_ar2_logic_unequal_s* o ){return "!=";} \
   static inline tp_t opal_nop_ar2_logic_unequal_s_type_vop_ap( const opal_nop_ar2_logic_unequal_s* o ){return TYPEOF_bhvm_vop_ar2_logic_unequal_s;} \
   static inline sz_t opal_nop_ar2_logic_unequal_s_mcode_push_dp_holor( const opal_nop_ar2_logic_unequal_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_logic_larger_s 3554713720
+#define TYPEOF_opal_nop_ar2_logic_larger_s 0x2A11ADCD8108BE78ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_larger_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_larger_s ) \
     {aware_t _;}; \
@@ -800,7 +800,7 @@
   static inline sc_t opal_nop_ar2_logic_larger_s_symbol( const opal_nop_ar2_logic_larger_s* o ){return ">";} \
   static inline tp_t opal_nop_ar2_logic_larger_s_type_vop_ap( const opal_nop_ar2_logic_larger_s* o ){return TYPEOF_bhvm_vop_ar2_logic_larger_s;} \
   static inline sz_t opal_nop_ar2_logic_larger_s_mcode_push_dp_holor( const opal_nop_ar2_logic_larger_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_logic_smaller_s 3872490393
+#define TYPEOF_opal_nop_ar2_logic_smaller_s 0x2568290BE99FD579ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_smaller_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_smaller_s ) \
     {aware_t _;}; \
@@ -811,7 +811,7 @@
   static inline sc_t opal_nop_ar2_logic_smaller_s_symbol( const opal_nop_ar2_logic_smaller_s* o ){return "<";} \
   static inline tp_t opal_nop_ar2_logic_smaller_s_type_vop_ap( const opal_nop_ar2_logic_smaller_s* o ){return TYPEOF_bhvm_vop_ar2_logic_smaller_s;} \
   static inline sz_t opal_nop_ar2_logic_smaller_s_mcode_push_dp_holor( const opal_nop_ar2_logic_smaller_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_logic_larger_equal_s 4287251147
+#define TYPEOF_opal_nop_ar2_logic_larger_equal_s 0xD94C7AC8CC86918Bull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_larger_equal_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_larger_equal_s ) \
     {aware_t _;}; \
@@ -822,7 +822,7 @@
   static inline sc_t opal_nop_ar2_logic_larger_equal_s_symbol( const opal_nop_ar2_logic_larger_equal_s* o ){return ">=";} \
   static inline tp_t opal_nop_ar2_logic_larger_equal_s_type_vop_ap( const opal_nop_ar2_logic_larger_equal_s* o ){return TYPEOF_bhvm_vop_ar2_logic_larger_equal_s;} \
   static inline sz_t opal_nop_ar2_logic_larger_equal_s_mcode_push_dp_holor( const opal_nop_ar2_logic_larger_equal_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_logic_smaller_equal_s 1912517170
+#define TYPEOF_opal_nop_ar2_logic_smaller_equal_s 0x02EC3516D727CA92ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_smaller_equal_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_smaller_equal_s ) \
     {aware_t _;}; \
@@ -833,7 +833,7 @@
   static inline sc_t opal_nop_ar2_logic_smaller_equal_s_symbol( const opal_nop_ar2_logic_smaller_equal_s* o ){return "<=";} \
   static inline tp_t opal_nop_ar2_logic_smaller_equal_s_type_vop_ap( const opal_nop_ar2_logic_smaller_equal_s* o ){return TYPEOF_bhvm_vop_ar2_logic_smaller_equal_s;} \
   static inline sz_t opal_nop_ar2_logic_smaller_equal_s_mcode_push_dp_holor( const opal_nop_ar2_logic_smaller_equal_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_logic_and_s 3794587412
+#define TYPEOF_opal_nop_ar2_logic_and_s 0xBEF1692B1434DC94ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_and_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_and_s ) \
     {aware_t _;}; \
@@ -844,7 +844,7 @@
   static inline sc_t opal_nop_ar2_logic_and_s_symbol( const opal_nop_ar2_logic_and_s* o ){return "&&";} \
   static inline tp_t opal_nop_ar2_logic_and_s_type_vop_ap( const opal_nop_ar2_logic_and_s* o ){return TYPEOF_bhvm_vop_ar2_logic_and_s;} \
   static inline sz_t opal_nop_ar2_logic_and_s_mcode_push_dp_holor( const opal_nop_ar2_logic_and_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_logic_or_s 935785202
+#define TYPEOF_opal_nop_ar2_logic_or_s 0x8F57AECDC5F91C32ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_logic_or_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_logic_or_s ) \
     {aware_t _;}; \
@@ -855,7 +855,7 @@
   static inline sc_t opal_nop_ar2_logic_or_s_symbol( const opal_nop_ar2_logic_or_s* o ){return "||";} \
   static inline tp_t opal_nop_ar2_logic_or_s_type_vop_ap( const opal_nop_ar2_logic_or_s* o ){return TYPEOF_bhvm_vop_ar2_logic_or_s;} \
   static inline sz_t opal_nop_ar2_logic_or_s_mcode_push_dp_holor( const opal_nop_ar2_logic_or_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){return -1;}
-#define TYPEOF_opal_nop_ar2_cat_s 2733504900
+#define TYPEOF_opal_nop_ar2_cat_s 0x05FBE8BEB89AE344ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_cat_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_cat_s ) \
     {aware_t _;}; \
@@ -867,7 +867,7 @@
   static inline tp_t opal_nop_ar2_cat_s_type_vop_ap( const opal_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar2_cat_s;} \
   static inline tp_t opal_nop_ar2_cat_s_type_vop_dp_a( const opal_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar1_cat_dp_a_s;} \
   static inline tp_t opal_nop_ar2_cat_s_type_vop_dp_b( const opal_nop_ar2_cat_s* o ){return TYPEOF_bhvm_vop_ar1_cat_dp_b_s;}
-#define TYPEOF_opal_nop_ar2_ccat_s 4100985691
+#define TYPEOF_opal_nop_ar2_ccat_s 0x3B5825640C9A9FDBull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_ccat_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_ccat_s ) \
     {aware_t _;}; \
@@ -879,7 +879,7 @@
   static inline tp_t opal_nop_ar2_ccat_s_type_vop_ap( const opal_nop_ar2_ccat_s* o ){return TYPEOF_bhvm_vop_ar2_ccat_s;} \
   static inline tp_t opal_nop_ar2_ccat_s_type_vop_dp_a( const opal_nop_ar2_ccat_s* o ){return TYPEOF_bhvm_vop_ar1_ccat_dp_a_s;} \
   static inline tp_t opal_nop_ar2_ccat_s_type_vop_dp_b( const opal_nop_ar2_ccat_s* o ){return TYPEOF_bhvm_vop_ar1_ccat_dp_b_s;}
-#define TYPEOF_opal_nop_ar2_order_inc_s 4266137955
+#define TYPEOF_opal_nop_ar2_order_inc_s 0x8209412FD9D70323ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_order_inc_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_order_inc_s ) \
     {aware_t _;}; \
@@ -891,7 +891,7 @@
   void opal_nop_ar2_order_inc_s_mcode_push_ap_track( const opal_nop_ar2_order_inc_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
   static inline tp_t opal_nop_ar2_order_inc_s_type_vop_dp_a( const opal_nop_ar2_order_inc_s* o ){return 0;} \
   static inline tp_t opal_nop_ar2_order_inc_s_type_vop_dp_b( const opal_nop_ar2_order_inc_s* o ){return TYPEOF_bhvm_vop_ar1_add_dp_b_s;}
-#define TYPEOF_opal_nop_ar2_order_dec_s 435788403
+#define TYPEOF_opal_nop_ar2_order_dec_s 0x25BE43FCA36F0793ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_order_dec_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_order_dec_s ) \
     {aware_t _;}; \
@@ -902,7 +902,7 @@
   bl_t opal_nop_ar2_order_dec_s_solve( const opal_nop_ar2_order_dec_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   sz_t opal_nop_ar2_order_dec_s_mcode_push_ap_holor( const opal_nop_ar2_order_dec_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ); \
   sz_t opal_nop_ar2_order_dec_s_mcode_push_dp_holor( const opal_nop_ar2_order_dec_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf );
-#define TYPEOF_opal_nop_ar2_cyclic_s 3706205743
+#define TYPEOF_opal_nop_ar2_cyclic_s 0x540C907D1F408E0Full
 #define BETH_EXPAND_ITEM_opal_nop_ar2_cyclic_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_cyclic_s ) \
     {aware_t _;tp_t name;}; \
@@ -915,7 +915,7 @@
   static inline void opal_nop_ar2_cyclic_s_mcode_push_ap_track( const opal_nop_ar2_cyclic_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." );} \
   static inline void opal_nop_ar2_cyclic_s_mcode_push_dp_track( const opal_nop_ar2_cyclic_s* o, const opal_nop_solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." );} \
   static inline sz_t opal_nop_ar2_cyclic_s_mcode_push_dp_holor( const opal_nop_ar2_cyclic_s* o, const opal_nop_solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ){ERR_fa( "Not implemented." ); return -1;}
-#define TYPEOF_opal_nop_ar2_rands_s 3400032036
+#define TYPEOF_opal_nop_ar2_rands_s 0x730B8F6E7A942D24ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_rands_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_rands_s ) \
     {aware_t _;}; \
@@ -925,7 +925,7 @@
   static inline sz_t opal_nop_ar2_rands_s_priority( const opal_nop_ar2_rands_s* o ){return 8;} \
   bl_t opal_nop_ar2_rands_s_solve( const opal_nop_ar2_rands_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result ); \
   void opal_nop_ar2_rands_s_settle( const opal_nop_ar2_rands_s* o, opal_context* context, const opal_nop_solve_result_s* result, opal_nop** out_nop, opal_nop_solve_result_s** out_result );
-#define TYPEOF_opal_nop_ar2_reshape_s 3345941670
+#define TYPEOF_opal_nop_ar2_reshape_s 0x4A0AA8C27D0792E6ull
 #define BETH_EXPAND_ITEM_opal_nop_ar2_reshape_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar2_reshape_s ) \
     {aware_t _;}; \
@@ -983,9 +983,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_nop_ar3
 
-#define TYPEOF_opal_nop_ar3 3098891386
-#define TYPEOF_opal_nop_ar3_s 1606629796
-#define TYPEOF_opal_nop_ar3_iff_s 2253549920
+#define TYPEOF_opal_nop_ar3 0xE97C6958169E7E5Aull
+#define TYPEOF_opal_nop_ar3_s 0x294AB3672529DA64ull
+#define TYPEOF_opal_nop_ar3_iff_s 0x4CA37E772D4CCAC0ull
 #define BETH_EXPAND_ITEM_opal_nop_ar3_iff_s \
   BCORE_DECLARE_OBJECT( opal_nop_ar3_iff_s ) \
     {aware_t _;}; \
@@ -1009,34 +1009,34 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_eval_nop
 
-#define TYPEOF_opal_eval_nop 4188901640
-#define TYPEOF_opal_eval_nop_s 3173082098
-#define TYPEOF_opal_eval_nop_result_s 327116934
+#define TYPEOF_opal_eval_nop 0x4A5BE4CC16DB8CE8ull
+#define TYPEOF_opal_eval_nop_s 0x4E6645AB705D11B2ull
+#define TYPEOF_opal_eval_nop_result_s 0x08E93DE88DAA6BE6ull
 #define BETH_EXPAND_ITEM_opal_eval_nop_result_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_result_s ) \
     {aware_t _;sz_t total_tests;sz_t solvable_tests;sz_t tolerated_errors;bl_t error;st_s msg;}; \
   void opal_eval_nop_result_s_resolve( const opal_eval_nop_result_s* o );
-#define TYPEOF_opal_eval_nop_param_s 3224023100
+#define TYPEOF_opal_eval_nop_param_s 0x32B6053F9508C09Cull
 #define BETH_EXPAND_ITEM_opal_eval_nop_param_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_param_s ) \
     {aware_t _;opal_nop* nop;opal_holor_s* ha;opal_holor_s* hb;opal_holor_s* hc;opal_holor_s* hr;bcore_sink* log;sz_t verbosity;bcore_prsg* prsg;}; \
   static inline void opal_eval_nop_param_s_init_x( opal_eval_nop_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   void opal_eval_nop_param_s_set( opal_eval_nop_param_s* o, const opal_eval_nop_param_s* src );
-#define TYPEOF_opal_eval_nop_generator_s 2743071660
+#define TYPEOF_opal_eval_nop_generator_s 0x6106F6806ECFE34Cull
 #define BETH_EXPAND_ITEM_opal_eval_nop_generator_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_generator_s ) \
     {aware_t _;opal_eval_nop_param_s param;bl_t set_htp;bl_t set_value;bl_t set_shape;bl_t set_dim;bl_t set_v_type;sz_t max_shape_size;sz_t max_dim;f3_t v_min;f3_t v_max;sz_t cycles;bcore_arr_uz_s tolerated_cycles;opal_eval_nop* eval;}; \
   opal_eval_nop_result_s* opal_eval_nop_generator_s_run( const opal_eval_nop_generator_s* o, opal_eval_nop_result_s* result ); \
   static inline void opal_eval_nop_generator_s_set_param( opal_eval_nop_generator_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
   er_t opal_eval_nop_generator_s_main( opal_eval_nop_generator_s* o, bcore_main_frame_s* frame );
-#define TYPEOF_opal_eval_nop_show_param_s 47537560
+#define TYPEOF_opal_eval_nop_show_param_s 0x9EFE40A781EDAFB8ull
 #define BETH_EXPAND_ITEM_opal_eval_nop_show_param_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_show_param_s ) \
     {aware_t _;opal_eval_nop_param_s param;}; \
   static inline void opal_eval_nop_show_param_s_set_param( opal_eval_nop_show_param_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
   er_t opal_eval_nop_show_param_s_main( opal_eval_nop_show_param_s* o, bcore_main_frame_s* frame ); \
   static inline opal_eval_nop_result_s* opal_eval_nop_show_param_s_run( const opal_eval_nop_show_param_s* o, opal_eval_nop_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
-#define TYPEOF_opal_eval_nop_arr_s 271786002
+#define TYPEOF_opal_eval_nop_arr_s 0xC0F16F22EB64D772ull
 #define BETH_EXPAND_ITEM_opal_eval_nop_arr_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_arr_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_eval_nop, );}; \
@@ -1051,21 +1051,21 @@
       bcore_array_t_push( TYPEOF_opal_eval_nop_arr_s, ( bcore_array* )o, sr_t_create( t ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_eval_nop_set_s 802013493
+#define TYPEOF_opal_eval_nop_set_s 0xC584D398EAD92ED5ull
 #define BETH_EXPAND_ITEM_opal_eval_nop_set_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_set_s ) \
     {aware_t _;opal_eval_nop_param_s param;opal_eval_nop_arr_s arr;}; \
   static inline void opal_eval_nop_set_s_set_param( opal_eval_nop_set_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
   er_t opal_eval_nop_set_s_main( opal_eval_nop_set_s* o, bcore_main_frame_s* frame ); \
   opal_eval_nop_result_s* opal_eval_nop_set_s_run( const opal_eval_nop_set_s* o, opal_eval_nop_result_s* result );
-#define TYPEOF_opal_eval_nop_ar1_s 626857419
+#define TYPEOF_opal_eval_nop_ar1_s 0x057C32243444E70Bull
 #define BETH_EXPAND_ITEM_opal_eval_nop_ar1_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_ar1_s ) \
     {aware_t _;opal_eval_nop_param_s param;opal_context* context;}; \
   opal_eval_nop_result_s* opal_eval_nop_ar1_s_run( const opal_eval_nop_ar1_s* o, opal_eval_nop_result_s* result ); \
   static inline void opal_eval_nop_ar1_s_set_param( opal_eval_nop_ar1_s* o, const opal_eval_nop_param_s* param ){opal_eval_nop_param_s_set( &o->param, param );} \
   er_t opal_eval_nop_ar1_s_main( opal_eval_nop_ar1_s* o, bcore_main_frame_s* frame );
-#define TYPEOF_opal_eval_nop_ar2_s 3619862610
+#define TYPEOF_opal_eval_nop_ar2_s 0xE99CAF2423F21432ull
 #define BETH_EXPAND_ITEM_opal_eval_nop_ar2_s \
   BCORE_DECLARE_OBJECT( opal_eval_nop_ar2_s ) \
     {aware_t _;opal_eval_nop_param_s param;opal_context* context;}; \
@@ -1113,10 +1113,10 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_sem
 
-#define TYPEOF_opal_sem 2402503155
-#define TYPEOF_opal_sem_s 998054677
-#define TYPEOF_cell 1759288501
-#define TYPEOF_opal_sem_link_s 3914525542
+#define TYPEOF_opal_sem 0x119AE3C204812B93ull
+#define TYPEOF_opal_sem_s 0xEC1F08139A1E3E55ull
+#define TYPEOF_cell 0xD98B1E90FD653435ull
+#define TYPEOF_opal_sem_link_s 0xFF23A8EDAE00D066ull
 #define BETH_EXPAND_ITEM_opal_sem_link_s \
   BCORE_DECLARE_OBJECT( opal_sem_link_s ) \
     {aware_t _;tp_t name;bl_t protected;bl_t visible;opal_sem_link_s* up;opal_sem_link_s* dn;vd_t cell;bl_t exit;}; \
@@ -1124,7 +1124,7 @@
   static inline void opal_sem_link_s_set_name_visible( opal_sem_link_s* o, tp_t name ){o->name = name; o->visible = true;} \
   static inline void opal_sem_link_s_set_name_invisible( opal_sem_link_s* o, tp_t name ){o->name = name; o->visible = false;} \
   static inline bl_t opal_sem_link_s_is_visible( const opal_sem_link_s* o ){return o->visible;}
-#define TYPEOF_opal_sem_links_s 583018727
+#define TYPEOF_opal_sem_links_s 0x7F8BACDF36F759C7ull
 #define BETH_EXPAND_ITEM_opal_sem_links_s \
   BCORE_DECLARE_OBJECT( opal_sem_links_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_sem_link_s, );}; \
@@ -1144,7 +1144,7 @@
       bcore_array_t_push( TYPEOF_opal_sem_links_s, ( bcore_array* )o, sr_t_create( TYPEOF_opal_sem_link_s ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_sem_body_s 4148845946
+#define TYPEOF_opal_sem_body_s 0x3B804C70042BB2FAull
 #define BETH_EXPAND_ITEM_opal_sem_body_s \
   BCORE_DECLARE_OBJECT( opal_sem_body_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_sem, );}; \
@@ -1161,7 +1161,7 @@
       bcore_array_t_push( TYPEOF_opal_sem_body_s, ( bcore_array* )o, sr_t_create( t ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_sem_cell_s 1449135970
+#define TYPEOF_opal_sem_cell_s 0xC780A2C0EE839242ull
 #define BETH_EXPAND_ITEM_opal_sem_cell_s \
   BCORE_DECLARE_OBJECT( opal_sem_cell_s ) \
     {aware_t _;tp_t name;bl_t visible;opal_sem_links_s encs;opal_sem_links_s excs;opal_sem_body_s* body;opal_sem_cell_s* parent;opal_sem_context_s* context;sz_t priority;opal_nop* nop;bcore_source_point_s source_point;opal_sem_cell_s* wrapped_cell;}; \
@@ -1178,7 +1178,7 @@
   static inline bl_t opal_sem_cell_s_is_wrapper( const opal_sem_cell_s* o ){return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL;} \
   opal_sem_cell_s* opal_sem_cell_s_get_cell_by_name( opal_sem_cell_s* o, tp_t name ); \
   opal_sem_link_s* opal_sem_cell_s_get_link_by_name( opal_sem_cell_s* o, tp_t name );
-#define TYPEOF_opal_sem_stack_flag_s 2567426165
+#define TYPEOF_opal_sem_stack_flag_s 0x80C5E705470926D5ull
 #define BETH_EXPAND_ITEM_opal_sem_stack_flag_s \
   BCORE_DECLARE_OBJECT( opal_sem_stack_flag_s ) \
     {aware_t _;};
@@ -1232,9 +1232,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_sem_context
 
-#define TYPEOF_opal_sem_context 3027567559
-#define TYPEOF_opal_sem_context_s 1373951201
-#define TYPEOF_opal_sem_context_s 1373951201
+#define TYPEOF_opal_sem_context 0x93D6278720517767ull
+#define TYPEOF_opal_sem_context_s 0xBC8FE9EF583316A1ull
+#define TYPEOF_opal_sem_context_s 0xBC8FE9EF583316A1ull
 #define BETH_EXPAND_ITEM_opal_sem_context_s \
   BCORE_DECLARE_OBJECT( opal_sem_context_s ) \
     {aware_t _;opal_nop_context_s nop_context;bcore_hmap_name_s hmap_name;bcore_arr_st_s arr_symbol_op2;bcore_hmap_tp_s control_types;bcore_hmap_tp_s reserved_names;}; \
@@ -1254,9 +1254,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_sem_id
 
-#define TYPEOF_opal_sem_id 450404681
-#define TYPEOF_opal_sem_id_s 4106934275
-#define TYPEOF_opal_sem_id_s 4106934275
+#define TYPEOF_opal_sem_id 0x56D6EE4EE146CDA9ull
+#define TYPEOF_opal_sem_id_s 0xFA4C51F178E4DB03ull
+#define TYPEOF_opal_sem_id_s 0xFA4C51F178E4DB03ull
 #define BETH_EXPAND_ITEM_opal_sem_id_s \
   BCORE_DECLARE_OBJECT( opal_sem_id_s ) \
     {aware_t _;bcore_arr_tp_s arr_tp;}; \
@@ -1273,9 +1273,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_sem_builder
 
-#define TYPEOF_opal_sem_builder 1308999267
-#define TYPEOF_opal_sem_builder_s 3027956485
-#define TYPEOF_opal_sem_builder_s 3027956485
+#define TYPEOF_opal_sem_builder 0xFDB7521C8FDF88A3ull
+#define TYPEOF_opal_sem_builder_s 0x7FED14E5533C84A5ull
+#define TYPEOF_opal_sem_builder_s 0x7FED14E5533C84A5ull
 #define BETH_EXPAND_ITEM_opal_sem_builder_s \
   BCORE_DECLARE_OBJECT( opal_sem_builder_s ) \
     {aware_t _;opal_sem_context_s* context;opal_sem_cell_s* cell_context;opal_sem_cell_s* cell_frame;}; \
@@ -1288,9 +1288,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_sem_tree
 
-#define TYPEOF_opal_sem_tree 2010001972
-#define TYPEOF_opal_sem_tree_s 1064238374
-#define TYPEOF_opal_sem_tree_node_s 1291463251
+#define TYPEOF_opal_sem_tree 0x56E89C090E7A32B4ull
+#define TYPEOF_opal_sem_tree_s 0xAEB9953E128E38C6ull
+#define TYPEOF_opal_sem_tree_node_s 0xA4637EA997769B13ull
 #define BETH_EXPAND_ITEM_opal_sem_tree_node_s \
   BCORE_DECLARE_OBJECT( opal_sem_tree_node_s ) \
     {aware_t _;sz_t id;opal_sem_cell_s* cell;opal_sem_tree_node_s* parent;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_sem_tree_node_s, );}; \
@@ -1306,7 +1306,7 @@
       bcore_array_t_push( TYPEOF_opal_sem_tree_node_s, ( bcore_array* )o, sr_t_create( TYPEOF_opal_sem_tree_node_s ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_sem_tree_s 1064238374
+#define TYPEOF_opal_sem_tree_s 0xAEB9953E128E38C6ull
 #define BETH_EXPAND_ITEM_opal_sem_tree_s \
   BCORE_DECLARE_OBJECT( opal_sem_tree_s ) \
     {aware_t _;sz_t id_base;opal_sem_tree_node_s* root;}; \
@@ -1325,13 +1325,13 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_net
 
-#define TYPEOF_opal_net 2850742067
-#define TYPEOF_opal_net_s 3651653717
-#define TYPEOF_opal_net_link_s 1463367078
+#define TYPEOF_opal_net 0x5D6D8FC19EF09313ull
+#define TYPEOF_opal_net_s 0xD11C6ED2EDBC51D5ull
+#define TYPEOF_opal_net_link_s 0xBEC64DD7FCB55AE6ull
 #define BETH_EXPAND_ITEM_opal_net_link_s \
   BCORE_DECLARE_OBJECT( opal_net_link_s ) \
     {aware_t _;vd_t node;};
-#define TYPEOF_opal_net_links_s 3829809703
+#define TYPEOF_opal_net_links_s 0xD5746702F3BEB147ull
 #define BETH_EXPAND_ITEM_opal_net_links_s \
   BCORE_DECLARE_OBJECT( opal_net_links_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_net_link_s, );}; \
@@ -1345,14 +1345,14 @@
       bcore_array_t_push( TYPEOF_opal_net_links_s, ( bcore_array* )o, sr_t_create( TYPEOF_opal_net_link_s ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_net_node_s 3101198586
+#define TYPEOF_opal_net_node_s 0x9351C9C406B6173Aull
 #define BETH_EXPAND_ITEM_opal_net_node_s \
   BCORE_DECLARE_OBJECT( opal_net_node_s ) \
     {aware_t _;opal_net_links_s upls;opal_net_links_s dnls;tp_t name;opal_sem_id_s* sem_id;bl_t flag;bl_t probe;sz_t id;bhvm_mcode_node_s* mnode;opal_nop* nop;opal_nop_solve_result_s* result;opal_context* context;bcore_source_point_s* source_point;}; \
   sz_t opal_net_node_s_up_index( const opal_net_node_s* o, const opal_net_node_s* node ); \
   void opal_net_node_s_set_nop_d( opal_net_node_s* o, opal_nop* nop ); \
   static inline bl_t opal_net_node_s_is_cyclic( const opal_net_node_s* o ){return ( o->mnode ) ? o->mnode->cyclic : opal_nop_a_is_cyclic( o->nop );}
-#define TYPEOF_opal_net_node_adl_s 2025295350
+#define TYPEOF_opal_net_node_adl_s 0x509B15320CE81796ull
 #define BETH_EXPAND_ITEM_opal_net_node_adl_s \
   BCORE_DECLARE_OBJECT( opal_net_node_adl_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_net_node_s, );}; \
@@ -1366,7 +1366,7 @@
       bcore_array_t_push( TYPEOF_opal_net_node_adl_s, ( bcore_array* )o, sr_t_create( TYPEOF_opal_net_node_s ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_net_nodes_s 3175198307
+#define TYPEOF_opal_net_nodes_s 0xB7AE4517C9DAF203ull
 #define BETH_EXPAND_ITEM_opal_net_nodes_s \
   BCORE_DECLARE_OBJECT( opal_net_nodes_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_net_node_s, );}; \
@@ -1381,7 +1381,7 @@
       bcore_array_t_push( TYPEOF_opal_net_nodes_s, ( bcore_array* )o, sr_t_create( TYPEOF_opal_net_node_s ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_net_cell_s 2933494946
+#define TYPEOF_opal_net_cell_s 0x872347AB3D381CC2ull
 #define BETH_EXPAND_ITEM_opal_net_cell_s \
   BCORE_DECLARE_OBJECT( opal_net_cell_s ) \
     {aware_t _;sz_t max_depth;opal_net_nodes_s body;opal_net_nodes_s encs;opal_net_nodes_s excs;opal_context* context;}; \
@@ -1427,9 +1427,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_net_builder
 
-#define TYPEOF_opal_net_builder 685280419
-#define TYPEOF_opal_net_builder_s 2298087749
-#define TYPEOF_opal_net_builder_s 2298087749
+#define TYPEOF_opal_net_builder 0x53A00C404CA6E023ull
+#define TYPEOF_opal_net_builder_s 0x86E50E9200C00825ull
+#define TYPEOF_opal_net_builder_s 0x86E50E9200C00825ull
 #define BETH_EXPAND_ITEM_opal_net_builder_s \
   BCORE_DECLARE_OBJECT( opal_net_builder_s ) \
     {aware_t _;opal_sem_builder_s sem_builder;bhvm_holor_adl_s input_holors;bcore_sink* log;}; \
@@ -1447,9 +1447,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_frame
 
-#define TYPEOF_opal_frame 2303180117
-#define TYPEOF_opal_frame_s 2207737015
-#define TYPEOF_opal_frame_s 2207737015
+#define TYPEOF_opal_frame 0xB871A75DF4155775ull
+#define TYPEOF_opal_frame_s 0x269090A5B208E077ull
+#define TYPEOF_opal_frame_s 0x269090A5B208E077ull
 #define BETH_EXPAND_ITEM_opal_frame_s \
   BCORE_DECLARE_OBJECT( opal_frame_s ) \
     {aware_t _;bcore_sink* log;opal_context* context;bhvm_mcode_frame_s* mcf;bl_t is_cyclic;bl_t setup;sz_t size_en;sz_t size_ex;opal_frame_hidx_s hidx_en;opal_frame_hidx_s hidx_ex;opal_frame_hidx_s hidx_ada;}; \
@@ -1485,11 +1485,11 @@
   opal_frame_s* opal_frame_s_run_dp( opal_frame_s* o, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en ); \
   opal_frame_s* opal_frame_s_run_ap_adl( opal_frame_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex ); \
   opal_frame_s* opal_frame_s_run_dp_adl( opal_frame_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en );
-#define TYPEOF_opal_frame_custom_hmeta_s 2503994969
+#define TYPEOF_opal_frame_custom_hmeta_s 0x93A48653768D3B59ull
 #define BETH_EXPAND_ITEM_opal_frame_custom_hmeta_s \
   BCORE_DECLARE_OBJECT( opal_frame_custom_hmeta_s ) \
     {aware_t _;sz_t ur_slot;sz_t ur_src;};
-#define TYPEOF_opal_frame_cyclic_s 3859514071
+#define TYPEOF_opal_frame_cyclic_s 0x995E0A8DD44E6957ull
 #define BETH_EXPAND_ITEM_opal_frame_cyclic_s \
   BCORE_DECLARE_OBJECT( opal_frame_cyclic_s ) \
     {aware_t _;opal_frame_s* frame;sz_t unroll_size;bl_t setup;sz_t unroll_index;bhvm_mcode_track_adl_s* track_adl_ap;bhvm_mcode_track_adl_s* track_adl_dp;bhvm_mcode_track_adl_s* track_adl_ap_setup;opal_frame_hidx_ads_s hidx_ads_en;opal_frame_hidx_ads_s hidx_ads_ex;}; \
@@ -1518,9 +1518,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_frame_hidx
 
-#define TYPEOF_opal_frame_hidx 672256437
-#define TYPEOF_opal_frame_hidx_s 472666071
-#define TYPEOF_opal_frame_hidx_s 472666071
+#define TYPEOF_opal_frame_hidx 0x52B2BB21BA315475ull
+#define TYPEOF_opal_frame_hidx_s 0xD4D8DFE337DB6577ull
+#define TYPEOF_opal_frame_hidx_s 0xD4D8DFE337DB6577ull
 #define BETH_EXPAND_ITEM_opal_frame_hidx_s \
   BCORE_DECLARE_OBJECT( opal_frame_hidx_s ) \
     {aware_t _;bcore_arr_sz_s* arr;}; \
@@ -1534,7 +1534,7 @@
   static inline bhvm_holor_s* opal_frame_hidx_s_get_pclass_holor( const opal_frame_hidx_s* o, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index ){return bhvm_mcode_hbase_s_get_holor( hbase, opal_frame_hidx_s_get_pclass_idx( o, hbase, pclass, index ) );} \
   static inline bhvm_mcode_hmeta* opal_frame_hidx_s_get_pclass_hmeta( const opal_frame_hidx_s* o, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index ){return bhvm_mcode_hbase_s_get_hmeta( hbase, opal_frame_hidx_s_get_pclass_idx( o, hbase, pclass, index ) );} \
   opal_frame_hidx_s* opal_frame_hidx_s_replace_index( opal_frame_hidx_s* o, bcore_arr_sz_s* index_map );
-#define TYPEOF_opal_frame_hidx_ads_s 3521098546
+#define TYPEOF_opal_frame_hidx_ads_s 0x3B15C6EBF08B98D2ull
 #define BETH_EXPAND_ITEM_opal_frame_hidx_ads_s \
   BCORE_DECLARE_OBJECT( opal_frame_hidx_ads_s ) \
     {aware_t _;BCORE_ARRAY_DYN_SOLID_STATIC_S( opal_frame_hidx_s, );}; \
@@ -1561,27 +1561,27 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_eval_frame
 
-#define TYPEOF_opal_eval_frame 785128296
-#define TYPEOF_opal_eval_frame_s 673046290
-#define TYPEOF_opal_eval_frame_result_s 3179823334
+#define TYPEOF_opal_eval_frame 0x4B9F7CCD20FCA388ull
+#define TYPEOF_opal_eval_frame_s 0x169B9E13956B9292ull
+#define TYPEOF_opal_eval_frame_result_s 0xB85688A323270006ull
 #define BETH_EXPAND_ITEM_opal_eval_frame_result_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_result_s ) \
     {aware_t _;bl_t error;st_s msg;}; \
   void opal_eval_frame_result_s_resolve( opal_eval_frame_result_s* o );
-#define TYPEOF_opal_eval_frame_param_s 2283680028
+#define TYPEOF_opal_eval_frame_param_s 0x6C3E8DE6385E6B3Cull
 #define BETH_EXPAND_ITEM_opal_eval_frame_param_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_param_s ) \
     {aware_t _;bcore_sink* log;sz_t verbosity;u3_t rval;st_s name;vd_t src;bhvm_holor_adl_s* in;bhvm_holor_adl_s* out;bl_t recovery_test;bl_t jacobian_test;f3_t max_dev;f3_t epsilon;}; \
   static inline void opal_eval_frame_param_s_init_x( opal_eval_frame_param_s* o ){o->log = bcore_fork( BCORE_STDOUT );} \
   void opal_eval_frame_param_s_set( opal_eval_frame_param_s* o, const opal_eval_frame_param_s* src );
-#define TYPEOF_opal_eval_frame_show_param_s 2983012792
+#define TYPEOF_opal_eval_frame_show_param_s 0x4D82F0C5D0D28C18ull
 #define BETH_EXPAND_ITEM_opal_eval_frame_show_param_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_show_param_s ) \
     {aware_t _;opal_eval_frame_param_s param;}; \
   static inline void opal_eval_frame_show_param_s_set_param( opal_eval_frame_show_param_s* o, const opal_eval_frame_param_s* param ){opal_eval_frame_param_s_set( &o->param, param );} \
   er_t opal_eval_frame_show_param_s_main( opal_eval_frame_show_param_s* o, bcore_main_frame_s* frame ); \
   static inline opal_eval_frame_result_s* opal_eval_frame_show_param_s_run( const opal_eval_frame_show_param_s* o, opal_eval_frame_result_s* result ){bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result;}
-#define TYPEOF_opal_eval_frame_arr_s 528657778
+#define TYPEOF_opal_eval_frame_arr_s 0xA8EB91B9450EB892ull
 #define BETH_EXPAND_ITEM_opal_eval_frame_arr_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_arr_s ) \
     {aware_t _;BCORE_ARRAY_DYN_LINK_STATIC_S( opal_eval_frame, );}; \
@@ -1596,21 +1596,21 @@
       bcore_array_t_push( TYPEOF_opal_eval_frame_arr_s, ( bcore_array* )o, sr_t_create( t ) ); \
       return o->data[ o->size - 1 ]; \
   }
-#define TYPEOF_opal_eval_frame_set_s 1038200085
+#define TYPEOF_opal_eval_frame_set_s 0xABCBF62F43117B75ull
 #define BETH_EXPAND_ITEM_opal_eval_frame_set_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_set_s ) \
     {aware_t _;opal_eval_frame_param_s param;opal_eval_frame_arr_s arr;}; \
   static inline void opal_eval_frame_set_s_set_param( opal_eval_frame_set_s* o, const opal_eval_frame_param_s* param ){opal_eval_frame_param_s_set( &o->param, param );} \
   er_t opal_eval_frame_set_s_main( opal_eval_frame_set_s* o, bcore_main_frame_s* frame ); \
   opal_eval_frame_result_s* opal_eval_frame_set_s_run( const opal_eval_frame_set_s* o, opal_eval_frame_result_s* result );
-#define TYPEOF_opal_eval_frame_plain_s 3361958737
+#define TYPEOF_opal_eval_frame_plain_s 0x9FB160FC03FA1C31ull
 #define BETH_EXPAND_ITEM_opal_eval_frame_plain_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_plain_s ) \
     {aware_t _;opal_eval_frame_param_s param;sz_t ap_cycles;}; \
   opal_eval_frame_result_s* opal_eval_frame_plain_s_run( const opal_eval_frame_plain_s* o, opal_eval_frame_result_s* result ); \
   static inline void opal_eval_frame_plain_s_set_param( opal_eval_frame_plain_s* o, const opal_eval_frame_param_s* param ){opal_eval_frame_param_s_set( &o->param, param );} \
   er_t opal_eval_frame_plain_s_main( opal_eval_frame_plain_s* o, bcore_main_frame_s* frame );
-#define TYPEOF_opal_eval_frame_cyclic_s 1180851996
+#define TYPEOF_opal_eval_frame_cyclic_s 0xDDE64EC20A199D3Cull
 #define BETH_EXPAND_ITEM_opal_eval_frame_cyclic_s \
   BCORE_DECLARE_OBJECT( opal_eval_frame_cyclic_s ) \
     {aware_t _;opal_eval_frame_param_s param;}; \
@@ -1656,9 +1656,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_adaptive
 
-#define TYPEOF_opal_adaptive 1058255374
-#define TYPEOF_opal_adaptive_s 431057104
-#define TYPEOF_opal_adaptive_s 431057104
+#define TYPEOF_opal_adaptive 0x14329F62AB3B1A2Eull
+#define TYPEOF_opal_adaptive_s 0x3A11CE1909CC2850ull
+#define TYPEOF_opal_adaptive_s 0x3A11CE1909CC2850ull
 #define BETH_EXPAND_ITEM_opal_adaptive_s \
   BCORE_DECLARE_OBJECT( opal_adaptive_s ) \
     {aware_t _;vd_t src;opal_frame_s frame;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;}; \
@@ -1670,14 +1670,14 @@
   bhpt_adaptor_probe_s* opal_adaptive_s_get_adaptor_probe( const opal_adaptive_s* o, bhpt_adaptor_probe_s* probe ); \
   static inline void opal_adaptive_s_rebind_holors( opal_adaptive_s* o ){opal_frame_s_bind_holors( &o->frame );} \
   void opal_adaptive_s_status_to_sink( const opal_adaptive_s* o, sz_t verbosity, bcore_sink* sink );
-#define TYPEOF_opal_adaptive_builder_s 3443060476
+#define TYPEOF_opal_adaptive_builder_s 0xD5FB511296336B1Cull
 #define BETH_EXPAND_ITEM_opal_adaptive_builder_s \
   BCORE_DECLARE_OBJECT( opal_adaptive_builder_s ) \
     {aware_t _;vd_t src;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;}; \
   static inline void opal_adaptive_builder_s_set_format_en( opal_adaptive_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_en, format );} \
   static inline void opal_adaptive_builder_s_set_format_ex( opal_adaptive_builder_s* o, const bhvm_holor_s* format ){bhvm_holor_s_copy( &o->holor_frame_ex, format );} \
   bhpt_adaptive* opal_adaptive_builder_s_create_adaptive( const opal_adaptive_builder_s* o );
-#define TYPEOF_opal_adaptive_cyclic_s 3324695814
+#define TYPEOF_opal_adaptive_cyclic_s 0xC0FD71845612D3E6ull
 #define BETH_EXPAND_ITEM_opal_adaptive_cyclic_s \
   BCORE_DECLARE_OBJECT( opal_adaptive_cyclic_s ) \
     {aware_t _;vd_t src;opal_frame_cyclic_s frame;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;bhvm_holor_adl_s* dp_buffer;bl_t dp_value;}; \
@@ -1689,7 +1689,7 @@
   bhpt_adaptor_probe_s* opal_adaptive_cyclic_s_get_adaptor_probe( const opal_adaptive_cyclic_s* o, bhpt_adaptor_probe_s* probe ); \
   static inline void opal_adaptive_cyclic_s_rebind_holors( opal_adaptive_cyclic_s* o ){opal_frame_cyclic_s_bind_holors( &o->frame );} \
   void opal_adaptive_cyclic_s_status_to_sink( const opal_adaptive_cyclic_s* o, sz_t verbosity, bcore_sink* sink );
-#define TYPEOF_opal_adaptive_cyclic_builder_s 649113942
+#define TYPEOF_opal_adaptive_cyclic_builder_s 0x00AB0A725B97B216ull
 #define BETH_EXPAND_ITEM_opal_adaptive_cyclic_builder_s \
   BCORE_DECLARE_OBJECT( opal_adaptive_cyclic_builder_s ) \
     {aware_t _;vd_t src;bhvm_holor_s holor_frame_en;bhvm_holor_s holor_frame_ex;sz_t unroll_size;}; \
@@ -1713,9 +1713,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 // group: opal_adaptor
 
-#define TYPEOF_opal_adaptor 3603928821
-#define TYPEOF_opal_adaptor_s 3242609687
-#define TYPEOF_opal_adaptor_frame_s 842723161
+#define TYPEOF_opal_adaptor 0xCB423D6445E8BD55ull
+#define TYPEOF_opal_adaptor_s 0xB743D5DE0BF96497ull
+#define TYPEOF_opal_adaptor_frame_s 0xD0F6530E7722F299ull
 #define BETH_EXPAND_ITEM_opal_adaptor_frame_s \
   BCORE_DECLARE_OBJECT( opal_adaptor_frame_s ) \
     {aware_t _;vd_t src;opal_frame_s* frame;}; \
@@ -1731,4 +1731,4 @@
 vd_t opal_xoila_out_signal_handler( const bcore_signal_s* o );
 
 #endif // OPAL_XOILA_OUT_H
-// BETH_PLANT_SIGNATURE 1760672411
+// BETH_PLANT_SIGNATURE 7922685545718674846
