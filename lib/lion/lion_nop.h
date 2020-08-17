@@ -823,7 +823,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return "=="; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_equal_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
@@ -832,7 +832,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return "!="; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_unequal_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
@@ -841,7 +841,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return ">"; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_larger_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
@@ -850,7 +850,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return "<"; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_smaller_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
@@ -859,7 +859,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return ">="; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_larger_equal_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
@@ -868,7 +868,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return "<="; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_smaller_equal_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
@@ -877,7 +877,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return "&&"; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_and_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
@@ -886,7 +886,7 @@ group :ar2 = retrievable
         func :: :priority    = { return 6; };
         func :: :eci         = { return true; };
         func :: :symbol      = { return "||"; };
-        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_$R_s; };
+        func :: :type_vop_ap = { return TYPEOF_bhvm_vop_ar2_logic_or_s; };
         func :: :mcode_push_dp_holor = { return -1; }; // no gradient
     };
 

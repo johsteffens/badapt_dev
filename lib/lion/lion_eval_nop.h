@@ -158,7 +158,7 @@ stamp :set = extending :std
                 BLM_RETURNV( :result_s*, result );
             }
             BLM_DOWN();
-        };
+        }
         return result;
     };
 };
