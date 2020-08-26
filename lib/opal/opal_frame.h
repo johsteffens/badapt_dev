@@ -92,29 +92,22 @@ group :hidx =
 
 /// frame member functions
 
-signature @* mutab_from_source( mutable, bcore_source* source );
-signature @* mutab_from_st(     mutable, const st_s* st );
-signature @* mutab_from_sc(     mutable,       sc_t  sc );
-signature @* plain_from_source(   plain, bcore_source* source );
-signature @* plain_from_st(       plain, const st_s* st );
-signature @* plain_from_sc(       plain,       sc_t  sc );
-
 signature void reset( mutable );
 signature void setup( mutable );
 signature void check_integrity( const );
 
-signature :mutab_from_source setup_from_source(      const bhvm_holor_s** en, sz_t size_en );
-signature :mutab_from_st     setup_from_st(          const bhvm_holor_s** en, sz_t size_en );
-signature :mutab_from_sc     setup_from_sc(          const bhvm_holor_s** en, sz_t size_en );
-signature :plain_from_source create_from_source(     const bhvm_holor_s** en, sz_t size_en );
-signature :plain_from_st     create_from_st(         const bhvm_holor_s** en, sz_t size_en );
-signature :plain_from_sc     create_from_sc(         const bhvm_holor_s** en, sz_t size_en );
-signature :mutab_from_source setup_from_source_adl(  const bhvm_holor_adl_s* en );
-signature :mutab_from_st     setup_from_st_adl(      const bhvm_holor_adl_s* en );
-signature :mutab_from_sc     setup_from_sc_adl(      const bhvm_holor_adl_s* en );
-signature :plain_from_source create_from_source_adl( const bhvm_holor_adl_s* en );
-signature :plain_from_st     create_from_st_adl(     const bhvm_holor_adl_s* en );
-signature :plain_from_sc     create_from_sc_adl(     const bhvm_holor_adl_s* en );
+signature @* setup_from_source(      mutable, bcore_source* source, const bhvm_holor_s** en, sz_t size_en );
+signature @* setup_from_st(          mutable,   const st_s* st,     const bhvm_holor_s** en, sz_t size_en );
+signature @* setup_from_sc(          mutable,         sc_t  sc,     const bhvm_holor_s** en, sz_t size_en );
+signature @* create_from_source(     plain,   bcore_source* source, const bhvm_holor_s** en, sz_t size_en );
+signature @* create_from_st(         plain,     const st_s* st,     const bhvm_holor_s** en, sz_t size_en );
+signature @* create_from_sc(         plain,           sc_t  sc,     const bhvm_holor_s** en, sz_t size_en );
+signature @* setup_from_source_adl(  mutable, bcore_source* source, const bhvm_holor_adl_s* en );
+signature @* setup_from_st_adl(      mutable,   const st_s* st,     const bhvm_holor_adl_s* en );
+signature @* setup_from_sc_adl(      mutable,         sc_t  sc,     const bhvm_holor_adl_s* en );
+signature @* create_from_source_adl( plain,   bcore_source* source, const bhvm_holor_adl_s* en );
+signature @* create_from_st_adl(     plain,     const st_s* st,     const bhvm_holor_adl_s* en );
+signature @* create_from_sc_adl(     plain,           sc_t  sc,     const bhvm_holor_adl_s* en );
 
 signature sz_t get_size_en( const ); // number of entry channels
 signature sz_t get_size_ex( const ); // number of exit channels
