@@ -446,7 +446,7 @@ bl_t opal_net_cell_s_is_consistent( const opal_net_cell_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void opal_net_cell_s_copy_x( opal_net_cell_s* o )
+void opal_net_cell_s_copy_x( opal_net_cell_s* o, const opal_net_cell_s* src )
 {
     BFOR_EACH( i, &o->body )
     {

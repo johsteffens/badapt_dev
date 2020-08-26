@@ -137,7 +137,7 @@ stamp :show_param = extending :std
 
 feature 'a' void set_param( mutable, const :param_s* param );
 
-stamp :arr = aware bcore_array { aware :* []; };
+stamp :arr = aware bcore_array { aware :=> []; };
 
 stamp :set = extending :std
 {

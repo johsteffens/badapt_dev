@@ -587,7 +587,7 @@ bl_t lion_net_cell_s_is_consistent( const lion_net_cell_s* o )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void lion_net_cell_s_copy_x( lion_net_cell_s* o )
+void lion_net_cell_s_copy_x( lion_net_cell_s* o, const lion_net_cell_s* src )
 {
     BFOR_EACH( i, &o->body )
     {

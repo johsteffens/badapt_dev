@@ -39,7 +39,7 @@ stamp badapt_problem_recurrent_abc = badapt_supplier
     u3_t rval    = 1234;
     f3_t pos_tgt =  1.0;
     f3_t neg_tgt =  0.0;
-    aware badapt_loss* preferred_loss = badapt_loss_l2_s;
+    aware badapt_loss => preferred_loss = badapt_loss_l2_s;
 
     func badapt_supplier : preferred_loss = { return o->preferred_loss; };
     func badapt_supplier : get_in_size;
@@ -67,7 +67,7 @@ stamp badapt_problem_recurrent_text = aware badapt_supplier
     u3_t rval       = 1234;
     f3_t pos_tgt    =  1.0;
     f3_t neg_tgt    =  0.0;
-    aware badapt_loss* preferred_loss = badapt_loss_l2_s;
+    aware badapt_loss => preferred_loss = badapt_loss_l2_s;
 
     func badapt_supplier : preferred_loss = { return o->preferred_loss; };
     func badapt_supplier : get_in_size;
@@ -116,7 +116,7 @@ stamp badapt_problem_recurrent_utf8 = aware badapt_supplier
     u3_t rval       = 1234;
     f3_t pos_tgt    =  1.0;
     f3_t neg_tgt    =  0.0;
-    aware badapt_loss* preferred_loss = badapt_loss_l2_s;
+    aware badapt_loss => preferred_loss = badapt_loss_l2_s;
 
     func badapt_supplier : preferred_loss = { return o->preferred_loss; };
     func badapt_supplier : get_in_size    = { return 256; };

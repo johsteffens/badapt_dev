@@ -144,7 +144,7 @@ stamp :show_param = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :arr = aware bcore_array { aware :* []; };
+stamp :arr = aware bcore_array { aware :=> []; };
 
 stamp :set = extending :std
 {
