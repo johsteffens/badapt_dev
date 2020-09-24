@@ -298,7 +298,7 @@ opal_frame_s* opal_frame_s_setup_from_source( opal_frame_s* o, bcore_source* sou
         }
     }
 
-    o->setup = true;
+    o->is_setup = true;
     opal_frame_s_reset( o );
     opal_frame_s_setup( o );
 
@@ -321,7 +321,7 @@ opal_frame_s* opal_frame_s_run( opal_frame_s* o, tp_t track )
 opal_frame_s* opal_frame_s_run_ap( opal_frame_s* o, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex )
 {
     ASSERT( o->mcf );
-    ASSERT( o->setup );
+    ASSERT( o->is_setup );
 
     bhvm_mcode_hbase_s* hbase = o->mcf->hbase;
     const opal_frame_hidx_s* hidx_en = &o->hidx_en;
@@ -372,7 +372,7 @@ opal_frame_s* opal_frame_s_run_ap( opal_frame_s* o, const bhvm_holor_s** en, sz_
 
 opal_frame_s* opal_frame_s_run_dp( opal_frame_s* o, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en )
 {
-    ASSERT( o->setup );
+    ASSERT( o->is_setup );
     ASSERT( o->mcf );
     ASSERT( !o->is_cyclic );
 
@@ -490,7 +490,7 @@ void opal_frame_s_cyclic_reset( opal_frame_s* o )
 
 void opal_frame_cyclic_s_reset( opal_frame_cyclic_s* o )
 {
-    if( !o->setup ) return;
+    if( !o->is_setup ) return;
     if( !o->frame ) return;
 
     if( o->frame->mcf->hbase->copy_size_limit >= 0 )
@@ -506,7 +506,7 @@ void opal_frame_cyclic_s_reset( opal_frame_cyclic_s* o )
     bhvm_mcode_track_adl_s_detach( &o->track_adl_ap_setup );
 
     o->unroll_index = 0;
-    o->setup = false;
+    o->is_setup = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -523,7 +523,7 @@ opal_frame_cyclic_s* opal_frame_cyclic_s_bind_holors( opal_frame_cyclic_s* o )
 
 void opal_frame_cyclic_s_setup( opal_frame_cyclic_s* o )
 {
-    if( o->setup ) return;
+    if( o->is_setup ) return;
     if( !o->frame ) return;
 
     ASSERT( o->unroll_size >= 2 );
@@ -607,7 +607,7 @@ void opal_frame_cyclic_s_setup( opal_frame_cyclic_s* o )
     opal_frame_s_setup( frame );
     for( sz_t i = 1; i < o->unroll_size; i++ ) bhvm_mcode_track_s_run( o->track_adl_ap_setup->data[ i ], hbase->holor_adl.data );
 
-    o->setup = true;
+    o->is_setup = true;
     BLM_DOWN();
 }
 
@@ -809,7 +809,7 @@ void opal_frame_cyclic_s_run_ap_adl_flat( opal_frame_cyclic_s* o, const bhvm_hol
 void opal_frame_cyclic_s_run_dp_adl_flat( opal_frame_cyclic_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en )
 {
     ASSERT( o->frame );
-    ASSERT( o->setup );
+    ASSERT( o->is_setup );
 
     sz_t size_en = opal_frame_s_get_size_en( o->frame );
     sz_t size_ex = opal_frame_s_get_size_ex( o->frame );

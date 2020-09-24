@@ -94,13 +94,13 @@ stamp :param = aware bcore_inst
 
         if( o->name.size == 0 )
         {
-            st_s_copy( &o->name, &src->name );
+            o->name.copy( &src->name );
         }
         else if( src->name.size > 0 )
         {
             st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
-            st_s_copy( &o->name, new_name );
-            st_s_discard( new_name );
+            o->name.copy( new_name );
+            new_name.discard();
         }
 
         if( !o->src ) o->src = bcore_fork( src->src );
@@ -121,7 +121,7 @@ stump :std = aware :
     func bcore_main :main =
     {
         BLM_INIT();
-        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        o.run( BLM_CREATE( :result_s ) ).resolve();
         BLM_RETURNV( s2_t, 0 );
     };
 };
@@ -148,11 +148,11 @@ stamp :set = extending :std
         {
             BLM_INIT();
             :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
-            :a_set_param( eval, &o->param );
-            :a_run( eval, result );
+            eval.set_param( &o->param );
+            eval.run( result );
             if( result->error )
             {
-                st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, BLM_CLONE( st_s, &result->msg ) );
+                result->msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", i, BLM_CLONE( st_s, &result->msg ) );
                 BLM_RETURNV( :result_s*, result );
             }
             BLM_DOWN();
@@ -163,14 +163,14 @@ stamp :set = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :plain  = extending :std
+stamp :plain = extending :std
 {
     sz_t ap_cycles = 1; // for testing
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :cyclic  = extending :std
+stamp :cyclic = extending :std
 {
 };
 

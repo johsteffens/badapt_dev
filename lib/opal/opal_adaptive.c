@@ -47,7 +47,7 @@ bhpt_adaptor_probe_s* opal_adaptive_s_get_adaptor_probe( const opal_adaptive_s* 
 {
     bhpt_adaptor_probe_s_set_size( probe, opal_frame_s_get_size_ada( &o->frame ) );
     opal_frame_s* frame = ( opal_frame_s* )&o->frame;
-    ASSERT( frame->setup );
+    ASSERT( frame->is_setup );
     BFOR_EACH( i, probe )
     {
         probe->data[ i ].axon = opal_frame_s_get_ap_ada( frame, i );
@@ -201,7 +201,7 @@ bhpt_adaptor_probe_s* opal_adaptive_cyclic_s_get_adaptor_probe( const opal_adapt
 
     opal_frame_s* frame = o->frame.frame;
 
-    ASSERT( frame->setup );
+    ASSERT( frame->is_setup );
     BFOR_EACH( i, probe )
     {
         probe->data[ i ].axon = opal_frame_s_get_ap_ada( frame, i );

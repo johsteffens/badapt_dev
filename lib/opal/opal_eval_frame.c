@@ -32,7 +32,7 @@ static void frame_s_estimate_jacobian_en( const opal_frame_s* const_o, const bhv
     BLM_INIT();
 
     opal_frame_s* o = BLM_CLONE( opal_frame_s, const_o );
-    ASSERT( o->setup );
+    ASSERT( o->is_setup );
 
     bhvm_holor_adl_s* adl_en = BLM_CLONE( bhvm_holor_adl_s, en );
     bhvm_holor_adl_s* adl_ex = BLM_CREATE( bhvm_holor_adl_s );
@@ -92,7 +92,7 @@ static void frame_s_estimate_jacobian_ada( const opal_frame_s* const_o, const bh
 {
     BLM_INIT();
     opal_frame_s* o = BLM_CLONE( opal_frame_s, const_o );
-    ASSERT( o->setup );
+    ASSERT( o->is_setup );
 
     bhvm_holor_adl_s* adl_ex = BLM_CREATE( bhvm_holor_adl_s );
     opal_frame_s_run_ap_adl( o, adl_en, adl_ex );
@@ -432,7 +432,7 @@ static void frame_cyclic_s_estimate_jacobian_en( const opal_frame_cyclic_s* cons
     BLM_INIT();
 
     opal_frame_cyclic_s* o = BLM_CLONE( opal_frame_cyclic_s, const_o );
-    ASSERT( o->setup );
+    ASSERT( o->is_setup );
 
     bhvm_holor_adl_s* adl_en = BLM_CLONE( bhvm_holor_adl_s, en );
     bhvm_holor_adl_s* adl_ex = BLM_CREATE( bhvm_holor_adl_s );

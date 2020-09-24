@@ -83,13 +83,13 @@ stamp :param = aware bcore_inst
     func : :set =
     {
         o->verbosity = sz_max( o->verbosity, src->verbosity );
-        bcore_prsg_a_set_state_mix( o->prsg, o->prsg, src->prsg );
+        o->prsg.set_state_mix( o->prsg, src->prsg );
         bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
-        if( !o->ha  ) o->ha  = opal_holor_s_clone( src->ha );
-        if( !o->hb  ) o->hb  = opal_holor_s_clone( src->hb );
-        if( !o->hc  ) o->hc  = opal_holor_s_clone( src->hc );
-        if( !o->hr  ) o->hr  = opal_holor_s_clone( src->hr );
-        if( !o->nop ) o->nop = opal_nop_a_clone( src->nop );
+        if( !o->ha  ) o->ha  = src->ha.clone();
+        if( !o->hb  ) o->hb  = src->hb.clone();
+        if( !o->hc  ) o->hc  = src->hc.clone();
+        if( !o->hr  ) o->hr  = src->hr.clone();
+        if( !o->nop ) o->nop = src->nop.clone();
     };
 };
 
@@ -103,11 +103,11 @@ stump :std = aware :
 {
     :param_s param;
     func : :run;
-    func : :set_param = { :param_s_set( &o->param, param ); };
+    func : :set_param = { o.param.set( param ); };
     func bcore_main : main =
     {
         BLM_INIT();
-        :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
+        o.run( BLM_CREATE( :result_s ) ).resolve();
         BLM_RETURNV( s2_t, 0 );
     };
 };
@@ -156,12 +156,12 @@ stamp :set = extending :std
         {
             BLM_INIT();
             :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
-            :a_set_param( eval, &o->param );
-            :a_run( eval, result );
+            eval.set_param( &o->param );
+            eval.run( result );
             if( result->error )
             {
-                st_s* s = BLM_A_PUSH( st_s_clone( &result->msg ) );
-                st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
+                st_s* s = BLM_A_PUSH( result->msg.clone() );
+                result->msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", i, s );
                 BLM_RETURNV( :result_s*, result );
             }
             BLM_DOWN();

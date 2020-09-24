@@ -55,11 +55,11 @@ group :hidx =
     stamp : = aware :
     {
         bcore_arr_sz_s => arr;
-        func : :clear     = { if( o->arr ) bcore_arr_sz_s_clear( o->arr ); return o; };
-        func : :push      = { if( !o->arr ) o->arr = bcore_arr_sz_s_create(); bcore_arr_sz_s_push( o->arr, index ); return o; };
+        func : :clear     = { if( o.arr ) bcore_arr_sz_s_clear( o.arr ); return o; };
+        func : :push      = { if( !o.arr ) o.arr = bcore_arr_sz_s_create(); bcore_arr_sz_s_push( o.arr, index ); return o; };
 
-        func : :get_idx   = { assert( o->arr ); assert( index >= 0 && index < o->arr->size ); return o->arr->data[ index ]; };
-        func : :get_size  = { return o->arr ? o->arr->size : 0; };
+        func : :get_idx   = { assert( o.arr ); assert( index >= 0 && index < o.arr->size ); return o.arr->data[ index ]; };
+        func : :get_size  = { return o.arr ? o.arr->size : 0; };
         func : :get_holor = { return bhvm_mcode_hbase_s_get_holor( hbase, @_get_idx( o, index ) ); };
         func : :get_hmeta = { return bhvm_mcode_hbase_s_get_hmeta( hbase, @_get_idx( o, index ) ); };
 
@@ -75,12 +75,12 @@ group :hidx =
 
         func : :replace_index =
         {
-            BFOR_EACH( i, o->arr )
+            BFOR_EACH( i, o.arr )
             {
-                sz_t old_index = o->arr->data[ i ];
+                sz_t old_index = o.arr->data[ i ];
                 assert( old_index >= 0 && old_index < index_map->size );
                 sz_t new_index = index_map->data[ old_index ];
-                if( new_index >= 0 ) o->arr->data[ i ] = new_index;
+                if( new_index >= 0 ) o.arr->data[ i ] = new_index;
             }
             return o;
         };
@@ -146,7 +146,7 @@ stamp : = aware :
     bl_t is_cyclic; // indicates that the underlying graph is cyclic
 
     /// frame has been setup
-    bl_t setup;
+    bl_t is_setup;
 
     sz_t size_en; // number of entry holors (per ap/dp cycle)
     sz_t size_ex; // number of exit holors (per ap/dp cycle)
@@ -157,34 +157,34 @@ stamp : = aware :
 
     func : :reset =
     {
-        if( !o->setup ) return;
-        if( !o->mcf ) return;
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_shelve );
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_shelve );
-        o->setup = false;
+        if( !o.is_setup ) return;
+        if( !o.mcf ) return;
+        o.mcf.track_run( TYPEOF_track_ap_shelve );
+        o.mcf.track_run( TYPEOF_track_dp_shelve );
+        o.is_setup = false;
     };
 
     func : :bind_holors =
     {
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_ap_setup );
-        bhvm_mcode_frame_s_track_run( o->mcf, TYPEOF_track_dp_setup );
+        o.mcf.track_run( TYPEOF_track_ap_setup );
+        o.mcf.track_run( TYPEOF_track_dp_setup );
         return o;
     };
 
     func : :setup =
     {
-        if( o->setup ) return;
-        if( !o->mcf ) return;
-        @_bind_holors( o );
-        o->setup = true;
+        if( o.is_setup ) return;
+        if( !o.mcf ) return;
+        o.bind_holors();
+        o.is_setup = true;
     };
 
     func : :check_integrity;
 
     /// shelving/reconstitution
-    func bcore_via_call  : shelve  = { bl_t setup = o->setup; @_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */ };
-    func bcore_via_call  : mutated = { if( o->setup ) { @_reset( o ); @_setup( o ); }  @_check_integrity( o ); };
-    func bcore_inst_call : copy_x  = { if( o->setup ) { @_reset( o ); @_setup( o ); }  @_check_integrity( o ); };
+    func bcore_via_call  : shelve  = { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
+    func bcore_via_call  : mutated = { if( o.is_setup ) { o.reset(); o.setup(); } o.check_integrity(); };
+    func bcore_inst_call : copy_x  = { if( o.is_setup ) { o.reset(); o.setup(); } o.check_integrity(); };
 
     /// frame setup from string or source; 'in' can be NULL
     func : :setup_from_source;
@@ -200,16 +200,16 @@ stamp : = aware :
     func : :create_from_st_adl     = { return @_create_from_st( st,           en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
     func : :create_from_sc_adl     = { return @_create_from_sc( sc,           en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
 
-    func : :get_size_en  = { return :hidx_s_get_size( &o->hidx_en ); };
-    func : :get_size_ex  = { return :hidx_s_get_size( &o->hidx_ex ); };
-    func : :get_size_ada = { return :hidx_s_get_size( &o->hidx_ada ); };
+    func : :get_size_en  = { return o.hidx_en .get_size(); };
+    func : :get_size_ex  = { return o.hidx_ex .get_size(); };
+    func : :get_size_ada = { return o.hidx_ada.get_size(); };
 
-    func : :get_ap_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_ax0, index ); };
-    func : :get_dp_en  = { return :hidx_s_get_pclass_holor( &o->hidx_en,  o->mcf->hbase, TYPEOF_pclass_ag0, index ); };
-    func : :get_ap_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_ax0, index ); };
-    func : :get_dp_ex  = { return :hidx_s_get_pclass_holor( &o->hidx_ex,  o->mcf->hbase, TYPEOF_pclass_ag0, index ); };
-    func : :get_ap_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_ax0, index ); };
-    func : :get_dp_ada = { return :hidx_s_get_pclass_holor( &o->hidx_ada, o->mcf->hbase, TYPEOF_pclass_ag0, index ); };
+    func : :get_ap_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
+    func : :get_dp_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
+    func : :get_ap_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
+    func : :get_dp_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
+    func : :get_ap_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
+    func : :get_dp_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
 
     func : :run_ap;
     func : :run_dp;
@@ -239,7 +239,7 @@ stamp :cyclic = aware :
     /// state data ...
 
     /// frame has been setup
-    bl_t setup = false;
+    bl_t is_setup = false;
 
     /// current unroll process index
     sz_t unroll_index = 0;
@@ -259,13 +259,13 @@ stamp :cyclic = aware :
     func : :setup;
 
     /// shelving/reconstitution
-    func bcore_via_call  : shelve  = { bl_t setup = o->setup; @_reset( o ); o->setup = setup; /* setup flag remembers o's setup state before shelving */ };
-    func bcore_via_call  : mutated = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
-    func bcore_inst_call : copy_x  = { if( o->setup ) { @_reset( o ); @_setup( o ); } };
+    func bcore_via_call  : shelve  = { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
+    func bcore_via_call  : mutated = { if( o.is_setup ) { o.reset(); o.setup(); } };
+    func bcore_inst_call : copy_x  = { if( o.is_setup ) { o.reset(); o.setup(); } };
 
-    func : :get_size_en  = { return :s_get_size_en(  o->frame ); };
-    func : :get_size_ex  = { return :s_get_size_ex(  o->frame ); };
-    func : :get_size_ada = { return :s_get_size_ada( o->frame ); };
+    func : :get_size_en  = { return o.frame.get_size_en(); };
+    func : :get_size_ex  = { return o.frame.get_size_ex(); };
+    func : :get_size_ada = { return o.frame.get_size_ada(); };
 
     func : :run_ap;
     func : :run_ap_adl;
