@@ -157,9 +157,9 @@ feature 'a' bl_t is_adaptive( const ) = { return false; };
 feature 'a' void settle( const, opal_context* context, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
 {
     :ar0_literal_s* literal = :ar0_literal_s_create();
-    literal->h = opal_holor_s_clone( result->h );
+    literal.h = result.h.clone();
     :solve_result_s* r = :solve_result_s_create();
-    r->h = bcore_fork( literal->h );
+    r.h = bcore_fork( literal.h );
     :solve_result_s_attach( out_result, r );
     :a_attach( out_nop, (:*)literal );
 };
@@ -177,10 +177,10 @@ feature 'a' tp_t type_vop_dp_c( const );
 /// axon pass (output) holor + initialization code
 feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
-    bhvm_holor_s* h = &result->h->h;
+    bhvm_holor_s* h = &result.h.h;
     opal_holor_meta_s* m = &result->h->m;
-    sz_t idx = mcf->push_hm( h, ( bhvm_mcode_hmeta* )m );
-    if( m->active )
+    sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
+    if( m.active )
     {
         bhvm_vop* vop_ar0_determine = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create();
         mcf->track_vop_push_d( TYPEOF_track_ap_setup, vop_ar0_determine->set_index( 0, idx ) );
@@ -202,13 +202,13 @@ feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, cons
 {
     BLM_INIT();
 
-    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
-    opal_holor_meta_s* m = &result->h->m;
-    sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result.h.h );
+    opal_holor_meta_s* m = &result.h.m;
+    sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
-    bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
 
     BLM_RETURNV( sz_t, idx );
 };
@@ -217,24 +217,24 @@ feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, cons
 
 feature 'a' void mcode_push_ap_track( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
-    tp_t type = ( :a_defines_type_vop_ap( o ) ) ? :a_type_vop_ap( o ) : result->type_vop_ap;
-    if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
+    tp_t type = ( o.defines_type_vop_ap() ) ? o.type_vop_ap() : result.type_vop_ap;
+    if( type ) mcf.track_vop_set_args_push_d( TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 feature 'a' void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
-    if( ch_id >= :a_arity( o ) + 'a' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
+    if( ch_id >= o.arity() + 'a' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     tp_t type = 0;
     switch( ch_id )
     {
-        case 'a': type = ( :a_defines_type_vop_dp_a( o ) ) ? :a_type_vop_dp_a( o ) : result->type_vop_dp_a; break;
-        case 'b': type = ( :a_defines_type_vop_dp_b( o ) ) ? :a_type_vop_dp_b( o ) : result->type_vop_dp_b; break;
-        case 'c': type = ( :a_defines_type_vop_dp_c( o ) ) ? :a_type_vop_dp_c( o ) : result->type_vop_dp_c; break;
+        case 'a': type = ( o.defines_type_vop_dp_a() ) ? o.type_vop_dp_a() : result.type_vop_dp_a; break;
+        case 'b': type = ( o.defines_type_vop_dp_b() ) ? o.type_vop_dp_b() : result.type_vop_dp_b; break;
+        case 'c': type = ( o.defines_type_vop_dp_c() ) ? o.type_vop_dp_c() : result.type_vop_dp_c; break;
         default: ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     }
-    if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_dp, bhvm_vop_t_create( type ), arr_ci );
+    if( type ) mcf.track_vop_set_args_push_d( TYPEOF_track_dp, bhvm_vop_t_create( type ), arr_ci );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -252,7 +252,7 @@ group :ar0 = retrievable
         func :: :solve =
         {
             opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->can_settle = true;
+            result.can_settle = true;
             return true;
         };
     };
@@ -266,7 +266,7 @@ group :ar0 = retrievable
         func :: :solve =
         {
             opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->can_settle = false;
+            result.can_settle = false;
             return true;
         };
     };
@@ -281,7 +281,7 @@ group :ar0 = retrievable
         func :: :solve =
         {
             opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->can_settle = false;
+            result.can_settle = false;
             return true;
         };
 
@@ -289,12 +289,12 @@ group :ar0 = retrievable
         {
             bhvm_holor_s* h = &result->h->h;
             opal_holor_meta_s* m = &result->h->m;
-            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+            sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
             if( result->h->h.v.size == 0 ) // randomize holor if result is vacant
             {
-                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
-                bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
             }
             return idx;
         };
@@ -304,11 +304,11 @@ group :ar0 = retrievable
             BLM_INIT();
             bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
             opal_holor_meta_s* m = &result->h->m;
-            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+            sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_adaptive_zero_grad,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_adaptive_zero_grad,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
             BLM_RETURNV( sz_t, idx );
         };
 
@@ -334,17 +334,17 @@ group :ar0 = retrievable
         {
             bhvm_holor_s* h = &result->h->h;
             opal_holor_meta_s* m = &result->h->m;
-            sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
+            sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
             bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s_create();
-            vop_rand->prsg = bcore_prsg_a_clone( o->prsg );
-            vop_rand->min = o->min;
-            vop_rand->max = o->max;
-            vop_rand->density = o->density;
+            vop_rand.prsg = o->prsg.clone();
+            vop_rand.min = o->min;
+            vop_rand.max = o->max;
+            vop_rand.density = o->density;
 
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap,        bhvm_vop_a_set_index( ( ( bhvm_vop* )vop_rand ),                          0, idx ) );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-            bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap,        bhvm_vop_a_set_index( ( ( bhvm_vop* )vop_rand ),                          0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
 
             return idx;
         };

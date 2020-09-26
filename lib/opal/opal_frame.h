@@ -56,9 +56,9 @@ group :hidx =
     {
         bcore_arr_sz_s => arr;
         func : :clear     = { if( o.arr ) bcore_arr_sz_s_clear( o.arr ); return o; };
-        func : :push      = { if( !o.arr ) o.arr = bcore_arr_sz_s_create(); bcore_arr_sz_s_push( o.arr, index ); return o; };
+        func : :push      = { if( !o.arr ) o.arr = bcore_arr_sz_s_create(); o.arr.push( index ); return o; };
 
-        func : :get_idx   = { assert( o.arr ); assert( index >= 0 && index < o.arr->size ); return o.arr->data[ index ]; };
+        func : :get_idx   = { assert( o.arr ); assert( index >= 0 && index < o.arr->size ); return o.arr.[ index ]; };
         func : :get_size  = { return o.arr ? o.arr->size : 0; };
         func : :get_holor = { return bhvm_mcode_hbase_s_get_holor( hbase, @_get_idx( o, index ) ); };
         func : :get_hmeta = { return bhvm_mcode_hbase_s_get_hmeta( hbase, @_get_idx( o, index ) ); };
@@ -66,21 +66,21 @@ group :hidx =
         func : :get_pclass_idx =
         {
             const bhvm_mcode_hmeta* hmeta = @_get_hmeta( o, hbase, index );
-            if( hmeta ) return bhvm_mcode_node_s_get_pclass_idx( bhvm_mcode_hmeta_a_get_node( hmeta ), pclass );
+            if( hmeta ) return hmeta.get_node().get_pclass_idx( pclass );
             return -1;
         };
 
-        func : :get_pclass_holor = { return bhvm_mcode_hbase_s_get_holor( hbase, @_get_pclass_idx( o, hbase, pclass, index ) ); };
-        func : :get_pclass_hmeta = { return bhvm_mcode_hbase_s_get_hmeta( hbase, @_get_pclass_idx( o, hbase, pclass, index ) ); };
+        func : :get_pclass_holor = { return hbase.get_holor( o.get_pclass_idx( hbase, pclass, index ) ); };
+        func : :get_pclass_hmeta = { return hbase.get_hmeta( o.get_pclass_idx( hbase, pclass, index ) ); };
 
         func : :replace_index =
         {
             BFOR_EACH( i, o.arr )
             {
-                sz_t old_index = o.arr->data[ i ];
+                sz_t old_index = o.arr.[ i ];
                 assert( old_index >= 0 && old_index < index_map->size );
-                sz_t new_index = index_map->data[ old_index ];
-                if( new_index >= 0 ) o.arr->data[ i ] = new_index;
+                sz_t new_index = index_map.[ old_index ];
+                if( new_index >= 0 ) o.arr.[ i ] = new_index;
             }
             return o;
         };

@@ -56,9 +56,9 @@ stamp :result = aware bcore_inst
         }
         if( o->total_tests > 0 )
         {
-            bcore_sink_a_push_fa( BCORE_STDOUT, "Total tests ...... #<sz_t>\n", o->total_tests );
-            bcore_sink_a_push_fa( BCORE_STDOUT, "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o->solvable_tests, ( o->solvable_tests * 100 ) / o->total_tests );
-            bcore_sink_a_push_fa( BCORE_STDOUT, "Tolerated errors . #<sz_t>\n", o->tolerated_errors );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Total tests ...... #<sz_t>\n", o.total_tests );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "Tolerated errors . #<sz_t>\n", o.tolerated_errors );
         }
     };
 };
@@ -82,8 +82,8 @@ stamp :param = aware bcore_inst
 
     func : :set =
     {
-        o->verbosity = sz_max( o->verbosity, src->verbosity );
-        o->prsg.set_state_mix( o->prsg, src->prsg );
+        o.verbosity = sz_max( o.verbosity, src.verbosity );
+        o.prsg.set_state_mix( o.prsg, src.prsg );
         bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
         if( !o->ha  ) o->ha  = src->ha.clone();
         if( !o->hb  ) o->hb  = src->hb.clone();
@@ -155,7 +155,7 @@ stamp :set = extending :std
         BFOR_EACH( i, &o->arr )
         {
             BLM_INIT();
-            :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+            :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.[ i ] ) );
             eval.set_param( &o->param );
             eval.run( result );
             if( result->error )

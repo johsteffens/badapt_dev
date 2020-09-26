@@ -117,7 +117,7 @@ stump :std = aware :
 {
     :param_s param;
     func : :run;
-    func : :set_param = { :param_s_set( &o->param, param ); };
+    func : :set_param = { o->param.set( param ); };
     func bcore_main :main =
     {
         BLM_INIT();
@@ -147,7 +147,7 @@ stamp :set = extending :std
         BFOR_EACH( i, &o->arr )
         {
             BLM_INIT();
-            :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+            :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.[ i ] ) );
             eval.set_param( &o->param );
             eval.run( result );
             if( result->error )

@@ -90,17 +90,17 @@ stamp :node = aware :
 
     func : :up_index =
     {
-        BFOR_EACH( i, &o->upls ) if( o->upls.data[ i ]->node == node ) return i;
+        BFOR_EACH( i, &o.upls ) if( o->upls.[ i ]->node == node ) return i;
         return -1;
     };
 
     func : :set_nop_d =
     {
         ASSERT( o->result == NULL );
-        opal_nop_a_attach( &o->nop, nop );
+        opal_nop_a_attach( &o.nop, nop );
     };
 
-    func : :is_cyclic = { return ( o->mnode ) ? o->mnode->cyclic : opal_nop_a_is_cyclic( o->nop ); };
+    func : :is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
 };
 
 stamp :node_adl = aware bcore_array { :node_s => []; };
@@ -112,7 +112,7 @@ stamp :nodes = aware bcore_array
     :node_s => [];
     func : :get_by_id =
     {
-        BFOR_EACH( i, o ) if( o->data[ i ]->id == id ) return o->data[ i ];
+        BFOR_EACH( i, o ) if( o.[ i ]->id == id ) return o.[ i ];
         return NULL;
     };
 };
@@ -140,15 +140,15 @@ stamp :cell = aware :
 
     func : :clear_flags =
     {
-        BFOR_EACH( i, &o->body ) o->body.data[ i ]->flag = false;
+        BFOR_EACH( i, &o.body ) o.body.[ i ].flag = false;
     };
 
     func : :clear_all_flags =
     {
-        BFOR_EACH( i, &o->body )
+        BFOR_EACH( i, &o.body )
         {
-            o->body.data[ i ]->flag = false;
-            o->body.data[ i ]->probe = false;
+            o.body.[ i ].flag = false;
+            o.body.[ i ].probe = false;
         }
     };
 
@@ -156,7 +156,7 @@ stamp :cell = aware :
 
     func : :clear_downlinks =
     {
-        BFOR_EACH( i, &o->body ) :links_s_clear( &o->body.data[ i ]->dnls );
+        BFOR_EACH( i, &o.body ) o.body.[ i ].dnls.clear();
     };
 
     func : :set_downlinks;
