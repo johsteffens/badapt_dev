@@ -104,7 +104,7 @@ group :context = opal_context
     stamp : = aware :
     {
         opal_nop_context_s nop_context;
-        func opal_context :get_prsg = { return opal_nop_context_s_get_prsg( &o->nop_context ); };
+        func opal_context :get_prsg = { return o->nop_context.get_prsg(); };
 
         bcore_hmap_name_s hmap_name;
         bcore_arr_st_s    arr_symbol_op2;

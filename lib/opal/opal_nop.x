@@ -69,7 +69,7 @@ name track_ap_cyclic_update;
  */
 name track_dp_adaptive_zero_grad;
 
-feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o->_ ) ); return -1; };
+feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o._ ) ); return -1; };
 feature 'a' sz_t priority( const ) = { return 10; };
 feature 'a' sc_t symbol( const )   = { return NULL; };
 
@@ -77,7 +77,7 @@ feature 'a' sc_t symbol( const )   = { return NULL; };
 feature 'a' bl_t reserved( const ) = { return false; };
 
 /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
-feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( o->arity() == n ) ? o->clone() : NULL; };
+feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( o.arity() == n ) ? o.clone() : NULL; };
 
 /** Solve computes the result 'r' from an array of arguments 'a'.
   * 'a' represents an array of pointers. The array size is equal to arity.
@@ -178,14 +178,14 @@ feature 'a' tp_t type_vop_dp_c( const );
 feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     bhvm_holor_s* h = &result.h.h;
-    opal_holor_meta_s* m = &result->h->m;
+    opal_holor_meta_s* m = &result.h.m;
     sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
     if( m.active )
     {
         bhvm_vop* vop_ar0_determine = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create();
-        mcf->track_vop_push_d( TYPEOF_track_ap_setup, vop_ar0_determine->set_index( 0, idx ) );
-        bhvm_vop* vop_ar0_vacate = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create();
-        mcf->track_vop_push_d( TYPEOF_track_ap_shelve, vop_ar0_vacate->set_index( 0, idx ) );
+        bhvm_vop* vop_ar0_vacate    = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create();
+        mcf->track_vop_push_d( TYPEOF_track_ap_setup, vop_ar0_determine.set_index( 0, idx ) );
+        mcf->track_vop_push_d( TYPEOF_track_ap_shelve, vop_ar0_vacate.set_index( 0, idx ) );
     }
     return idx;
 };
@@ -251,7 +251,7 @@ group :ar0 = retrievable
         opal_holor_s -> h;
         func :: :solve =
         {
-            opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
+            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
             result.can_settle = true;
             return true;
         };
@@ -265,7 +265,7 @@ group :ar0 = retrievable
 
         func :: :solve =
         {
-            opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
+            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
             result.can_settle = false;
             return true;
         };
@@ -280,17 +280,17 @@ group :ar0 = retrievable
 
         func :: :solve =
         {
-            opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
+            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
             result.can_settle = false;
             return true;
         };
 
         func :: :mcode_push_ap_holor =
         {
-            bhvm_holor_s* h = &result->h->h;
-            opal_holor_meta_s* m = &result->h->m;
+            bhvm_holor_s* h = &result.h.h;
+            opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
-            if( result->h->h.v.size == 0 ) // randomize holor if result is vacant
+            if( result.h.h.v.size == 0 ) // randomize holor if result is vacant
             {
                 mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
                 mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
@@ -302,8 +302,8 @@ group :ar0 = retrievable
         func :: :mcode_push_dp_holor =
         {
             BLM_INIT();
-            bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
-            opal_holor_meta_s* m = &result->h->m;
+            bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result.h.h );
+            opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
             mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
@@ -325,22 +325,22 @@ group :ar0 = retrievable
 
         func :: :solve =
         {
-            opal_holor_s_attach( &result->h, bcore_fork( o->h ) );
-            result->can_settle = false;
+            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
+            result.can_settle = false;
             return true;
         };
 
         func :: :mcode_push_ap_holor =
         {
-            bhvm_holor_s* h = &result->h->h;
-            opal_holor_meta_s* m = &result->h->m;
+            bhvm_holor_s* h = &result.h.h;
+            opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
             bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s_create();
-            vop_rand.prsg = o->prsg.clone();
-            vop_rand.min = o->min;
-            vop_rand.max = o->max;
-            vop_rand.density = o->density;
+            vop_rand.prsg = o.prsg.clone();
+            vop_rand.min = o.min;
+            vop_rand.max = o.max;
+            vop_rand.density = o.density;
 
             mcf.track_vop_push_d( TYPEOF_track_ap,        bhvm_vop_a_set_index( ( ( bhvm_vop* )vop_rand ),                          0, idx ) );
             mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
@@ -366,13 +366,13 @@ group :ar1 = retrievable
         func :: :priority = { return 8; };
         func :: :solve =
         {
-            opal_holor_s_attach( &result->h, opal_holor_s_create() );
-            bhvm_holor_s_fork( &result->h->h, &a[0]->h );
-            result->h->m.htp      =  a[0]->m.htp;
-            result->h->m.active   =  a[0]->m.active;
-            result->can_settle       = !a[0]->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
+            opal_holor_s_attach( &result.h, opal_holor_s_create() );
+            result.h.h.fork( &a[0].h );
+            result.h.m.htp      =  a[0].m.htp;
+            result.h.m.active   =  a[0].m.active;
+            result.can_settle    = !a[0].m.active;
+            result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
+            result.type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
     };
@@ -390,11 +390,11 @@ group :ar1 = retrievable
         func :: :symbol   = { return "f3_t"; };
         func :: :solve =
         {
-            opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
-            bhvm_holor_s_set_type( &result->h->h, TYPEOF_f3_t );
-            result->can_settle = ( result->h ) && !result->h->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
+            opal_holor_s_attach( &result.h, a[0].clone() );
+            result.h.h.set_type( TYPEOF_f3_t );
+            result.can_settle = ( result.h ) && !result.h.m.active;
+            result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
+            result.type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
     };
@@ -405,11 +405,11 @@ group :ar1 = retrievable
         func :: :symbol   = { return "f2_t"; };
         func :: :solve =
         {
-            opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
-            bhvm_holor_s_set_type( &result->h->h, TYPEOF_f2_t );
-            result->can_settle = ( result->h ) && !result->h->m.active;
-            result->type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-            result->type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
+            opal_holor_s_attach( &result.h, a[0].clone() );
+            bhvm_holor_s_set_type( &result.h.h, TYPEOF_f2_t );
+            result.can_settle = ( result.h ) && !result.h.m.active;
+            result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
+            result.type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
         };
     };
@@ -603,12 +603,12 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result->h, opal_holor_s_create() );
-                bhvm_holor_s_set_scalar_f3( &result->h->h, a[0]->h.s.size ? a[0]->h.s.data[ a[0]->h.s.size - 1 ] : 1 );
-                result->h->m.active = false;
-                result->can_settle = true;
+                opal_holor_s_attach( &result.h, opal_holor_s_create() );
+                result.h.h.set_scalar_f3( a[0].h.s.size ? a[0].h.s.[ a[0].h.s.size - 1 ] : 1 );
+                result.h.m.active = false;
+                result.can_settle = true;
             }
-            result->codable = false;
+            result.codable = false;
             return true;
         };
     };
@@ -622,12 +622,12 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result->h, opal_holor_s_create() );
-                bhvm_holor_s_set_scalar_f3( &result->h->h, bhvm_shape_s_get_volume( &a[0]->h.s ) );
-                result->h->m.active = false;
-                result->can_settle = true;
+                opal_holor_s_attach( &result.h, opal_holor_s_create() );
+                result.h.h.set_scalar_f3( bhvm_shape_s_get_volume( &a[0].h.s ) );
+                result.h.m.active = false;
+                result.can_settle = true;
             }
-            result->codable = false;
+            result.codable = false;
             return true;
         };
     };
@@ -644,12 +644,12 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
-                if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
-                result->h->m.active = false;
-                result->can_settle = true;
+                opal_holor_s_attach( &result.h, a[0].clone() );
+                if( result.h.h.v.size == 0 ) result.h.h.fit_size();
+                result.h.m.active = false;
+                result.can_settle = true;
             }
-            result->codable = false;
+            result.codable = false;
             return true;
         };
     };
@@ -663,13 +663,13 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result->h, opal_holor_s_clone( a[0] ) );
-                if( result->h->h.v.size == 0 ) bhvm_holor_s_fit_size( &result->h->h );
-                bhvm_value_s_zro( &result->h->h.v );
-                result->h->m.active = false;
-                result->can_settle = true;
+                opal_holor_s_attach( &result.h, a[0].clone() );
+                if( result.h.h.v.size == 0 ) result.h.h.fit_size();
+                result.h.h.v.zro();
+                result.h.m.active = false;
+                result.can_settle = true;
             }
-            result->codable = false;
+            result.codable = false;
             return true;
         };
     };
@@ -683,14 +683,14 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result->h, opal_holor_s_create() );
-                bhvm_shape_s_copy( &result->h->h.s, &a[0]->h.s );
-                bhvm_value_s_set_type( &result->h->h.v, a[0]->h.v.type );
-                result->h->m.htp = &a[0]->m.htp;
-                result->h->m.active = false;
-                result->can_settle = true;
+                opal_holor_s_attach( &result.h, opal_holor_s_create() );
+                result.h.h.s.copy( &a[0].h.s );
+                result.h.h.v.set_type( a[0].h.v.type );
+                result.h.m.htp = &a[0]->m.htp;
+                result.h.m.active = false;
+                result.can_settle = true;
             }
-            result->codable = false;
+            result.codable = false;
             return true;
         };
     };

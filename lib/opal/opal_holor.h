@@ -71,7 +71,7 @@ stamp :meta = aware bhvm_mcode_hmeta
     func bhvm_mcode_hmeta : get_custom = { return o.custom; };
     func bhvm_mcode_hmeta : set_custom = { bcore_inst_a_attach( &o.custom, custom.clone() ); return o.custom; };
 
-    func bhvm_mcode_hmeta : get_node = { return o->mnode; };
+    func bhvm_mcode_hmeta : get_node = { return o.mnode; };
     func bhvm_mcode_hmeta : set_node = { bhvm_mcode_node_s_attach( &o.mnode, bcore_fork( node ) ); };
 };
 
