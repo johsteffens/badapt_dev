@@ -114,10 +114,10 @@ group :context = opal_context
 
         func : :setup;
 
-        func opal_context :nameof   = { return bcore_hmap_name_s_get_sc( &o->hmap_name, name ); };
+        func opal_context :nameof   = { return o->hmap_name.get_sc( name ); };
         func opal_context :ifnameof = { sc_t sc = @_nameof( o, name ); return sc ? sc : "";     };
         func opal_context :typeof   = { return btypeof( name );                                 };
-        func opal_context :entypeof = { return bcore_hmap_name_s_set_sc( &o->hmap_name, name ); };
+        func opal_context :entypeof = { return o->hmap_name.set_sc( name ); };
 
         func : :setup_cell =
         {
@@ -158,8 +158,8 @@ group :id = :
             st_s_clear( s );
             BFOR_EACH( i, &o->arr_tp )
             {
-                if( i > 0 ) st_s_push_char( s, '.' );
-                st_s_push_sc( s, opal_context_a_ifnameof( context, o->arr_tp.data[ i ] ) );
+                if( i > 0 ) s.push_char( '.' );
+                st_s_push_sc( s, context.ifnameof( o->arr_tp.data[ i ] ) );
             }
         };
     };
@@ -175,10 +175,10 @@ name cell;
 
 signature   sz_t get_arity( const );
 signature   sz_t get_priority( const );
-feature 'a' tp_t get_name( const ) = { return 0; };
-feature 'a' bl_t is_visible( const ) = { return true; }; // invisible objects are not searchable via get_by_name functions
-feature 'a' void set_name_visible(   mutable, tp_t name );
-feature 'a' void set_name_invisible( mutable, tp_t name );
+feature tp_t get_name( const ) = { return 0; };
+feature bl_t is_visible( const ) = { return true; }; // invisible objects are not searchable via get_by_name functions
+feature void set_name_visible(   mutable, tp_t name );
+feature void set_name_invisible( mutable, tp_t name );
 
 body             get_name_ = { return o->name; };
 

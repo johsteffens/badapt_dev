@@ -114,8 +114,8 @@ name cell;
 
 signature   sz_t get_arity( const );
 signature   sz_t get_priority( const );
-feature 'a' tp_t get_name( const ) = { return 0; };
-feature 'a' bl_t is_visible( const ) = { return true; }; // an object can be made syntactically invisible
+feature tp_t get_name( const ) = { return 0; };
+feature bl_t is_visible( const ) = { return true; }; // an object can be made syntactically invisible
 body             get_name_ = { return o->name; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

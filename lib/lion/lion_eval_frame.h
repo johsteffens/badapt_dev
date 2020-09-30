@@ -58,7 +58,7 @@ stamp :result = aware bcore_inst
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' :result_s* run( const, :result_s* result ); // returns result
+feature :result_s* run( const, :result_s* result ); // returns result
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -135,7 +135,7 @@ stamp :show_param = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' void set_param( mutable, const :param_s* param );
+feature void set_param( mutable, const :param_s* param );
 
 stamp :arr = aware bcore_array { aware :=> []; };
 

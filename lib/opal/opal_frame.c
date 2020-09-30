@@ -627,7 +627,7 @@ void opal_frame_cyclic_s_setup_from_frame( opal_frame_cyclic_s* o, const opal_fr
 opal_frame_cyclic_s* opal_frame_cyclic_s_run_ap( opal_frame_cyclic_s* o, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex )
 {
     ASSERT( o->frame );
-    assert( o->setup );
+    assert( o->is_setup );
     assert( o->unroll_index < o->unroll_size );
 
     opal_frame_s* frame = o->frame;

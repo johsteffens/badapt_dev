@@ -47,7 +47,7 @@ signature void set_nop_d( mutable, opal_nop* nop );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' bl_t is_cyclic( const ) = { return false; };
+feature bl_t is_cyclic( const ) = { return false; };
 
 stamp :node = aware :
 {

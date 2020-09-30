@@ -95,8 +95,8 @@ stamp :param = aware bcore_inst
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature 'a' void set_param( mutable, const :param_s* param );
-feature 'a' :result_s* run( const, :result_s* result ); // creates result or returns NULL
+feature void set_param( mutable, const :param_s* param );
+feature :result_s* run( const, :result_s* result ); // creates result or returns NULL
 
 /// template
 stump :std = aware :

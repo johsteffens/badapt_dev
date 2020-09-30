@@ -69,15 +69,15 @@ name track_ap_cyclic_update;
  */
 name track_dp_adaptive_zero_grad;
 
-feature 'a' sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o._ ) ); return -1; };
-feature 'a' sz_t priority( const ) = { return 10; };
-feature 'a' sc_t symbol( const )   = { return NULL; };
+feature sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o._ ) ); return -1; };
+feature sz_t priority( const ) = { return 10; };
+feature sc_t symbol( const )   = { return NULL; };
 
 /// Overload 'true' when the symbol shall be declared as reserved keyword in the syntax. In that case the cell of that name cannot be defined locally.
-feature 'a' bl_t reserved( const ) = { return false; };
+feature bl_t reserved( const ) = { return false; };
 
 /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
-feature 'a' :* create_op_of_arn( const, sz_t n ) = { return ( o.arity() == n ) ? o.clone() : NULL; };
+feature :* create_op_of_arn( const, sz_t n ) = { return ( o.arity() == n ) ? o.clone() : NULL; };
 
 /** Solve computes the result 'r' from an array of arguments 'a'.
   * 'a' represents an array of pointers. The array size is equal to arity.
@@ -124,29 +124,29 @@ stamp :solve_result = aware bcore_inst
 };
 
 /// returns true when the operator supports 'elementary cyclic indexing'
-feature 'a' bl_t eci( const ) = { return false; };
+feature bl_t eci( const ) = { return false; };
 
 /** Low level solving.
   * Returns 'true' in case of success, otherwise check result->msg
   * The default implementation solves all elementary operators
   */
-feature 'a' bl_t solve( const, opal_context* context, opal_holor_s** a, :solve_result_s* result ) = solve__;
+feature bl_t solve( const, opal_context* context, opal_holor_s** a, :solve_result_s* result ) = solve__;
 
 /** Node-level solving.
  *  Implemented in opel_net.c
  */
-feature 'a' void solve_node( mutable, opal_net_node_s* node, opal_net_node_adl_s* deferred ) = solve_node__;
+feature void solve_node( mutable, opal_net_node_s* node, opal_net_node_adl_s* deferred ) = solve_node__;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// indicates that node is a parameter
-feature 'a' bl_t is_param(    const ) = { return false; };
+feature bl_t is_param(    const ) = { return false; };
 
 /// indicates that node is cyclic
-feature 'a' bl_t is_cyclic(   const ) = { return false; };
+feature bl_t is_cyclic(   const ) = { return false; };
 
 /// indicates that node is adaptive
-feature 'a' bl_t is_adaptive( const ) = { return false; };
+feature bl_t is_adaptive( const ) = { return false; };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -154,7 +154,7 @@ feature 'a' bl_t is_adaptive( const ) = { return false; };
  *  Default implementation turns it into a literal.
  *  For better control consider overloading feature 'solve_node'.
  */
-feature 'a' void settle( const, opal_context* context, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
+feature void settle( const, opal_context* context, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
 {
     :ar0_literal_s* literal = :ar0_literal_s_create();
     literal.h = result.h.clone();
@@ -167,15 +167,15 @@ feature 'a' void settle( const, opal_context* context, const :solve_result_s* re
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// preferred vop type (optional, when the type does not depend on holor parameters)
-feature 'a' tp_t type_vop_ap( const );
-feature 'a' tp_t type_vop_dp_a( const );
-feature 'a' tp_t type_vop_dp_b( const );
-feature 'a' tp_t type_vop_dp_c( const );
+feature tp_t type_vop_ap( const );
+feature tp_t type_vop_dp_a( const );
+feature tp_t type_vop_dp_b( const );
+feature tp_t type_vop_dp_c( const );
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// axon pass (output) holor + initialization code
-feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     bhvm_holor_s* h = &result.h.h;
     opal_holor_meta_s* m = &result.h.m;
@@ -198,7 +198,7 @@ feature 'a' sz_t mcode_push_ap_holor( const, const :solve_result_s* result, cons
  *  then the function should be overloaded simply returning -1. This keeps the compiler from producing
  *  ineffective dp-mcode.
  */
-feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     BLM_INIT();
 
@@ -215,7 +215,7 @@ feature 'a' sz_t mcode_push_dp_holor( const, const :solve_result_s* result, cons
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-feature 'a' void mcode_push_ap_track( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature void mcode_push_ap_track( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     tp_t type = ( o.defines_type_vop_ap() ) ? o.type_vop_ap() : result.type_vop_ap;
     if( type ) mcf.track_vop_set_args_push_d( TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
@@ -223,7 +223,7 @@ feature 'a' void mcode_push_ap_track( const, const :solve_result_s* result, cons
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-feature 'a' void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
     if( ch_id >= o.arity() + 'a' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     tp_t type = 0;
