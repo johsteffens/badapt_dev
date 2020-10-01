@@ -48,14 +48,14 @@ stamp : = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func ^ : get_format_en = { format.copy( &o->holor_frame_en ); return format; };
-    func ^ : get_format_ex = { format.copy( &o->holor_frame_ex ); return format; };
+    func ^ : get_format_en = { format.copy( o.holor_frame_en ); return format; };
+    func ^ : get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
 
     func ^ : axon_pass;
     func ^ : dendrite_pass;
     func ^ : cyclic_reset;
     func ^ : get_adaptor_probe;
-    func ^ : rebind_holors = { o->frame.bind_holors(); };
+    func ^ : rebind_holors = { o.frame.bind_holors(); };
     func ^ : status_to_sink;
 
     // ==============================================================
@@ -72,8 +72,8 @@ stamp :builder = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func ^ : set_format_en = { o->holor_frame_en.copy( format ); };
-    func ^ : set_format_ex = { o->holor_frame_ex.copy( format ); };
+    func ^ : set_format_en = { o.holor_frame_en.copy( format ); };
+    func ^ : set_format_ex = { o.holor_frame_ex.copy( format ); };
     func ^ : create_adaptive;
 
     // ==============================================================
@@ -99,14 +99,14 @@ stamp :cyclic = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func ^ : get_format_en = { format.copy( &o->holor_frame_en ); return format; };
-    func ^ : get_format_ex = { format.copy( &o->holor_frame_ex ); return format; };
+    func ^ : get_format_en = { format.copy( o.holor_frame_en ); return format; };
+    func ^ : get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
 
     func ^ : axon_pass;
     func ^ : dendrite_pass;
     func ^ : cyclic_reset;
     func ^ : get_adaptor_probe;
-    func ^ : rebind_holors = { o->frame.bind_holors(); };
+    func ^ : rebind_holors = { o.frame.bind_holors(); };
     func ^ : status_to_sink;
 
     // ==============================================================
@@ -124,8 +124,8 @@ stamp :cyclic_builder = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func ^ : set_format_en = { o->holor_frame_en.copy( format ); };
-    func ^ : set_format_ex = { o->holor_frame_ex.copy( format ); };
+    func ^ : set_format_en = { o.holor_frame_en.copy( format ); };
+    func ^ : set_format_ex = { o.holor_frame_ex.copy( format ); };
     func ^ : create_adaptive;
 
     // ==============================================================

@@ -155,7 +155,7 @@ stamp :set = extending :std
         BFOR_EACH( i, &o->arr )
         {
             BLM_INIT();
-            :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.[ i ] ) );
+            :* eval = BLM_A_PUSH( cast( bcore_inst*, o->arr.[ i ] ).clone() );
             eval.set_param( &o->param );
             eval.run( result );
             if( result->error )
