@@ -251,7 +251,7 @@ group :ar0 = retrievable
         opal_holor_s -> h;
         func :: :solve =
         {
-            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
+            result.h =< bcore_fork( o.h );
             result.can_settle = true;
             return true;
         };
@@ -265,7 +265,7 @@ group :ar0 = retrievable
 
         func :: :solve =
         {
-            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
+            result.h =< bcore_fork( o.h );
             result.can_settle = false;
             return true;
         };
@@ -280,7 +280,7 @@ group :ar0 = retrievable
 
         func :: :solve =
         {
-            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
+            result.h =< bcore_fork( o.h );
             result.can_settle = false;
             return true;
         };
@@ -325,7 +325,7 @@ group :ar0 = retrievable
 
         func :: :solve =
         {
-            opal_holor_s_attach( &result.h, bcore_fork( o.h ) );
+            result.h =< bcore_fork( o.h );
             result.can_settle = false;
             return true;
         };
@@ -366,7 +366,7 @@ group :ar1 = retrievable
         func :: :priority = { return 8; };
         func :: :solve =
         {
-            opal_holor_s_attach( &result.h, opal_holor_s_create() );
+            result.h =< opal_holor_s_create();
             result.h.h.fork( &a[0].h );
             result.h.m.htp      =  a[0].m.htp;
             result.h.m.active   =  a[0].m.active;
@@ -390,7 +390,7 @@ group :ar1 = retrievable
         func :: :symbol   = { return "f3_t"; };
         func :: :solve =
         {
-            opal_holor_s_attach( &result.h, a[0].clone() );
+            result.h =< a[0].clone();
             result.h.h.set_type( TYPEOF_f3_t );
             result.can_settle = ( result.h ) && !result.h.m.active;
             result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
@@ -405,7 +405,7 @@ group :ar1 = retrievable
         func :: :symbol   = { return "f2_t"; };
         func :: :solve =
         {
-            opal_holor_s_attach( &result.h, a[0].clone() );
+            result.h =< a[0].clone();
             bhvm_holor_s_set_type( &result.h.h, TYPEOF_f2_t );
             result.can_settle = ( result.h ) && !result.h.m.active;
             result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
@@ -603,7 +603,7 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result.h, opal_holor_s_create() );
+                result.h =< opal_holor_s_create();
                 result.h.h.set_scalar_f3( a[0].h.s.size ? a[0].h.s.[ a[0].h.s.size - 1 ] : 1 );
                 result.h.m.active = false;
                 result.can_settle = true;
@@ -622,7 +622,7 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result.h, opal_holor_s_create() );
+                result.h =< opal_holor_s_create();
                 result.h.h.set_scalar_f3( bhvm_shape_s_get_volume( &a[0].h.s ) );
                 result.h.m.active = false;
                 result.can_settle = true;
@@ -644,7 +644,7 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result.h, a[0].clone() );
+                result.h =< a[0].clone();
                 if( result.h.h.v.size == 0 ) result.h.h.fit_size();
                 result.h.m.active = false;
                 result.can_settle = true;
@@ -663,7 +663,7 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result.h, a[0].clone() );
+                result.h =< a[0].clone();
                 if( result.h.h.v.size == 0 ) result.h.h.fit_size();
                 result.h.h.v.zro();
                 result.h.m.active = false;
@@ -683,7 +683,7 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                opal_holor_s_attach( &result.h, opal_holor_s_create() );
+                result.h =< opal_holor_s_create();
                 result.h.h.s.copy( &a[0].h.s );
                 result.h.h.v.set_type( a[0].h.v.type );
                 result.h.m.htp = &a[0]->m.htp;

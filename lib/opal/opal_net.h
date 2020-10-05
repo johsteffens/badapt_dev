@@ -90,14 +90,14 @@ stamp :node = aware :
 
     func : :up_index =
     {
-        BFOR_EACH( i, &o.upls ) if( o->upls.[ i ]->node == node ) return i;
+        BFOR_EACH( i, &o.upls ) if( o->upls.[ i ].node == node ) return i;
         return -1;
     };
 
     func : :set_nop_d =
     {
         ASSERT( o->result == NULL );
-        opal_nop_a_attach( &o.nop, nop );
+        o.nop =< nop;
     };
 
     func : :is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
@@ -112,7 +112,7 @@ stamp :nodes = aware bcore_array
     :node_s => [];
     func : :get_by_id =
     {
-        BFOR_EACH( i, o ) if( o.[ i ]->id == id ) return o.[ i ];
+        BFOR_EACH( i, o ) if( o.[ i ].id == id ) return o.[ i ];
         return NULL;
     };
 };
@@ -182,7 +182,7 @@ group :builder = :
         hidden bhvm_holor_adl_s input_holors;
         hidden aware bcore_sink -> log;
 
-        func : :fork_log = { bcore_sink_a_attach( &o->log, bcore_fork( log ) ); };
+        func : :fork_log = { o->log =< bcore_fork( log ); };
 
         func : :fork_input_holors =
         {
@@ -190,7 +190,7 @@ group :builder = :
             BFOR_EACH( i, &o->input_holors )
             {
                 ASSERT( input_holors[ i ] );
-                bhvm_holor_s_attach( &o->input_holors.data[ i ], bcore_fork( ( bhvm_holor_s* )input_holors[ i ] ) );
+                o->input_holors.[ i ] =< bcore_fork( ( bhvm_holor_s* )input_holors[ i ] );
             }
         };
 

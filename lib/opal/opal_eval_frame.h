@@ -90,7 +90,7 @@ stamp :param = aware bcore_inst
 
         o.verbosity = sz_max( o.verbosity, src.verbosity );
         o.rval      = bcore_lcg00_u3( o.rval + src.rval );
-        bcore_inst_a_attach( (bcore_inst**)&o.log, bcore_fork( src.log ) );
+        o.log       =< bcore_fork( src.log );
 
         if( o.name.size == 0 )
         {

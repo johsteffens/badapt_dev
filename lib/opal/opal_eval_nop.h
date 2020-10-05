@@ -84,7 +84,7 @@ stamp :param = aware bcore_inst
     {
         o.verbosity = sz_max( o.verbosity, src.verbosity );
         o.prsg.set_state_mix( o.prsg, src.prsg );
-        bcore_inst_a_attach( (bcore_inst**)&o->log, bcore_fork( src->log ) );
+        o->log =< bcore_fork( src->log );
         if( !o->ha  ) o->ha  = src->ha.clone();
         if( !o->hb  ) o->hb  = src->hb.clone();
         if( !o->hc  ) o->hc  = src->hc.clone();
