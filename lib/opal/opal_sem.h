@@ -114,20 +114,20 @@ group :context = opal_context
 
         func : :setup;
 
-        func opal_context :nameof   = { return o->hmap_name.get_sc( name ); };
-        func opal_context :ifnameof = { sc_t sc = @_nameof( o, name ); return sc ? sc : "";     };
-        func opal_context :typeof   = { return btypeof( name );                                 };
-        func opal_context :entypeof = { return o->hmap_name.set_sc( name ); };
+        func opal_context :nameof   = { return o.hmap_name.get_sc( name ); };
+        func opal_context :ifnameof = { sc_t sc = o.nameof( name ); return sc ? sc : ""; };
+        func opal_context :typeof   = { return btypeof( name ); };
+        func opal_context :entypeof = { return o.hmap_name.set_sc( name ); };
 
         func : :setup_cell =
         {
-            @_attach( &cell->context, bcore_fork( o ) );
+            cell.context =< bcore_fork( o );
             return cell;
         };
 
         func : :create_cell =
         {
-            return @_setup_cell( o, ::cell_s_create() );
+            return o.setup_cell( ::cell_s! );
         };
     };
 };
@@ -149,17 +149,17 @@ group :id = :
     stamp : = aware :
     {
         bcore_arr_tp_s arr_tp;
-        func : :clear       = { bcore_arr_tp_s_clear( &o->arr_tp ); };
-        func : :set         = { bcore_arr_tp_s_clear( &o->arr_tp ); bcore_arr_tp_s_push( &o->arr_tp, tp ); };
-        func : :push_child  = { bcore_arr_tp_s_push( &o->arr_tp, tp ); };
-        func : :push_parent = { bcore_arr_tp_s_push_left( &o->arr_tp, tp ); };
+        func : :clear       = { o.arr_tp.clear(); };
+        func : :set         = { o.arr_tp.clear(); o.arr_tp.push( tp ); };
+        func : :push_child  = { o.arr_tp.push( tp ); };
+        func : :push_parent = { o.arr_tp.push_left( tp ); };
         func : :to_string   =
         {
-            st_s_clear( s );
+            s.clear();
             BFOR_EACH( i, &o->arr_tp )
             {
                 if( i > 0 ) s.push_char( '.' );
-                st_s_push_sc( s, context.ifnameof( o->arr_tp.data[ i ] ) );
+                s.push_sc( context.ifnameof( o.arr_tp.[ i ] ) );
             }
         };
     };
@@ -216,38 +216,38 @@ stamp :links = aware bcore_array
 
     func : :get_link_by_name =
     {
-        BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return o->data[ i ];
+        BFOR_EACH( i, o ) if( o.[ i ].name == name ) return o->data[ i ];
         return NULL;
     };
 
     func : :name_exists =
     {
-        BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return true;
+        BFOR_EACH( i, o ) if( o.[ i ].name == name ) return true;
         return false;
     };
 
     func : :get_link_by_up =
     {
-        BFOR_EACH( i, o ) if( o->data[ i ]->up == up ) return o->data[ i ];
+        BFOR_EACH( i, o ) if( o.[ i ].up == up ) return o->data[ i ];
         return NULL;
     };
 
     func : :get_link_by_dn =
     {
-        BFOR_EACH( i, o ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
+        BFOR_EACH( i, o ) if( o.[ i ].dn == dn ) return o->data[ i ];
         return NULL;
     };
 
     func : :get_index_by_link =
     {
-        BFOR_EACH( i, o ) if( o->data[ i ] == link ) return i;
+        BFOR_EACH( i, o ) if( o.[ i ] == link ) return i;
         return -1;
     };
 
     func : :count_open =
     {
         sz_t count = 0;
-        BFOR_EACH( i, o ) count += ( o->data[ i ]->up == NULL );
+        BFOR_EACH( i, o ) count += ( o.[ i ].up == NULL );
         return count;
     };
 };
@@ -258,7 +258,7 @@ stamp :body = aware bcore_array
 
     func : :name_exists =
     {
-        BFOR_EACH( i, o ) if( :a_get_name( o->data[ i ] ) == name ) return true;
+        BFOR_EACH( i, o ) if( o.[ i ].get_name() == name ) return true;
         return false;
     };
 
@@ -266,9 +266,9 @@ stamp :body = aware bcore_array
     {
         BFOR_EACH( i, o )
         {
-            if( :a_get_name( o->data[ i ] ) == name )
+            if( o.[ i ].get_name() == name )
             {
-                if( :a_is_visible( o->data[ i ] ) ) return o->data[ i ];
+                if( o.[ i ].is_visible() ) return o.[ i ];
             }
         }
         return NULL;
@@ -308,28 +308,28 @@ stamp :cell = aware :
     func : :set_name_visible   = { o->name = name; o->visible = true; };
     func : :set_name_invisible = { o->name = name; o->visible = false; };
     func : :is_visible = { return o->visible; };
-    func : :get_arity       = { return :links_s_count_open(       &o->encs       ); };
-    func : :get_enc_by_name = { return :links_s_get_link_by_name( &o->encs, name ); };
-    func : :get_exc_by_name = { return :links_s_get_link_by_name( &o->excs, name ); };
-    func : :get_enc_by_open = { return :links_s_get_link_by_up(   &o->encs, NULL ); };
-    func : :get_enc_by_dn   = { return :links_s_get_link_by_dn(   &o->encs, dn   ); };
+    func : :get_arity       = { return o.encs.count_open(); };
+    func : :get_enc_by_name = { return o.encs.get_link_by_name( name ); };
+    func : :get_exc_by_name = { return o.excs.get_link_by_name( name ); };
+    func : :get_enc_by_open = { return o.encs.get_link_by_up( NULL ); };
+    func : :get_enc_by_dn   = { return o.encs.get_link_by_dn( dn   ); };
     func : :get_priority    = { return o->priority; };
     func : :is_wrapper      = { return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL; };
 
     // search for a cell descends the tree
     func : :get_cell_by_name =
     {
-        :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
-        if( sem && sem->_ == TYPEOF_:cell_s ) return ( :cell_s* )sem;
-        if( o->parent ) return :cell_s_get_cell_by_name( o->parent, name );
+        :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
+        if( sem && sem._ == TYPEOF_:cell_s ) return cast( :cell_s*, sem );
+        if( o.parent ) return o.parent.get_cell_by_name( name );
         return NULL;
     };
 
     // search for a link only looks up the body of this cell
     func : :get_link_by_name =
     {
-        :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
-        if( sem && sem->_ == TYPEOF_:link_s ) return ( :link_s* )sem;
+        :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
+        if( sem && sem._ == TYPEOF_:link_s ) return cast( :link_s*, sem );
         return NULL;
     };
 };
@@ -389,14 +389,14 @@ group :tree = :
 
         func : :push_parents_to_sem_id =
         {
-            opal_sem_id_s_push_parent( sem_id, o->cell ? o->cell->name : 0 );
-            if( o->parent ) @_push_parents_to_sem_id( o->parent, sem_id );
+            sem_id.push_parent( o.cell ? o.cell.name : 0 );
+            if( o.parent ) o.parent.push_parents_to_sem_id( sem_id );
         };
 
         func : :get_sem_id =
         {
-            opal_sem_id_s_set( sem_id, o->cell ? o->cell->name : 0 );
-            if( o->parent ) @_push_parents_to_sem_id( o->parent, sem_id );
+            sem_id.set( o.cell ? o.cell.name : 0 );
+            if( o.parent ) o.parent.push_parents_to_sem_id( sem_id );
         };
     };
 

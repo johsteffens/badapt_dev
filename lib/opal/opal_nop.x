@@ -156,9 +156,9 @@ feature bl_t is_adaptive( const ) = { return false; };
  */
 feature void settle( const, opal_context* context, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
 {
-    :ar0_literal_s* literal = :ar0_literal_s_create();
+    :ar0_literal_s* literal = :ar0_literal_s!;
     literal.h = result.h.clone();
-    :solve_result_s* r = :solve_result_s_create();
+    :solve_result_s* r = :solve_result_s!;
     r.h = bcore_fork( literal.h );
     :solve_result_s_attach( out_result, r );
     :a_attach( out_nop, (:*)literal );
@@ -182,10 +182,8 @@ feature sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bh
     sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
     if( m.active )
     {
-        bhvm_vop* vop_ar0_determine = ( bhvm_vop* )bhvm_vop_ar0_determine_s_create();
-        bhvm_vop* vop_ar0_vacate    = ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create();
-        mcf->track_vop_push_d( TYPEOF_track_ap_setup, vop_ar0_determine.set_index( 0, idx ) );
-        mcf->track_vop_push_d( TYPEOF_track_ap_shelve, vop_ar0_vacate.set_index( 0, idx ) );
+        mcf->track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
+        mcf->track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
     }
     return idx;
 };
@@ -206,9 +204,9 @@ feature sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bh
     opal_holor_meta_s* m = &result.h.m;
     sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
-    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp,        bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ),       0, idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp,        cast( bhvm_vop*, bhvm_vop_ar0_zro_s!       ).set_index( 0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
 
     BLM_RETURNV( sz_t, idx );
 };
@@ -292,9 +290,9 @@ group :ar0 = retrievable
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
             if( result.h.h.v.size == 0 ) // randomize holor if result is vacant
             {
-                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_randomize_s_create() ), 0, idx ) );
-                mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_randomize_s! ).set_index( 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
             }
             return idx;
         };
@@ -306,9 +304,9 @@ group :ar0 = retrievable
             opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
-            mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_dp_adaptive_zero_grad,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_zro_s_create() ), 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_setup,              cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_shelve,             cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_adaptive_zero_grad, cast( bhvm_vop*, bhvm_vop_ar0_zro_s!       ).set_index( 0, idx ) );
             BLM_RETURNV( sz_t, idx );
         };
 
@@ -336,15 +334,15 @@ group :ar0 = retrievable
             opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
-            bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s_create();
+            bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s!;
             vop_rand.prsg = o.prsg.clone();
             vop_rand.min = o.min;
             vop_rand.max = o.max;
             vop_rand.density = o.density;
 
-            mcf.track_vop_push_d( TYPEOF_track_ap,        bhvm_vop_a_set_index( ( ( bhvm_vop* )vop_rand ),                          0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_vacate_s_create() ),    0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap,        cast( bhvm_vop*, vop_rand                  ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
 
             return idx;
         };
@@ -368,8 +366,8 @@ group :ar1 = retrievable
         {
             result.h =< opal_holor_s_create();
             result.h.h.fork( &a[0].h );
-            result.h.m.htp      =  a[0].m.htp;
-            result.h.m.active   =  a[0].m.active;
+            result.h.m.htp       =  a[0].m.htp;
+            result.h.m.active    =  a[0].m.active;
             result.can_settle    = !a[0].m.active;
             result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result.type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
@@ -406,8 +404,8 @@ group :ar1 = retrievable
         func :: :solve =
         {
             result.h =< a[0].clone();
-            bhvm_holor_s_set_type( &result.h.h, TYPEOF_f2_t );
-            result.can_settle = ( result.h ) && !result.h.m.active;
+            result.h.h.set_type( TYPEOF_f2_t );
+            result.can_settle    = ( result.h ) && !result.h.m.active;
             result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
             result.type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
             return true;
@@ -422,8 +420,8 @@ group :ar1 = retrievable
         func :: :type_vop_dp_a = { return TYPEOF_bhvm_vop_ar1_neg_dp_s; };
         func :: :create_op_of_arn =
         {
-            return ( n == 2 ) ? (::*)::ar2_sub_s_create()
-                 : ( n == 1 ) ? (::*)@_clone( o )
+            return ( n == 2 ) ? (::*)::ar2_sub_s!
+                 : ( n == 1 ) ? (::*)o.clone()
                  : NULL;
         };
     };
@@ -603,7 +601,7 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                result.h =< opal_holor_s_create();
+                result.h =< opal_holor_s!;
                 result.h.h.set_scalar_f3( a[0].h.s.size ? a[0].h.s.[ a[0].h.s.size - 1 ] : 1 );
                 result.h.m.active = false;
                 result.can_settle = true;
@@ -622,8 +620,8 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                result.h =< opal_holor_s_create();
-                result.h.h.set_scalar_f3( bhvm_shape_s_get_volume( &a[0].h.s ) );
+                result.h =< opal_holor_s!;
+                result.h.h.set_scalar_f3( a[0].h.s.get_volume() );
                 result.h.m.active = false;
                 result.can_settle = true;
             }
@@ -683,7 +681,7 @@ group :ar1 = retrievable
         {
             if( a[0] )
             {
-                result.h =< opal_holor_s_create();
+                result.h =< opal_holor_s!;
                 result.h.h.s.copy( &a[0].h.s );
                 result.h.h.v.set_type( a[0].h.v.type );
                 result.h.m.htp = &a[0]->m.htp;
@@ -959,7 +957,7 @@ group :ar2 = retrievable
     stamp :reshape =
     {
         func :: :symbol   = { return "reshape"; };
-        func :: :priority    = { return 8; };
+        func :: :priority = { return 8; };
 
         func :: :solve =
         {

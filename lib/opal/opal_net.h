@@ -32,11 +32,7 @@
 XOILA_DEFINE_GROUP( opal_net, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :link = aware :
-{
-    hidden vd_t /* :node_s* */ node; // (!) target is a node
-};
-
+stamp :link  = aware : { private aware :node_s* node; };
 stamp :links = aware bcore_array { :link_s => []; };
 
 signature void solve( mutable );
@@ -186,7 +182,7 @@ group :builder = :
 
         func : :fork_input_holors =
         {
-            bhvm_holor_adl_s_set_size( &o->input_holors, size_input_holors );
+            o.input_holors.set_size( size_input_holors );
             BFOR_EACH( i, &o->input_holors )
             {
                 ASSERT( input_holors[ i ] );

@@ -55,19 +55,18 @@ group :hidx =
     stamp : = aware :
     {
         bcore_arr_sz_s => arr;
-        func : :clear     = { if( o.arr ) bcore_arr_sz_s_clear( o.arr ); return o; };
-        func : :push      = { if( !o.arr ) o.arr = bcore_arr_sz_s_create(); o.arr.push( index ); return o; };
+        func : :clear     = { if( o.arr ) o.arr.clear(); return o; };
+        func : :push      = { o.arr!.push( index ); return o; };
 
-        func : :get_idx   = { assert( o.arr ); assert( index >= 0 && index < o.arr->size ); return o.arr.[ index ]; };
+        func : :get_idx   = { assert( index >= 0 && index < o.arr->size ); return o.arr?.[ index ]; };
         func : :get_size  = { return o.arr ? o.arr->size : 0; };
-        func : :get_holor = { return bhvm_mcode_hbase_s_get_holor( hbase, @_get_idx( o, index ) ); };
-        func : :get_hmeta = { return bhvm_mcode_hbase_s_get_hmeta( hbase, @_get_idx( o, index ) ); };
+        func : :get_holor = { return hbase.get_holor( o.get_idx( index ) ); };
+        func : :get_hmeta = { return hbase.get_hmeta( o.get_idx( index ) ); };
 
         func : :get_pclass_idx =
         {
-            const bhvm_mcode_hmeta* hmeta = @_get_hmeta( o, hbase, index );
-            if( hmeta ) return hmeta.get_node().get_pclass_idx( pclass );
-            return -1;
+            const bhvm_mcode_hmeta* hmeta = o.get_hmeta( hbase, index );
+            return ( hmeta ) ? hmeta.get_node().get_pclass_idx( pclass ) : -1;
         };
 
         func : :get_pclass_holor = { return hbase.get_holor( o.get_pclass_idx( hbase, pclass, index ) ); };
@@ -188,17 +187,17 @@ stamp : = aware :
 
     /// frame setup from string or source; 'in' can be NULL
     func : :setup_from_source;
-    func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en, size_en ) ); };
+    func : :setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, o.setup_from_source( BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en, size_en ) ); };
     func : :setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en, size_en ); };
-    func : :create_from_source     = { @* o = @_create(); return @_setup_from_source( o, source, en, size_en ); };
-    func : :create_from_st         = { @* o = @_create(); return @_setup_from_st(     o, st,     en, size_en ); };
-    func : :create_from_sc         = { @* o = @_create(); return @_setup_from_sc(     o, sc,     en, size_en ); };
-    func : :setup_from_source_adl  = { return @_setup_from_source( o, source, en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
-    func : :setup_from_st_adl      = { return @_setup_from_st(     o, st,     en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
-    func : :setup_from_sc_adl      = { return @_setup_from_sc(     o, sc,     en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
-    func : :create_from_source_adl = { return @_create_from_source( source,   en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
-    func : :create_from_st_adl     = { return @_create_from_st( st,           en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
-    func : :create_from_sc_adl     = { return @_create_from_sc( sc,           en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
+    func : :create_from_source     = { return (@!).setup_from_source( source, en, size_en ); };
+    func : :create_from_st         = { return (@!).setup_from_st(     st,     en, size_en ); };
+    func : :create_from_sc         = { return (@!).setup_from_sc(     sc,     en, size_en ); };
+    func : :setup_from_source_adl  = { return o.setup_from_source( source, en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
+    func : :setup_from_st_adl      = { return o.setup_from_st(     st,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
+    func : :setup_from_sc_adl      = { return o.setup_from_sc(     sc,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
+    func : :create_from_source_adl = { return (@!).setup_from_source_adl( source, en ); };
+    func : :create_from_st_adl     = { return (@!).setup_from_st_adl(         st, en ); };
+    func : :create_from_sc_adl     = { return (@!).setup_from_sc_adl(         sc, en ); };
 
     func : :get_size_en  = { return o.hidx_en .get_size(); };
     func : :get_size_ex  = { return o.hidx_ex .get_size(); };
