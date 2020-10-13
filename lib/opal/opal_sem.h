@@ -216,38 +216,38 @@ stamp :links = aware bcore_array
 
     func : :get_link_by_name =
     {
-        BFOR_EACH( i, o ) if( o.[ i ].name == name ) return o->data[ i ];
+        foreach( $* e in o ) if( e.name == name ) return e;
         return NULL;
     };
 
     func : :name_exists =
     {
-        BFOR_EACH( i, o ) if( o.[ i ].name == name ) return true;
+        foreach( const $* e in o ) if( e.name == name ) return true;
         return false;
     };
 
     func : :get_link_by_up =
     {
-        BFOR_EACH( i, o ) if( o.[ i ].up == up ) return o->data[ i ];
+        foreach( $* e in o ) if( e.up == up ) return e;
         return NULL;
     };
 
     func : :get_link_by_dn =
     {
-        BFOR_EACH( i, o ) if( o.[ i ].dn == dn ) return o->data[ i ];
+        foreach( $* e in o ) if( e.dn == dn ) return e;
         return NULL;
     };
 
     func : :get_index_by_link =
     {
-        BFOR_EACH( i, o ) if( o.[ i ] == link ) return i;
+        foreach( $* e in o ) if( e == link ) return __i;
         return -1;
     };
 
     func : :count_open =
     {
         sz_t count = 0;
-        BFOR_EACH( i, o ) count += ( o.[ i ].up == NULL );
+        foreach( $* e in o ) count += ( e.up == NULL );
         return count;
     };
 };
@@ -258,17 +258,17 @@ stamp :body = aware bcore_array
 
     func : :name_exists =
     {
-        BFOR_EACH( i, o ) if( o.[ i ].get_name() == name ) return true;
+        foreach( $* e in o ) if( e.get_name() == name ) return true;
         return false;
     };
 
     func : :get_sem_by_name =
     {
-        BFOR_EACH( i, o )
+        foreach( $* e in o )
         {
-            if( o.[ i ].get_name() == name )
+            if( e.get_name() == name )
             {
-                if( o.[ i ].is_visible() ) return o.[ i ];
+                if( e.is_visible() ) return e;
             }
         }
         return NULL;

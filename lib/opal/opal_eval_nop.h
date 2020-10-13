@@ -152,16 +152,16 @@ stamp :set = extending :std
 
     func : :run =
     {
-        BFOR_EACH( i, &o->arr )
+        foreach( :* e in o->arr )
         {
             BLM_INIT();
-            :* eval = BLM_A_PUSH( o->arr.[ i ].clone() );
+            :* eval = BLM_A_PUSH( e.clone() );
             eval.set_param( &o->param );
             eval.run( result );
             if( result->error )
             {
                 st_s* s = BLM_A_PUSH( result->msg.clone() );
-                result->msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", i, s );
+                result->msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, s );
                 BLM_RETURNV( :result_s*, result );
             }
             BLM_DOWN();

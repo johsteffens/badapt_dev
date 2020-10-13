@@ -86,7 +86,7 @@ stamp :node = aware :
 
     func : :up_index =
     {
-        BFOR_EACH( i, &o.upls ) if( o->upls.[ i ].node == node ) return i;
+        foreach( $* e in o.upls ) if( e.node == node ) return __i;
         return -1;
     };
 
@@ -108,7 +108,7 @@ stamp :nodes = aware bcore_array
     :node_s => [];
     func : :get_by_id =
     {
-        BFOR_EACH( i, o ) if( o.[ i ].id == id ) return o.[ i ];
+        foreach( $* e in o ) if( e.id == id ) return e;
         return NULL;
     };
 };
@@ -136,15 +136,15 @@ stamp :cell = aware :
 
     func : :clear_flags =
     {
-        BFOR_EACH( i, &o.body ) o.body.[ i ].flag = false;
+        foreach( $* e in o.body ) e.flag = false;
     };
 
     func : :clear_all_flags =
     {
-        BFOR_EACH( i, &o.body )
+        foreach( $* e in o.body )
         {
-            o.body.[ i ].flag = false;
-            o.body.[ i ].probe = false;
+            e.flag = false;
+            e.probe = false;
         }
     };
 
@@ -152,7 +152,7 @@ stamp :cell = aware :
 
     func : :clear_downlinks =
     {
-        BFOR_EACH( i, &o.body ) o.body.[ i ].dnls.clear();
+        foreach( $* e in o.body ) e.dnls.clear();
     };
 
     func : :set_downlinks;

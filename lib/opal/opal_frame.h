@@ -74,12 +74,12 @@ group :hidx =
 
         func : :replace_index =
         {
-            BFOR_EACH( i, o.arr )
+            foreach( sz_t* e in o.arr )
             {
-                sz_t old_index = o.arr.[ i ];
+                sz_t old_index = *e;
                 assert( old_index >= 0 && old_index < index_map->size );
                 sz_t new_index = index_map.[ old_index ];
-                if( new_index >= 0 ) o.arr.[ i ] = new_index;
+                if( new_index >= 0 ) *e = new_index;
             }
             return o;
         };
