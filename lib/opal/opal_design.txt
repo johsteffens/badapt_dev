@@ -104,7 +104,6 @@ g_out = lstm( dim_h = 200, x = g_in ).y;
 - operation: cell embedded in a cell
 - once a cell is complete, data types can be finalized
 
-
 ================================================================================
 Semantic Cell Concept:
 A semantic graph communicates with the objects outside its body through input an output channels.
