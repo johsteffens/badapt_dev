@@ -45,7 +45,7 @@ stamp :result = aware bcore_inst
     bl_t error = false;
     st_s msg;
 
-    func : :resolve =
+    func : .resolve =
     {
         if( !o ) return;
         if( o->error )
@@ -77,9 +77,9 @@ stamp :param = aware bcore_inst
     sz_t verbosity = 1;
     u3_t rval = 1234; // for random generators
 
-    func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
+    func bcore_inst_call . init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
 
-    func : :set =
+    func : .set =
     {
         o->verbosity = sz_max( o->verbosity, src->verbosity );
         o->rval      = bcore_lcg00_u3( o->rval + src->rval );
@@ -101,9 +101,9 @@ feature :result_s* run( const, :result_s* result ); // creates result or returns
 stump :std = aware :
 {
     :param_s param;
-    func : :run;
-    func : :set_param = { :param_s_set( &o->param, param ); };
-    func bcore_main : main =
+    func : .run;
+    func : .set_param = { :param_s_set( &o->param, param ); };
+    func bcore_main . main =
     {
         BLM_INIT();
         :result_s_resolve( @_run( o, BLM_CREATE( :result_s ) ) );
@@ -134,7 +134,7 @@ stamp :generator = extending :std
 
 stamp :show_param = extending :std
 {
-    func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
+    func : .run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
 
 stamp :arr = aware bcore_array { aware :=> []; };
@@ -143,7 +143,7 @@ stamp :set = extending :std
 {
     :arr_s arr;
 
-    func : :run =
+    func : .run =
     {
         BFOR_EACH( i, &o->arr )
         {

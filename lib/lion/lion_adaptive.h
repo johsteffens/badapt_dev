@@ -49,16 +49,16 @@ stamp : = aware badapt_adaptive
     // ==============================================================
 
     // === adaptive functions =======================================
-    func ^ : get_in_size  = { return o->in_size;  };
-    func ^ : get_out_size = { return o->out_size; };
-    func ^ : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
-    func ^ : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
+    func ^ . get_in_size  = { return o->in_size;  };
+    func ^ . get_out_size = { return o->out_size; };
+    func ^ . get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
+    func ^ . set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
 
-    func ^ : arc_to_sink;
-    func ^ : minfer;
-    func ^ : bgrad_adapt;
+    func ^ . arc_to_sink;
+    func ^ . minfer;
+    func ^ . bgrad_adapt;
 
-    func ^ : get_weights_min_max;
+    func ^ . get_weights_min_max;
 
     // ==============================================================
 };
@@ -77,15 +77,15 @@ stamp :builder = aware badapt_builder
     // === builder functions =======================================
 
     /// input vector size
-    func ^ : get_in_size = { return o->in_size; };
-    func ^ : set_in_size = { o->in_size = size; };
+    func ^ . get_in_size = { return o->in_size; };
+    func ^ . set_in_size = { o->in_size = size; };
 
     /// output vector size
-    func ^ : get_out_size = { return o->out_size; };
-    func ^ : set_out_size = { o->out_size = size; };
+    func ^ . get_out_size = { return o->out_size; };
+    func ^ . set_out_size = { o->out_size = size; };
 
     /// builds adaptive ready to be trained; passes ownership
-    func ^ : build;
+    func ^ . build;
 
     // ==============================================================
 };
@@ -109,16 +109,16 @@ stamp :cyclic = aware badapt_adaptive
     bl_t dp_value; // true in case a value was stored
 
     // === adaptive functions =======================================
-    func ^ : get_in_size  = { return o->in_size;  };
-    func ^ : get_out_size = { return o->out_size; };
-    func ^ : get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
-    func ^ : set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
+    func ^ . get_in_size  = { return o->in_size;  };
+    func ^ . get_out_size = { return o->out_size; };
+    func ^ . get_dynamics_std = { badapt_dynamics_std_s_copy( dynamics, &o->dynamics ); };
+    func ^ . set_dynamics_std = { badapt_dynamics_std_s_copy( &o->dynamics, dynamics ); };
 
-    func ^ : arc_to_sink;
-    func ^ : minfer;
-    func ^ : bgrad_adapt;
-    func ^ : get_weights_min_max;
-    func ^ : reset;
+    func ^ . arc_to_sink;
+    func ^ . minfer;
+    func ^ . bgrad_adapt;
+    func ^ . get_weights_min_max;
+    func ^ . reset;
 
     // ==============================================================
 };
@@ -138,15 +138,15 @@ stamp :cyclic_builder = aware badapt_builder
     // === builder functions =======================================
 
     /// input vector size
-    func ^ : get_in_size = { return o->in_size; };
-    func ^ : set_in_size = { o->in_size = size; };
+    func ^ . get_in_size = { return o->in_size; };
+    func ^ . set_in_size = { o->in_size = size; };
 
     /// output vector size
-    func ^ : get_out_size = { return o->out_size; };
-    func ^ : set_out_size = { o->out_size = size; };
+    func ^ . get_out_size = { return o->out_size; };
+    func ^ . set_out_size = { o->out_size = size; };
 
     /// builds adaptive ready to be trained; passes ownership
-    func ^ : build;
+    func ^ . build;
 
     // ==============================================================
 };

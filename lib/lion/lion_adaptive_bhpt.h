@@ -50,15 +50,15 @@ stamp : = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func ^ : get_format_en = { bhvm_holor_s_copy( format, &o->holor_frame_en ); return format; };
-    func ^ : get_format_ex = { bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format; };
+    func ^ . get_format_en = { bhvm_holor_s_copy( format, &o->holor_frame_en ); return format; };
+    func ^ . get_format_ex = { bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format; };
 
-    func ^ : axon_pass;
-    func ^ : dendrite_pass;
-    func ^ : cyclic_reset;
-    func ^ : get_adaptor_probe;
-    func ^ : rebind_holors = { lion_frame_s_bind_holors( &o->frame ); };
-    func ^ : status_to_sink;
+    func ^ . axon_pass;
+    func ^ . dendrite_pass;
+    func ^ . cyclic_reset;
+    func ^ . get_adaptor_probe;
+    func ^ . rebind_holors = { lion_frame_s_bind_holors( &o->frame ); };
+    func ^ . status_to_sink;
 
     // ==============================================================
 };
@@ -74,9 +74,9 @@ stamp :builder = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func ^ : set_format_en = { bhvm_holor_s_copy( &o->holor_frame_en, format ); };
-    func ^ : set_format_ex = { bhvm_holor_s_copy( &o->holor_frame_ex, format ); };
-    func ^ : create_adaptive;
+    func ^ . set_format_en = { bhvm_holor_s_copy( &o->holor_frame_en, format ); };
+    func ^ . set_format_ex = { bhvm_holor_s_copy( &o->holor_frame_ex, format ); };
+    func ^ . create_adaptive;
 
     // ==============================================================
 };
@@ -101,15 +101,15 @@ stamp :cyclic = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func ^ : get_format_en = { bhvm_holor_s_copy( format, &o->holor_frame_en ); return format; };
-    func ^ : get_format_ex = { bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format; };
+    func ^ . get_format_en = { bhvm_holor_s_copy( format, &o->holor_frame_en ); return format; };
+    func ^ . get_format_ex = { bhvm_holor_s_copy( format, &o->holor_frame_ex ); return format; };
 
-    func ^ : axon_pass;
-    func ^ : dendrite_pass;
-    func ^ : cyclic_reset;
-    func ^ : get_adaptor_probe;
-    func ^ : rebind_holors = { lion_frame_cyclic_s_bind_holors( &o->frame ); };
-    func ^ : status_to_sink;
+    func ^ . axon_pass;
+    func ^ . dendrite_pass;
+    func ^ . cyclic_reset;
+    func ^ . get_adaptor_probe;
+    func ^ . rebind_holors = { lion_frame_cyclic_s_bind_holors( &o->frame ); };
+    func ^ . status_to_sink;
 
     // ==============================================================
 };
@@ -126,9 +126,9 @@ stamp :cyclic_builder = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func ^ : set_format_en = { bhvm_holor_s_copy( &o->holor_frame_en, format ); };
-    func ^ : set_format_ex = { bhvm_holor_s_copy( &o->holor_frame_ex, format ); };
-    func ^ : create_adaptive;
+    func ^ . set_format_en = { bhvm_holor_s_copy( &o->holor_frame_en, format ); };
+    func ^ . set_format_ex = { bhvm_holor_s_copy( &o->holor_frame_ex, format ); };
+    func ^ . create_adaptive;
 
     // ==============================================================
 };

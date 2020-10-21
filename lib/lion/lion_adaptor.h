@@ -44,8 +44,8 @@ stamp :frame = aware bhpt_adaptor
 
     hidden lion_frame_s => frame;
 
-    func bhpt_adaptor : reset = { if( o->frame ) lion_frame_s_cyclic_reset( o->frame ); };
-    func bhpt_adaptor : adapt;
+    func bhpt_adaptor . reset = { if( o->frame ) lion_frame_s_cyclic_reset( o->frame ); };
+    func bhpt_adaptor . adapt;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -43,7 +43,7 @@ stamp :result = aware bcore_inst
     bl_t error = false;
     st_s msg;
 
-    func : :resolve =
+    func : .resolve =
     {
         if( !o ) return;
         if( o->error )
@@ -78,9 +78,9 @@ stamp :param = aware bcore_inst
     sz_t verbosity = 1;
     aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
 
-    func bcore_inst_call : init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
+    func bcore_inst_call . init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
 
-    func : :set =
+    func : .set =
     {
         o.verbosity = sz_max( o.verbosity, src.verbosity );
         o.prsg.set_state_mix( o.prsg, src.prsg );
@@ -102,9 +102,9 @@ feature :result_s* run( const, :result_s* result ); // creates result or returns
 stump :std = aware :
 {
     :param_s param;
-    func : :run;
-    func : :set_param = { o.param.set( param ); };
-    func bcore_main : main =
+    func : .run;
+    func : .set_param = { o.param.set( param ); };
+    func bcore_main . main =
     {
         BLM_INIT();
         o.run( BLM_CREATE( :result_s ) ).resolve();
@@ -139,7 +139,7 @@ stamp :generator = extending :std
 
 stamp :show_param = extending :std
 {
-    func : :run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
+    func : .run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,7 +150,7 @@ stamp :set = extending :std
 {
     :arr_s arr;
 
-    func : :run =
+    func : .run =
     {
         foreach( :* e in o->arr )
         {

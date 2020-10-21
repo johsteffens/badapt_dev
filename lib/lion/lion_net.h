@@ -134,21 +134,21 @@ stamp :node = aware :
 
     hidden bcore_source_point_s -> source_point;
 
-    //func : :solve;
+    //func : .solve;
 
-    func : :up_index =
+    func : .up_index =
     {
         BFOR_EACH( i, &o->upls ) if( o->upls.data[ i ]->node == node ) return i;
         return -1;
     };
 
-    func : :set_nop_d =
+    func : .set_nop_d =
     {
         ASSERT( o->result == NULL );
         lion_nop_a_attach( &o->nop, nop );
     };
 
-    func : :is_cyclic = { return ( o->mnode ) ? o->mnode->cyclic : lion_nop_a_is_cyclic( o->nop ); };
+    func : .is_cyclic = { return ( o->mnode ) ? o->mnode->cyclic : lion_nop_a_is_cyclic( o->nop ); };
 };
 
 stamp :node_adl = aware bcore_array { :node_s => []; };
@@ -158,7 +158,7 @@ signature :node_s* get_by_id( mutable, sz_t id );
 stamp :nodes = aware bcore_array
 {
     :node_s => [];
-    func : :get_by_id =
+    func : .get_by_id =
     {
         BFOR_EACH( i, o ) if( o->data[ i ]->id == id ) return o->data[ i ];
         return NULL;
@@ -181,15 +181,15 @@ stamp :cell = aware :
     :nodes_s encs; // entry channels
     :nodes_s excs; // exit channels
 
-    func : :is_consistent;
-    func : :normalize; // re-entrant
+    func : .is_consistent;
+    func : .normalize; // re-entrant
 
-    func : :clear_flags =
+    func : .clear_flags =
     {
         BFOR_EACH( i, &o->body ) o->body.data[ i ]->flag = false;
     };
 
-    func : :clear_all_flags =
+    func : .clear_all_flags =
     {
         BFOR_EACH( i, &o->body )
         {
@@ -198,19 +198,19 @@ stamp :cell = aware :
         }
     };
 
-    func : :solve;
+    func : .solve;
 
-    func : :clear_downlinks =
+    func : .clear_downlinks =
     {
         BFOR_EACH( i, &o->body ) :links_s_clear( &o->body.data[ i ]->dnls );
     };
 
-    func : :set_downlinks;
+    func : .set_downlinks;
 
-    func bcore_inst_call : copy_x; // cell is copyable
+    func bcore_inst_call . copy_x; // cell is copyable
 
     // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
-    func bcore_via_call  : mutated = { ERR_fa( "Cannot reconstitute." ); };
+    func bcore_via_call  . mutated = { ERR_fa( "Cannot reconstitute." ); };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -129,8 +129,8 @@ stamp :link = aware :
     private :link_s -> dn;   // down link
     private  vd_t cell; // cell owning the link (only if link is part of membrane)
     bl_t     exit; // true: link is of cell's exit membrane. false: entry membrane
-    func : : get_name = :get_name_;
-    func : : is_visible = { return o->visible; };
+    func : . get_name = :get_name_;
+    func : . is_visible = { return o->visible; };
 };
 
 signature bl_t     name_exists(       const,   tp_t name );
@@ -146,37 +146,37 @@ stamp :links = aware bcore_array
 {
     :link_s => [];
 
-    func : :get_link_by_name =
+    func : .get_link_by_name =
     {
         BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return o->data[ i ];
         return NULL;
     };
 
-    func : :name_exists =
+    func : .name_exists =
     {
         BFOR_EACH( i, o ) if( o->data[ i ]->name == name ) return true;
         return false;
     };
 
-    func : :get_link_by_up =
+    func : .get_link_by_up =
     {
         BFOR_EACH( i, o ) if( o->data[ i ]->up == up ) return o->data[ i ];
         return NULL;
     };
 
-    func : :get_link_by_dn =
+    func : .get_link_by_dn =
     {
         BFOR_EACH( i, o ) if( o->data[ i ]->dn == dn ) return o->data[ i ];
         return NULL;
     };
 
-    func : :get_index_by_link =
+    func : .get_index_by_link =
     {
         BFOR_EACH( i, o ) if( o->data[ i ] == link ) return i;
         return -1;
     };
 
-    func : :count_open =
+    func : .count_open =
     {
         sz_t count = 0;
         BFOR_EACH( i, o ) count += ( o->data[ i ]->up == NULL );
@@ -188,13 +188,13 @@ stamp :body = aware bcore_array
 {
     aware : => [];
 
-    func : :name_exists =
+    func : .name_exists =
     {
         BFOR_EACH( i, o ) if( :a_get_name( o->data[ i ] ) == name ) return true;
         return false;
     };
 
-    func : :get_sem_by_name =
+    func : .get_sem_by_name =
     {
         BFOR_EACH( i, o )
         {
@@ -230,17 +230,17 @@ stamp :cell = aware :
 
     hidden bcore_source_point_s source_point;
 
-    func : :get_name = :get_name_;
-    func : :get_arity       = { return :links_s_count_open(       &o->encs       ); };
-    func : :get_enc_by_name = { return :links_s_get_link_by_name( &o->encs, name ); };
-    func : :get_exc_by_name = { return :links_s_get_link_by_name( &o->excs, name ); };
-    func : :get_enc_by_open = { return :links_s_get_link_by_up(   &o->encs, NULL ); };
-    func : :get_enc_by_dn   = { return :links_s_get_link_by_dn(   &o->encs, dn   ); };
-    func : :get_priority    = { return o->priority; };
-    func : :is_wrapper      = { return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL; };
+    func : .get_name = :get_name_;
+    func : .get_arity       = { return :links_s_count_open(       &o->encs       ); };
+    func : .get_enc_by_name = { return :links_s_get_link_by_name( &o->encs, name ); };
+    func : .get_exc_by_name = { return :links_s_get_link_by_name( &o->excs, name ); };
+    func : .get_enc_by_open = { return :links_s_get_link_by_up(   &o->encs, NULL ); };
+    func : .get_enc_by_dn   = { return :links_s_get_link_by_dn(   &o->encs, dn   ); };
+    func : .get_priority    = { return o->priority; };
+    func : .is_wrapper      = { return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL; };
 
     // search for a cell descends the tree
-    func : :get_cell_by_name =
+    func : .get_cell_by_name =
     {
         :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
         if( sem && sem->_ == TYPEOF_:cell_s ) return ( :cell_s* )sem;
@@ -249,7 +249,7 @@ stamp :cell = aware :
     };
 
     // search for a link only looks up the body of this cell
-    func : :get_link_by_name =
+    func : .get_link_by_name =
     {
         :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
         if( sem && sem->_ == TYPEOF_:link_s ) return ( :link_s* )sem;
