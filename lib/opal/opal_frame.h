@@ -98,15 +98,15 @@ signature void check_integrity( const );
 signature @* setup_from_source(      mutable, bcore_source* source, const bhvm_holor_s** en, sz_t size_en );
 signature @* setup_from_st(          mutable,   const st_s* st,     const bhvm_holor_s** en, sz_t size_en );
 signature @* setup_from_sc(          mutable,         sc_t  sc,     const bhvm_holor_s** en, sz_t size_en );
-signature @* create_from_source(     plain,   bcore_source* source, const bhvm_holor_s** en, sz_t size_en );
-signature @* create_from_st(         plain,     const st_s* st,     const bhvm_holor_s** en, sz_t size_en );
-signature @* create_from_sc(         plain,           sc_t  sc,     const bhvm_holor_s** en, sz_t size_en );
+signature @* create_from_source(              bcore_source* source, const bhvm_holor_s** en, sz_t size_en );
+signature @* create_from_st(                    const st_s* st,     const bhvm_holor_s** en, sz_t size_en );
+signature @* create_from_sc(                          sc_t  sc,     const bhvm_holor_s** en, sz_t size_en );
 signature @* setup_from_source_adl(  mutable, bcore_source* source, const bhvm_holor_adl_s* en );
 signature @* setup_from_st_adl(      mutable,   const st_s* st,     const bhvm_holor_adl_s* en );
 signature @* setup_from_sc_adl(      mutable,         sc_t  sc,     const bhvm_holor_adl_s* en );
-signature @* create_from_source_adl( plain,   bcore_source* source, const bhvm_holor_adl_s* en );
-signature @* create_from_st_adl(     plain,     const st_s* st,     const bhvm_holor_adl_s* en );
-signature @* create_from_sc_adl(     plain,           sc_t  sc,     const bhvm_holor_adl_s* en );
+signature @* create_from_source_adl(          bcore_source* source, const bhvm_holor_adl_s* en );
+signature @* create_from_st_adl(                const st_s* st,     const bhvm_holor_adl_s* en );
+signature @* create_from_sc_adl(                      sc_t  sc,     const bhvm_holor_adl_s* en );
 
 signature sz_t get_size_en( const ); // number of entry channels
 signature sz_t get_size_ex( const ); // number of exit channels
