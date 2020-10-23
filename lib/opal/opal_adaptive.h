@@ -48,15 +48,14 @@ stamp : = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func ^ . get_format_en = { format.copy( o.holor_frame_en ); return format; };
-    func ^ . get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
-
-    func ^ . axon_pass;
-    func ^ . dendrite_pass;
-    func ^ . cyclic_reset;
-    func ^ . get_adaptor_probe;
-    func ^ . rebind_holors = { o.frame.bind_holors(); };
-    func ^ . status_to_sink;
+    func bhpt_adaptive.get_format_en = { format.copy( o.holor_frame_en ); return format; };
+    func bhpt_adaptive.get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
+    func bhpt_adaptive.axon_pass     = { o.frame.run_ap( cast( const bhvm_holor_s**, ax_en), 1, ax_ex, 1 ); };
+    func bhpt_adaptive.dendrite_pass = { o.frame.run_dp( cast( const bhvm_holor_s**, ag_ex), 1, ( ag_en ) ? &ag_en : NULL, ( ag_en ) ? 1 : 0 ); };
+    func bhpt_adaptive.cyclic_reset  = { o.frame.cyclic_reset(); };
+    func bhpt_adaptive.rebind_holors = { o.frame.bind_holors(); };
+    func bhpt_adaptive.get_adaptor_probe;
+    func bhpt_adaptive.status_to_sink;
 
     // ==============================================================
 };
@@ -72,9 +71,9 @@ stamp :builder = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func ^ . set_format_en = { o.holor_frame_en.copy( format ); };
-    func ^ . set_format_ex = { o.holor_frame_ex.copy( format ); };
-    func ^ . create_adaptive;
+    func bhpt_builder.set_format_en = { o.holor_frame_en.copy( format ); };
+    func bhpt_builder.set_format_ex = { o.holor_frame_ex.copy( format ); };
+    func bhpt_builder.create_adaptive;
 
     // ==============================================================
 };
@@ -99,15 +98,15 @@ stamp :cyclic = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func ^ . get_format_en = { format.copy( o.holor_frame_en ); return format; };
-    func ^ . get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
+    func bhpt_adaptive.get_format_en = { format.copy( o.holor_frame_en ); return format; };
+    func bhpt_adaptive.get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
 
-    func ^ . axon_pass;
-    func ^ . dendrite_pass;
-    func ^ . cyclic_reset;
-    func ^ . get_adaptor_probe;
-    func ^ . rebind_holors = { o.frame.bind_holors(); };
-    func ^ . status_to_sink;
+    func bhpt_adaptive.axon_pass = { o.frame.run_ap( cast( const bhvm_holor_s**, ax_en), 1, ax_ex, 1 ); };
+    func bhpt_adaptive.dendrite_pass;
+    func bhpt_adaptive.cyclic_reset;
+    func bhpt_adaptive.get_adaptor_probe;
+    func bhpt_adaptive.rebind_holors = { o.frame.bind_holors(); };
+    func bhpt_adaptive.status_to_sink;
 
     // ==============================================================
 };
@@ -124,14 +123,16 @@ stamp :cyclic_builder = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func ^ . set_format_en = { o.holor_frame_en.copy( format ); };
-    func ^ . set_format_ex = { o.holor_frame_ex.copy( format ); };
-    func ^ . create_adaptive;
+    func bhpt_builder.set_format_en = { o.holor_frame_en.copy( format ); };
+    func bhpt_builder.set_format_ex = { o.holor_frame_ex.copy( format ); };
+    func bhpt_builder.create_adaptive;
 
     // ==============================================================
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+embed "opal_adaptive.x";
 
 #endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
