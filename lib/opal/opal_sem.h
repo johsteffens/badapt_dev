@@ -320,7 +320,7 @@ stamp :cell = aware :
     func : .get_cell_by_name =
     {
         :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
-        if( sem && sem._ == TYPEOF_:cell_s ) return cast( :cell_s*, sem );
+        if( sem && sem._ == TYPEOF_:cell_s ) return cast( sem, :cell_s* );
         if( o.parent ) return o.parent.get_cell_by_name( name );
         return NULL;
     };
@@ -329,7 +329,7 @@ stamp :cell = aware :
     func : .get_link_by_name =
     {
         :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
-        if( sem && sem._ == TYPEOF_:link_s ) return cast( :link_s*, sem );
+        if( sem && sem._ == TYPEOF_:link_s ) return cast( sem, :link_s* );
         return NULL;
     };
 };

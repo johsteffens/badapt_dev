@@ -142,7 +142,7 @@ stamp :arr = aware bcore_array { aware : => []; };
 stamp :set = extending :std
 {
     :arr_s arr;
-    func : .run =
+    func :.run =
     {
         foreach( const :* e in o.arr )
         {
@@ -176,6 +176,8 @@ stamp :cyclic = extending :std
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+embed "opal_eval_frame.x";
 
 #endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

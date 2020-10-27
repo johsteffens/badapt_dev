@@ -42,8 +42,53 @@ stamp :frame = aware bhpt_adaptor
 
     hidden opal_frame_s => frame;
 
-    func bhpt_adaptor . reset = { if( o.frame ) o.frame.cyclic_reset(); };
-    func bhpt_adaptor . adapt;
+    func bhpt_adaptor.reset = { if( o.frame ) o.frame.cyclic_reset(); };
+    func bhpt_adaptor.adapt;
+};
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+func (:frame) bhpt_adaptor.adapt =
+{
+    if( !o.frame )
+    {
+        bcore_source* source = NULL;
+
+        switch( *(aware_t*)o.src )
+        {
+            case TYPEOF_bcore_file_path_s:
+            {
+                source = scope( cast( bcore_file_open_source_path( cast( o.src, const bcore_file_path_s* ) ), bcore_source* ), source );
+            }
+            break;
+
+            case TYPEOF_st_s:
+            {
+                source = scope( cast( bcore_source_string_s_create_from_string( cast( o.src, const st_s* ) ), bcore_source* ), source );
+            }
+            break;
+
+            default:
+            {
+                ERR_fa( "Invalid source type '#<sc_t>'.", ifnameof( *(aware_t*)o.src ) );
+            }
+            break;
+        }
+
+        o.frame = opal_frame_s!;
+        o.frame.setup_from_source( source, verbatim_C{ ( const bhvm_holor_s*[] ){ node->axon, node->grad } }, 2 );
+
+        ASSERT( o.frame.get_size_en() == 2 );
+        ASSERT( o.frame.get_size_ex() == 2 );
+    }
+
+    o.frame.run_ap
+    (
+        verbatim_C{ ( const bhvm_holor_s*[] ){ node->axon, node->grad } },
+        2,
+        verbatim_C{ ( bhvm_holor_s*[] ){ node->axon, node->grad } },
+        2
+    );
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -182,8 +182,8 @@ feature sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bh
     sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
     if( m.active )
     {
-        mcf->track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
-        mcf->track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
+        mcf->track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop_ar0_determine_s!, bhvm_vop* ).set_index( 0, idx ) );
+        mcf->track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop_ar0_vacate_s!,    bhvm_vop* ).set_index( 0, idx ) );
     }
     return idx;
 };
@@ -204,9 +204,9 @@ feature sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bh
     opal_holor_meta_s* m = &result.h.m;
     sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
-    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp,        cast( bhvm_vop*, bhvm_vop_ar0_zro_s!       ).set_index( 0, idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  cast( bhvm_vop_ar0_determine_s!, bhvm_vop* ).set_index( 0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp,        cast( bhvm_vop_ar0_zro_s!,       bhvm_vop* ).set_index( 0, idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, cast( bhvm_vop_ar0_vacate_s!,    bhvm_vop* ).set_index( 0, idx ) );
 
     BLM_RETURNV( sz_t, idx );
 };
@@ -290,9 +290,9 @@ group :ar0 = retrievable
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
             if( result.h.h.v.size == 0 ) // randomize holor if result is vacant
             {
-                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
-                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_randomize_s! ).set_index( 0, idx ) );
-                mcf.track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop_ar0_determine_s!, bhvm_vop* ).set_index( 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop_ar0_randomize_s!, bhvm_vop* ).set_index( 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop_ar0_vacate_s!,    bhvm_vop* ).set_index( 0, idx ) );
             }
             return idx;
         };
@@ -304,9 +304,9 @@ group :ar0 = retrievable
             opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, ( bhvm_mcode_hmeta* )m );
 
-            mcf.track_vop_push_d( TYPEOF_track_dp_setup,              cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_dp_shelve,             cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_dp_adaptive_zero_grad, cast( bhvm_vop*, bhvm_vop_ar0_zro_s!       ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_setup,              cast( bhvm_vop_ar0_determine_s!, bhvm_vop* ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_shelve,             cast( bhvm_vop_ar0_vacate_s!,    bhvm_vop* ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_adaptive_zero_grad, cast( bhvm_vop_ar0_zro_s!,       bhvm_vop* ).set_index( 0, idx ) );
             BLM_RETURNV( sz_t, idx );
         };
 
@@ -340,9 +340,9 @@ group :ar0 = retrievable
             vop_rand.max = o.max;
             vop_rand.density = o.density;
 
-            mcf.track_vop_push_d( TYPEOF_track_ap,        cast( bhvm_vop*, vop_rand                  ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop*, bhvm_vop_ar0_determine_s! ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop*, bhvm_vop_ar0_vacate_s!    ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap,        cast( vop_rand,                  bhvm_vop* ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_setup,  cast( bhvm_vop_ar0_determine_s!, bhvm_vop* ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_shelve, cast( bhvm_vop_ar0_vacate_s!,    bhvm_vop* ).set_index( 0, idx ) );
 
             return idx;
         };
