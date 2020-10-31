@@ -61,8 +61,8 @@ void lion_adaptive_s_minfer( lion_adaptive_s* o, const bmath_vf3_s* in, bmath_vf
 
     if( out->size != o->out_size ) bmath_vf3_s_set_size( out, o->out_size );
 
-    bhvm_value_s_fork_data( &h_in->v,  TYPEOF_f3_t, in->data,  in->size );
-    bhvm_value_s_fork_data( &h_out->v, TYPEOF_f3_t, out->data, out->size );
+    bhvm_value_s_fork_from_data( &h_in->v,  TYPEOF_f3_t, in->data,  in->size );
+    bhvm_value_s_fork_from_data( &h_out->v, TYPEOF_f3_t, out->data, out->size );
 
     lion_frame_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, 1, &h_out, 1 );
 
@@ -81,8 +81,8 @@ void lion_adaptive_s_bgrad_adapt( lion_adaptive_s* o, bmath_vf3_s* grad_in, cons
     if( grad_in ) bhvm_shape_s_set_data( &h_grad_in->s, ( sz_t* )&grad_in->size, 1 );
     bhvm_shape_s_set_data( &h_grad_out->s, ( sz_t* )&grad_out->size, 1 );
 
-    if( h_grad_in ) bhvm_value_s_fork_data( &h_grad_in->v, TYPEOF_f3_t, grad_in->data, grad_in->size );
-    bhvm_value_s_fork_data( &h_grad_out->v, TYPEOF_f3_t, grad_out->data, grad_out->size );
+    if( h_grad_in ) bhvm_value_s_fork_from_data( &h_grad_in->v, TYPEOF_f3_t, grad_in->data, grad_in->size );
+    bhvm_value_s_fork_from_data( &h_grad_out->v, TYPEOF_f3_t, grad_out->data, grad_out->size );
 
     lion_frame_s* frame = &o->frame;
     lion_frame_s_run_dp( frame, ( const bhvm_holor_s** )&h_grad_out, 1, ( h_grad_in ) ? &h_grad_in : NULL, ( h_grad_in ) ? 1 : 0 );
@@ -260,8 +260,8 @@ void lion_adaptive_cyclic_s_minfer( lion_adaptive_cyclic_s* o, const bmath_vf3_s
 
     if( out->size != o->out_size ) bmath_vf3_s_set_size( out, o->out_size );
 
-    bhvm_value_s_fork_data( &h_in->v,  TYPEOF_f3_t, in->data,  in->size );
-    bhvm_value_s_fork_data( &h_out->v, TYPEOF_f3_t, out->data, out->size );
+    bhvm_value_s_fork_from_data( &h_in->v,  TYPEOF_f3_t, in->data,  in->size );
+    bhvm_value_s_fork_from_data( &h_out->v, TYPEOF_f3_t, out->data, out->size );
 
     lion_frame_cyclic_s_run_ap( &o->frame, ( const bhvm_holor_s** )&h_in, 1, &h_out, 1 );
 

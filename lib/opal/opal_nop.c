@@ -191,7 +191,7 @@ void opal_nop_ar1_adaptive_s_settle( const opal_nop_ar1_adaptive_s* o, opal_cont
 bl_t opal_nop_ar1_output_s_solve( const opal_nop_ar1_output_s* o, opal_context* context, opal_holor_s** a, opal_nop_solve_result_s* result )
 {
     opal_holor_s_attach( &result->h, opal_holor_s_create() );
-    bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+    bhvm_holor_s_fork_from( &result->h->h, &a[0]->h );
     result->h->m.htp = a[0]->m.htp;
     result->h->m.active = a[0]->m.active;
     result->can_settle = (result->h) && !result->h->m.active;
@@ -278,7 +278,7 @@ bl_t opal_nop_ar1_cast_htp_s_solve( const opal_nop_ar1_cast_htp_s* o, opal_conte
     if( a[0] )
     {
         opal_holor_s_attach( &result->h, opal_holor_s_create() );
-        bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+        bhvm_holor_s_fork_from( &result->h->h, &a[0]->h );
         opal_holor_meta_s_copy( &result->h->m, &a[0]->m );
         result->h->m.htp = !a[0]->m.htp;
     }
@@ -368,7 +368,7 @@ bl_t opal_nop_ar1_reshape_s_solve( const opal_nop_ar1_reshape_s* o, opal_context
         }
 
         bhvm_shape_s_copy( &hy->s, &o->shape );
-        bhvm_value_s_fork( &hy->v, &ha->v );
+        bhvm_value_s_fork_from( &hy->v, &ha->v );
 
         opal_holor_meta_s_copy( &result->h->m, &a[0]->m );
         result->h->m.htp = false; // htp flag is being reset

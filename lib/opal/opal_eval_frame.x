@@ -308,7 +308,7 @@ func (:plain) :.run =
                     }
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex.[ j ];
-                    bhvm_holor_s* dp_ex2 = scope( bhvm_holor_s!, scope_local ).fork_vector_isovol( dp_ex1 );
+                    bhvm_holor_s* dp_ex2 = scope( bhvm_holor_s!, scope_local ).fork_from_vector_isovol( dp_ex1 );
 
                     opal_frame_sc_run_ap
                     (
@@ -376,7 +376,7 @@ func (:plain) :.run =
                     }
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex.[ j ];
-                    bhvm_holor_s* dp_ex2 = scope( bhvm_holor_s!, scope_local ).fork_vector_isovol( dp_ex1 );
+                    bhvm_holor_s* dp_ex2 = scope( bhvm_holor_s!, scope_local ).fork_from_vector_isovol( dp_ex1 );
 
                     opal_frame_sc_run_ap
                     (

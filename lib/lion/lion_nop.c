@@ -174,7 +174,7 @@ void lion_nop_ar1_adaptive_s_settle( const lion_nop_ar1_adaptive_s* o, const lio
 bl_t lion_nop_ar1_output_s_solve( const lion_nop_ar1_output_s* o, lion_holor_s** a, lion_nop_solve_result_s* result )
 {
     lion_holor_s_attach( &result->h, lion_holor_s_create() );
-    bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+    bhvm_holor_s_fork_from( &result->h->h, &a[0]->h );
     result->h->m.htp = a[0]->m.htp;
     result->h->m.active = a[0]->m.active;
     result->settled = (result->h) && !result->h->m.active;
@@ -262,7 +262,7 @@ bl_t lion_nop_ar1_cast_htp_s_solve( const lion_nop_ar1_cast_htp_s* o, lion_holor
     if( a[0] )
     {
         lion_holor_s_attach( &result->h, lion_holor_s_create() );
-        bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+        bhvm_holor_s_fork_from( &result->h->h, &a[0]->h );
         lion_hmeta_s_copy( &result->h->m, &a[0]->m );
         result->h->m.htp = !a[0]->m.htp;
     }
@@ -352,7 +352,7 @@ bl_t lion_nop_ar1_reshape_s_solve( const lion_nop_ar1_reshape_s* o, lion_holor_s
         }
 
         bhvm_shape_s_copy( &hy->s, &o->shape );
-        bhvm_value_s_fork( &hy->v, &ha->v );
+        bhvm_value_s_fork_from( &hy->v, &ha->v );
 
         lion_hmeta_s_copy( &result->h->m, &a[0]->m );
         result->h->m.htp = false; // htp flag is being reset

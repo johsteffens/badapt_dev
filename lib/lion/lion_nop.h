@@ -383,7 +383,7 @@ group :ar1 = retrievable
         func :: .solve =
         {
             lion_holor_s_attach( &result->h, lion_holor_s_create() );
-            bhvm_holor_s_fork( &result->h->h, &a[0]->h );
+            bhvm_holor_s_fork_from( &result->h->h, &a[0]->h );
             result->h->m.htp = a[0]->m.htp;
             result->h->m.active = a[0]->m.active;
             result->settled = (result->h) && !result->h->m.active;

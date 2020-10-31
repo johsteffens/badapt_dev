@@ -365,7 +365,7 @@ group :ar1 = retrievable
         func :: .solve =
         {
             result.h =< opal_holor_s_create();
-            result.h.h.fork( &a[0].h );
+            result.h.h.fork_from( &a[0].h );
             result.h.m.htp       =  a[0].m.htp;
             result.h.m.active    =  a[0].m.active;
             result.can_settle    = !a[0].m.active;
