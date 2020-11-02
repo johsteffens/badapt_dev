@@ -82,21 +82,21 @@ stamp :node = aware :
 
     hidden bcore_source_point_s -> source_point;
 
-    //func : .solve;
+    //func :.solve;
 
-    func : .up_index =
+    func :.up_index =
     {
         foreach( $* e in o.upls ) if( e.node == node ) return __i;
         return -1;
     };
 
-    func : .set_nop_d =
+    func :.set_nop_d =
     {
         ASSERT( o->result == NULL );
         o.nop =< nop;
     };
 
-    func : .is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
+    func :.is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
 };
 
 stamp :node_adl = aware bcore_array { :node_s => []; };
@@ -106,7 +106,7 @@ signature :node_s* get_by_id( mutable, sz_t id );
 stamp :nodes = aware bcore_array
 {
     :node_s => [];
-    func : .get_by_id =
+    func :.get_by_id =
     {
         foreach( $* e in o ) if( e.id == id ) return e;
         return NULL;
@@ -131,15 +131,15 @@ stamp :cell = aware :
 
     hidden aware opal_context -> context;
 
-    func : .is_consistent;
-    func : .normalize; // re-entrant
+    func :.is_consistent;
+    func :.normalize; // re-entrant
 
-    func : .clear_flags =
+    func :.clear_flags =
     {
         foreach( $* e in o.body ) e.flag = false;
     };
 
-    func : .clear_all_flags =
+    func :.clear_all_flags =
     {
         foreach( $* e in o.body )
         {
@@ -148,19 +148,19 @@ stamp :cell = aware :
         }
     };
 
-    func : .solve;
+    func :.solve;
 
-    func : .clear_downlinks =
+    func :.clear_downlinks =
     {
         foreach( $* e in o.body ) e.dnls.clear();
     };
 
-    func : .set_downlinks;
+    func :.set_downlinks;
 
-    func bcore_inst_call . copy_x; // cell is copyable
+    func bcore_inst_call.copy_x; // cell is copyable
 
     // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
-    func bcore_via_call  . mutated = { ERR_fa( "Cannot reconstitute." ); };
+    func bcore_via_call.mutated = { ERR_fa( "Cannot reconstitute." ); };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,9 +178,9 @@ group :builder = :
         hidden bhvm_holor_adl_s input_holors;
         hidden aware bcore_sink -> log;
 
-        func : .fork_log = { o->log =< bcore_fork( log ); };
+        func :.fork_log = { o->log =< bcore_fork( log ); };
 
-        func : .fork_input_holors =
+        func :.fork_input_holors =
         {
             o.input_holors.set_size( size_input_holors );
             BFOR_EACH( i, &o->input_holors )
@@ -190,7 +190,7 @@ group :builder = :
             }
         };
 
-        func : .build_from_source;
+        func :.build_from_source;
     };
 };
 

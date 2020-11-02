@@ -21,7 +21,7 @@
 func (:) bhpt_adaptive.get_adaptor_probe =
 {
     probe.set_size( o.frame.get_size_ada() );
-    opal_frame_s* frame = cast( o.frame, opal_frame_s* );
+    opal_frame_s* frame = o.frame.cast( opal_frame_s* );
     ASSERT( frame.is_setup );
     foreach( $* e in probe )
     {

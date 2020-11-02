@@ -69,8 +69,8 @@ stamp :param = aware bcore_inst
     sz_t verbosity = 1;
     u3_t rval = 1234; // for random generators
 
-    st_s name;              // name of test (only for logging)
-    aware => src;           // source (bcore_file_path_s or st_s with inline code)
+    st_s name;               // name of test (only for logging)
+    aware bcore_inst => src; // source (bcore_file_path_s or st_s with inline code)
 
     bhvm_holor_adl_s => in;  // input holors
     bhvm_holor_adl_s => out; // expected output holors (if NULL, output is sent to log)
@@ -83,29 +83,27 @@ stamp :param = aware bcore_inst
 
     func bcore_inst_call . init_x = { o.log = bcore_fork( BCORE_STDOUT ); };
 
-    func : .set =
+    func :.set =
     {
         o.recovery_test = o.recovery_test || src.recovery_test;
         o.jacobian_test = o.jacobian_test || src.jacobian_test;
 
         o.verbosity = sz_max( o.verbosity, src.verbosity );
         o.rval      = bcore_lcg00_u3( o.rval + src.rval );
-        o.log       =< bcore_fork( src.log );
+        o.log       =< src.log.fork();
 
         if( o.name.size == 0 )
         {
-            o.name.copy( &src.name );
+            o.name.copy( src.name );
         }
         else if( src.name.size > 0 )
         {
-            st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o.name.sc, src.name.sc );
-            o.name.copy( new_name );
-            new_name.discard();
+            o.name.push_fa( "_<sc_t>", src.name.sc );
         }
 
-        if( !o.src ) o.src = bcore_fork( src.src );
-        if( !o.in  ) o.in  = bcore_fork( src.in );
-        if( !o.out ) o.out = bcore_fork( src.out );
+        if( !o.src ) o.src = src.src.fork();
+        if( !o.in  ) o.in  = src.in.fork();
+        if( !o.out ) o.out = src.out.fork();
 
         o.max_dev = f3_max( o.max_dev, src.max_dev );
     };
@@ -116,13 +114,12 @@ stamp :param = aware bcore_inst
 stump :std = aware :
 {
     :param_s param;
-    func : .run;
-    func : .set_param = { o.param.set( param ); };
+    func :.run;
+    func :.set_param = { o.param.set( param ); };
     func bcore_main .main =
     {
-        BLM_INIT();
-        o.run( BLM_CREATE( :result_s ) ).resolve();
-        BLM_RETURNV( s2_t, 0 );
+        o.run( :result_s!.scope() ).resolve();
+        return 0;
     };
 };
 
@@ -146,16 +143,14 @@ stamp :set = extending :std
     {
         foreach( const :* e in o.arr )
         {
-            BLM_INIT();
-            :* eval = BLM_A_PUSH( e.clone() );
+            :* eval = e.clone().scope( eval );
             eval.set_param( &o.param );
             eval.run( result );
             if( result.error )
             {
-                result.msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, BLM_CLONE( st_s, &result.msg ) );
-                BLM_RETURNV( :result_s*, result );
+                result.msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, result.msg.clone().scope( scope_local ) );
+                return result;
             }
-            BLM_DOWN();
         }
 
         return result;

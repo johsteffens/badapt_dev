@@ -61,18 +61,18 @@ stamp :meta = aware bhvm_mcode_hmeta
      */
     bl_t active = true;
 
-    func : .clear = { o.name = 0; o.htp = false; };
+    func :.clear = { o.name = 0; o.htp = false; };
 
-    func bhvm_mcode_hmeta . get_name    = { return o.name; };
-    func bhvm_mcode_hmeta . get_pclass  = { return o.pclass; };
-    func bhvm_mcode_hmeta . is_rollable = { return !o.active || o.mnode.adaptive || ( o.mnode.cyclic && o.pclass == TYPEOF_pclass_ax1 ); };
-    func bhvm_mcode_hmeta . is_active   = { return  o.active; };
+    func bhvm_mcode_hmeta.get_name    = { return o.name; };
+    func bhvm_mcode_hmeta.get_pclass  = { return o.pclass; };
+    func bhvm_mcode_hmeta.is_rollable = { return !o.active || o.mnode.adaptive || ( o.mnode.cyclic && o.pclass == TYPEOF_pclass_ax1 ); };
+    func bhvm_mcode_hmeta.is_active   = { return  o.active; };
 
-    func bhvm_mcode_hmeta . get_custom = { return o.custom; };
-    func bhvm_mcode_hmeta . set_custom = { return o.custom =< custom.clone(); };
+    func bhvm_mcode_hmeta.get_custom = { return o.custom; };
+    func bhvm_mcode_hmeta.set_custom = { return o.custom =< custom.clone(); };
 
-    func bhvm_mcode_hmeta . get_node = { return o.mnode; };
-    func bhvm_mcode_hmeta . set_node = { o.mnode =< bcore_fork( node ); };
+    func bhvm_mcode_hmeta.get_node = { return o.mnode; };
+    func bhvm_mcode_hmeta.set_node = { o.mnode =< bcore_fork( node ); };
 };
 
 stamp : = aware :

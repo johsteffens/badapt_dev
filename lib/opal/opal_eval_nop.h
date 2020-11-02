@@ -43,18 +43,18 @@ stamp :result = aware bcore_inst
     bl_t error = false;
     st_s msg;
 
-    func : .resolve =
+    func :.resolve =
     {
         if( !o ) return;
-        if( o->error )
+        if( o.error )
         {
-            bcore_sink_a_push_fa( BCORE_STDERR, "#<sc_t>\n", o->msg.sc );
+            bcore_sink_a_push_fa( BCORE_STDERR, "#<sc_t>\n", o.msg.sc );
         }
-        else if( o->msg.size > 0 )
+        else if( o.msg.size > 0 )
         {
-            bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o->msg.sc );
+            bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o.msg.sc );
         }
-        if( o->total_tests > 0 )
+        if( o.total_tests > 0 )
         {
             bcore_sink_a_push_fa( BCORE_STDOUT, "Total tests ...... #<sz_t>\n", o.total_tests );
             bcore_sink_a_push_fa( BCORE_STDOUT, "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
@@ -78,18 +78,18 @@ stamp :param = aware bcore_inst
     sz_t verbosity = 1;
     aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
 
-    func bcore_inst_call . init_x = { o->log = bcore_fork( BCORE_STDOUT ); };
+    func bcore_inst_call . init_x = { o.log = bcore_fork( BCORE_STDOUT ); };
 
-    func : .set =
+    func :.set =
     {
         o.verbosity = sz_max( o.verbosity, src.verbosity );
         o.prsg.set_state_mix( o.prsg, src.prsg );
-        o->log =< bcore_fork( src->log );
-        if( !o->ha  ) o->ha  = src->ha.clone();
-        if( !o->hb  ) o->hb  = src->hb.clone();
-        if( !o->hc  ) o->hc  = src->hc.clone();
-        if( !o->hr  ) o->hr  = src->hr.clone();
-        if( !o->nop ) o->nop = src->nop.clone();
+        o.log =< bcore_fork( src.log );
+        if( !o.ha  ) o.ha  = src.ha.clone();
+        if( !o.hb  ) o.hb  = src.hb.clone();
+        if( !o.hc  ) o.hc  = src.hc.clone();
+        if( !o.hr  ) o.hr  = src.hr.clone();
+        if( !o.nop ) o.nop = src.nop.clone();
     };
 };
 
@@ -102,13 +102,12 @@ feature :result_s* run( const, :result_s* result ); // creates result or returns
 stump :std = aware :
 {
     :param_s param;
-    func : .run;
-    func : .set_param = { o.param.set( param ); };
+    func :.run;
+    func :.set_param = { o.param.set( param ); };
     func bcore_main . main =
     {
-        BLM_INIT();
-        o.run( BLM_CREATE( :result_s ) ).resolve();
-        BLM_RETURNV( s2_t, 0 );
+        o.run( :result_s!.scope() ).resolve();
+        return 0;
     };
 };
 
@@ -139,7 +138,7 @@ stamp :generator = extending :std
 
 stamp :show_param = extending :std
 {
-    func : .run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
+    func :.run = { bcore_txt_ml_a_to_sink( &o.param, o.param.log ); return result; };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,21 +149,18 @@ stamp :set = extending :std
 {
     :arr_s arr;
 
-    func : .run =
+    func :.run =
     {
-        foreach( :* e in o->arr )
+        foreach( :* e in o.arr )
         {
-            BLM_INIT();
-            :* eval = BLM_A_PUSH( e.clone() );
-            eval.set_param( &o->param );
+            :* eval = e.clone().scope( scope_local );
+            eval.set_param( &o.param );
             eval.run( result );
-            if( result->error )
+            if( result.error )
             {
-                st_s* s = BLM_A_PUSH( result->msg.clone() );
-                result->msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, s );
-                BLM_RETURNV( :result_s*, result );
+                result.msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, result.msg.clone().scope( scope_local ) );
+                return result;
             }
-            BLM_DOWN();
         }
         return result;
     };

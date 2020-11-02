@@ -55,24 +55,24 @@ group :hidx =
     stamp : = aware :
     {
         bcore_arr_sz_s => arr;
-        func : .clear     = { if( o.arr ) o.arr.clear(); return o; };
-        func : .push      = { o.arr!.push( index ); return o; };
+        func :.clear     = { if( o.arr ) o.arr.clear(); return o; };
+        func :.push      = { o.arr!.push( index ); return o; };
 
-        func : .get_idx   = { assert( index >= 0 && index < o.arr->size ); return o.arr?.[ index ]; };
-        func : .get_size  = { return o.arr ? o.arr->size : 0; };
-        func : .get_holor = { return hbase.get_holor( o.get_idx( index ) ); };
-        func : .get_hmeta = { return hbase.get_hmeta( o.get_idx( index ) ); };
+        func :.get_idx   = { assert( index >= 0 && index < o.arr->size ); return o.arr?.[ index ]; };
+        func :.get_size  = { return o.arr ? o.arr->size : 0; };
+        func :.get_holor = { return hbase.get_holor( o.get_idx( index ) ); };
+        func :.get_hmeta = { return hbase.get_hmeta( o.get_idx( index ) ); };
 
-        func : .get_pclass_idx =
+        func :.get_pclass_idx =
         {
             const bhvm_mcode_hmeta* hmeta = o.get_hmeta( hbase, index );
             return ( hmeta ) ? hmeta.get_node().get_pclass_idx( pclass ) : -1;
         };
 
-        func : .get_pclass_holor = { return hbase.get_holor( o.get_pclass_idx( hbase, pclass, index ) ); };
-        func : .get_pclass_hmeta = { return hbase.get_hmeta( o.get_pclass_idx( hbase, pclass, index ) ); };
+        func :.get_pclass_holor = { return hbase.get_holor( o.get_pclass_idx( hbase, pclass, index ) ); };
+        func :.get_pclass_hmeta = { return hbase.get_hmeta( o.get_pclass_idx( hbase, pclass, index ) ); };
 
-        func : .replace_index =
+        func :.replace_index =
         {
             foreach( sz_t* e in o.arr )
             {
@@ -154,7 +154,7 @@ stamp : = aware :
     :hidx_s hidx_ex;  // exit index
     :hidx_s hidx_ada; // adaptive index
 
-    func : .reset =
+    func :.reset =
     {
         if( !o.is_setup ) return;
         if( !o.mcf ) return;
@@ -163,14 +163,14 @@ stamp : = aware :
         o.is_setup = false;
     };
 
-    func : .bind_holors =
+    func :.bind_holors =
     {
         o.mcf.track_run( TYPEOF_track_ap_setup );
         o.mcf.track_run( TYPEOF_track_dp_setup );
         return o;
     };
 
-    func : .setup =
+    func :.setup =
     {
         if( o.is_setup ) return;
         if( !o.mcf ) return;
@@ -178,7 +178,7 @@ stamp : = aware :
         o.is_setup = true;
     };
 
-    func : .check_integrity;
+    func :.check_integrity;
 
     /// shelving/reconstitution
     func bcore_via_call  . shelve  = { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
@@ -186,34 +186,34 @@ stamp : = aware :
     func bcore_inst_call . copy_x  = { if( o.is_setup ) { o.reset(); o.setup(); } o.check_integrity(); };
 
     /// frame setup from string or source; 'in' can be NULL
-    func : .setup_from_source;
-    func : .setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, o.setup_from_source( BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en, size_en ) ); };
-    func : .setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en, size_en ); };
-    func : .create_from_source     = { return (@!).setup_from_source( source, en, size_en ); };
-    func : .create_from_st         = { return (@!).setup_from_st(     st,     en, size_en ); };
-    func : .create_from_sc         = { return (@!).setup_from_sc(     sc,     en, size_en ); };
-    func : .setup_from_source_adl  = { return o.setup_from_source( source, en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
-    func : .setup_from_st_adl      = { return o.setup_from_st(     st,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
-    func : .setup_from_sc_adl      = { return o.setup_from_sc(     sc,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
-    func : .create_from_source_adl = { return (@!).setup_from_source_adl( source, en ); };
-    func : .create_from_st_adl     = { return (@!).setup_from_st_adl(         st, en ); };
-    func : .create_from_sc_adl     = { return (@!).setup_from_sc_adl(         sc, en ); };
+    func :.setup_from_source;
+    func :.setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, o.setup_from_source( BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en, size_en ) ); };
+    func :.setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en, size_en ); };
+    func :.create_from_source     = { return (@!).setup_from_source( source, en, size_en ); };
+    func :.create_from_st         = { return (@!).setup_from_st(     st,     en, size_en ); };
+    func :.create_from_sc         = { return (@!).setup_from_sc(     sc,     en, size_en ); };
+    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
+    func :.setup_from_st_adl      = { return o.setup_from_st(     st,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
+    func :.setup_from_sc_adl      = { return o.setup_from_sc(     sc,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
+    func :.create_from_source_adl = { return (@!).setup_from_source_adl( source, en ); };
+    func :.create_from_st_adl     = { return (@!).setup_from_st_adl(         st, en ); };
+    func :.create_from_sc_adl     = { return (@!).setup_from_sc_adl(         sc, en ); };
 
-    func : .get_size_en  = { return o.hidx_en .get_size(); };
-    func : .get_size_ex  = { return o.hidx_ex .get_size(); };
-    func : .get_size_ada = { return o.hidx_ada.get_size(); };
+    func :.get_size_en  = { return o.hidx_en .get_size(); };
+    func :.get_size_ex  = { return o.hidx_ex .get_size(); };
+    func :.get_size_ada = { return o.hidx_ada.get_size(); };
 
-    func : .get_ap_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
-    func : .get_dp_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
-    func : .get_ap_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
-    func : .get_dp_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
-    func : .get_ap_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
-    func : .get_dp_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
+    func :.get_ap_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
+    func :.get_dp_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
+    func :.get_ap_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
+    func :.get_dp_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
+    func :.get_ap_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
+    func :.get_dp_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
 
-    func : .run_ap;
-    func : .run_dp;
-    func : .run_ap_adl;
-    func : .run_dp_adl;
+    func :.run_ap;
+    func :.run_dp;
+    func :.run_ap_adl;
+    func :.run_dp_adl;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -253,21 +253,21 @@ stamp :cyclic = aware :
     :hidx_ads_s hidx_ads_ex;  // exit index
 
     /// functions ...
-    func : .bind_holors;
-    func : .reset;
-    func : .setup;
+    func :.bind_holors;
+    func :.reset;
+    func :.setup;
 
     /// shelving/reconstitution
     func bcore_via_call  . shelve  = { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
     func bcore_via_call  . mutated = { if( o.is_setup ) { o.reset(); o.setup(); } };
     func bcore_inst_call . copy_x  = { if( o.is_setup ) { o.reset(); o.setup(); } };
 
-    func : .get_size_en  = { return o.frame.get_size_en(); };
-    func : .get_size_ex  = { return o.frame.get_size_ex(); };
-    func : .get_size_ada = { return o.frame.get_size_ada(); };
+    func :.get_size_en  = { return o.frame.get_size_en(); };
+    func :.get_size_ex  = { return o.frame.get_size_ex(); };
+    func :.get_size_ada = { return o.frame.get_size_ada(); };
 
-    func : .run_ap;
-    func : .run_ap_adl;
+    func :.run_ap;
+    func :.run_ap_adl;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

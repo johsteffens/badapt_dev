@@ -112,20 +112,20 @@ group :context = opal_context
         bcore_hmap_tp_s control_types; // types reserved for control
         bcore_hmap_tp_s reserved_names; // reserved keywords (not allowed for variables)
 
-        func : .setup;
+        func :.setup;
 
         func opal_context .nameof   = { return o.hmap_name.get_sc( name ); };
         func opal_context .ifnameof = { sc_t sc = o.nameof( name ); return sc ? sc : ""; };
         func opal_context .typeof   = { return btypeof( name ); };
         func opal_context .entypeof = { return o.hmap_name.set_sc( name ); };
 
-        func : .setup_cell =
+        func :.setup_cell =
         {
             cell.context =< bcore_fork( o );
             return cell;
         };
 
-        func : .create_cell =
+        func :.create_cell =
         {
             return o.setup_cell( ::cell_s! );
         };
@@ -149,17 +149,17 @@ group :id = :
     stamp : = aware :
     {
         bcore_arr_tp_s arr_tp;
-        func : .clear       = { o.arr_tp.clear(); };
-        func : .set         = { o.arr_tp.clear(); o.arr_tp.push( tp ); };
-        func : .push_child  = { o.arr_tp.push( tp ); };
-        func : .push_parent = { o.arr_tp.push_left( tp ); };
-        func : .to_string   =
+        func :.clear       = { o.arr_tp.clear(); };
+        func :.set         = { o.arr_tp.clear(); o.arr_tp.push( tp ); };
+        func :.push_child  = { o.arr_tp.push( tp ); };
+        func :.push_parent = { o.arr_tp.push_left( tp ); };
+        func :.to_string   =
         {
             s.clear();
-            BFOR_EACH( i, &o->arr_tp )
+            foreach( tp_t t in o.arr_tp )
             {
-                if( i > 0 ) s.push_char( '.' );
-                s.push_sc( context.ifnameof( o.arr_tp.[ i ] ) );
+                if( __i > 0 ) s.push_char( '.' );
+                s.push_sc( context.ifnameof( t ) );
             }
         };
     };
@@ -195,10 +195,10 @@ stamp :link = aware :
     private :link_s -> dn;   // down link
     private  vd_t cell; // cell owning the link (only if link is part of membrane)
     bl_t     exit; // true: link is of cell's exit membrane. false: entry membrane
-    func : . get_name = :get_name_;
-    func : .set_name_visible   = { o->name = name; o->visible = true; };
-    func : .set_name_invisible = { o->name = name; o->visible = false; };
-    func : .is_visible = { return o->visible; };
+    func :. get_name = :get_name_;
+    func :.set_name_visible   = { o->name = name; o->visible = true; };
+    func :.set_name_invisible = { o->name = name; o->visible = false; };
+    func :.is_visible = { return o->visible; };
 };
 
 signature bl_t     name_exists(       const,   tp_t name );
@@ -214,37 +214,37 @@ stamp :links = aware bcore_array
 {
     :link_s => [];
 
-    func : .get_link_by_name =
+    func :.get_link_by_name =
     {
         foreach( $* e in o ) if( e.name == name ) return e;
         return NULL;
     };
 
-    func : .name_exists =
+    func :.name_exists =
     {
         foreach( const $* e in o ) if( e.name == name ) return true;
         return false;
     };
 
-    func : .get_link_by_up =
+    func :.get_link_by_up =
     {
         foreach( $* e in o ) if( e.up == up ) return e;
         return NULL;
     };
 
-    func : .get_link_by_dn =
+    func :.get_link_by_dn =
     {
         foreach( $* e in o ) if( e.dn == dn ) return e;
         return NULL;
     };
 
-    func : .get_index_by_link =
+    func :.get_index_by_link =
     {
         foreach( $* e in o ) if( e == link ) return __i;
         return -1;
     };
 
-    func : .count_open =
+    func :.count_open =
     {
         sz_t count = 0;
         foreach( $* e in o ) count += ( e.up == NULL );
@@ -256,13 +256,13 @@ stamp :body = aware bcore_array
 {
     aware : => [];
 
-    func : .name_exists =
+    func :.name_exists =
     {
         foreach( $* e in o ) if( e.get_name() == name ) return true;
         return false;
     };
 
-    func : .get_sem_by_name =
+    func :.get_sem_by_name =
     {
         foreach( $* e in o )
         {
@@ -303,33 +303,33 @@ stamp :cell = aware :
     // if cell is a wrapper, wrapped_cell is the cell being wrapped
     private :cell_s    -> wrapped_cell;
 
-    func : .get_name = :get_name_;
+    func :.get_name = :get_name_;
 
-    func : .set_name_visible   = { o->name = name; o->visible = true; };
-    func : .set_name_invisible = { o->name = name; o->visible = false; };
-    func : .is_visible = { return o->visible; };
-    func : .get_arity       = { return o.encs.count_open(); };
-    func : .get_enc_by_name = { return o.encs.get_link_by_name( name ); };
-    func : .get_exc_by_name = { return o.excs.get_link_by_name( name ); };
-    func : .get_enc_by_open = { return o.encs.get_link_by_up( NULL ); };
-    func : .get_enc_by_dn   = { return o.encs.get_link_by_dn( dn   ); };
-    func : .get_priority    = { return o->priority; };
-    func : .is_wrapper      = { return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL; };
+    func :.set_name_visible   = { o->name = name; o->visible = true; };
+    func :.set_name_invisible = { o->name = name; o->visible = false; };
+    func :.is_visible      = { return o->visible; };
+    func :.get_arity       = { return o.encs.count_open(); };
+    func :.get_enc_by_name = { return o.encs.get_link_by_name( name ); };
+    func :.get_exc_by_name = { return o.excs.get_link_by_name( name ); };
+    func :.get_enc_by_open = { return o.encs.get_link_by_up( NULL ); };
+    func :.get_enc_by_dn   = { return o.encs.get_link_by_dn( dn   ); };
+    func :.get_priority    = { return o->priority; };
+    func :.is_wrapper      = { return o->wrapped_cell != NULL && o->nop == NULL && o->body == NULL; };
 
     // search for a cell descends the tree
-    func : .get_cell_by_name =
+    func :.get_cell_by_name =
     {
         :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
-        if( sem && sem._ == TYPEOF_:cell_s ) return cast( sem, :cell_s* );
+        if( sem && sem._ == TYPEOF_:cell_s ) return sem.cast( :cell_s* );
         if( o.parent ) return o.parent.get_cell_by_name( name );
         return NULL;
     };
 
     // search for a link only looks up the body of this cell
-    func : .get_link_by_name =
+    func :.get_link_by_name =
     {
         :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
-        if( sem && sem._ == TYPEOF_:link_s ) return cast( sem, :link_s* );
+        if( sem && sem._ == TYPEOF_:link_s ) return sem.cast( :link_s* );
         return NULL;
     };
 };
@@ -352,7 +352,7 @@ group :builder = :
         opal_sem_cell_s => cell_context;
         opal_sem_cell_s => cell_frame;
 
-        func : .build_from_source;
+        func :.build_from_source;
     };
 };
 
@@ -387,13 +387,13 @@ group :tree = :
         private :node_s -> parent; // semantic parent of cell (note that cell.parent is a lexical parent)
         :node_s => [];
 
-        func : .push_parents_to_sem_id =
+        func :.push_parents_to_sem_id =
         {
             sem_id.push_parent( o.cell ? o.cell.name : 0 );
             if( o.parent ) o.parent.push_parents_to_sem_id( sem_id );
         };
 
-        func : .get_sem_id =
+        func :.get_sem_id =
         {
             sem_id.set( o.cell ? o.cell.name : 0 );
             if( o.parent ) o.parent.push_parents_to_sem_id( sem_id );
@@ -408,8 +408,8 @@ group :tree = :
         sz_t id_base = 0; // (incremented when adding nodes)
         :node_s => root;
 
-        func : .enter;
-        func : .exit;
+        func :.enter;
+        func :.exit;
     };
 };
 

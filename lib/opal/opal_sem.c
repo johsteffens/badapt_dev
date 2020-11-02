@@ -959,7 +959,6 @@ void opal_sem_cell_s_evaluate_set_encs( opal_sem_cell_s* o, opal_sem_cell_s* par
         {
             bcore_source_a_parse_fa( source, "#name", name );
             if( bcore_source_a_parse_bl_fa( source, " #?([0]=='='&&[1]!='=')" ) )
-            //if( bcore_source_a_parse_bl_fa( source, " #?'='" ) )
             {
                 bcore_source_a_parse_fa( source, "=" );
                 opal_sem_link_s* link = opal_sem_cell_s_get_enc_by_name( o, typeof( name->sc ) );
