@@ -144,10 +144,10 @@ feature bl_t eci( const ) = { return false; };
   * Returns 'true' in case of success, otherwise check result->msg
   * The default implementation solves all elementary operators
   */
-feature bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) = solve__;
+feature bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) extern _;
 
 /** Node-level solving. */
-feature void solve_node( mutable, lion_net_node_s* node, lion_net_node_adl_s* deferred ) = solve_node__;
+feature void solve_node( mutable, lion_net_node_s* node, lion_net_node_adl_s* deferred ) extern _;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
