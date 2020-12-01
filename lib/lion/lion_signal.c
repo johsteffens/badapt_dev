@@ -14,7 +14,7 @@
  */
 
 #include "bcore_std.h"
-#include "lion_xoila_out.h"
+#include "lion.xo.h"
 
 #include "lion_root.h"
 #include "lion_nop.h"

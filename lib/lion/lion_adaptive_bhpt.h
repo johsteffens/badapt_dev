@@ -27,7 +27,7 @@
 #include "bhvm_mcode.h"
 #include "lion_net.h"
 #include "lion_frame.h"
-#include "lion_xoila_out.h"
+#include "lion.xo.h"
 
 /**********************************************************************************************************************/
 

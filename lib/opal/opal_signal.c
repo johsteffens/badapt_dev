@@ -14,6 +14,6 @@
  */
 
 #include "bcore_std.h"
-#include "opal_xoila_out.h"
+#include "opal.xo.h"
 
 BETH_SIGNAL_DEFINE( opal )

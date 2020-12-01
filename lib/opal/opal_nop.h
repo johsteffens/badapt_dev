@@ -26,7 +26,7 @@
 #include "bhvm_mcode.h"
 #include "opal_holor.h"
 #include "opal_context.h"
-#include "opal_xoila_out.h"
+#include "opal.xo.h"
 
 /**********************************************************************************************************************/
 

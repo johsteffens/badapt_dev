@@ -14,7 +14,7 @@
  */
 
 #include "bcore_std.h"
-#include "badapt_dev_xoila_out.h"
+#include "badapt_dev.xo.h"
 #include "badapt_dev_problem.h"
 #include "badapt_dev_ern.h"
 #include "badapt_dev_lstm.h"

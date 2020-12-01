@@ -25,7 +25,7 @@
 #include "bmath_std.h"
 #include "bhvm_mcode.h"
 #include "lion_root.h"
-#include "lion_xoila_out.h"
+#include "lion.xo.h"
 
 /**********************************************************************************************************************/
 
