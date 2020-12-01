@@ -1,5 +1,7 @@
 *.backup
 *.xml
+*.xo.h
+*.xo.c
 badapt_dev.*
 build/badapt_dev
 *.state
