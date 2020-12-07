@@ -35,7 +35,7 @@ XOILA_DEFINE_GROUP( lion, bcore_inst )
 
 signature void clear( mutable );
 
-stamp :hmeta = aware bhvm_mcode_hmeta
+stamp :hmeta_s = aware bhvm_mcode_hmeta
 {
     aware bcore_inst => custom; // custom params
 
@@ -74,7 +74,7 @@ stamp :hmeta = aware bhvm_mcode_hmeta
     func bhvm_mcode_hmeta . set_node = { bhvm_mcode_node_s_attach( &o->mnode, bcore_fork( node ) ); };
 };
 
-stamp :holor = aware :
+stamp :holor_s = aware :
 {
     :hmeta_s     m;
     bhvm_holor_s h;

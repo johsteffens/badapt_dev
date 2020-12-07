@@ -1,6 +1,6 @@
 /** This file was generated from xoila source code.
  *  Compiling Agent : xoico_compiler (C) 2020 J.B.Steffens
- *  Last File Update: 2020-12-01T10:47:49Z
+ *  Last File Update: 2020-12-07T21:02:55Z
  *
  *  Copyright and License of this File:
  *
@@ -43,14 +43,14 @@ BCORE_DEFINE_OBJECT_INST_P( lion_hmeta_s )
     "tp_t pclass;"
     "bl_t htp;"
     "bl_t active = true;"
-    "func ^:get_name;"
-    "func ^:get_pclass;"
-    "func ^:is_rollable;"
-    "func ^:is_active;"
-    "func ^:get_custom;"
-    "func ^:set_custom;"
-    "func ^:get_node;"
-    "func ^:set_node;"
+    "func bhvm_mcode_hmeta:get_name;"
+    "func bhvm_mcode_hmeta:get_pclass;"
+    "func bhvm_mcode_hmeta:is_rollable;"
+    "func bhvm_mcode_hmeta:is_active;"
+    "func bhvm_mcode_hmeta:get_custom;"
+    "func bhvm_mcode_hmeta:set_custom;"
+    "func bhvm_mcode_hmeta:get_node;"
+    "func bhvm_mcode_hmeta:set_node;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_holor_s )
@@ -1192,8 +1192,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_generator_s )
     "sz_t cycles = 0;"
     "bcore_arr_uz_s tolerated_cycles;"
     "aware lion_eval_nop=> eval;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func lion_eval_nop:run;"
+    "func lion_eval_nop:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1210,9 +1210,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_show_param_s )
 "aware lion_eval_nop"
 "{"
     "lion_eval_nop_param_s param;"
-    "func ^:set_param;"
+    "func lion_eval_nop:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func lion_eval_nop:run;"
 "}";
 
 er_t lion_eval_nop_show_param_s_main( lion_eval_nop_show_param_s* o, bcore_main_frame_s* frame )
@@ -1235,9 +1235,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_set_s )
 "{"
     "lion_eval_nop_param_s param;"
     "lion_eval_nop_arr_s arr;"
-    "func ^:set_param;"
+    "func lion_eval_nop:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func lion_eval_nop:run;"
 "}";
 
 er_t lion_eval_nop_set_s_main( lion_eval_nop_set_s* o, bcore_main_frame_s* frame )
@@ -1274,8 +1274,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_ar1_s )
 "aware lion_eval_nop"
 "{"
     "lion_eval_nop_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func lion_eval_nop:run;"
+    "func lion_eval_nop:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1292,8 +1292,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_nop_ar2_s )
 "aware lion_eval_nop"
 "{"
     "lion_eval_nop_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func lion_eval_nop:run;"
+    "func lion_eval_nop:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1339,8 +1339,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_sem_link_s )
     "private lion_sem_link_s -> dn;"
     "private vd_t cell;"
     "bl_t exit;"
-    "func ^:get_name;"
-    "func ^:is_visible;"
+    "func lion_sem:get_name;"
+    "func lion_sem:is_visible;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_sem_links_s )
@@ -1435,7 +1435,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_sem_cell_s )
     "sz_t priority = 10;"
     "private lion_sem_cell_s* parent;"
     "hidden bcore_source_point_s source_point;"
-    "func ^:get_name;"
+    "func lion_sem:get_name;"
 "}";
 
 lion_sem_cell_s* lion_sem_cell_s_get_cell_by_name( lion_sem_cell_s* o, tp_t name )
@@ -1525,7 +1525,7 @@ BCORE_DEFINE_OBJECT_INST_P( lion_net_node_s )
     "aware lion_nop -> nop;"
     "lion_nop_solve_result_s => result;"
     "hidden bcore_source_point_s -> source_point;"
-    "func ^:is_cyclic;"
+    "func lion_net:is_cyclic;"
 "}";
 
 sz_t lion_net_node_s_up_index( const lion_net_node_s* o, const lion_net_node_s* node )
@@ -1811,9 +1811,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_show_param_s )
 "aware lion_eval_frame"
 "{"
     "lion_eval_frame_param_s param;"
-    "func ^:set_param;"
+    "func lion_eval_frame:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func lion_eval_frame:run;"
 "}";
 
 er_t lion_eval_frame_show_param_s_main( lion_eval_frame_show_param_s* o, bcore_main_frame_s* frame )
@@ -1836,9 +1836,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_set_s )
 "{"
     "lion_eval_frame_param_s param;"
     "lion_eval_frame_arr_s arr;"
-    "func ^:set_param;"
+    "func lion_eval_frame:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func lion_eval_frame:run;"
 "}";
 
 er_t lion_eval_frame_set_s_main( lion_eval_frame_set_s* o, bcore_main_frame_s* frame )
@@ -1875,8 +1875,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_plain_s )
 "{"
     "lion_eval_frame_param_s param;"
     "sz_t ap_cycles = 1;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func lion_eval_frame:run;"
+    "func lion_eval_frame:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1893,8 +1893,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_eval_frame_cyclic_s )
 "aware lion_eval_frame"
 "{"
     "lion_eval_frame_param_s param;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func lion_eval_frame:run;"
+    "func lion_eval_frame:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1929,14 +1929,14 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_s )
     "badapt_dynamics_std_s dynamics;"
     "sz_t in_size;"
     "sz_t out_size;"
-    "func ^:get_in_size;"
-    "func ^:get_out_size;"
-    "func ^:get_dynamics_std;"
-    "func ^:set_dynamics_std;"
-    "func ^:arc_to_sink;"
-    "func ^:minfer;"
-    "func ^:bgrad_adapt;"
-    "func ^:get_weights_min_max;"
+    "func badapt_adaptive:get_in_size;"
+    "func badapt_adaptive:get_out_size;"
+    "func badapt_adaptive:get_dynamics_std;"
+    "func badapt_adaptive:set_dynamics_std;"
+    "func badapt_adaptive:arc_to_sink;"
+    "func badapt_adaptive:minfer;"
+    "func badapt_adaptive:bgrad_adapt;"
+    "func badapt_adaptive:get_weights_min_max;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_builder_s )
@@ -1946,11 +1946,11 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_builder_s )
     "sz_t in_size;"
     "sz_t out_size;"
     "badapt_dynamics_std_s dynamics;"
-    "func ^:get_in_size;"
-    "func ^:set_in_size;"
-    "func ^:get_out_size;"
-    "func ^:set_out_size;"
-    "func ^:build;"
+    "func badapt_builder:get_in_size;"
+    "func badapt_builder:set_in_size;"
+    "func badapt_builder:get_out_size;"
+    "func badapt_builder:set_out_size;"
+    "func badapt_builder:build;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_s )
@@ -1963,15 +1963,15 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_s )
     "sz_t out_size;"
     "bhvm_holor_adl_s => dp_buffer;"
     "bl_t dp_value;"
-    "func ^:get_in_size;"
-    "func ^:get_out_size;"
-    "func ^:get_dynamics_std;"
-    "func ^:set_dynamics_std;"
-    "func ^:arc_to_sink;"
-    "func ^:minfer;"
-    "func ^:bgrad_adapt;"
-    "func ^:get_weights_min_max;"
-    "func ^:reset;"
+    "func badapt_adaptive:get_in_size;"
+    "func badapt_adaptive:get_out_size;"
+    "func badapt_adaptive:get_dynamics_std;"
+    "func badapt_adaptive:set_dynamics_std;"
+    "func badapt_adaptive:arc_to_sink;"
+    "func badapt_adaptive:minfer;"
+    "func badapt_adaptive:bgrad_adapt;"
+    "func badapt_adaptive:get_weights_min_max;"
+    "func badapt_adaptive:reset;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_builder_s )
@@ -1982,11 +1982,11 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_cyclic_builder_s )
     "sz_t out_size;"
     "sz_t unroll_size;"
     "badapt_dynamics_std_s dynamics;"
-    "func ^:get_in_size;"
-    "func ^:set_in_size;"
-    "func ^:get_out_size;"
-    "func ^:set_out_size;"
-    "func ^:build;"
+    "func badapt_builder:get_in_size;"
+    "func badapt_builder:set_in_size;"
+    "func badapt_builder:get_out_size;"
+    "func badapt_builder:set_out_size;"
+    "func badapt_builder:build;"
 "}";
 
 XOILA_DEFINE_SPECT( bcore_inst, lion_adaptive )
@@ -2006,8 +2006,8 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptor_frame_s )
 "{"
     "aware => src;"
     "hidden lion_frame_s => frame;"
-    "func ^:reset;"
-    "func ^:adapt;"
+    "func bhpt_adaptor:reset;"
+    "func bhpt_adaptor:adapt;"
 "}";
 
 XOILA_DEFINE_SPECT( bcore_inst, lion_adaptor )
@@ -2029,14 +2029,14 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_s )
     "lion_frame_s frame;"
     "bhvm_holor_s holor_frame_en;"
     "bhvm_holor_s holor_frame_ex;"
-    "func ^:get_format_en;"
-    "func ^:get_format_ex;"
-    "func ^:axon_pass;"
-    "func ^:dendrite_pass;"
-    "func ^:cyclic_reset;"
-    "func ^:get_adaptor_probe;"
-    "func ^:rebind_holors;"
-    "func ^:status_to_sink;"
+    "func bhpt_adaptive:get_format_en;"
+    "func bhpt_adaptive:get_format_ex;"
+    "func bhpt_adaptive:axon_pass;"
+    "func bhpt_adaptive:dendrite_pass;"
+    "func bhpt_adaptive:cyclic_reset;"
+    "func bhpt_adaptive:get_adaptor_probe;"
+    "func bhpt_adaptive:rebind_holors;"
+    "func bhpt_adaptive:status_to_sink;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_builder_s )
@@ -2045,9 +2045,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_builder_s )
     "aware => src;"
     "bhvm_holor_s holor_frame_en;"
     "bhvm_holor_s holor_frame_ex;"
-    "func ^:set_format_en;"
-    "func ^:set_format_ex;"
-    "func ^:create_adaptive;"
+    "func bhpt_builder:set_format_en;"
+    "func bhpt_builder:set_format_ex;"
+    "func bhpt_builder:create_adaptive;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_s )
@@ -2059,14 +2059,14 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_s )
     "bhvm_holor_s holor_frame_ex;"
     "bhvm_holor_adl_s => dp_buffer;"
     "bl_t dp_value;"
-    "func ^:get_format_en;"
-    "func ^:get_format_ex;"
-    "func ^:axon_pass;"
-    "func ^:dendrite_pass;"
-    "func ^:cyclic_reset;"
-    "func ^:get_adaptor_probe;"
-    "func ^:rebind_holors;"
-    "func ^:status_to_sink;"
+    "func bhpt_adaptive:get_format_en;"
+    "func bhpt_adaptive:get_format_ex;"
+    "func bhpt_adaptive:axon_pass;"
+    "func bhpt_adaptive:dendrite_pass;"
+    "func bhpt_adaptive:cyclic_reset;"
+    "func bhpt_adaptive:get_adaptor_probe;"
+    "func bhpt_adaptive:rebind_holors;"
+    "func bhpt_adaptive:status_to_sink;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_builder_s )
@@ -2076,9 +2076,9 @@ BCORE_DEFINE_OBJECT_INST_P( lion_adaptive_bhpt_cyclic_builder_s )
     "bhvm_holor_s holor_frame_en;"
     "bhvm_holor_s holor_frame_ex;"
     "sz_t unroll_size;"
-    "func ^:set_format_en;"
-    "func ^:set_format_ex;"
-    "func ^:create_adaptive;"
+    "func bhpt_builder:set_format_en;"
+    "func bhpt_builder:set_format_ex;"
+    "func bhpt_builder:create_adaptive;"
 "}";
 
 XOILA_DEFINE_SPECT( bcore_inst, lion_adaptive_bhpt )
@@ -2868,4 +2868,4 @@ vd_t lion_xo_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// XOILA_OUT_SIGNATURE 0xD05388C5ED9582CBull
+// XOILA_OUT_SIGNATURE 0xAADB27DBE5821E70ull

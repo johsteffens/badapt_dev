@@ -57,7 +57,7 @@
 XOILA_DEFINE_GROUP( lion_ctr, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :node = aware bcore_array
+stamp :node_s = aware bcore_array
 {
     sz_t id = -1;
     private lion_sem_cell_s -> cell;
@@ -65,7 +65,7 @@ stamp :node = aware bcore_array
     :node_s => [];
 };
 
-stamp :tree = aware :
+stamp :tree_s = aware :
 {
     sz_t id_base = 0; // (incremented when adding nodes)
     :node_s => root;
@@ -84,12 +84,12 @@ stamp :tree = aware :
 XOILA_DEFINE_GROUP( lion_net, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :link = aware :
+stamp :link_s = aware :
 {
     hidden vd_t /* :node_s* */ node; // (!) target is a node
 };
 
-stamp :links = aware bcore_array { :link_s => []; };
+stamp :links_s = aware bcore_array { :link_s => []; };
 
 signature void solve( mutable );
 
@@ -101,7 +101,7 @@ signature void set_nop_d( mutable, lion_nop* nop );
 
 feature bl_t is_cyclic( const ) = { return false; };
 
-stamp :node = aware :
+stamp :node_s = aware :
 {
     :links_s upls; // uplinks
     :links_s dnls; // downlinks
@@ -151,11 +151,11 @@ stamp :node = aware :
     func : .is_cyclic = { return ( o->mnode ) ? o->mnode->cyclic : lion_nop_a_is_cyclic( o->nop ); };
 };
 
-stamp :node_adl = aware bcore_array { :node_s => []; };
+stamp :node_adl_s = aware bcore_array { :node_s => []; };
 
 signature :node_s* get_by_id( mutable, sz_t id );
 
-stamp :nodes = aware bcore_array
+stamp :nodes_s = aware bcore_array
 {
     :node_s => [];
     func : .get_by_id =
@@ -174,7 +174,7 @@ signature bl_t is_consistent( const );
 signature void clear_downlinks( mutable );
 signature void set_downlinks( mutable );
 
-stamp :cell = aware :
+stamp :cell_s = aware :
 {
     sz_t max_depth = 32768; // maximum recursion depth
     :nodes_s body;

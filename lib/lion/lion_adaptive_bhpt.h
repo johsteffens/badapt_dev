@@ -36,7 +36,7 @@
 XOILA_DEFINE_GROUP( lion_adaptive_bhpt, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp : = aware bhpt_adaptive
+stamp :s = aware bhpt_adaptive
 {
     // === architecture parameters ================================
 
@@ -65,7 +65,7 @@ stamp : = aware bhpt_adaptive
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :builder = aware bhpt_builder
+stamp :builder_s = aware bhpt_builder
 {
     aware => src; // source (bcore_file_path_s or st_s with inline code)
 
@@ -83,7 +83,7 @@ stamp :builder = aware bhpt_builder
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :cyclic = aware bhpt_adaptive
+stamp :cyclic_s = aware bhpt_adaptive
 {
     // === architecture parameters ================================
 
@@ -116,7 +116,7 @@ stamp :cyclic = aware bhpt_adaptive
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :cyclic_builder = aware bhpt_builder
+stamp :cyclic_builder_s = aware bhpt_builder
 {
     aware => src; // source (bcore_file_path_s or st_s with inline code)
 

@@ -31,7 +31,7 @@ XOILA_DEFINE_GROUP( badapt_dev_problem_objects, bcore_inst )
 /** Type: Recurrent Sequence Estimator
  *  Method: Simple UTF alphabet (for testing)
  */
-stamp badapt_problem_recurrent_abc = badapt_supplier
+stamp badapt_problem_recurrent_abc_s = badapt_supplier
 {
     aware_t _;
     sz_t index = 0;
@@ -52,7 +52,7 @@ stamp badapt_problem_recurrent_abc = badapt_supplier
 
 /** Type: Recurrent Sequence Estimator
  */
-stamp badapt_problem_recurrent_text = aware badapt_supplier
+stamp badapt_problem_recurrent_text_s = aware badapt_supplier
 {
     st_s text_file;
     st_s ignore_line_char; // character initiating a line comment to be ignored in training
@@ -78,7 +78,7 @@ stamp badapt_problem_recurrent_text = aware badapt_supplier
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp badapt_guide_char_encode = badapt_guide
+stamp badapt_guide_char_encode_s = badapt_guide
 {
     aware_t _;
     aware badapt_guide => guide_default = badapt_guide_std_s;
@@ -104,7 +104,7 @@ stamp badapt_guide_char_encode = badapt_guide
 
 /** Type: Recurrent Sequence Estimator
  */
-stamp badapt_problem_recurrent_utf8 = aware badapt_supplier
+stamp badapt_problem_recurrent_utf8_s = aware badapt_supplier
 {
     st_s text_file;
 
@@ -127,7 +127,7 @@ stamp badapt_problem_recurrent_utf8 = aware badapt_supplier
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp badapt_guide_utf8_encode = badapt_guide
+stamp badapt_guide_utf8_encode_s = badapt_guide
 {
     aware_t _;
     aware badapt_guide => guide_default = badapt_guide_std_s;

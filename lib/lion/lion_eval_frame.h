@@ -37,7 +37,7 @@ signature void resolve( mutable );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :result = aware bcore_inst
+stamp :result_s = aware bcore_inst
 {
     bl_t error = false;
     st_s msg;
@@ -63,7 +63,7 @@ feature :result_s* run( const, :result_s* result ); // returns result
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 signature void set( mutable, const :param_s* src );
-stamp :param = aware bcore_inst
+stamp :param_s = aware bcore_inst
 {
     hidden aware bcore_sink -> log;
     sz_t verbosity = 1;
@@ -113,7 +113,7 @@ stamp :param = aware bcore_inst
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stump :std = aware :
+stump :std_s = aware :
 {
     :param_s param;
     func : .run;
@@ -128,7 +128,7 @@ stump :std = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :show_param = extending :std
+stamp :show_param_s = extending :std
 {
     func : .run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
@@ -137,9 +137,9 @@ stamp :show_param = extending :std
 
 feature void set_param( mutable, const :param_s* param );
 
-stamp :arr = aware bcore_array { aware :=> []; };
+stamp :arr_s = aware bcore_array { aware :=> []; };
 
-stamp :set = extending :std
+stamp :set_s = extending :std
 {
     :arr_s arr;
     func : .run =
@@ -163,14 +163,14 @@ stamp :set = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :plain  = extending :std
+stamp :plain_s  = extending :std
 {
     sz_t ap_cycles = 1; // for testing
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :cyclic  = extending :std
+stamp :cyclic_s  = extending :std
 {
 };
 

@@ -32,8 +32,8 @@
 XOILA_DEFINE_GROUP( opal_net, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :link  = aware : { private aware :node_s* node; };
-stamp :links = aware bcore_array { :link_s => []; };
+stamp :link_s  = aware : { private aware :node_s* node; };
+stamp :links_s = aware bcore_array { :link_s => []; };
 
 signature void solve( mutable );
 
@@ -45,7 +45,7 @@ signature void set_nop_d( mutable, opal_nop* nop );
 
 feature bl_t is_cyclic( const ) = { return false; };
 
-stamp :node = aware :
+stamp :node_s = aware :
 {
     :links_s upls; // uplinks
     :links_s dnls; // downlinks
@@ -99,11 +99,11 @@ stamp :node = aware :
     func :.is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
 };
 
-stamp :node_adl = aware bcore_array { :node_s => []; };
+stamp :node_adl_s = aware bcore_array { :node_s => []; };
 
 signature :node_s* get_by_id( mutable, sz_t id );
 
-stamp :nodes = aware bcore_array
+stamp :nodes_s = aware bcore_array
 {
     :node_s => [];
     func :.get_by_id =
@@ -122,7 +122,7 @@ signature bl_t is_consistent( const );
 signature void clear_downlinks( mutable );
 signature void set_downlinks( mutable );
 
-stamp :cell = aware :
+stamp :cell_s = aware :
 {
     sz_t max_depth = 32768; // maximum recursion depth
     :nodes_s body;
@@ -172,7 +172,7 @@ group :builder = :
     signature void fork_input_holors( mutable, const bhvm_holor_s** input_holors, sz_t size_input_holors );
     signature void build_from_source( mutable, opal_net_cell_s* net_cell, bcore_source* source );
 
-    stamp : = aware :
+    stamp :s = aware :
     {
         opal_sem_builder_s sem_builder;
         hidden bhvm_holor_adl_s input_holors;

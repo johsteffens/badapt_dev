@@ -34,7 +34,7 @@ XOILA_DEFINE_GROUP( opal_eval_nop, bcore_inst )
 
 signature void resolve( const );
 
-stamp :result = aware bcore_inst
+stamp :result_s = aware bcore_inst
 {
     sz_t total_tests = 0;
     sz_t solvable_tests = 0;
@@ -67,7 +67,7 @@ stamp :result = aware bcore_inst
 
 signature void set( mutable, const :param_s* src );
 
-stamp :param = aware bcore_inst
+stamp :param_s = aware bcore_inst
 {
     aware opal_nop => nop;
     opal_holor_s => ha;
@@ -99,7 +99,7 @@ feature void set_param( mutable, const :param_s* param );
 feature :result_s* run( const, :result_s* result ); // creates result or returns NULL
 
 /// template
-stump :std = aware :
+stump :std_s = aware :
 {
     :param_s param;
     func :.run;
@@ -114,7 +114,7 @@ stump :std = aware :
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// randomizes holors defined in param; undefined holors stay undefined
-stamp :generator = extending :std
+stamp :generator_s = extending :std
 {
     bl_t set_htp    = false;  // changes htp-state
     bl_t set_value  = false;  // sets/changes values
@@ -136,16 +136,16 @@ stamp :generator = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :show_param = extending :std
+stamp :show_param_s = extending :std
 {
     func :.run = { bcore_txt_ml_a_to_sink( &o.param, o.param.log ); return result; };
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :arr = aware bcore_array { aware :=> []; };
+stamp :arr_s = aware bcore_array { aware :=> []; };
 
-stamp :set = extending :std
+stamp :set_s = extending :std
 {
     :arr_s arr;
 
@@ -168,11 +168,11 @@ stamp :set = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :ar1 = extending :std { aware opal_context => context = opal_nop_context_s; };
+stamp :ar1_s = extending :std { aware opal_context => context = opal_nop_context_s; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :ar2 = extending :std { aware opal_context => context = opal_nop_context_s; };
+stamp :ar2_s = extending :std { aware opal_context => context = opal_nop_context_s; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

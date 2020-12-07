@@ -52,7 +52,7 @@ group :hidx =
 
     signature @* replace_index( mutable, bcore_arr_sz_s* index_map );
 
-    stamp : = aware :
+    stamp :s = aware :
     {
         bcore_arr_sz_s => arr;
         func :.clear     = { if( o.arr ) o.arr.clear(); return o; };
@@ -86,7 +86,7 @@ group :hidx =
 
     };
 
-    stamp :ads = aware bcore_array { :s []; };
+    stamp :ads_s = aware bcore_array { :s []; };
 };
 
 /// frame member functions
@@ -131,7 +131,7 @@ signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* 
  */
 signature @* bind_holors( mutable );
 
-stamp : = aware :
+stamp :s = aware :
 {
     /// pre-setup parameters
     aware bcore_sink -> log;
@@ -218,7 +218,7 @@ stamp : = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :custom_hmeta = aware :
+stamp :custom_hmeta_s = aware :
 {
     sz_t ur_slot;
     sz_t ur_src;
@@ -227,7 +227,7 @@ stamp :custom_hmeta = aware :
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// frame specialized in unrolling cyclic networks
-stamp :cyclic = aware :
+stamp :cyclic_s = aware :
 {
     /// pre-setup parameters
     :s => frame;

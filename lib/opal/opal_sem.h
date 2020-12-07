@@ -101,7 +101,7 @@ group :context = opal_context
     signature opal_sem_cell_s* setup_cell( mutable, opal_sem_cell_s* cell ); // returns cell
     signature opal_sem_cell_s* create_cell( mutable ); // creates and setups cell
 
-    stamp : = aware :
+    stamp :s = aware :
     {
         opal_nop_context_s nop_context;
         func opal_context .get_prsg = { return o->nop_context.get_prsg(); };
@@ -146,7 +146,7 @@ group :id = :
     signature void push_parent( mutable, tp_t tp );
     signature void to_string(   const, const opal_context* context, st_s* s );
 
-    stamp : = aware :
+    stamp :s = aware :
     {
         bcore_arr_tp_s arr_tp;
         func :.clear       = { o.arr_tp.clear(); };
@@ -185,7 +185,7 @@ body             get_name_ = { return o->name; };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // bidirectional link
-stamp :link = aware :
+stamp :link_s = aware :
 {
     tp_t name;
     bl_t protected = false; // a protected link may not be used (used for cyclic syntax error detection)
@@ -210,7 +210,7 @@ signature :link_s* get_link_by_dn(    mutable, :link_s* dn );
 signature sz_t     get_index_by_link( mutable, :link_s* link ); // returns -1 if not found
 signature sz_t     count_open( const );
 
-stamp :links = aware bcore_array
+stamp :links_s = aware bcore_array
 {
     :link_s => [];
 
@@ -252,7 +252,7 @@ stamp :links = aware bcore_array
     };
 };
 
-stamp :body = aware bcore_array
+stamp :body_s = aware bcore_array
 {
     aware : => [];
 
@@ -286,7 +286,7 @@ signature :cell_s* get_cell_by_name( mutable, tp_t name );
 
 signature bl_t is_wrapper( const );
 
-stamp :cell = aware :
+stamp :cell_s = aware :
 {
              tp_t         name;
              bl_t visible = true;  // an invisible cell cannot be retrieved in get_cell_by_name
@@ -337,7 +337,7 @@ stamp :cell = aware :
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// evaluation stack indicators
-stamp :stack_flag = aware : {};
+stamp :stack_flag_s = aware : {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -346,7 +346,7 @@ group :builder = :
 {
     signature er_t build_from_source( mutable, opal_sem_cell_s* cell, bcore_source* source );
 
-    stamp : = aware :
+    stamp :s = aware :
     {
         opal_sem_context_s => context;
         opal_sem_cell_s => cell_context;
@@ -380,7 +380,7 @@ group :tree = :
     signature void push_parents_to_sem_id( const, ::id_s* sem_id );
     signature void get_sem_id(             const, ::id_s* sem_id );
 
-    stamp :node = aware bcore_array
+    stamp :node_s = aware bcore_array
     {
         sz_t id = -1;
         private opal_sem_cell_s -> cell;
@@ -403,7 +403,7 @@ group :tree = :
     signature er_t enter( mutable, ::cell_s* cell,                        :node_s* node_in, :node_s** node_out );
     signature er_t exit ( mutable, ::cell_s* cell, bl_t test_for_wrapper, :node_s* node_in, :node_s** node_out );
 
-    stamp : = aware :
+    stamp :s = aware :
     {
         sz_t id_base = 0; // (incremented when adding nodes)
         :node_s => root;

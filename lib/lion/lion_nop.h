@@ -108,7 +108,7 @@ feature :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n ) ?
   *     Overload 'settle' when a different operator is desired.
   */
 
-stamp :solve_result = aware bcore_inst
+stamp :solve_result_s = aware bcore_inst
 {
     /// result holor
     lion_holor_s => h;
@@ -244,7 +244,7 @@ feature void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // global context
-stamp :context = aware bcore_inst
+stamp :context_s = aware bcore_inst
 {
     /** The randomizer is supposed to produce different values on repeated calls but
      *  always the same sequence of random values for building a network.
@@ -259,12 +259,12 @@ stamp :context = aware bcore_inst
 
 group :ar0 = retrievable
 {
-    extending stump verbatim :_ = aware :
+    extending stump verbatim :_s = aware :
     {
         func :: .arity = { return 0; };
     };
 
-    stamp :literal =
+    stamp :literal_s =
     {
         lion_holor_s -> h;
         func :: .solve =
@@ -276,7 +276,7 @@ group :ar0 = retrievable
     };
 
     /// parameter/variable (does not settle); used for cell-frame input and system accessible parameters
-    stamp :param =
+    stamp :param_s =
     {
         lion_holor_s -> h;
         func :: .solve =
@@ -288,7 +288,7 @@ group :ar0 = retrievable
     };
 
     /// nullary adaptive operator
-    stamp :adaptive =
+    stamp :adaptive_s =
     {
         lion_holor_s -> h;
 
@@ -331,7 +331,7 @@ group :ar0 = retrievable
     };
 
     /// nullary self-seeding random operator
-    stamp :rand =
+    stamp :rand_s =
     {
         lion_holor_s -> h;
         f3_t min     = -0.5;
@@ -371,13 +371,13 @@ group :ar0 = retrievable
 
 group :ar1 = retrievable
 {
-    extending stump verbatim :_ = aware :
+    extending stump verbatim :_s = aware :
     {
         func :: .arity = { return 1; };
         func :: .reserved = { return true; };
     };
 
-    stamp :identity =
+    stamp :identity_s =
     {
         func :: .priority = { return 8; };
         func :: .solve =
@@ -393,7 +393,7 @@ group :ar1 = retrievable
         };
     };
 
-    stamp :f3 =
+    stamp :f3_s =
     {
         func :: .priority = { return 8; };
         func :: .symbol   = { return "f3_t"; };
@@ -408,7 +408,7 @@ group :ar1 = retrievable
         };
     };
 
-    stamp :f2 =
+    stamp :f2_s =
     {
         func :: .priority = { return 8; };
         func :: .symbol   = { return "f2_t"; };
@@ -423,7 +423,7 @@ group :ar1 = retrievable
         };
     };
 
-    stamp :neg =
+    stamp :neg_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "neg"; };
@@ -437,7 +437,7 @@ group :ar1 = retrievable
         };
     };
 
-    stamp :floor =
+    stamp :floor_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "floor"; };
@@ -445,7 +445,7 @@ group :ar1 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :ceil =
+    stamp :ceil_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "ceil"; };
@@ -453,7 +453,7 @@ group :ar1 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :abs =
+    stamp :abs_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "abs"; };
@@ -461,7 +461,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_abs_dp_s; };
     };
 
-    stamp :exp =
+    stamp :exp_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "exp"; };
@@ -469,7 +469,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_exp_dp_s; };
     };
 
-    stamp :log =
+    stamp :log_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "log"; };
@@ -477,7 +477,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_log_dp_s; };
     };
 
-    stamp :inv =
+    stamp :inv_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "inv"; };
@@ -485,7 +485,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_inv_dp_s; };
     };
 
-    stamp :sqr =
+    stamp :sqr_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "sqr"; };
@@ -493,7 +493,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sqr_dp_s; };
     };
 
-    stamp :srt =
+    stamp :srt_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "srt"; };
@@ -501,7 +501,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_srt_dp_s; };
     };
 
-    stamp :sigm =
+    stamp :sigm_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "sigm"; };
@@ -509,7 +509,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sigm_dp_s; };
     };
 
-    stamp :sigm_hard =
+    stamp :sigm_hard_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "sigm_hard"; };
@@ -517,7 +517,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sigm_hard_dp_s; };
     };
 
-    stamp :sigm_leaky =
+    stamp :sigm_leaky_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "sigm_leaky"; };
@@ -525,7 +525,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_sigm_leaky_dp_s; };
     };
 
-    stamp :tanh =
+    stamp :tanh_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "tanh"; };
@@ -533,7 +533,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_tanh_dp_s; };
     };
 
-    stamp :tanh_hard =
+    stamp :tanh_hard_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "tanh_hard"; };
@@ -541,7 +541,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_tanh_hard_dp_s; };
     };
 
-    stamp :tanh_leaky =
+    stamp :tanh_leaky_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "tanh_leaky"; };
@@ -549,7 +549,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_tanh_leaky_dp_s; };
     };
 
-    stamp :softplus =
+    stamp :softplus_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "softplus"; };
@@ -557,7 +557,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_softplus_dp_s; };
     };
 
-    stamp :softmax =
+    stamp :softmax_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "softmax"; };
@@ -565,7 +565,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_softmax_dp_s; };
     };
 
-    stamp :relu =
+    stamp :relu_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "relu"; };
@@ -573,7 +573,7 @@ group :ar1 = retrievable
         func :: .type_vop_dp_a = { return TYPEOF_bhvm_vop_ar2_relu_dp_s; };
     };
 
-    stamp :relu_leaky =
+    stamp :relu_leaky_s =
     {
         func :: .priority      = { return 8; };
         func :: .symbol        = { return "relu_leaky"; };
@@ -582,7 +582,7 @@ group :ar1 = retrievable
     };
 
     /// formal output (used for resolving the network; not part of syntax)
-    stamp :output =
+    stamp :output_s =
     {
         func :: .solve;
         func :: .mcode_push_dp_holor;
@@ -592,7 +592,7 @@ group :ar1 = retrievable
      *  Operation is settled when at least a vacant holor can be computed.
      *  If the holor is vacant, it is initialized in the virtual machine.
      */
-    stamp :adaptive =
+    stamp :adaptive_s =
     {
         tp_t name;
         func :: .priority    = { return 8; };
@@ -604,7 +604,7 @@ group :ar1 = retrievable
     /// special operators ------------------------------------------------------
 
     /// returns leading dimension as constant
-    stamp :dimof =
+    stamp :dimof_s =
     {
         func :: .symbol   = { return "dimof"; };
         func :: .priority = { return 8; };
@@ -623,7 +623,7 @@ group :ar1 = retrievable
     };
 
     /// returns volume as constant
-    stamp :volof =
+    stamp :volof_s =
     {
         func :: .symbol   = { return "volof"; };
         func :: .priority = { return 8; };
@@ -645,7 +645,7 @@ group :ar1 = retrievable
      *  Assumes current value.
      *  If input is vacant, holor is determined and filled with zeros.
      */
-    stamp :constof =
+    stamp :constof_s =
     {
         func :: .symbol   = { return "constof"; };
         func :: .priority = { return 8; };
@@ -664,7 +664,7 @@ group :ar1 = retrievable
     };
 
     /// returns input holor as constant where all values are set to zero
-    stamp :zeroof =
+    stamp :zeroof_s =
     {
         func :: .symbol   = { return "zeroof"; };
         func :: .priority = { return 8; };
@@ -684,7 +684,7 @@ group :ar1 = retrievable
     };
 
     /// returns shape-only (vacant holor) as constant
-    stamp :shapeof =
+    stamp :shapeof_s =
     {
         func :: .symbol   = { return "shapeof"; };
         func :: .priority = { return 8; };
@@ -709,7 +709,7 @@ group :ar1 = retrievable
      *  Seeding and rval update is system-internal.
      *  The resulting mcode randomizer updates its seed after each call (thread safe)
      */
-    stamp :rand =
+    stamp :rand_s =
     {
         u3_t rseed = 1234;
         func :: .symbol   = { return "rand"; };
@@ -719,7 +719,7 @@ group :ar1 = retrievable
     };
 
     /// Cast operator reinterpreting a holor as transposed.
-    stamp :cast_htp =
+    stamp :cast_htp_s =
     {
         func :: .priority  = { return 12; };
         func :: .symbol    = { return "htp"; };
@@ -731,7 +731,7 @@ group :ar1 = retrievable
     /** Cast operator reinterpreting a holor as reshaped. Transposed flag is cleared.
      *  This ar1 operator is created by ar2_reshape during settlement.
      */
-    stamp :reshape =
+    stamp :reshape_s =
     {
         bhvm_shape_s shape;
         func :: .priority  = { return 8; };
@@ -747,13 +747,13 @@ group :ar1 = retrievable
 
 group :ar2 = retrievable
 {
-    extending stump verbatim :_ = aware :
+    extending stump verbatim :_s = aware :
     {
         func :: .arity = { return 2; };
         func :: .reserved = { return true; };
     };
 
-    stamp :add =
+    stamp :add_s =
     {
         func :: .priority      = { return 8; };
         func :: .eci           = { return true; };
@@ -763,7 +763,7 @@ group :ar2 = retrievable
         func :: .type_vop_dp_b = { return TYPEOF_bhvm_vop_ar1_add_dp_b_s; };
     };
 
-    stamp :sub =
+    stamp :sub_s =
     {
         func :: .priority      = { return 8; };
         func :: .eci           = { return true; };
@@ -779,7 +779,7 @@ group :ar2 = retrievable
         };
     };
 
-    stamp :mul =
+    stamp :mul_s =
     {
         func :: .priority      = { return 10; };
         func :: .eci           = { return true; };
@@ -789,7 +789,7 @@ group :ar2 = retrievable
         func :: .type_vop_dp_b = { return TYPEOF_bhvm_vop_ar2_mul_dp_b_s; };
     };
 
-    stamp :div =
+    stamp :div_s =
     {
         func :: .priority      = { return 10; };
         func :: .eci           = { return true; };
@@ -799,7 +799,7 @@ group :ar2 = retrievable
         func :: .type_vop_dp_b = { return TYPEOF_bhvm_vop_ar3_div_dp_b_s; };
     };
 
-    stamp :pow =
+    stamp :pow_s =
     {
         func :: .priority      = { return 12; };
         func :: .eci           = { return true; };
@@ -809,7 +809,7 @@ group :ar2 = retrievable
         func :: .type_vop_dp_b = { return TYPEOF_bhvm_vop_ar3_pow_dp_b_s; };
     };
 
-    stamp :bmul =
+    stamp :bmul_s =
     {
         func :: .priority = { return 10; };
         func :: .symbol   = { return "**"; };
@@ -818,7 +818,7 @@ group :ar2 = retrievable
 
     /// logic ------------------------------------------------------------------
 
-    stamp :logic_equal =
+    stamp :logic_equal_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -827,7 +827,7 @@ group :ar2 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :logic_unequal =
+    stamp :logic_unequal_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -836,7 +836,7 @@ group :ar2 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :logic_larger =
+    stamp :logic_larger_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -845,7 +845,7 @@ group :ar2 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :logic_smaller =
+    stamp :logic_smaller_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -854,7 +854,7 @@ group :ar2 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :logic_larger_equal =
+    stamp :logic_larger_equal_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -863,7 +863,7 @@ group :ar2 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :logic_smaller_equal =
+    stamp :logic_smaller_equal_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -872,7 +872,7 @@ group :ar2 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :logic_and =
+    stamp :logic_and_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -881,7 +881,7 @@ group :ar2 = retrievable
         func :: .mcode_push_dp_holor = { return -1; }; // no gradient
     };
 
-    stamp :logic_or =
+    stamp :logic_or_s =
     {
         func :: .priority    = { return 6; };
         func :: .eci         = { return true; };
@@ -893,7 +893,7 @@ group :ar2 = retrievable
     /// special operators ------------------------------------------------------
 
     // constructive concatenation defined in bhvm_holor_s_cat_set
-    stamp :cat =
+    stamp :cat_s =
     {
         func :: .priority = { return 6; };
         func :: .symbol   = { return ":"; };
@@ -904,7 +904,7 @@ group :ar2 = retrievable
     };
 
     // conservative concatenation defined in bhvm_holor_s_ccat_set
-    stamp :ccat =
+    stamp :ccat_s =
     {
         func :: .priority = { return 8; };
         func :: .symbol   = { return "::"; };
@@ -914,7 +914,7 @@ group :ar2 = retrievable
         func :: .type_vop_dp_b = { return TYPEOF_bhvm_vop_ar1_ccat_dp_b_s; };
     };
 
-    stamp :order_inc =
+    stamp :order_inc_s =
     {
         func :: .priority = { return 21; };
         func :: .symbol   = { return "["; };
@@ -925,7 +925,7 @@ group :ar2 = retrievable
     };
 
     // r-value is (scalar) index
-    stamp :order_dec =
+    stamp :order_dec_s =
     {
         func :: .priority = { return 20; };
         func :: .symbol   = { return "]"; };
@@ -936,7 +936,7 @@ group :ar2 = retrievable
 
     // argument 'a' is initialization, 'b' is normal input
     // dendrite-pass treats 'b' -> 'y' as identity
-    stamp :cyclic =
+    stamp :cyclic_s =
     {
         tp_t name;
 
@@ -954,7 +954,7 @@ group :ar2 = retrievable
      *  Evaluateds only the shape of the second argument to determine output shape.
      *  The resulting mcode randomizer updates its seed after each call (thread safe)
      */
-    stamp :rands =
+    stamp :rands_s =
     {
         func :: .symbol   = { return "rands"; };
         func :: .priority = { return 8; };
@@ -965,7 +965,7 @@ group :ar2 = retrievable
     /** Cast operator reinterpreting a holor as reshaped. Transposed flag is cleared.
      *  This ar2 operator creates ar1_reshape during settlement.
      */
-    stamp :reshape =
+    stamp :reshape_s =
     {
         func :: .symbol   = { return "reshape"; };
         func :: .priority    = { return 8; };
@@ -986,13 +986,13 @@ group :ar2 = retrievable
 
 group :ar3 = retrievable
 {
-    extending stump verbatim :_ = aware :
+    extending stump verbatim :_s = aware :
     {
         func :: .arity    = { return 3; };
         func :: .reserved = { return true; };
     };
 
-    stamp :iff =
+    stamp :iff_s =
     {
         func :: .priority      = { return 4; };
         func :: .eci           = { return true; };

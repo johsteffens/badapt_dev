@@ -97,7 +97,7 @@ XOILA_DEFINE_GROUP( lion_sem, bcore_inst )
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // global context
-stamp :context = aware bcore_inst
+stamp :context_s = aware bcore_inst
 {
     bcore_hmap_name_s hmap_name;
     bcore_arr_st_s    arr_symbol_op2;
@@ -121,7 +121,7 @@ body             get_name_ = { return o->name; };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // bidirectional link
-stamp :link = aware :
+stamp :link_s = aware :
 {
     tp_t name;
     bl_t visible = true;
@@ -142,7 +142,7 @@ signature :link_s* get_link_by_dn(    mutable, :link_s* dn );
 signature sz_t     get_index_by_link( mutable, :link_s* link ); // returns -1 if not found
 signature sz_t     count_open( const );
 
-stamp :links = aware bcore_array
+stamp :links_s = aware bcore_array
 {
     :link_s => [];
 
@@ -184,7 +184,7 @@ stamp :links = aware bcore_array
     };
 };
 
-stamp :body = aware bcore_array
+stamp :body_s = aware bcore_array
 {
     aware : => [];
 
@@ -215,7 +215,7 @@ signature :cell_s* get_cell_by_name( mutable, tp_t name );
 
 signature bl_t is_wrapper( const );
 
-stamp :cell = aware :
+stamp :cell_s = aware :
 {
             tp_t       name;
            :links_s    encs; // entry channels
@@ -261,7 +261,7 @@ stamp :cell = aware :
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// evaluation stack indicators
-stamp :stack_flag = aware : {};
+stamp :stack_flag_s = aware : {};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

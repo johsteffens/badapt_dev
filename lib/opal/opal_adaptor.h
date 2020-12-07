@@ -35,7 +35,7 @@ XOILA_DEFINE_GROUP( opal_adaptor, bcore_inst )
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :frame = aware bhpt_adaptor
+stamp :frame_s = aware bhpt_adaptor
 {
     /// source should define cell ( axon_out, grad_out <- axon_in, grad_in ) { ... };
     aware => src; // source (bcore_file_path_s or st_s with inline code)

@@ -1,6 +1,6 @@
 /** This file was generated from xoila source code.
  *  Compiling Agent : xoico_compiler (C) 2020 J.B.Steffens
- *  Last File Update: 2020-12-01T10:47:49Z
+ *  Last File Update: 2020-12-07T21:02:55Z
  *
  *  Copyright and License of this File:
  *
@@ -64,14 +64,14 @@ BCORE_DEFINE_OBJECT_INST_P( opal_holor_meta_s )
     "tp_t pclass;"
     "bl_t htp;"
     "bl_t active = true;"
-    "func ^:get_name;"
-    "func ^:get_pclass;"
-    "func ^:is_rollable;"
-    "func ^:is_active;"
-    "func ^:get_custom;"
-    "func ^:set_custom;"
-    "func ^:get_node;"
-    "func ^:set_node;"
+    "func bhvm_mcode_hmeta:get_name;"
+    "func bhvm_mcode_hmeta:get_pclass;"
+    "func bhvm_mcode_hmeta:is_rollable;"
+    "func bhvm_mcode_hmeta:is_active;"
+    "func bhvm_mcode_hmeta:get_custom;"
+    "func bhvm_mcode_hmeta:set_custom;"
+    "func bhvm_mcode_hmeta:get_node;"
+    "func bhvm_mcode_hmeta:set_node;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( opal_holor_s )
@@ -98,7 +98,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_nop_context_s )
 "aware opal_context"
 "{"
     "aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;"
-    "func ^:get_prsg;"
+    "func opal_context:get_prsg;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( opal_nop_solve_result_s )
@@ -1217,8 +1217,8 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_generator_s )
     "sz_t cycles = 0;"
     "bcore_arr_uz_s tolerated_cycles;"
     "aware opal_eval_nop=> eval;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func opal_eval_nop:run;"
+    "func opal_eval_nop:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1234,9 +1234,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_show_param_s )
 "aware opal_eval_nop"
 "{"
     "opal_eval_nop_param_s param;"
-    "func ^:set_param;"
+    "func opal_eval_nop:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func opal_eval_nop:run;"
 "}";
 
 er_t opal_eval_nop_show_param_s_main( opal_eval_nop_show_param_s* o, bcore_main_frame_s* frame )
@@ -1258,9 +1258,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_set_s )
 "{"
     "opal_eval_nop_param_s param;"
     "opal_eval_nop_arr_s arr;"
-    "func ^:set_param;"
+    "func opal_eval_nop:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func opal_eval_nop:run;"
 "}";
 
 er_t opal_eval_nop_set_s_main( opal_eval_nop_set_s* o, bcore_main_frame_s* frame )
@@ -1294,8 +1294,8 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_ar1_s )
 "{"
     "opal_eval_nop_param_s param;"
     "aware opal_context => context = opal_nop_context_s;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func opal_eval_nop:run;"
+    "func opal_eval_nop:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1312,8 +1312,8 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_nop_ar2_s )
 "{"
     "opal_eval_nop_param_s param;"
     "aware opal_context => context = opal_nop_context_s;"
-    "func ^:run;"
-    "func ^:set_param;"
+    "func opal_eval_nop:run;"
+    "func opal_eval_nop:set_param;"
     "func bcore_main:main;"
 "}";
 
@@ -1349,10 +1349,10 @@ BCORE_DEFINE_OBJECT_INST_P( opal_sem_link_s )
     "private opal_sem_link_s -> dn;"
     "private vd_t cell;"
     "bl_t exit;"
-    "func ^:get_name;"
-    "func ^:set_name_visible;"
-    "func ^:set_name_invisible;"
-    "func ^:is_visible;"
+    "func opal_sem:get_name;"
+    "func opal_sem:set_name_visible;"
+    "func opal_sem:set_name_invisible;"
+    "func opal_sem:is_visible;"
 "}";
 
 BCORE_DEFINE_OBJECT_INST_P( opal_sem_links_s )
@@ -1452,10 +1452,10 @@ BCORE_DEFINE_OBJECT_INST_P( opal_sem_cell_s )
     "aware opal_nop -> nop;"
     "hidden bcore_source_point_s source_point;"
     "private opal_sem_cell_s -> wrapped_cell;"
-    "func ^:get_name;"
-    "func ^:set_name_visible;"
-    "func ^:set_name_invisible;"
-    "func ^:is_visible;"
+    "func opal_sem:get_name;"
+    "func opal_sem:set_name_visible;"
+    "func opal_sem:set_name_invisible;"
+    "func opal_sem:is_visible;"
 "}";
 
 opal_sem_cell_s* opal_sem_cell_s_get_cell_by_name( opal_sem_cell_s* o, tp_t name )
@@ -1646,7 +1646,7 @@ BCORE_DEFINE_OBJECT_INST_P( opal_net_node_s )
     "opal_nop_solve_result_s => result;"
     "hidden aware opal_context -> context;"
     "hidden bcore_source_point_s -> source_point;"
-    "func ^:is_cyclic;"
+    "func opal_net:is_cyclic;"
 "}";
 
 sz_t opal_net_node_s_up_index( const opal_net_node_s* o, const opal_net_node_s* node )
@@ -2146,9 +2146,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_show_param_s )
 "aware opal_eval_frame"
 "{"
     "opal_eval_frame_param_s param;"
-    "func ^:set_param;"
+    "func opal_eval_frame:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func opal_eval_frame:run;"
 "}";
 
 er_t opal_eval_frame_show_param_s_main( opal_eval_frame_show_param_s* o, bcore_main_frame_s* frame )
@@ -2170,9 +2170,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_set_s )
 "{"
     "opal_eval_frame_param_s param;"
     "opal_eval_frame_arr_s arr;"
-    "func ^:set_param;"
+    "func opal_eval_frame:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func opal_eval_frame:run;"
 "}";
 
 er_t opal_eval_frame_set_s_main( opal_eval_frame_set_s* o, bcore_main_frame_s* frame )
@@ -2207,9 +2207,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_plain_s )
 "{"
     "opal_eval_frame_param_s param;"
     "sz_t ap_cycles = 1;"
-    "func ^:set_param;"
+    "func opal_eval_frame:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func opal_eval_frame:run;"
 "}";
 
 er_t opal_eval_frame_plain_s_main( opal_eval_frame_plain_s* o, bcore_main_frame_s* frame )
@@ -2502,9 +2502,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_eval_frame_cyclic_s )
 "aware opal_eval_frame"
 "{"
     "opal_eval_frame_param_s param;"
-    "func ^:set_param;"
+    "func opal_eval_frame:set_param;"
     "func bcore_main:main;"
-    "func ^:run;"
+    "func opal_eval_frame:run;"
 "}";
 
 er_t opal_eval_frame_cyclic_s_main( opal_eval_frame_cyclic_s* o, bcore_main_frame_s* frame )
@@ -2758,14 +2758,14 @@ BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_s )
     "opal_frame_s frame;"
     "bhvm_holor_s holor_frame_en;"
     "bhvm_holor_s holor_frame_ex;"
-    "func ^:get_format_en;"
-    "func ^:get_format_ex;"
-    "func ^:axon_pass;"
-    "func ^:dendrite_pass;"
-    "func ^:cyclic_reset;"
-    "func ^:rebind_holors;"
-    "func ^:get_adaptor_probe;"
-    "func ^:status_to_sink;"
+    "func bhpt_adaptive:get_format_en;"
+    "func bhpt_adaptive:get_format_ex;"
+    "func bhpt_adaptive:axon_pass;"
+    "func bhpt_adaptive:dendrite_pass;"
+    "func bhpt_adaptive:cyclic_reset;"
+    "func bhpt_adaptive:rebind_holors;"
+    "func bhpt_adaptive:get_adaptor_probe;"
+    "func bhpt_adaptive:status_to_sink;"
 "}";
 
 bhpt_adaptor_probe_s* opal_adaptive_s_get_adaptor_probe( const opal_adaptive_s* o, bhpt_adaptor_probe_s* probe )
@@ -2797,9 +2797,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_builder_s )
     "aware => src;"
     "bhvm_holor_s holor_frame_en;"
     "bhvm_holor_s holor_frame_ex;"
-    "func ^:set_format_en;"
-    "func ^:set_format_ex;"
-    "func ^:create_adaptive;"
+    "func bhpt_builder:set_format_en;"
+    "func bhpt_builder:set_format_ex;"
+    "func bhpt_builder:create_adaptive;"
 "}";
 
 bhpt_adaptive* opal_adaptive_builder_s_create_adaptive( const opal_adaptive_builder_s* o )
@@ -2858,14 +2858,14 @@ BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_cyclic_s )
     "bhvm_holor_s holor_frame_ex;"
     "bhvm_holor_adl_s => dp_buffer;"
     "bl_t dp_value;"
-    "func ^:get_format_en;"
-    "func ^:get_format_ex;"
-    "func ^:axon_pass;"
-    "func ^:rebind_holors;"
-    "func ^:dendrite_pass;"
-    "func ^:cyclic_reset;"
-    "func ^:get_adaptor_probe;"
-    "func ^:status_to_sink;"
+    "func bhpt_adaptive:get_format_en;"
+    "func bhpt_adaptive:get_format_ex;"
+    "func bhpt_adaptive:axon_pass;"
+    "func bhpt_adaptive:rebind_holors;"
+    "func bhpt_adaptive:dendrite_pass;"
+    "func bhpt_adaptive:cyclic_reset;"
+    "func bhpt_adaptive:get_adaptor_probe;"
+    "func bhpt_adaptive:status_to_sink;"
 "}";
 
 void opal_adaptive_cyclic_s_dp_buffer_create( opal_adaptive_cyclic_s* o )
@@ -2960,9 +2960,9 @@ BCORE_DEFINE_OBJECT_INST_P( opal_adaptive_cyclic_builder_s )
     "bhvm_holor_s holor_frame_en;"
     "bhvm_holor_s holor_frame_ex;"
     "sz_t unroll_size;"
-    "func ^:set_format_en;"
-    "func ^:set_format_ex;"
-    "func ^:create_adaptive;"
+    "func bhpt_builder:set_format_en;"
+    "func bhpt_builder:set_format_ex;"
+    "func bhpt_builder:create_adaptive;"
 "}";
 
 bhpt_adaptive* opal_adaptive_cyclic_builder_s_create_adaptive( const opal_adaptive_cyclic_builder_s* o )
@@ -3032,8 +3032,8 @@ BCORE_DEFINE_OBJECT_INST_P( opal_adaptor_frame_s )
 "{"
     "aware => src;"
     "hidden opal_frame_s => frame;"
-    "func ^:reset;"
-    "func ^:adapt;"
+    "func bhpt_adaptor:reset;"
+    "func bhpt_adaptor:adapt;"
 "}";
 
 void opal_adaptor_frame_s_adapt( opal_adaptor_frame_s* o, const bhpt_adaptor_node_s* node )
@@ -3881,4 +3881,4 @@ vd_t opal_xo_signal_handler( const bcore_signal_s* o )
     }
     return NULL;
 }
-// XOILA_OUT_SIGNATURE 0xCB18BEDBC151075Eull
+// XOILA_OUT_SIGNATURE 0x319EAFFE933AC890ull
