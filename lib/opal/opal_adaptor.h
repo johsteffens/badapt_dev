@@ -48,7 +48,7 @@ stamp :frame_s = aware bhpt_adaptor
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-func (:frame) bhpt_adaptor.adapt =
+func (:frame_s) bhpt_adaptor.adapt =
 {
     if( !o.frame )
     {

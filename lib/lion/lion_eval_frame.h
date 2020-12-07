@@ -128,7 +128,7 @@ stump :std_s = aware :
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :show_param_s = extending :std
+stamp :show_param_s = extending :std_s
 {
     func : .run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
@@ -139,7 +139,7 @@ feature void set_param( mutable, const :param_s* param );
 
 stamp :arr_s = aware bcore_array { aware :=> []; };
 
-stamp :set_s = extending :std
+stamp :set_s = extending :std_s
 {
     :arr_s arr;
     func : .run =
@@ -163,14 +163,14 @@ stamp :set_s = extending :std
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :plain_s  = extending :std
+stamp :plain_s  = extending :std_s
 {
     sz_t ap_cycles = 1; // for testing
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp :cyclic_s  = extending :std
+stamp :cyclic_s  = extending :std_s
 {
 };
 

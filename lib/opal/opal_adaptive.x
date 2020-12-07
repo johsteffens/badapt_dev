@@ -18,7 +18,7 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:) bhpt_adaptive.get_adaptor_probe =
+func (:s) bhpt_adaptive.get_adaptor_probe =
 {
     probe.set_size( o.frame.get_size_ada() );
     opal_frame_s* frame = o.frame.cast( opal_frame_s* );
@@ -33,7 +33,7 @@ func (:) bhpt_adaptive.get_adaptor_probe =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:) bhpt_adaptive.status_to_sink =
+func (:s) bhpt_adaptive.status_to_sink =
 {
     if( verbosity >=  1 ) sink.push_fa( "#<sc_t>", ifnameof( o._ ) );
     if( verbosity >= 10 ) o.frame.disassemble_to_sink( sink );
@@ -41,7 +41,7 @@ func (:) bhpt_adaptive.status_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:builder) bhpt_builder.create_adaptive =
+func (:builder_s) bhpt_builder.create_adaptive =
 {
     opal_adaptive_s* adaptive = opal_adaptive_s!;
 
@@ -93,7 +93,7 @@ func (:builder) bhpt_builder.create_adaptive =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) (void dp_buffer_create( mutable )) =
+func (:cyclic_s) (void dp_buffer_create( mutable )) =
 {
     o.dp_buffer =< bhvm_holor_adl_s!;
     o.dp_buffer.set_size( o.frame.unroll_size );
@@ -106,7 +106,7 @@ func (:cyclic) (void dp_buffer_create( mutable )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) (void dp_buffer_reset( mutable )) =
+func (:cyclic_s) (void dp_buffer_reset( mutable )) =
 {
     if( !o.dp_buffer ) opal_adaptive_cyclic_s_dp_buffer_create( o );
     foreach( $* e in o.dp_buffer ) e.v.zro();
@@ -115,14 +115,14 @@ func (:cyclic) (void dp_buffer_reset( mutable )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) (void dp_buffer_apply( mutable )) =
+func (:cyclic_s) (void dp_buffer_apply( mutable )) =
 {
     o.frame.run_dp_adl_flat( o.dp_buffer, NULL );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) (void dp_buffer_apply_reset( mutable )) =
+func (:cyclic_s) (void dp_buffer_apply_reset( mutable )) =
 {
     o.dp_buffer_apply();
     o.dp_buffer_reset();
@@ -130,7 +130,7 @@ func (:cyclic) (void dp_buffer_apply_reset( mutable )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) bhpt_adaptive.dendrite_pass =
+func (:cyclic_s) bhpt_adaptive.dendrite_pass =
 {
     ASSERT( !ag_en );
 
@@ -146,7 +146,7 @@ func (:cyclic) bhpt_adaptive.dendrite_pass =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) bhpt_adaptive.cyclic_reset =
+func (:cyclic_s) bhpt_adaptive.cyclic_reset =
 {
     o.frame.cyclic_reset();
     if( o.dp_value ) o.dp_buffer_reset();
@@ -154,7 +154,7 @@ func (:cyclic) bhpt_adaptive.cyclic_reset =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) bhpt_adaptive.get_adaptor_probe =
+func (:cyclic_s) bhpt_adaptive.get_adaptor_probe =
 {
     bhpt_adaptor_probe_s_set_size( probe, o.frame.get_size_ada() );
     opal_frame_s* frame = o.frame.frame;
@@ -169,7 +169,7 @@ func (:cyclic) bhpt_adaptive.get_adaptor_probe =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic) bhpt_adaptive.status_to_sink =
+func (:cyclic_s) bhpt_adaptive.status_to_sink =
 {
     if( verbosity >=  1 ) sink.push_fa( "#<sc_t>", ifnameof( o._ ) );
     if( verbosity >= 10 ) o.frame.disassemble_to_sink( sink );
@@ -177,7 +177,7 @@ func (:cyclic) bhpt_adaptive.status_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_builder) bhpt_builder.create_adaptive =
+func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 {
     opal_adaptive_cyclic_s* adaptive = opal_adaptive_cyclic_s!;
 

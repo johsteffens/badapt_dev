@@ -112,7 +112,7 @@ stump :std_s = aware :
 };
 
 /// randomizes holors defined in param; undefined holors stay undefined
-stamp :generator_s = extending :std
+stamp :generator_s = extending :std_s
 {
     bl_t set_htp    = false;  // changes htp-state
     bl_t set_value  = false;  // sets/changes values
@@ -132,14 +132,14 @@ stamp :generator_s = extending :std
     aware : => eval;
 };
 
-stamp :show_param_s = extending :std
+stamp :show_param_s = extending :std_s
 {
     func : .run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
 
 stamp :arr_s = aware bcore_array { aware :=> []; };
 
-stamp :set_s = extending :std
+stamp :set_s = extending :std_s
 {
     :arr_s arr;
 
@@ -163,8 +163,8 @@ stamp :set_s = extending :std
     };
 };
 
-stamp :ar1_s = extending :std {};
-stamp :ar2_s = extending :std {};
+stamp :ar1_s = extending :std_s {};
+stamp :ar2_s = extending :std_s {};
 
 #endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
