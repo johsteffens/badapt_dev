@@ -98,7 +98,7 @@ bl_t opal_nop_solve__( const opal_nop* o, opal_context* context, opal_holor_s** 
             arr_ci->data[ i ].c = ( i < arity ) ? 'a' + i : 'y';
         }
 
-        result->type_vop_ap = opal_nop_a_defines_type_vop_ap( o ) ? opal_nop_a_type_vop_ap( o ) : 0;
+        result->type_vop_ap = opal_nop_defines_type_vop_ap( o ) ? opal_nop_a_type_vop_ap( o ) : 0;
         assert( result->type_vop_ap );
 
         bhvm_vop_a_run( bhvm_vop_a_set_args( BLM_A_PUSH( bhvm_vop_t_create( result->type_vop_ap ) ), arr_ci ), hbase->holor_adl.data );

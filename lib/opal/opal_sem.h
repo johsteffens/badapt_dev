@@ -210,9 +210,12 @@ signature :link_s* get_link_by_dn(    mutable, :link_s* dn );
 signature sz_t     get_index_by_link( mutable, :link_s* link ); // returns -1 if not found
 signature sz_t     count_open( const );
 
-stamp :links_s = aware bcore_array
+stamp :links_s = aware x_array
 {
     :link_s => [];
+
+    wrap x_array.set_size;
+    wrap x_array.push_d;
 
     func :.get_link_by_name =
     {
@@ -252,9 +255,11 @@ stamp :links_s = aware bcore_array
     };
 };
 
-stamp :body_s = aware bcore_array
+stamp :body_s = aware x_array
 {
     aware : => [];
+
+    wrap x_array.push_t;
 
     func :.name_exists =
     {
@@ -380,12 +385,14 @@ group :tree = :
     signature void push_parents_to_sem_id( const, ::id_s* sem_id );
     signature void get_sem_id(             const, ::id_s* sem_id );
 
-    stamp :node_s = aware bcore_array
+    stamp :node_s = aware x_array
     {
         sz_t id = -1;
         private opal_sem_cell_s -> cell;
         private :node_s -> parent; // semantic parent of cell (note that cell.parent is a lexical parent)
         :node_s => [];
+
+        wrap x_array.push_d;
 
         func :.push_parents_to_sem_id =
         {

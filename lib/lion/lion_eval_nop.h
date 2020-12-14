@@ -137,7 +137,7 @@ stamp :show_param_s = extending :std_s
     func : .run = { bcore_txt_ml_a_to_sink( &o->param, o->param.log ); return result; };
 };
 
-stamp :arr_s = aware bcore_array { aware :=> []; };
+stamp :arr_s = aware x_array { aware :=> []; };
 
 stamp :set_s = extending :std_s
 {

@@ -169,7 +169,7 @@ bl_t badapt_guide_char_encode_s_callback( const badapt_guide_char_encode_s* o, b
 {
     BLM_INIT();
     badapt_adaptive* adaptive = BLM_A_PUSH( badapt_adaptive_a_clone( badapt_training_state_a_get_adaptive( state ) ) );
-    if( badapt_adaptive_a_defines_reset( adaptive ) ) badapt_adaptive_a_reset( adaptive );
+    if( badapt_adaptive_defines_reset( adaptive ) ) badapt_adaptive_a_reset( adaptive );
     sz_t vec_size = bcore_strlen( encode_charset );
 
     bmath_vf3_s* vin  = BLM_CREATE( bmath_vf3_s );
@@ -265,7 +265,7 @@ bl_t badapt_guide_utf8_encode_s_callback( const badapt_guide_utf8_encode_s* o, b
 {
     BLM_INIT();
     badapt_adaptive* adaptive = BLM_A_PUSH( badapt_adaptive_a_clone( badapt_training_state_a_get_adaptive( state ) ) );
-    if( badapt_adaptive_a_defines_reset( adaptive ) ) badapt_adaptive_a_reset( adaptive );
+    if( badapt_adaptive_defines_reset( adaptive ) ) badapt_adaptive_a_reset( adaptive );
 
     sz_t vec_size = 256;
     bmath_vf3_s* vin = BLM_CREATE( bmath_vf3_s );

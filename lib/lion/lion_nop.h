@@ -221,7 +221,7 @@ feature sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bh
 
 feature void mcode_push_ap_track( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
-    tp_t type = ( :a_defines_type_vop_ap( o ) ) ? :a_type_vop_ap( o ) : result->type_vop_ap;
+    tp_t type = ( :defines_type_vop_ap( o ) ) ? :a_type_vop_ap( o ) : result->type_vop_ap;
     if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
 };
 
@@ -233,9 +233,9 @@ feature void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_
     tp_t type = 0;
     switch( ch_id )
     {
-        case 'a': type = ( :a_defines_type_vop_dp_a( o ) ) ? :a_type_vop_dp_a( o ) : result->type_vop_dp_a; break;
-        case 'b': type = ( :a_defines_type_vop_dp_b( o ) ) ? :a_type_vop_dp_b( o ) : result->type_vop_dp_b; break;
-        case 'c': type = ( :a_defines_type_vop_dp_c( o ) ) ? :a_type_vop_dp_c( o ) : result->type_vop_dp_c; break;
+        case 'a': type = ( :defines_type_vop_dp_a( o ) ) ? :a_type_vop_dp_a( o ) : result->type_vop_dp_a; break;
+        case 'b': type = ( :defines_type_vop_dp_b( o ) ) ? :a_type_vop_dp_b( o ) : result->type_vop_dp_b; break;
+        case 'c': type = ( :defines_type_vop_dp_c( o ) ) ? :a_type_vop_dp_c( o ) : result->type_vop_dp_c; break;
         default: ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     }
     if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_dp, bhvm_vop_t_create( type ), arr_ci );

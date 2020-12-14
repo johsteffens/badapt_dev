@@ -89,7 +89,11 @@ group :hidx =
 
     };
 
-    stamp :ads_s = aware bcore_array { :s []; };
+    stamp :ads_s = aware x_array
+    {
+        :s [];
+        wrap x_array.push_c;
+    };
 };
 
 /// frame member functions

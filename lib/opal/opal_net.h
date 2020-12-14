@@ -33,7 +33,13 @@ XOILA_DEFINE_GROUP( opal_net, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 stamp :link_s  = aware : { private aware :node_s* node; };
-stamp :links_s = aware bcore_array { :link_s => []; };
+stamp :links_s = aware x_array
+{
+    :link_s => [];
+    wrap x_array.clear;
+    wrap x_array.push_d;
+    wrap x_array.push;
+};
 
 signature void solve( mutable );
 
@@ -99,11 +105,15 @@ stamp :node_s = aware :
     func :.is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
 };
 
-stamp :node_adl_s = aware bcore_array { :node_s => []; };
+stamp :node_adl_s = aware x_array
+{
+    :node_s => [];
+    wrap x_array.push_d;
+};
 
 signature :node_s* get_by_id( mutable, sz_t id );
 
-stamp :nodes_s = aware bcore_array
+stamp :nodes_s = aware x_array
 {
     :node_s => [];
     func :.get_by_id =
@@ -111,6 +121,10 @@ stamp :nodes_s = aware bcore_array
         foreach( $* e in o ) if( e.id == id ) return e;
         return NULL;
     };
+
+    wrap x_array.set_size;
+    wrap x_array.push;
+    wrap x_array.push_d;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
