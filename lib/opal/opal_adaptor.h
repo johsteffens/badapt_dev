@@ -38,7 +38,7 @@ XOILA_DEFINE_GROUP( opal_adaptor, bcore_inst )
 stamp :frame_s = aware bhpt_adaptor
 {
     /// source should define cell ( axon_out, grad_out <- axon_in, grad_in ) { ... };
-    aware => src; // source (bcore_file_path_s or st_s with inline code)
+    aware x_inst => src; // source (bcore_file_path_s or st_s with inline code)
 
     hidden opal_frame_s => frame;
 
@@ -54,17 +54,17 @@ func (:frame_s) bhpt_adaptor.adapt =
     {
         bcore_source* source = NULL;
 
-        switch( *(aware_t*)o.src )
+        switch( o.src._ )
         {
             case TYPEOF_bcore_file_path_s:
             {
-                source = scope( cast( bcore_file_open_source_path( cast( o.src, const bcore_file_path_s* ) ), bcore_source* ), source );
+                source = bcore_file_open_source_path( o.src.cast( const bcore_file_path_s* ) ).scope();
             }
             break;
 
             case TYPEOF_st_s:
             {
-                source = scope( cast( bcore_source_string_s_create_from_string( cast( o.src, const st_s* ) ), bcore_source* ), source );
+                source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( bcore_source* ).scope();
             }
             break;
 

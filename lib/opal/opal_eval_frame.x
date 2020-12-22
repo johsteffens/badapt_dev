@@ -26,9 +26,9 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( mutable, const bhvm_holo
 {
     ASSERT( o.is_setup );
 
-    bhvm_holor_adl_s* adl_en = scope( en.clone(), scope_func );
-    bhvm_holor_adl_s* adl_ex = scope( bhvm_holor_adl_s!, scope_func );
-    bhvm_holor_adl_s* adl_rf = scope( bhvm_holor_adl_s!, scope_func );
+    bhvm_holor_adl_s* adl_en = en.clone().scope();
+    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!.scope();
+    bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!.scope();
     o.run_ap_adl( adl_en, adl_ex );
     adl_rf.copy( adl_ex );
 
@@ -77,7 +77,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( mutable, const bhvm_holo
 
 func (opal_frame_s) (void estimate_jacobian_en( const, const bhvm_holor_adl_s* en, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl )) =
 {
-    scope( o.clone() ).mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
+    o.clone().scope().mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( mutable, const bhvm_hol
 {
     ASSERT( o.is_setup );
 
-    bhvm_holor_adl_s* adl_ex = scope( bhvm_holor_adl_s!, scope_func );
+    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!.scope();
     o.run_ap_adl( adl_en, adl_ex );
 
     sz_t size_ada = o.hidx_ada.get_size();
@@ -139,7 +139,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( mutable, const bhvm_hol
 
 func (opal_frame_s) (void estimate_jacobian_ada( const, const bhvm_holor_adl_s* adl_en, f3_t epsilon, bhvm_holor_mdl_s* jac_mdl )) =
 {
-    scope( o.clone(), scope_func ).mutable_estimate_jacobian_ada( adl_en, epsilon, jac_mdl );
+    o.clone().scope().mutable_estimate_jacobian_ada( adl_en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -153,45 +153,45 @@ func (:plain_s) :.run =
     bcore_sink* log = o.param.log;
     sz_t verbosity = o.param.verbosity;
 
-    switch( *(aware_t*)o.param.src )
+    switch( o.param.src._ )
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = scope( cast( bcore_file_open_source_path( cast( o.param.src, const bcore_file_path_s* ) ), bcore_source* ), source );
+            source = bcore_file_open_source_path( o.param.src.cast( const bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = scope( cast( bcore_source_string_s_create_from_string( cast( o.param.src, const st_s* ) ), bcore_source* ), source );
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( const st_s* ) ).cast( bcore_source* ).scope();
         }
         break;
 
         default:
         {
-            ERR_fa( "Invalid source type '#<sc_t>'.", ifnameof( *(aware_t*)o.param.src ) );
+            ERR_fa( "Invalid source type '#<sc_t>'.", ifnameof( o.param.src._ ) );
         }
         break;
     }
 
     const bhvm_holor_adl_s* adl_ap_en = o.param.in;
-          bhvm_holor_adl_s* adl_ap_ex = scope( bhvm_holor_adl_s!, scope_func );
+          bhvm_holor_adl_s* adl_ap_ex = bhvm_holor_adl_s!.scope();
 
-    opal_frame_s* frame0 = scope( opal_frame_s!, scope_func );
-    if( verbosity >= 20 ) frame0.log = fork( log );
+    opal_frame_s* frame0 = opal_frame_s!.scope();
+    if( verbosity >= 20 ) frame0.log = log.fork();
 
     frame0.setup_from_source_adl( source, adl_ap_en );
 
     /// test frame recovery/copying
     if( o.param.recovery_test )
     {
-        opal_frame_s* frame1 = scope( opal_frame_s!, scope_func );
+        opal_frame_s* frame1 = opal_frame_s!.scope();
         bcore_bin_ml_a_copy( frame1, frame0 );
         frame0 = frame1;
     }
 
     /// test copying
-    opal_frame_s* frame = scope( frame0.clone(), scope_func );
+    opal_frame_s* frame = frame0.clone().scope();
 
     if( frame.size_en > 0 )
     {
@@ -230,7 +230,7 @@ func (:plain_s) :.run =
             bl_t value_dev = shape_dev || ( h_out.v.fdev_equ( &h_hbo.v ) > o.param.max_dev );
             if( shape_dev || value_dev )
             {
-                st_s* msg = scope( st_s!, msg );
+                st_s* msg = st_s!.scope( msg );
                 bcore_sink* sink = cast( msg, bcore_sink* );
                 sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
                 sink.push_fa( "\n#p20.{Frame output} " );
@@ -263,13 +263,13 @@ func (:plain_s) :.run =
 
         if( verbosity >= 10 ) log.push_fa( "\nJacobian DP Test:\n" );
 
-        bhvm_holor_adl_s* adl_dp_en = scope( adl_ap_en.clone(), scope_local );
-        bhvm_holor_adl_s* adl_dp_ex = scope( adl_ap_ex.clone(), scope_local );
+        bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone().scope();
+        bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex.clone().scope();
         foreach( $* e in adl_dp_en ) e.zro();
 
         foreach( $* e in adl_dp_ex )
         {
-            e.v.set_random_u3( 1.0, -1, 1, &rval );
+            e.v.set_random_u3( 1.0, -1, 1, rval.1 );
             if( verbosity >= 10 )
             {
                 log.push_fa( "Gradient exc #<sz_t>: ", __i );
@@ -280,7 +280,7 @@ func (:plain_s) :.run =
         frame.run_dp_adl( adl_dp_ex, adl_dp_en );
 
         sz_t size_ex = frame.get_size_ex();
-        bhvm_holor_mdl_s* mdl_jc = scope( bhvm_holor_mdl_s!, scope_local );
+        bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!.scope();
 
         /// testing entry channels
         if( frame.get_size_en() )
@@ -293,7 +293,7 @@ func (:plain_s) :.run =
                 if( verbosity >= 10 ) log.push_fa( "enc #<sz_t>:\n", i );
 
                 bhvm_holor_s* dp_en1 = adl_dp_en.[ i ];
-                bhvm_holor_s* dp_en2 = scope( bhvm_holor_s!, scope_local ).copy_vector_isovol( dp_en1 );
+                bhvm_holor_s* dp_en2 = bhvm_holor_s!.scope( scope_local ).copy_vector_isovol( dp_en1 );
                 dp_en2.v.zro();
 
                 for( sz_t j = 0; j < size_ex; j++ )
@@ -308,7 +308,7 @@ func (:plain_s) :.run =
                     }
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex.[ j ];
-                    bhvm_holor_s* dp_ex2 = scope( bhvm_holor_s!, scope_local ).fork_from_vector_isovol( dp_ex1 );
+                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!.scope( scope_local ).fork_from_vector_isovol( dp_ex1 );
 
                     opal_frame_sc_run_ap
                     (
@@ -326,7 +326,7 @@ func (:plain_s) :.run =
 
                 if( error || verbosity >= 10 )
                 {
-                    st_s* st = scope( st_s!, scope_local );
+                    st_s* st = st_s!.scope( scope_local );
                     st.push_fa( "dp-channel: #<sz_t>", i );
                     st.push_fa( ", dev: #<f3_t>", dev );
                     st.push_fa( "\ngradient (dp)          : " );
@@ -361,7 +361,7 @@ func (:plain_s) :.run =
                 if( verbosity >= 10 ) log.push_fa( "adc #<sz_t>:\n", i );
 
                 const bhvm_holor_s* dp_ada1 = frame.get_dp_ada( i );
-                bhvm_holor_s* dp_ada2 = scope( bhvm_holor_s!, scope_local ).copy_vector_isovol( dp_ada1 );
+                bhvm_holor_s* dp_ada2 = bhvm_holor_s!.scope( scope_local ).copy_vector_isovol( dp_ada1 );
                 dp_ada2.v.zro();
 
                 for( sz_t j = 0; j < size_ex; j++ )
@@ -376,7 +376,7 @@ func (:plain_s) :.run =
                     }
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex.[ j ];
-                    bhvm_holor_s* dp_ex2 = scope( bhvm_holor_s!, scope_local ).fork_from_vector_isovol( dp_ex1 );
+                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!.scope( scope_local ).fork_from_vector_isovol( dp_ex1 );
 
                     opal_frame_sc_run_ap
                     (
@@ -394,13 +394,13 @@ func (:plain_s) :.run =
 
                 if( error || verbosity >= 10 )
                 {
-                    st_s* st = scope( st_s!, scope_local );
+                    st_s* st = st_s!.scope( scope_local );
                     st.push_fa( "dp-channel: #<sz_t>", i );
                     st.push_fa( ", dev: #<f3_t>", dev );
                     st.push_fa( "\ngradient (dp)          : " );
-                    dp_ada1.to_sink( cast( st, bcore_sink* ) );
+                    dp_ada1.to_sink( st.cast( bcore_sink* ) );
                     st.push_fa( "\ngradient (via jacobian): " );
-                    dp_ada2.to_sink( cast( st, bcore_sink* ) );
+                    dp_ada2.to_sink( st.cast( bcore_sink* ) );
                     st.push_fa( "\n" );
                     if( error )
                     {
@@ -502,17 +502,17 @@ func (:cyclic_s) :.run =
 
     bcore_source* source = NULL;
 
-    switch( *(aware_t*)o.param.src )
+    switch( o.param.src._ )
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = cast( bcore_file_open_source_path( o.param.src.cast( const bcore_file_path_s* ) ), bcore_source* ).scope();
+            source = bcore_file_open_source_path( o.param.src.cast( const bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = cast( bcore_source_string_s_create_from_string( o.param.src.cast( const st_s* ) ), bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( const st_s* ) ).cast( bcore_source* ).scope();
         }
         break;
 
@@ -578,7 +578,7 @@ func (:cyclic_s) :.run =
             if( shape_dev || value_dev )
             {
                 st_s* msg = st_s!.scope( scope_local );
-                bcore_sink* sink = msg.cast( bcore_sink* );
+                bcore_sink* sink = msg;
                 sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
                 sink.push_fa( "\n#p20.{frame_cyclic output} " );
                 h_ex1.brief_to_sink( sink );
@@ -603,7 +603,7 @@ func (:cyclic_s) :.run =
             if( shape_dev || value_dev )
             {
                 st_s* msg = st_s!.scope( scope_local );
-                bcore_sink* sink = msg.cast( bcore_sink* );
+                bcore_sink* sink = msg;
                 sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
                 sink.push_fa( "\n#p20.{Output (frame_cyclic)} " );
                 h_ex1.brief_to_sink( sink );

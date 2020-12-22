@@ -88,8 +88,6 @@ stamp :node_s = aware :
 
     hidden bcore_source_point_s -> source_point;
 
-    //func :.solve;
-
     func :.up_index =
     {
         foreach( $* e in o.upls ) if( e.node == node ) return __i;
@@ -103,6 +101,9 @@ stamp :node_s = aware :
     };
 
     func :.is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
+
+    /// Provides necessary mcode and holor data for isolated nodes that do not actively participate in computing an output
+    func (void isolated_mcode_push( mutable, bhvm_mcode_frame_s* mcf ));
 };
 
 stamp :node_adl_s = aware x_array
@@ -125,6 +126,7 @@ stamp :nodes_s = aware x_array
     wrap x_array.set_size;
     wrap x_array.push;
     wrap x_array.push_d;
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -175,6 +177,11 @@ stamp :cell_s = aware :
 
     // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
     func bcore_via_call.mutated = { ERR_fa( "Cannot reconstitute." ); };
+
+    func (void graph_to_sink( mutable, bcore_sink* sink ));
+    func (void mcode_push_ap( mutable, bhvm_mcode_frame_s* mcf ));
+    func (void mcode_push_dp( mutable, bhvm_mcode_frame_s* mcf, bl_t entry_channels ));
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,9 +222,6 @@ group :builder = :
 /**********************************************************************************************************************/
 /// node
 
-/// Provides necessary mcode and holor data for isolated nodes that do not actively participate in computing an output
-void opal_net_node_s_isolated_mcode_push( opal_net_node_s* o, bhvm_mcode_frame_s* mcf );
-
 /**********************************************************************************************************************/
 /// cell
 
@@ -232,10 +236,6 @@ void opal_net_cell_s_from_sem_cell
     vd_t arg,
     bcore_sink* log
 );
-
-void opal_net_cell_s_graph_to_sink( opal_net_cell_s* o, bcore_sink* sink );
-void opal_net_cell_s_mcode_push_ap( opal_net_cell_s* o, bhvm_mcode_frame_s* mcf );
-void opal_net_cell_s_mcode_push_dp( opal_net_cell_s* o, bhvm_mcode_frame_s* mcf, bl_t entry_channels );
 
 #endif // TYPEOF_opal_net
 

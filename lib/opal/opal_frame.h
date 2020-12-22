@@ -30,9 +30,9 @@
 /**********************************************************************************************************************/
 
 XOILA_DEFINE_GROUP( opal_frame, bcore_inst )
-#ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef XOILA_SECTION
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 /// holor indexing group
 group :hidx =
@@ -58,8 +58,8 @@ group :hidx =
         func :.clear     = { if( o.arr ) o.arr.clear(); return o; };
         func :.push      = { o.arr!.push( index ); return o; };
 
-        func :.get_idx   = { assert( index >= 0 && index < o.arr->size ); return o.arr?.[ index ]; };
-        func :.get_size  = { return o.arr ? o.arr->size : 0; };
+        func :.get_idx   = { assert( index >= 0 && index < o.arr.size ); return o.arr?.[ index ]; };
+        func :.get_size  = { return o.arr ? o.arr.size : 0; };
         func :.get_holor = { return hbase.get_holor( o.get_idx( index ) ); };
         func :.get_hmeta = { return hbase.get_hmeta( o.get_idx( index ) ); };
 
@@ -92,6 +92,8 @@ group :hidx =
         wrap x_array.push_c;
     };
 };
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 /// frame member functions
 
@@ -128,6 +130,10 @@ signature @* run_ap(     mutable, const bhvm_holor_s** en, sz_t size_en, bhvm_ho
 signature @* run_dp(     mutable, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en );
 signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex ); // allocates out
 signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en ); // allocates out
+
+signature void disassemble_to_sink( const, bcore_sink* sink );
+signature void cyclic_reset( mutable );
+
 
 /** Explicitly re-binds holors (typically by running setup tracks).
  *  This can be necessary when certain holors have been externally reallocated.
@@ -182,7 +188,12 @@ stamp :s = aware :
         o.is_setup = true;
     };
 
-    func :.check_integrity;
+    func :.check_integrity =
+    {
+        assert( o.context );
+        assert( o.mcf );
+        o.mcf.check_integrity();
+    };
 
     /// shelving/reconstitution
     func bcore_via_call  . shelve  = { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
@@ -191,17 +202,17 @@ stamp :s = aware :
 
     /// frame setup from string or source; 'in' can be NULL
     func :.setup_from_source;
-    func :.setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, o.setup_from_source( BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en, size_en ) ); };
-    func :.setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en, size_en ); };
-    func :.create_from_source     = { return (@!).setup_from_source( source, en, size_en ); };
-    func :.create_from_st         = { return (@!).setup_from_st(     st,     en, size_en ); };
-    func :.create_from_sc         = { return (@!).setup_from_sc(     sc,     en, size_en ); };
-    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
-    func :.setup_from_st_adl      = { return o.setup_from_st(     st,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
-    func :.setup_from_sc_adl      = { return o.setup_from_sc(     sc,     en ? ( const bhvm_holor_s** )en.data : NULL, en ? en.size : 0 ); };
-    func :.create_from_source_adl = { return (@!).setup_from_source_adl( source, en ); };
-    func :.create_from_st_adl     = { return (@!).setup_from_st_adl(         st, en ); };
-    func :.create_from_sc_adl     = { return (@!).setup_from_sc_adl(         sc, en ); };
+    func :.setup_from_st = { return o.setup_from_source( bcore_source_string_s_create_from_string( st ).scope(), en, size_en ); };
+    func :.setup_from_sc = { return o.setup_from_st( st_s_create_sc( sc ).scope(), en, size_en ); };
+    func :.create_from_source     = { return @!.setup_from_source( source, en, size_en ); };
+    func :.create_from_st         = { return @!.setup_from_st( st, en, size_en ); };
+    func :.create_from_sc         = { return @!.setup_from_sc( sc, en, size_en ); };
+    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? en.data.cast( const bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_st_adl      = { return o.setup_from_st( st, en ? en.data.cast( const bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_sc_adl      = { return o.setup_from_sc( sc, en ? en.data.cast( const bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.create_from_source_adl = { return @!.setup_from_source_adl( source, en ); };
+    func :.create_from_st_adl     = { return @!.setup_from_st_adl( st, en ); };
+    func :.create_from_sc_adl     = { return @!.setup_from_sc_adl( sc, en ); };
 
     func :.get_size_en  = { return o.hidx_en .get_size(); };
     func :.get_size_ex  = { return o.hidx_ex .get_size(); };
@@ -214,13 +225,24 @@ stamp :s = aware :
     func :.get_ap_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
     func :.get_dp_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
 
+    func (@* run( mutable, tp_t track )) =
+    {
+        ASSERT( o->mcf );
+        o.mcf.track_run( track );
+        return o;
+    };
+
+    /// resets all cyclic values to the initialization value
+    func :.cyclic_reset = { o.mcf.track_run( TYPEOF_track_ap_cyclic_reset ); };
+
     func :.run_ap;
     func :.run_dp;
     func :.run_ap_adl;
     func :.run_dp_adl;
+    func :.disassemble_to_sink;
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 stamp :custom_hmeta_s = aware :
 {
@@ -228,7 +250,15 @@ stamp :custom_hmeta_s = aware :
     sz_t ur_src;
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
+
+signature void setup_from_frame( mutable, const opal_frame_s* frame, sz_t unroll_size );
+
+/// resets cyclic values; runs track_ap for all slots assuming all input/output holors are provided in sequence
+signature void run_ap_adl_flat( mutable, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
+
+/// runs track_dp for all slots assuming all input/output holors are provided in sequence
+signature void run_dp_adl_flat( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en );
 
 /// frame specialized in unrolling cyclic networks
 stamp :cyclic_s = aware :
@@ -272,32 +302,41 @@ stamp :cyclic_s = aware :
 
     func :.run_ap;
     func :.run_ap_adl;
+    func :.run_ap_adl_flat;
+    func :.run_dp_adl_flat;
+
+    func :.setup_from_frame;
+
+    func :.disassemble_to_sink;
+
+    /// resets all cyclic values to the initialization value
+    func :.cyclic_reset =
+    {
+        o.frame.mcf.track_run( TYPEOF_track_ap_cyclic_reset );
+        o.unroll_index = 0;
+    };
+
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
-#endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+func (void sc_run_ap( sc_t sc, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex )) =
+{
+    opal_frame_s_create_from_sc( sc, en, size_en ).scope().run_ap( en, size_en, ex, size_ex );
+};
 
-void opal_frame_sc_run_ap( sc_t sc, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex );
-void opal_frame_sc_run_dp( sc_t sc, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en );
+// ---------------------------------------------------------------------------------------------------------------------
 
-/// resets all cyclic values to the initialization value
-void opal_frame_s_cyclic_reset( opal_frame_s* o );
+func (void sc_run_dp( sc_t sc, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en )) =
+{
+    opal_frame_s_create_from_sc( sc, ex, size_ex ).scope().run_dp( ex, size_ex, en, size_en );
+};
 
-void opal_frame_s_disassemble_to_sink( const opal_frame_s* o, bcore_sink* sink );
+// ---------------------------------------------------------------------------------------------------------------------
 
-void opal_frame_cyclic_s_setup_from_frame( opal_frame_cyclic_s* o, const opal_frame_s* frame, sz_t unroll_size );
+embed "opal_frame.x";
 
-void opal_frame_cyclic_s_disassemble_to_sink( const opal_frame_cyclic_s* o, bcore_sink* sink );
-
-/// resets all cyclic values to the initialization
-void opal_frame_cyclic_s_cyclic_reset( opal_frame_cyclic_s* o );
-
-/// resets cyclic values; runs track_ap for all slots assuming all input/output holors are provided in sequence
-void opal_frame_cyclic_s_run_ap_adl_flat( opal_frame_cyclic_s* o, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex );
-
-///  runs track_dp for all slots assuming all input/output holors are provided in sequence
-void opal_frame_cyclic_s_run_dp_adl_flat( opal_frame_cyclic_s* o, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en );
+#endif // XOILA_SECTION
 
 /**********************************************************************************************************************/
 

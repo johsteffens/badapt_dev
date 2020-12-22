@@ -43,7 +43,7 @@ stamp :meta_s = aware bhvm_mcode_hmeta
     tp_t name;
 
     // opal_sem_id_s
-    aware bcore_inst => sem_id;
+    aware x_inst => sem_id;
 
     /// pass-class (see bhvm_mcode_hmeta)
     tp_t pclass;
@@ -80,27 +80,28 @@ stamp :s = aware :
     :meta_s      m;
     bhvm_holor_s h;
     func bcore_fp .copy_typed;
+
+    func (void to_sink(      const, bcore_sink* sink ));
+    func (void to_sink_nl(   const, bcore_sink* sink )); // appends newline
+    func (void to_stdout(    const ));
+    func (void to_stdout_nl( const )); // appends newline
+
+    /** compacted version, single line */
+    func (void brief_to_sink( const, bcore_sink* sink ));
+    func (void brief_to_stdout( const ));
+
+    /** multiline version */
+    func (void formatted_to_sink( const, bcore_sink* sink ));
+    func (void formatted_to_stdout( const ));
+
+    /// sets holor from text source
+    func (void parse( mutable, bcore_source* source ));
+
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-void opal_holor_s_to_sink(      const opal_holor_s* o, bcore_sink* sink );
-void opal_holor_s_to_sink_nl(   const opal_holor_s* o, bcore_sink* sink ); // appends newline
-void opal_holor_s_to_stdout(    const opal_holor_s* o );
-void opal_holor_s_to_stdout_nl( const opal_holor_s* o ); // appends newline
-
-/** compacted version, single line */
-void opal_holor_s_brief_to_sink(       const opal_holor_s* o, bcore_sink* sink );
-void opal_holor_s_brief_to_stdout(     const opal_holor_s* o );
-
-/** multiline version */
-void opal_holor_s_formatted_to_sink(   const opal_holor_s* o, bcore_sink* sink );
-void opal_holor_s_formatted_to_stdout( const opal_holor_s* o );
-
-/// sets holor from text source
-void opal_holor_s_parse( opal_holor_s* o, bcore_source* source );
 
 /**********************************************************************************************************************/
 

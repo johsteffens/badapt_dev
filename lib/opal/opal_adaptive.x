@@ -21,12 +21,11 @@
 func (:s) bhpt_adaptive.get_adaptor_probe =
 {
     probe.set_size( o.frame.get_size_ada() );
-    opal_frame_s* frame = o.frame.cast( opal_frame_s* );
-    ASSERT( frame.is_setup );
+    ASSERT( o.frame.is_setup );
     foreach( $* e in probe )
     {
-        e.axon = frame.get_ap_ada(__i);
-        e.grad = frame.get_dp_ada(__i);
+        e.axon = o.frame.cast($*).get_ap_ada(__i);
+        e.grad = o.frame.cast($*).get_dp_ada(__i);
     }
     return probe;
 };
@@ -47,17 +46,17 @@ func (:builder_s) bhpt_builder.create_adaptive =
 
     bcore_source* source = NULL;
 
-    switch( *cast( o.src, aware_t* ) )
+    switch( o.src._ )
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = scope( cast( bcore_file_open_source_path( cast( o.src, const bcore_file_path_s* ) ), bcore_source* ), source );
+            source = bcore_file_open_source_path( o.src.cast( const bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = scope( cast( bcore_source_string_s_create_from_string( cast( o.src, const st_s* ) ), bcore_source* ), source );
+            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).scope().cast( bcore_source* );
         }
         break;
 
@@ -73,7 +72,8 @@ func (:builder_s) bhpt_builder.create_adaptive =
 
     opal_frame_s* frame = adaptive.frame;
     const bhvm_holor_s* holor_frame_en = o.holor_frame_en;
-    frame.setup_from_source( source, ( const bhvm_holor_s** )&holor_frame_en, 1 );
+
+    frame.setup_from_source( source, holor_frame_en, 1 );
 
     ASSERT( frame.get_size_en() == 1 );
     ASSERT( frame.get_size_ex() == 1 );
@@ -81,9 +81,9 @@ func (:builder_s) bhpt_builder.create_adaptive =
     ASSERT( o.holor_frame_en.s.is_equal( &frame.get_ap_en(0).s ) );
     ASSERT( o.holor_frame_ex.s.get_volume() == frame.get_ap_ex(0).s.get_volume() );
 
-    adaptive.src = bcore_fork( o.src );
+    adaptive.src = o.src.fork();
 
-    return (bhpt_adaptive*)adaptive;
+    return adaptive;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -183,17 +183,17 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 
     bcore_source* source = NULL;
 
-    switch( *(aware_t*)o.src )
+    switch( o.src._ )
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = scope( cast( bcore_file_open_source_path( cast( o.src, const bcore_file_path_s* ) ), bcore_source* ), source );
+            source = bcore_file_open_source_path( o.src.cast( const bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = scope( cast( bcore_source_string_s_create_from_string( cast( o.src, const st_s* ) ), bcore_source* ), source );
+            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( bcore_source* ).scope();
         }
         break;
 
@@ -207,22 +207,21 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
     adaptive.holor_frame_en.copy( o.holor_frame_en );
     adaptive.holor_frame_ex.copy( o.holor_frame_ex );
 
-    opal_frame_s* frame = scope( opal_frame_s!, scope_local );
+    opal_frame_s* frame = opal_frame_s!.scope();
     const bhvm_holor_s* holor_frame_en = o.holor_frame_en;
-    frame.setup_from_source( source, cast( holor_frame_en, const bhvm_holor_s** ), 1 );
+    frame.setup_from_source( source, holor_frame_en, 1 );
 
     ASSERT( frame.get_size_en() == 1 );
     ASSERT( frame.get_size_ex() == 1 );
 
-    ASSERT( o.holor_frame_en.s.is_equal( &frame.get_ap_en(0).s ) );
+    ASSERT( o.holor_frame_en.s.is_equal( frame.get_ap_en(0).s.1 ) );
     ASSERT( o.holor_frame_ex.s.get_volume() == frame.get_ap_ex(0).s.get_volume() );
 
-    adaptive.src = bcore_fork( o.src );
+    adaptive.src = o.src.fork();
 
-    opal_frame_cyclic_s* frame_cyclic = adaptive.frame;
-    frame_cyclic.setup_from_frame( frame, o.unroll_size );
+    adaptive.frame.setup_from_frame( frame, o.unroll_size );
 
-    return ( bhpt_adaptive* )adaptive;
+    return adaptive;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------

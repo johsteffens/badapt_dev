@@ -163,7 +163,7 @@ static void disassemble_track_to_sink( const bhvm_mcode_track_s* track, sz_t ind
     {
         bcore_sink_a_push_fa( sink, "#rn{ }", indent );
         bhvm_vop* vop = track->data[ i ].vop;
-        bhvm_vop_a_to_sink( vop, sink );
+        bhvm_vop_to_sink( vop, sink );
         bcore_sink_a_push_fa( sink, "\n" );
     }
 }

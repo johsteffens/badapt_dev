@@ -70,7 +70,7 @@ stamp :param_s = aware bcore_inst
     u3_t rval = 1234; // for random generators
 
     st_s name;               // name of test (only for logging)
-    aware bcore_inst => src; // source (bcore_file_path_s or st_s with inline code)
+    aware x_inst => src; // source (bcore_file_path_s or st_s with inline code)
 
     bhvm_holor_adl_s => in;  // input holors
     bhvm_holor_adl_s => out; // expected output holors (if NULL, output is sent to log)
