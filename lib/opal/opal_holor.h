@@ -29,9 +29,12 @@
 /**********************************************************************************************************************/
 
 XOILA_DEFINE_GROUP( opal_holor, bcore_inst )
-#ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef XOILA_SECTION
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 signature void clear( mutable );
+signature void parse( mutable, bcore_source* source );
 
 stamp :meta_s = aware bhvm_mcode_hmeta
 {
@@ -79,29 +82,57 @@ stamp :s = aware :
 {
     :meta_s      m;
     bhvm_holor_s h;
-    func bcore_fp .copy_typed;
+    func bcore_fp.copy_typed;
 
-    func (void to_sink(      const, bcore_sink* sink ));
-    func (void to_sink_nl(   const, bcore_sink* sink )); // appends newline
-    func (void to_stdout(    const ));
-    func (void to_stdout_nl( const )); // appends newline
+    func (void to_sink( const, bcore_sink* sink )) =
+    {
+        if( !o.m.active ) sink.push_fa( "<const>" );
+        if( o.m.htp ) sink.push_fa( "<htp>" );
+        o.h.to_sink( sink );
+    };
+
+    // appends newline
+    func (void to_sink_nl( const, bcore_sink* sink )) =
+    {
+        o.to_sink( sink );
+        sink.push_fa( "\n" );
+    };
+
+    func (void to_stdout( const )) = { o.to_sink( BCORE_STDOUT ); };
+
+    // appends newline
+    func (void to_stdout_nl( const )) = { o.to_sink_nl( BCORE_STDOUT ); };
 
     /** compacted version, single line */
-    func (void brief_to_sink( const, bcore_sink* sink ));
-    func (void brief_to_stdout( const ));
+    func (void brief_to_sink( const, bcore_sink* sink )) =
+    {
+        sink.push_fa( o.m.active ? "<active>" : "<const>" );
+        if( o.m.htp ) sink.push_fa( "<htp>" );
+        o.h.brief_to_sink( sink );
+    };
+
+    func (void brief_to_stdout( const )) = { o.brief_to_sink( BCORE_STDOUT ); };
 
     /** multiline version */
-    func (void formatted_to_sink( const, bcore_sink* sink ));
-    func (void formatted_to_stdout( const ));
+    func (void formatted_to_sink( const, bcore_sink* sink )) =
+    {
+        sink.push_fa( o.m.active ? "<active>" : "<const>" );
+        if( o.m.htp ) sink.push_fa( "<htp>(" );
+        o.h.formatted_to_sink( sink );
+        if( o.m.htp ) sink.push_fa( ")" );
+    };
+
+    func (void formatted_to_stdout( const )) = { o.formatted_to_sink( BCORE_STDOUT ); };
 
     /// sets holor from text source
-    func (void parse( mutable, bcore_source* source ));
-
+    func :.parse;
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
-#endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+embed "opal_holor.x";
+
+#endif // XOILA_SECTION
 
 /**********************************************************************************************************************/
 

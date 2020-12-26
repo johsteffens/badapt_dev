@@ -30,7 +30,7 @@
 #ifdef TYPEOF_opal_net
 
 XOILA_DEFINE_GROUP( opal_net, bcore_inst )
-#ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef XOILA_SECTION
 
 stamp :link_s  = aware : { private aware :node_s* node; };
 stamp :links_s = aware x_array
@@ -47,9 +47,21 @@ signature void solve( mutable );
 signature sz_t up_index( const, const :node_s* node );
 signature void set_nop_d( mutable, opal_nop* nop );
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 feature bl_t is_cyclic( const ) = { return false; };
+
+signature void mcode_push_ap(               mutable, bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_ap_phase0( mutable, bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_ap_phase1( mutable, bhvm_mcode_frame_s* mcf );
+
+signature void mcode_push_dp(               mutable, sz_t up_index, bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_dp_phase0( mutable, sz_t up_index, bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_dp_phase1( mutable,                bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_dp_phase2( mutable,                bhvm_mcode_frame_s* mcf );
+
+/// Provides necessary mcode and holor data for isolated nodes that do not actively participate in computing an output
+signature void isolated_mcode_push( mutable, bhvm_mcode_frame_s* mcf );
 
 stamp :node_s = aware :
 {
@@ -102,8 +114,53 @@ stamp :node_s = aware :
 
     func :.is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
 
-    /// Provides necessary mcode and holor data for isolated nodes that do not actively participate in computing an output
-    func (void isolated_mcode_push( mutable, bhvm_mcode_frame_s* mcf ));
+    /// s. opal_nop_solve_node__
+    func (void solve( mutable, opal_net_node_adl_s* deferred )) =
+    {
+        if( !o->nop ) o.err_fa( "Node has no operator." );
+        o.nop.solve_node( o, deferred );
+    };
+
+    /// Outputs the graph structure in text form to sink
+    func (void graph_to_sink( const, bcore_sink* sink )) = { o.trace_to_sink( 0, sink ); sink.push_fa( "\n" ); };
+
+    /** Recursively sets downlinks for all non-flagged uplinks.
+     *  Assumes initial state was normal.
+     */
+    func (void set_downlinks( mutable )) =
+    {
+        if( !o.flag )
+        {
+            o.flag = true;
+            foreach( $* e in o.upls )
+            {
+                e.node.dnls.push().node = o;
+                e.node.set_downlinks();
+            }
+        }
+    };
+
+    /** Recursively sets flags for all nodes reachable via uplink.
+     *  Assumes initial state was normal.
+     */
+    func (void set_flags( mutable )) =
+    {
+        if( !o.flag )
+        {
+            o.flag = true;
+            foreach( $* e in o->upls ) e.node.set_flags();
+        }
+    };
+
+    func :.mcode_push_ap;
+    func :.cyclic_mcode_push_ap_phase0;
+    func :.cyclic_mcode_push_ap_phase1;
+    func :.isolated_mcode_push;
+
+    func :.mcode_push_dp;
+    func :.cyclic_mcode_push_dp_phase0;
+    func :.cyclic_mcode_push_dp_phase1;
+    func :.cyclic_mcode_push_dp_phase2;
 };
 
 stamp :node_adl_s = aware x_array
@@ -126,10 +183,9 @@ stamp :nodes_s = aware x_array
     wrap x_array.set_size;
     wrap x_array.push;
     wrap x_array.push_d;
-
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 signature void normalize( mutable );
 signature void clear_flags( mutable ); /// clears flags
@@ -164,7 +220,12 @@ stamp :cell_s = aware :
         }
     };
 
-    func :.solve;
+    func :.solve =
+    {
+        $* deferred = opal_net_node_adl_s!.scope();
+        foreach( $* e in o->excs  ) e.solve( deferred );
+        foreach( $* e in deferred ) e.solve( NULL );
+    };
 
     func :.clear_downlinks =
     {
@@ -178,13 +239,20 @@ stamp :cell_s = aware :
     // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
     func bcore_via_call.mutated = { ERR_fa( "Cannot reconstitute." ); };
 
-    func (void graph_to_sink( mutable, bcore_sink* sink ));
-    func (void mcode_push_ap( mutable, bhvm_mcode_frame_s* mcf ));
+    func (void graph_to_sink( const, bcore_sink* sink )) =
+    {
+        foreach( const opal_net_node_s* node in o.excs ) node.graph_to_sink( sink );
+    };
+
+    func :.mcode_push_ap;
     func (void mcode_push_dp( mutable, bhvm_mcode_frame_s* mcf, bl_t entry_channels ));
 
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
+
+/// Creates an input node operator at indexed global input channel
+feature opal_nop* create_input_nop( const, sz_t in_idx, tp_t in_name, const opal_nop* cur_nop );
 
 // network builder
 group :builder = :
@@ -211,13 +279,17 @@ group :builder = :
             }
         };
 
+        func ::.create_input_nop;
+
         func :.build_from_source;
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
-#endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+embed "opal_net.x";
+
+#endif // XOILA_SECTION
 
 /**********************************************************************************************************************/
 /// node
@@ -225,23 +297,7 @@ group :builder = :
 /**********************************************************************************************************************/
 /// cell
 
-/** Converts opal_sem_cell_s to opal_net_cell_s
- *  Requires a double-nested frame to allow correct processing of input channels with assignments (checked).
- */
-void opal_net_cell_s_from_sem_cell
-(
-    opal_net_cell_s* o,
-    opal_sem_cell_s* sem_cell,
-    opal_nop* (*input_nop_create)( vd_t arg, sz_t in_idx, tp_t in_name, const opal_nop* cur_nop ),
-    vd_t arg,
-    bcore_sink* log
-);
-
 #endif // TYPEOF_opal_net
-
-/**********************************************************************************************************************/
-
-vd_t opal_net_signal_handler( const bcore_signal_s* o );
 
 /**********************************************************************************************************************/
 

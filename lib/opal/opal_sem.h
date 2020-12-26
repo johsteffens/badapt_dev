@@ -90,9 +90,9 @@ BCORE_FORWARD_OBJECT( opal_sem_context_s );
 opal_sem_context_s* opal_sem_get_context( void );
 
 XOILA_DEFINE_GROUP( opal_sem, bcore_inst )
-#ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef XOILA_SECTION
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 // semantic context
 group :context = opal_context
@@ -132,7 +132,7 @@ group :context = opal_context
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 /** Semantic Identifier.
  *  Identifies objects in a semantic tree by storing the tree elements
@@ -168,7 +168,7 @@ group :id = :
     signature void get_sem_id( const, :s* sem_id );
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 // language control types
 name cell;
@@ -182,7 +182,7 @@ feature void set_name_invisible( mutable, tp_t name );
 
 body             get_name_ = { return o->name; };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 // bidirectional link
 stamp :link_s = aware :
@@ -193,7 +193,7 @@ stamp :link_s = aware :
 
     private :link_s -> up;   // up link
     private :link_s -> dn;   // down link
-    private  vd_t cell; // cell owning the link (only if link is part of membrane)
+    private :cell_s* cell; // cell owning the link (only if link is part of membrane)
     bl_t     exit; // true: link is of cell's exit membrane. false: entry membrane
     func :. get_name = :get_name_;
     func :.set_name_visible   = { o->name = name; o->visible = true; };
@@ -280,7 +280,7 @@ stamp :body_s = aware x_array
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 // cell
 
 signature :link_s* get_enc_by_name(  mutable, tp_t name );
@@ -339,12 +339,12 @@ stamp :cell_s = aware :
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 /// evaluation stack indicators
 stamp :stack_flag_s = aware : {};
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 // semantic builder
 group :builder = :
@@ -361,7 +361,7 @@ group :builder = :
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
 /** Semantic tree
  *  The semantic tree is an intermediate and temporary representation
@@ -420,23 +420,23 @@ group :tree = :
     };
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ---------------------------------------------------------------------------------------------------------------------
 
-#endif // XOILA_SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+func (:cell_s) (sc_t nameof(      const, tp_t name ));
+func (:cell_s) (sc_t ifnameof(    const, tp_t name ));
+func (:cell_s) (tp_t entypeof(    const, sc_t name ));
+func (:cell_s) (tp_t entypeof_fv( const, sc_t format, va_list args ));
+func (:cell_s) (tp_t entypeof_fa( const, sc_t format, ... ));
 
-sc_t opal_sem_cell_s_nameof(      const opal_sem_cell_s* o, tp_t name );
-sc_t opal_sem_cell_s_ifnameof(    const opal_sem_cell_s* o, tp_t name );
-tp_t opal_sem_cell_s_entypeof(    const opal_sem_cell_s* o, sc_t name );
-tp_t opal_sem_cell_s_entypeof_fv( const opal_sem_cell_s* o, sc_t format, va_list args );
-tp_t opal_sem_cell_s_entypeof_fa( const opal_sem_cell_s* o, sc_t format, ... );
+func (:link_s) (@* trace_to_cell_membrane( mutable ));
 
-opal_sem_link_s* opal_sem_link_s_trace_to_cell_membrane( opal_sem_link_s* o );
+func (:cell_s) (void parse( mutable, bcore_source* source ));
+func (:cell_s) (void parse_signature( mutable, bcore_source* source ));
+func (:cell_s) (void parse_body( mutable, bcore_source* source ));
 
-void opal_sem_cell_s_parse( opal_sem_cell_s* o, bcore_source* source );
-void opal_sem_cell_s_parse_signature( opal_sem_cell_s* o, bcore_source* source );
-void opal_sem_cell_s_parse_body( opal_sem_cell_s* o, bcore_source* source );
+func (:tree_node_s) (bcore_source_point_s* get_nearest_source_point( mutable ));
 
-bcore_source_point_s* opal_sem_tree_node_s_get_nearest_source_point( opal_sem_tree_node_s* o );
+#endif // XOILA_SECTION
 
 /**********************************************************************************************************************/
 

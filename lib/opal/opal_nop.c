@@ -16,6 +16,7 @@
 /**********************************************************************************************************************/
 
 #include "opal_nop.h"
+#include "opal_net.h"
 
 /**********************************************************************************************************************/
 // opal_nop
@@ -106,6 +107,61 @@ bl_t opal_nop_solve__( const opal_nop* o, opal_context* context, opal_holor_s** 
 
     result->can_settle = can_settle;
     BLM_RETURNV( bl_t, true );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
+ *  Function 'solve' executes operator->solve to compute a holor.
+ *  If a holor can be computed (vacant or determined), the solve-route is considered finished
+ *  and will not be processed again. A detached result (o->h == NULL) causes a route to be reentered.
+ *  If operator->solve settles, all uplinks are removed and the operator is switched to a final arity0
+ *  version via opal_op_a_settle.
+ *  After settling, the graph can be run through an optimizer minimizing its structure.
+ */
+void opal_nop_solve_node__( opal_nop* o, opal_net_node_s* node, opal_net_node_adl_s* deferred )
+{
+    if( node->flag ) return; // cyclic link
+
+    node->flag = true;
+
+    if( node->result ) return;
+
+    sz_t arity = opal_nop_a_arity( o );
+    if( arity != node->upls.size )
+    {
+        opal_net_node_s_err_fa( node, "Operator arity #<sz_t> differs from node arity #<sz_t>", arity, node->upls.size );
+    }
+
+    #define opal_MAX_ARITY 4 /* increase this number when assertion below fails */
+    ASSERT( arity <= opal_MAX_ARITY );
+    opal_holor_s* arg_h[ opal_MAX_ARITY ] = { NULL };
+
+    for( sz_t i = 0; i < arity; i++ )
+    {
+        opal_net_node_s* arg_n = node->upls.data[ i ]->node;
+        if( arg_n )
+        {
+            if( !arg_n->result ) opal_net_node_s_solve( arg_n, deferred );
+            ASSERT( arg_n->result );
+            arg_h[ i ] = arg_n->result->h;
+            ASSERT( arg_h[ i ] );
+        }
+    }
+
+    opal_net_node_s_nop_solve( node, arg_h );
+
+    if( node->result->can_settle )
+    {
+        opal_nop_a_settle( o, node->context, node->result, &node->nop, &node->result );
+        opal_net_links_s_clear( &node->upls );
+        if( !node->result->reducible )
+        {
+            if( node->result->h ) bhvm_value_s_clear( &node->result->h->h.v );
+        }
+    }
+
+    node->flag = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -375,6 +431,52 @@ bl_t opal_nop_ar1_reshape_s_solve( const opal_nop_ar1_reshape_s* o, opal_context
     }
     result->can_settle = result->h && !result->h->m.active;
     return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Solves node by changing nop: ar2_reshape -> ar1_reshape.
+ *  Shape is extracted from the uplink channel 0.
+ *  Channel 0 is then replaced by channel 1.
+ */
+void opal_nop_ar2_reshape_s_solve_node( opal_nop_ar2_reshape_s* o, opal_net_node_s* node, opal_net_node_adl_s* deferred )
+{
+    if( node->flag ) return; // cyclic link
+
+    node->flag = true;
+
+    if( node->result ) return;
+
+    ASSERT( node->upls.size == 2 );
+    opal_net_node_s* arg0 = node->upls.data[ 0 ]->node;
+    opal_net_node_s* arg1 = node->upls.data[ 1 ]->node;
+
+    if( arg0 && arg1 )
+    {
+        if( !arg0->result ) opal_net_node_s_solve( arg0, deferred );
+        if( !arg1->result ) opal_net_node_s_solve( arg1, deferred );
+
+        ASSERT( arg0->result && arg0->result->h );
+        ASSERT( arg1->result && arg1->result->h );
+
+        opal_nop_ar1_reshape_s* ar1_reshape = opal_nop_ar1_reshape_s_create();
+        bhvm_shape_s_copy( &ar1_reshape->shape, &arg0->result->h->h.s );
+
+        opal_net_links_s_clear( &node->upls );
+        opal_net_links_s_push_d( &node->upls, opal_net_link_s_create() );
+        node->upls.data[ 0 ]->node = arg1;
+
+        opal_nop_a_attach( &node->nop, ( opal_nop* )ar1_reshape );
+        opal_net_node_s_nop_solve( node, &arg1->result->h );
+
+        if( node->result->can_settle )
+        {
+            opal_nop_a_settle( (opal_nop*)o, node->context, node->result, &node->nop, &node->result );
+            opal_net_links_s_clear( &node->upls );
+        }
+    }
+
+    node->flag = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -890,6 +992,39 @@ bl_t opal_nop_ar2_cyclic_s_solve( const opal_nop_ar2_cyclic_s* o, opal_context* 
         opal_holor_s_attach( &result->h, NULL );
     }
     return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void opal_nop_ar2_cyclic_s_solve_node( opal_nop_ar2_cyclic_s* o, opal_net_node_s* node, opal_net_node_adl_s* deferred )
+{
+    if( node->flag ) return; // cyclic link
+
+    node->flag = true;
+
+    ASSERT( node->upls.size == 2 );
+
+    opal_holor_s* arg_h[ 2 ] = { NULL };
+    opal_net_node_s* arg_n = NULL;
+
+    arg_n = node->upls.data[ 0 ]->node;
+    opal_net_node_s_solve( arg_n, NULL );
+    arg_h[ 0 ] = arg_n->result->h;
+    opal_net_node_s_nop_solve( node, arg_h );
+
+    if( deferred )
+    {
+        opal_net_node_adl_s_push_d( deferred, bcore_fork( node ) );
+    }
+    else
+    {
+        arg_n = node->upls.data[ 1 ]->node;
+        opal_net_node_s_solve( arg_n, NULL );
+        arg_h[ 1 ] = arg_n->result->h;
+        opal_net_node_s_nop_solve( node, arg_h );
+    }
+
+    node->flag = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
