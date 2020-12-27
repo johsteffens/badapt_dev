@@ -45,7 +45,7 @@ func (:s) bcore_fp.copy_typed =
         case TYPEOF_st_s:
         {
             assert( inst._ == TYPEOF_st_s );
-            o.parse( bcore_source_string_s!.scope().setup_from_string( inst.cast( st_s* ) ) );
+            o.parse( bcore_source_string_s!^^.setup_from_string( inst.cast( st_s* ) ) );
         }
         break;
 
@@ -94,13 +94,13 @@ func (:s) (void from_sem_link( mutable, opal_sem_link_s* link, opal_sem_cell_s* 
     ASSERT( root );
     if( !root.parent ) ERR_fa( "(root->parent == NULL) Root is not nested. Using semantic context as root is discouraged. Preferably use a double-nested semantic frame." );
     opal_sem_cell_s* cell = link.cell;
-    opal_sem_tree_s* tree = opal_sem_tree_s!.scope();
+    opal_sem_tree_s* tree = opal_sem_tree_s!^^;
     opal_sem_tree_node_s* sem_tree_node = NULL;
     tree.enter( root, sem_tree_node, &sem_tree_node );
-    opal_net_cell_s* net_frame = opal_net_cell_s!.scope();
-    opal_net_node_s* up_node   = opal_net_node_s!.scope();
-    net_frame.context = root.context.fork().cast( opal_context* );
-    up_node.context   = root.context.fork().cast( opal_context* );
+    opal_net_cell_s* net_frame = opal_net_cell_s!^^;
+    opal_net_node_s* up_node   = opal_net_node_s!^^;
+    net_frame.context = root.context.fork();
+    up_node.context   = root.context.fork();
 
     up_node.name = link.name;
     up_node.id = tree.id_base++;

@@ -108,7 +108,7 @@ stump :std_s = aware :
     func :.set_param = { o.param.set( param ); };
     func bcore_main . main =
     {
-        o.run( :result_s!.scope() ).resolve();
+        o.run( :result_s!^^ ).resolve();
         return 0;
     };
 };

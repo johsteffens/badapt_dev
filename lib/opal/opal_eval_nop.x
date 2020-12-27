@@ -132,7 +132,7 @@ func (:ar1_s) :.run =
         bcore_sink_a_push_fa( o.param.log, " )\n" );
     }
 
-    opal_nop_solve_result_s* solve_result = opal_nop_solve_result_s!.scope();
+    opal_nop_solve_result_s* solve_result = opal_nop_solve_result_s!^^;
 
     opal_holor_s* a[ 1 ] = { ha };
 
@@ -145,7 +145,7 @@ func (:ar1_s) :.run =
     {
         if( ( hr ) || o.param.verbosity > 5 )
         {
-            st_s* msg = st_s!.scope();
+            st_s* msg = st_s!^^;
 
             if( ha )
             {
@@ -174,7 +174,7 @@ func (:ar1_s) :.run =
         ASSERT( hr.m.htp == r.m.htp );
         if( !bhvm_holor_s_is_equal( &hr->h, &r->h ) )
         {
-            st_s* msg = st_s!.scope();
+            st_s* msg = st_s!^^;
             msg.push_fa( "\n:result   : " );
             r.brief_to_sink( msg );
             msg.push_fa( "\n:expected : " );
@@ -197,8 +197,8 @@ func (:ar1_s) :.run =
 
     if( solve_result.codable )
     {
-        bhvm_mcode_frame_s* frame = bhvm_mcode_frame_s!.scope();
-        bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!.scope();
+        bhvm_mcode_frame_s* frame = bhvm_mcode_frame_s!^^;
+        bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
 
         sz_t i_ina  = frame.push_hmc( ha.h, NULL, 'a', arr_ci );
         sz_t i_out  = frame.push_hmc( r.h,  NULL, 'y', arr_ci );
@@ -211,7 +211,7 @@ func (:ar1_s) :.run =
         bhvm_holor_s* gout = frame.hbase.holor_adl.[ i_gout ];
 
         bhvm_holor_s* fin = out.clone().scope();
-        bhvm_holor_s* scl = bhvm_holor_s!.scope();
+        bhvm_holor_s* scl = bhvm_holor_s!^^;
         scl.set_scalar_f3( 1.0 );
 
         nop.mcode_push_ap_track( solve_result,      arr_ci, frame );
@@ -287,7 +287,7 @@ func (:ar1_s) :.run =
                     o0 < o0_max
                 )
                 {
-                    st_s* msg = st_s!.scope();
+                    st_s* msg = st_s!^^;
                     msg.push_fa( "\nGradient test: Operation '#<sc_t>', 'dp_#<char>' element '#<sz_t>':", ifnameof( nop->_ ), 'a', i );
                     msg.push_fa( "\nina            : " );  ina.brief_to_sink( msg );
                     msg.push_fa( "\nout            : " );  out.brief_to_sink( msg );
@@ -349,7 +349,7 @@ func (:ar2_s) :.run =
         o.param.log.push_fa( "\n" );
     }
 
-    opal_nop_solve_result_s* solve_result = opal_nop_solve_result_s!.scope();
+    opal_nop_solve_result_s* solve_result = opal_nop_solve_result_s!^^;
 
     opal_holor_s* a[ 2 ] = { ha, hb };
 
@@ -362,7 +362,7 @@ func (:ar2_s) :.run =
     {
         if( ( hr ) || o.param.verbosity > 5 )
         {
-            st_s* msg = st_s!.scope();
+            st_s* msg = st_s!^^;
 
             if( ha )
             {
@@ -396,7 +396,7 @@ func (:ar2_s) :.run =
         ASSERT( hr.m.htp == r.m.htp );
         if( !hr.h.is_equal( r.h ) )
         {
-            st_s* msg = st_s!.scope();
+            st_s* msg = st_s!^^;
             msg.push_fa( "\n:result   : " );
             r.brief_to_sink( msg );
             msg.push_fa( "\n:expected : " );
@@ -418,8 +418,8 @@ func (:ar2_s) :.run =
 
     if( solve_result->codable )
     {
-        $* frame = bhvm_mcode_frame_s!.scope();
-        $* arr_ci = bhvm_vop_arr_ci_s!.scope();
+        $* frame = bhvm_mcode_frame_s!^^;
+        $* arr_ci = bhvm_vop_arr_ci_s!^^;
 
         sz_t i_ina  = frame.push_hmc( ha.h, NULL, 'a', arr_ci );
         sz_t i_inb  = frame.push_hmc( hb.h, NULL, 'b', arr_ci );
@@ -436,7 +436,7 @@ func (:ar2_s) :.run =
         bhvm_holor_s* gout = frame.hbase.holor_adl.[ i_gout ];
 
         bhvm_holor_s*  fin = out.clone().scope();
-        bhvm_holor_s*  scl = bhvm_holor_s!.scope();
+        bhvm_holor_s*  scl = bhvm_holor_s!^^;
         scl.set_scalar_f3( 1.0 );
 
         nop.mcode_push_ap_track( solve_result,      arr_ci, frame );
@@ -466,7 +466,7 @@ func (:ar2_s) :.run =
 
         if( !out.is_equal( r.h ) )
         {
-            st_s* msg = st_s!.scope();
+            st_s* msg = st_s!^^;
             msg.push_fa( "\n:result   : " );
             out.brief_to_sink( msg );
             msg.push_fa( "\n:expected : " );
@@ -519,7 +519,7 @@ func (:ar2_s) :.run =
 
                 if( error || ( o.param.verbosity >= 10 ) )
                 {
-                    st_s* msg = st_s!.scope();
+                    st_s* msg = st_s!^^;
                     msg.push_fa( "\nGradient test: Operation '#<sc_t>', 'dp_#<char>' element '#<sz_t>':", ifnameof( nop->_ ), ( char )( 'a' + ch ), i );
                     msg.push_fa( "\nina            : " );  ina.brief_to_sink( msg );
                     msg.push_fa( "\ninb            : " );  inb.brief_to_sink( msg );

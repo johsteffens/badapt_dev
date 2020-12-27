@@ -207,7 +207,7 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
     adaptive.holor_frame_en.copy( o.holor_frame_en );
     adaptive.holor_frame_ex.copy( o.holor_frame_ex );
 
-    opal_frame_s* frame = opal_frame_s!.scope();
+    opal_frame_s* frame = opal_frame_s!^^;
     const bhvm_holor_s* holor_frame_en = o.holor_frame_en;
     frame.setup_from_source( source, holor_frame_en, 1 );
 

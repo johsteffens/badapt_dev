@@ -120,7 +120,7 @@ stamp :solve_result_s = aware bcore_inst
     tp_t type_vop_dp_c;
 
     /// attachment (only used by specific operators)
-    aware => attached;
+    aware x_inst => attached;
 };
 
 /// returns true when the operator supports 'elementary cyclic indexing'
@@ -130,12 +130,12 @@ feature bl_t eci( const ) = { return false; };
   * Returns 'true' in case of success, otherwise check result.msg
   * The default implementation solves all elementary operators
   */
-feature bl_t solve( const, opal_context* context, opal_holor_s** a, :solve_result_s* result ) extern solve__;
+feature bl_t solve( const, opal_context* context, opal_holor_s** a, :solve_result_s* result ) extern solve_default;
 
 /** Node-level solving.
  *  Implemented in opal_net.c
  */
-feature void solve_node( mutable, opal_net_node_s* node, opal_net_node_adl_s* deferred ) extern solve_node__;
+feature void solve_node( mutable, opal_net_node_s* node, opal_net_node_adl_s* deferred ) extern solve_node_default;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -179,11 +179,11 @@ feature sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bh
 {
     bhvm_holor_s* h = &result.h.h;
     opal_holor_meta_s* m = &result.h.m;
-    sz_t idx = mcf.push_hm( h, m.cast( bhvm_mcode_hmeta* ) );
+    sz_t idx = mcf.push_hm( h, m );
     if( m.active )
     {
-        mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_determine_s!.cast( bhvm_vop* ).set_index( 0, idx ) );
-        mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!   .cast( bhvm_vop* ).set_index( 0, idx ) );
+        mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
+        mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
     }
     return idx;
 };
@@ -198,12 +198,12 @@ feature sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bh
  */
 feature sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
 {
-    bhvm_holor_s* h = bhvm_holor_s!.scope().copy_shape_type( &result.h.h );
+    bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
     opal_holor_meta_s* m = &result.h.m;
-    sz_t idx = mcf.push_hm( h, m.cast( bhvm_mcode_hmeta* ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_ar0_determine_s!.cast( bhvm_vop* ).set_index( 0, idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp,        bhvm_vop_ar0_zro_s!      .cast( bhvm_vop* ).set_index( 0, idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!   .cast( bhvm_vop* ).set_index( 0, idx ) );
+    sz_t idx = mcf.push_hm( h, m );
+    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp,        bhvm_vop_ar0_zro_s!      .setup( idx ) );
+    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
     return idx;
 };
 
@@ -283,24 +283,24 @@ group :ar0 = retrievable
         {
             bhvm_holor_s* h = &result.h.h;
             opal_holor_meta_s* m = &result.h.m;
-            sz_t idx = mcf.push_hm( h, m.cast( bhvm_mcode_hmeta* ) );
+            sz_t idx = mcf.push_hm( h, m );
             if( result.h.h.v.size == 0 ) // randomize holor if result is vacant
             {
-                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_determine_s!.cast( bhvm_vop* ).set_index( 0, idx ) );
-                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_randomize_s!.cast( bhvm_vop* ).set_index( 0, idx ) );
-                mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!   .cast( bhvm_vop* ).set_index( 0, idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_randomize_s!.setup( idx ) );
+                mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
             }
             return idx;
         };
 
         func ::.mcode_push_dp_holor =
         {
-            bhvm_holor_s* h = bhvm_holor_s!.scope().copy_shape_type( &result.h.h );
+            bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
             opal_holor_meta_s* m = &result.h.m;
-            sz_t idx = mcf.push_hm( h, m.cast( bhvm_mcode_hmeta* ) );
-            mcf.track_vop_push_d( TYPEOF_track_dp_setup,              bhvm_vop_ar0_determine_s!.cast( bhvm_vop* ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_dp_shelve,             bhvm_vop_ar0_vacate_s!   .cast( bhvm_vop* ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_dp_adaptive_zero_grad, bhvm_vop_ar0_zro_s!      .cast( bhvm_vop* ).set_index( 0, idx ) );
+            sz_t idx = mcf.push_hm( h, m );
+            mcf.track_vop_push_d( TYPEOF_track_dp_setup,              bhvm_vop_ar0_determine_s!.setup( idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_shelve,             bhvm_vop_ar0_vacate_s!   .setup( idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_dp_adaptive_zero_grad, bhvm_vop_ar0_zro_s!      .setup( idx ) );
             return idx;
         };
 
@@ -326,7 +326,7 @@ group :ar0 = retrievable
         {
             bhvm_holor_s* h = &result.h.h;
             opal_holor_meta_s* m = &result.h.m;
-            sz_t idx = mcf.push_hm( h, m.cast( bhvm_mcode_hmeta* ) );
+            sz_t idx = mcf.push_hm( h, m );
 
             bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s!;
             vop_rand.prsg = o.prsg.clone();
@@ -334,9 +334,9 @@ group :ar0 = retrievable
             vop_rand.max = o.max;
             vop_rand.density = o.density;
 
-            mcf.track_vop_push_d( TYPEOF_track_ap,        vop_rand                 .cast( bhvm_vop* ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_determine_s!.cast( bhvm_vop* ).set_index( 0, idx ) );
-            mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!   .cast( bhvm_vop* ).set_index( 0, idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap,        vop_rand                 .setup( idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
+            mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
 
             return idx;
         };

@@ -27,8 +27,8 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( mutable, const bhvm_holo
     ASSERT( o.is_setup );
 
     bhvm_holor_adl_s* adl_en = en.clone().scope();
-    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!.scope();
-    bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!.scope();
+    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
+    bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^^;
     o.run_ap_adl( adl_en, adl_ex );
     adl_rf.copy( adl_ex );
 
@@ -89,7 +89,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( mutable, const bhvm_hol
 {
     ASSERT( o.is_setup );
 
-    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!.scope();
+    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
     o.run_ap_adl( adl_en, adl_ex );
 
     sz_t size_ada = o.hidx_ada.get_size();
@@ -175,9 +175,9 @@ func (:plain_s) :.run =
     }
 
     const bhvm_holor_adl_s* adl_ap_en = o.param.in;
-          bhvm_holor_adl_s* adl_ap_ex = bhvm_holor_adl_s!.scope();
+          bhvm_holor_adl_s* adl_ap_ex = bhvm_holor_adl_s!^^;
 
-    opal_frame_s* frame0 = opal_frame_s!.scope();
+    opal_frame_s* frame0 = opal_frame_s!^^;
     if( verbosity >= 20 ) frame0.log = log.fork();
 
     frame0.setup_from_source_adl( source, adl_ap_en );
@@ -185,7 +185,7 @@ func (:plain_s) :.run =
     /// test frame recovery/copying
     if( o.param.recovery_test )
     {
-        opal_frame_s* frame1 = opal_frame_s!.scope();
+        opal_frame_s* frame1 = opal_frame_s!^^;
         bcore_bin_ml_a_copy( frame1, frame0 );
         frame0 = frame1;
     }
@@ -231,12 +231,11 @@ func (:plain_s) :.run =
             if( shape_dev || value_dev )
             {
                 st_s* msg = st_s!.scope( msg );
-                bcore_sink* sink = cast( msg, bcore_sink* );
-                sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
-                sink.push_fa( "\n#p20.{Frame output} " );
-                h_hbo.brief_to_sink( sink );
-                sink.push_fa( "\n#p20.{Expected output} " );
-                h_out.brief_to_sink( sink );
+                msg.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
+                msg.push_fa( "\n#p20.{Frame output} " );
+                h_hbo.brief_to_sink( msg );
+                msg.push_fa( "\n#p20.{Expected output} " );
+                h_out.brief_to_sink( msg );
                 ERR_fa( "#<st_s*>\n", msg );
             }
         }
@@ -280,7 +279,7 @@ func (:plain_s) :.run =
         frame.run_dp_adl( adl_dp_ex, adl_dp_en );
 
         sz_t size_ex = frame.get_size_ex();
-        bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!.scope();
+        bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!^^;
 
         /// testing entry channels
         if( frame.get_size_en() )
@@ -293,7 +292,7 @@ func (:plain_s) :.run =
                 if( verbosity >= 10 ) log.push_fa( "enc #<sz_t>:\n", i );
 
                 bhvm_holor_s* dp_en1 = adl_dp_en.[ i ];
-                bhvm_holor_s* dp_en2 = bhvm_holor_s!.scope( scope_local ).copy_vector_isovol( dp_en1 );
+                bhvm_holor_s* dp_en2 = bhvm_holor_s!^.copy_vector_isovol( dp_en1 );
                 dp_en2.v.zro();
 
                 for( sz_t j = 0; j < size_ex; j++ )
@@ -308,7 +307,7 @@ func (:plain_s) :.run =
                     }
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex.[ j ];
-                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!.scope( scope_local ).fork_from_vector_isovol( dp_ex1 );
+                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!^.fork_from_vector_isovol( dp_ex1 );
 
                     opal_frame_sc_run_ap
                     (
@@ -326,13 +325,13 @@ func (:plain_s) :.run =
 
                 if( error || verbosity >= 10 )
                 {
-                    st_s* st = st_s!.scope( scope_local );
+                    st_s* st = st_s!^;
                     st.push_fa( "dp-channel: #<sz_t>", i );
                     st.push_fa( ", dev: #<f3_t>", dev );
                     st.push_fa( "\ngradient (dp)          : " );
-                    dp_en1.to_sink( cast( st, bcore_sink* ) );
+                    dp_en1.to_sink( st );
                     st.push_fa( "\ngradient (via jacobian): " );
-                    dp_en2.to_sink( cast( st, bcore_sink* ) );
+                    dp_en2.to_sink( st );
                     st.push_fa( "\n" );
                     if( error )
                     {
@@ -361,7 +360,7 @@ func (:plain_s) :.run =
                 if( verbosity >= 10 ) log.push_fa( "adc #<sz_t>:\n", i );
 
                 const bhvm_holor_s* dp_ada1 = frame.get_dp_ada( i );
-                bhvm_holor_s* dp_ada2 = bhvm_holor_s!.scope( scope_local ).copy_vector_isovol( dp_ada1 );
+                bhvm_holor_s* dp_ada2 = bhvm_holor_s!^.copy_vector_isovol( dp_ada1 );
                 dp_ada2.v.zro();
 
                 for( sz_t j = 0; j < size_ex; j++ )
@@ -376,7 +375,7 @@ func (:plain_s) :.run =
                     }
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex.[ j ];
-                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!.scope( scope_local ).fork_from_vector_isovol( dp_ex1 );
+                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!^.fork_from_vector_isovol( dp_ex1 );
 
                     opal_frame_sc_run_ap
                     (
@@ -394,13 +393,13 @@ func (:plain_s) :.run =
 
                 if( error || verbosity >= 10 )
                 {
-                    st_s* st = st_s!.scope( scope_local );
+                    st_s* st = st_s!^;
                     st.push_fa( "dp-channel: #<sz_t>", i );
                     st.push_fa( ", dev: #<f3_t>", dev );
                     st.push_fa( "\ngradient (dp)          : " );
-                    dp_ada1.to_sink( st.cast( bcore_sink* ) );
+                    dp_ada1.to_sink( st );
                     st.push_fa( "\ngradient (via jacobian): " );
-                    dp_ada2.to_sink( st.cast( bcore_sink* ) );
+                    dp_ada2.to_sink( st );
                     st.push_fa( "\n" );
                     if( error )
                     {
@@ -432,8 +431,8 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( mutable, const bh
     ASSERT( o.is_setup );
 
     bhvm_holor_adl_s* adl_en = en.clone().scope();
-    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!.scope();
-    bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!.scope();
+    bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
+    bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^^;
     o.run_ap_adl_flat( adl_en, adl_ex );
     adl_rf.copy( adl_ex );
 
@@ -497,7 +496,7 @@ func (:cyclic_s) :.run =
 
     if( !o.param.src ) ERR_fa( "Source missing." );
 
-    opal_frame_s* frame = opal_frame_s!.scope();
+    opal_frame_s* frame = opal_frame_s!^^;
     if( o.param.verbosity >= 20 ) frame.log = o.param.log.fork();
 
     bcore_source* source = NULL;
@@ -524,21 +523,21 @@ func (:cyclic_s) :.run =
     }
 
     const bhvm_holor_adl_s* adl_ap_en = o.param.in;
-          bhvm_holor_adl_s* adl_ap_ex1 = bhvm_holor_adl_s!.scope();
-          bhvm_holor_adl_s* adl_ap_ex2 = bhvm_holor_adl_s!.scope();
+          bhvm_holor_adl_s* adl_ap_ex1 = bhvm_holor_adl_s!^^;
+          bhvm_holor_adl_s* adl_ap_ex2 = bhvm_holor_adl_s!^^;
 
     frame.setup_from_source_adl( source, adl_ap_en );
 
     sz_t unroll_size = adl_ap_en.size / frame.size_en;
     ASSERT( unroll_size * frame.size_en == adl_ap_en.size );
 
-    opal_frame_cyclic_s* frame_cyclic0 = opal_frame_cyclic_s!.scope();
+    opal_frame_cyclic_s* frame_cyclic0 = opal_frame_cyclic_s!^^;
     frame_cyclic0.setup_from_frame( frame, unroll_size );
 
     /// test frame recovery/copying
     if( o.param.recovery_test)
     {
-        opal_frame_cyclic_s* frame_cyclic1 = opal_frame_cyclic_s!.scope();
+        opal_frame_cyclic_s* frame_cyclic1 = opal_frame_cyclic_s!^^;
         frame_cyclic1.copy( frame_cyclic0 );
         frame_cyclic0 = frame_cyclic1;
     }
@@ -577,7 +576,7 @@ func (:cyclic_s) :.run =
             bl_t value_dev = shape_dev || ( h_out.v.fdev_equ( &h_ex1.v ) > o.param.max_dev );
             if( shape_dev || value_dev )
             {
-                st_s* msg = st_s!.scope( scope_local );
+                st_s* msg = st_s!^;
                 bcore_sink* sink = msg;
                 sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
                 sink.push_fa( "\n#p20.{frame_cyclic output} " );
@@ -602,7 +601,7 @@ func (:cyclic_s) :.run =
             bl_t value_dev = shape_dev || ( h_ex2.v.fdev_equ( &h_ex1.v ) > o.param.max_dev );
             if( shape_dev || value_dev )
             {
-                st_s* msg = st_s!.scope( scope_local );
+                st_s* msg = st_s!^;
                 bcore_sink* sink = msg;
                 sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
                 sink.push_fa( "\n#p20.{Output (frame_cyclic)} " );
@@ -646,7 +645,7 @@ func (:cyclic_s) :.run =
 
         sz_t size_en = adl_dp_en.size;
         sz_t size_ex = adl_dp_ex.size;
-        bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!.scope();
+        bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!^^;
 
         /// testing entry channels
         if( size_en )
@@ -660,7 +659,7 @@ func (:cyclic_s) :.run =
                 if( o.param.verbosity >= 10 ) o.param.log.push_fa( "enc #<sz_t>:\n", i );
 
                 bhvm_holor_s* dp_en1 = adl_dp_en.[ i ];
-                bhvm_holor_s* dp_en2 = bhvm_holor_s!.scope( scope_local ).copy_vector_isovol( dp_en1 );
+                bhvm_holor_s* dp_en2 = bhvm_holor_s!^.copy_vector_isovol( dp_en1 );
                 dp_en2.v.zro();
 
                 for( sz_t j = 0; j < size_ex; j++ )
@@ -675,7 +674,7 @@ func (:cyclic_s) :.run =
                     }
 
                     bhvm_holor_s* dp_ex1 = adl_dp_ex.[ j ];
-                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!.scope( scope_local ).fork_from_vector_isovol( dp_ex1 );
+                    bhvm_holor_s* dp_ex2 = bhvm_holor_s!^.fork_from_vector_isovol( dp_ex1 );
                     opal_frame_sc_run_ap( "( y <- a, b, c ) { y = a + b ** c; }", verbatim_C{( const bhvm_holor_s*[] ) { dp_en2, h_jc, dp_ex2 }}, 3, &dp_en2, 1 );
                 }
 
@@ -688,9 +687,9 @@ func (:cyclic_s) :.run =
                     st.push_fa( "dp-channel: #<sz_t>", i );
                     st.push_fa( ", dev: #<f3_t>", dev );
                     st.push_fa( "\ngradient (dp)          : " );
-                    dp_en1.to_sink( st.cast( bcore_sink* ) );
+                    dp_en1.to_sink( st );
                     st.push_fa( "\ngradient (via jacobian): " );
-                    dp_en2.to_sink( st.cast( bcore_sink* ) );
+                    dp_en2.to_sink( st );
                     st.push_fa( "\n" );
                     if( error )
                     {

@@ -89,7 +89,7 @@ func(:node_s) (void nop_solve( mutable, opal_holor_s** arg_h )) =
     {
         sc_t name = o.nop.symbol();
         if( !name ) name = ifnameof( o.nop._ );
-        st_s* msg = st_s!.scope();
+        st_s* msg = st_s!^^;
         msg.push_fa( "Operator '#<sc_t>' failed:", name );
         if( o.result.msg ) msg.push_fa( " #<sc_t>", o.result.msg.sc );
         msg.push_fa( "\n" );
@@ -151,7 +151,7 @@ func (s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 )) =
 
 func (:cell_s) :.normalize =
 {
-    bcore_arr_vd_s* arr = bcore_arr_vd_s!.scope();
+    bcore_arr_vd_s* arr = bcore_arr_vd_s!^^;
     foreach( $* e in o.body ) arr.push( e );
     foreach( $* e in o.encs ) arr.push( e );
     foreach( $* e in o.excs ) arr.push( e );
@@ -398,7 +398,7 @@ func (:cell_s)
             {
                 net_node_up = o.body.push();
 
-                if( !net_node_up.context ) net_node_up.context = cell.context.fork().cast( opal_context* );
+                if( !net_node_up.context ) net_node_up.context = cell.context.fork();
                 net_node_up.set_nop_d( cell.nop.fork() );
 
                 if( !net_node_up.sem_id ) net_node_up.sem_id = opal_sem_id_s!;
@@ -577,13 +577,13 @@ func (:cell_s)
 {
     ASSERT( sem_cell );
 
-    if( !o.context ) o.context = sem_cell.context.fork().cast( opal_context* );
+    if( !o.context ) o.context = sem_cell.context.fork();
 
-    opal_sem_tree_s* tree = opal_sem_tree_s!.scope();
+    opal_sem_tree_s* tree = opal_sem_tree_s!^^;
     foreach( opal_sem_link_s* sem_link in sem_cell.encs )
     {
         opal_net_node_s* net_node =  o.encs.push();
-        net_node.context = o.context.fork().cast( opal_context* );
+        net_node.context = o.context.fork();
         net_node.name = sem_link.name;
         net_node.sem_id = opal_sem_id_s!;
         net_node.sem_id.set( net_node.name );
@@ -613,7 +613,7 @@ func (:cell_s)
     foreach( opal_sem_link_s* sem_link in sem_cell.excs )
     {
         opal_net_node_s* net_node =  o.excs.push();
-        net_node.context = o.context.fork().cast( opal_context* );
+        net_node.context = o.context.fork();
         net_node.name = sem_link.name;
 
         net_node.sem_id = opal_sem_id_s!;
@@ -677,7 +677,7 @@ func (:node_s) :.mcode_push_ap =
     if( !o.result ) ERR_fa( "Result is missing." );
     if( !o.result.codable ) o.source_point.parse_err_fa( "Operator '#<sc_t>': Not codable.", ifnameof( o.nop._ ) );
 
-    bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!.scope();
+    bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
 
     if( !o.mnode )
     {
@@ -701,7 +701,7 @@ func (:node_s) :.mcode_push_ap =
     {
         opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( opal_holor_meta_s* );
         if( !hmeta.name   ) hmeta.name = o.name;
-        if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork().cast( x_inst* );
+        if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
 
         hmeta.pclass = TYPEOF_pclass_ax0;
         hmeta.mnode =< o.mnode.fork();
@@ -726,7 +726,7 @@ func (:node_s) :.isolated_mcode_push =
     o.mnode.ax0 = o.nop.mcode_push_ap_holor( o.result, NULL, mcf );
     opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( opal_holor_meta_s* );
     if( !hmeta.name ) hmeta.name = o.name;
-    if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork().cast( x_inst* );
+    if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
     hmeta.pclass = TYPEOF_pclass_ax0;
     hmeta.mnode =< o.mnode.fork();
 };
@@ -754,9 +754,9 @@ func (:node_s) :.cyclic_mcode_push_ap_phase0 =
         opal_holor_meta_s* hmeta1 = mcf.hbase.hmeta_adl.[ o.mnode.ax1 ].cast( opal_holor_meta_s* );
 
         if( !hmeta0.name   ) hmeta0.name = o.name;
-        if( !hmeta0.sem_id ) hmeta0.sem_id = o.sem_id.fork().cast( x_inst* );
+        if( !hmeta0.sem_id ) hmeta0.sem_id = o.sem_id.fork();
         if( !hmeta1.name   ) hmeta1.name = o.name;
-        if( !hmeta1.sem_id ) hmeta1.sem_id = o.sem_id.fork().cast( x_inst* );
+        if( !hmeta1.sem_id ) hmeta1.sem_id = o.sem_id.fork();
 
         hmeta0.pclass = TYPEOF_pclass_ax0;
         hmeta1.pclass = TYPEOF_pclass_ax1;
@@ -808,7 +808,7 @@ func (:node_s) :.mcode_push_dp =
         return;
     }
 
-    bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!.scope();
+    bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
 
     bl_t up_index_is_valid = false;
 
@@ -846,7 +846,7 @@ func (:node_s) :.mcode_push_dp =
 
             opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ag0 ].cast( opal_holor_meta_s* );
             if( !hmeta.name ) hmeta.name = o.name;
-            if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork().cast( x_inst* );
+            if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
             hmeta.pclass = TYPEOF_pclass_ag0;
             hmeta.mnode =< o.mnode.fork();
         }
@@ -870,10 +870,10 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
     {
         o.flag = true;
 
-        bhvm_holor_s* h = bhvm_holor_s!.scope().copy_shape_type( o.result.h.h );
+        bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
         opal_holor_meta_s* m = o.result.h.m.clone().scope();
         if( !m.name ) m.name = o.name;
-        if( !m.sem_id ) m.sem_id = o.sem_id.fork().cast( x_inst* );
+        if( !m.sem_id ) m.sem_id = o.sem_id.fork();
 
         m.pclass = TYPEOF_pclass_ag0;
         m.mnode =< o.mnode.fork();
@@ -916,10 +916,10 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
     ASSERT( o.nop.is_cyclic() );
 
     {
-        bhvm_holor_s* h = bhvm_holor_s!.scope().copy_shape_type( o.result.h.h );
+        bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
         opal_holor_meta_s* m = o.result.h.m.clone().scope();
         if( !m.name ) m.name = o.name;
-        if( !m.sem_id ) m.sem_id = o.sem_id.fork().cast( x_inst* );
+        if( !m.sem_id ) m.sem_id = o.sem_id.fork();
         m.pclass = TYPEOF_pclass_ag1;
         m.mnode =< o.mnode.fork();
         sz_t idx = mcf.push_hm( h, m );
@@ -960,7 +960,7 @@ func (:cell_s) :.mcode_push_ap =
 {
     ASSERT( o.is_consistent() );
 
-    opal_net_node_adl_s* cyclic_adl = opal_net_node_adl_s!.scope();
+    opal_net_node_adl_s* cyclic_adl = opal_net_node_adl_s!^^;
     foreach( :node_s* node in o.body ) if( node.nop && node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
 
     foreach( :node_s* node in o.excs )
@@ -981,8 +981,8 @@ func (:cell_s) :.mcode_push_ap =
 func (:cell_s) (void mcode_push_dp( mutable, bhvm_mcode_frame_s* mcf, bl_t entry_channels )) =
 {
     ASSERT( o.is_consistent() );
-    opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!.scope();
-    opal_net_node_adl_s* adaptive_adl = opal_net_node_adl_s!.scope();
+    opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^^;
+    opal_net_node_adl_s* adaptive_adl = opal_net_node_adl_s!^^;
 
     foreach( :node_s* node in o.body ) if( node.nop )
     {
@@ -1027,7 +1027,7 @@ func (:builder_s) ::.create_input_nop =
         }
         else if( !h_cur.s.is_equal( h_in.s ) )
         {
-            st_s* msg = st_s!.scope();
+            st_s* msg = st_s!^^;
             msg.push_fa( "Shape deviation at input holor '#<sz_t>':", in_idx );
             msg.push_fa( "\n#p20.{Passed input} " );
             h_in.brief_to_sink( msg );
@@ -1054,7 +1054,7 @@ func (:builder_s) ::.create_input_nop =
 
 func (:builder_s) :.build_from_source =
 {
-    opal_sem_cell_s* sem_cell = opal_sem_cell_s!.scope();
+    opal_sem_cell_s* sem_cell = opal_sem_cell_s!^^;
     o.sem_builder.build_from_source( sem_cell, source );
     net_cell.from_sem_cell( sem_cell, o, o->log );
 };

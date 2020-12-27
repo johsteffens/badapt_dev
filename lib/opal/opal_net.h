@@ -222,7 +222,7 @@ stamp :cell_s = aware :
 
     func :.solve =
     {
-        $* deferred = opal_net_node_adl_s!.scope();
+        $* deferred = opal_net_node_adl_s!^^;
         foreach( $* e in o->excs  ) e.solve( deferred );
         foreach( $* e in deferred ) e.solve( NULL );
     };

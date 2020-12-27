@@ -35,7 +35,7 @@ func (st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, const opal_contex
 
 func (:s) (void disassemble_hbase_to_sink( const, const bhvm_mcode_hbase_s* hbase, sz_t indent, bcore_sink* sink )) =
 {
-    $* st_buf = st_s!.scope();
+    $* st_buf = st_s!^^;
     sz_t hname_length = 0;
     sz_t hbrief_length = 0;
 
@@ -44,7 +44,7 @@ func (:s) (void disassemble_hbase_to_sink( const, const bhvm_mcode_hbase_s* hbas
         bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ __i ];
         sc_t sc_name = opal_frame_hmeta_get_global_name_st( hmeta, o->context, st_buf )->sc;
         hname_length = sz_max( hname_length, bcore_strlen( sc_name ) );
-        st_s* st = st_s!.scope( scope_local );
+        st_s* st = st_s!^;
         h.compact_to_sink( 12, st );
         hbrief_length = sz_max( hbrief_length, st.size );
     }
@@ -55,7 +55,7 @@ func (:s) (void disassemble_hbase_to_sink( const, const bhvm_mcode_hbase_s* hbas
         tp_t pclass = hmeta.get_pclass();
         sc_t sc_name = opal_frame_hmeta_get_global_name_st( hmeta, o->context, st_buf ).sc;
 
-        $* msg = st_s!.scope( scope_local );
+        $* msg = st_s!^;
         msg.push_fa( "#rn{ }#pl3 {#<sz_t>}", indent, __i );
 
         bhvm_mcode_node_s* mnode = hmeta.get_node();
@@ -73,7 +73,7 @@ func (:s) (void disassemble_hbase_to_sink( const, const bhvm_mcode_hbase_s* hbas
         else if( hmeta.is_active() ) msg.push_fa( " active  " );
         else                         msg.push_fa( " const   " );
 
-        $* st = st_s!.scope( scope_local );
+        $* st = st_s!^;
         h.compact_to_sink( 12, st );
 
         msg.push_fa( " #pn' '{#<st_s*>} ", hbrief_length, st );
@@ -92,7 +92,7 @@ func (:s) (void disassemble_hbase_to_sink( const, const bhvm_mcode_hbase_s* hbas
 
 func (:s) (void disassemble_hidx_to_sink( const, const bhvm_mcode_hbase_s* hbase, const bcore_arr_sz_s* hidx, sz_t indent, bcore_sink* sink ) ) =
 {
-    $* st_buf = st_s!.scope();
+    $* st_buf = st_s!^^;
     sz_t hname_length = 0;
 
     foreach( sz_t idx_ap in hidx )
@@ -184,8 +184,8 @@ func (:s) :.disassemble_to_sink =
 
 func (:s) :.setup_from_source =
 {
-    $* net_cell = opal_net_cell_s!.scope();
-    $* net_builder = opal_net_builder_s!.scope();
+    $* net_cell = opal_net_cell_s!^^;
+    $* net_builder = opal_net_builder_s!^^;
 
     net_builder.fork_log( o.log );
     net_builder.fork_input_holors( en, size_en );
@@ -257,7 +257,7 @@ func (:s) :.run_ap =
         ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
         if( !h_m.s.is_equal( h_i.s ) )
         {
-            st_s* st = st_s!.scope( scope_local );
+            st_s* st = st_s!^;
             st.push_fa( "Entry channel #<sz_t> size mismatch:", i );
             st.push_fa( "\nGiven holor:   " );
             h_i.brief_to_sink( st );
@@ -310,7 +310,7 @@ func (:s) :.run_dp =
             ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_i.s ) )
             {
-                st_s* st = st_s!.scope( scope_local );
+                st_s* st = st_s!^;
                 st.push_fa( "Exit channel #<sz_t> shape mismatch:", i );
                 st.push_fa( "\nGiven holor:   " );
                 h_i.brief_to_sink( st );
@@ -436,18 +436,18 @@ func (:cyclic_s) :.setup =
     sz_t rolled_hbase_size = hbase.holor_adl.size;
     hbase.copy_size_limit = rolled_hbase_size;
 
-    bcore_arr_sz_s* idx_arr_track0_ap = bcore_arr_sz_s!.scope();
+    bcore_arr_sz_s* idx_arr_track0_ap = bcore_arr_sz_s!^^;
     track0_ap.get_index_arr( idx_arr_track0_ap );
 
     /// unrollable indices
-    bcore_arr_sz_s* ur_idx_arr = bcore_arr_sz_s!.scope();
+    bcore_arr_sz_s* ur_idx_arr = bcore_arr_sz_s!^^;
 
     foreach( sz_t src_idx in idx_arr_track0_ap )
     {
         if( !hbase->hmeta_adl.[ src_idx ].is_rollable() ) ur_idx_arr.push( src_idx );
     }
 
-    opal_frame_custom_hmeta_s* custom = opal_frame_custom_hmeta_s!.scope();
+    opal_frame_custom_hmeta_s* custom = opal_frame_custom_hmeta_s!^^;
 
     bhvm_mcode_track_s* track_ap_prev = NULL;
 
@@ -463,8 +463,8 @@ func (:cyclic_s) :.setup =
 
         if( i > 0 )
         {
-            bcore_arr_sz_s* ur_idx_map = bcore_arr_sz_s!.scope().fill( rolled_hbase_size, -1 );
-            bcore_arr_sz_s* rc_idx_map = bcore_arr_sz_s!.scope().fill( rolled_hbase_size, -1 );
+            bcore_arr_sz_s* ur_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
+            bcore_arr_sz_s* rc_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
             foreach( sz_t src_idx in ur_idx_arr )
             {
                 sz_t dst_idx = hbase.push_copy_from_index( src_idx );
