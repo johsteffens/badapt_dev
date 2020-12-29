@@ -129,6 +129,105 @@ group :context = opal_context
         {
             return o.setup_cell( ::cell_s! );
         };
+
+        func (tp_t entypeof_fv( mutable, sc_t format, va_list args )) =
+        {
+            return o.entypeof( st_s_create_fv( format, args ).scope().sc );
+        };
+
+        func (tp_t entypeof_fa( mutable, sc_t format, ... )) =
+        {
+            va_list args; va_start( args, format );
+            tp_t tp = o.entypeof_fv( format, args );
+            va_end( args );
+            return tp;
+        };
+
+        func (tp_t parse_name( mutable, bcore_source* source )) =
+        {
+            st_s* name = st_s!^;
+            source.parse_fa( " #name", name );
+            if( name.size == 0 ) source.parse_err_fa( "Identifier expected." );
+            return o.entypeof( name.sc );
+        };
+
+        func (bl_t is_control_type(  const, tp_t name )) = { return o.control_types.exists( name ); };
+        func (bl_t is_reserved_name( const, tp_t name )) = { return o.reserved_names.exists( name ); };
+
+        func (tp_t parse_var_name( mutable, bcore_source* source )) =
+        {
+            tp_t name = o.parse_name( source );
+            if( o.is_reserved_name( name ) )
+            {
+                source.parse_err_fa( "'#<sc_t>' is a reserved keyword. It may not be used as identifier at this point.", o.ifnameof( name ) );
+            }
+            return name;
+        };
+    };
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+group :stack =
+{
+    stamp :s = aware :
+    {
+        bcore_arr_vd_s arr;
+        func (x_inst* push( mutable, x_inst* value )) = { o.arr.push( value ); return value; };
+        func (x_inst* pop(  mutable )) = { return (x_inst*)o.arr.pop(); };
+        func (x_inst* pop_of_type(  mutable, tp_t type, bcore_source* source )) =
+        {
+            x_inst* v = o.pop();
+            if( v._ == type ) return v;
+            source.parse_err_fa( "Type error: '#<sc_t>' present but '#<sc_t>' expected.", ifnameof( v._ ), ifnameof( type ) );
+            return NULL;
+        };
+
+        func (x_inst* pop_of_value( mutable, x_inst* value, bcore_source* source )) =
+        {
+            x_inst* v = o.pop();
+            if( v == value ) return v;
+            source.parse_err_fa( "Internal error: Stack holds invalid value." );
+            return NULL;
+        };
+
+        func (bl_t is_of_type( mutable, sz_t idx, tp_t type )) =
+        {
+            if( idx <= 0 || idx > o.arr.size ) return false;
+            return *(aware_t*)o.arr.[ o.arr.size - idx ] == type;
+        };
+
+        func (bl_t is_of_value( mutable, sz_t idx, x_inst* value )) =
+        {
+            if( idx <= 0 || idx > o.arr.size ) return false;
+            return ( o.arr.[ o.arr.size - idx ].cast( x_inst* ) == value );
+        };
+
+        func (::link_s* pop_link( mutable, bcore_source* source )) = { return o.pop_of_type( TYPEOF_::link_s, source ).cast(::link_s*); };
+        func (::cell_s* pop_cell( mutable, bcore_source* source )) = { return o.pop_of_type( TYPEOF_::cell_s, source ).cast(::cell_s*); };
+
+        func (::link_s* stack_pop_link_or_exit( mutable, bcore_source* source )) =
+        {
+            x_inst* v = o.pop();
+            if     ( v._ == TYPEOF_::link_s )
+            {
+                return v.cast(::link_s*);
+            }
+            else if( v._ == TYPEOF_::cell_s )
+            {
+                ::cell_s* cell = v.cast(::cell_s*);
+                if( cell.excs.size != 1 )
+                {
+                    source.parse_err_fa( "Cell has #<sz_t> exit channels. Require is 1.", cell.excs.size );
+                }
+                return cell.excs.[ 0 ];
+            }
+            else
+            {
+                source.parse_err_fa( "Incorrect object on stack '#<sc_t>.", ifnameof( v._ ) );
+            }
+            return NULL;
+        };
     };
 };
 
@@ -337,6 +436,61 @@ stamp :cell_s = aware :
         if( sem && sem._ == TYPEOF_:link_s ) return sem.cast( :link_s* );
         return NULL;
     };
+
+    // push semantic item to cell's body ...
+    func (:* push_sem( mutable, tp_t type )) = { return o.body!.push_t( type ); };
+    func (:link_s* push_link( mutable )) = { return o.push_sem( TYPEOF_:link_s ).cast( :link_s* ); };
+    func (@* push_cell( mutable )) =
+    {
+        @* cell = o.push_sem( TYPEOF_@ ).cast( @* );
+        cell->parent = o;
+        cell->context = o->context.fork();
+        cell.set_name_invisible( o.entypeof_fa( "$#<sz_t>", o.body.size - 1 ) );
+        return cell;
+    };
+
+    func (@* push_cell_nop_d_invisible( mutable, opal_nop* nop )) = { @* cell = o.push_cell_nop_d( nop ); cell.visible = false; return cell; };
+    func (@* set_source( mutable, bcore_source* source )) = { o.source_point.set( source ); return o; };
+    func (@* push_cell_nop_d_set_source( mutable, opal_nop* nop, bcore_source* source )) = { return o.push_cell_nop_d( nop ).set_source( source ); };
+    func (@* push_cell_nop_d(                      mutable, opal_nop* nop ));
+    func (@* push_cell_nop_d_invisible_set_source( mutable, opal_nop* nop, bcore_source* source )) = { return o.push_cell_nop_d_invisible( nop ).set_source( source ); };
+    func (@* push_wrap_cell_hard( mutable, @* src )) = { return o.push_cell().wrap_cell_hard( src ); };
+    func (@* push_wrap_cell_soft( mutable, @* src )) = { return o.push_cell().wrap_cell_soft( src ); };
+    func (@* push_rewrap_cell_soft(     mutable, @* src )) = { return o.push_cell().rewrap_cell_soft( src ); };
+    func (@* push_wrap_cell_set_source( mutable, @* src, bcore_source* source )) = { return o.push_wrap_cell_soft( src ).set_source( source ); };
+
+    func (void create_args_out( mutable, bcore_source* source ));
+    func (void create_args_in(  mutable, :cell_s* frame, bcore_source* source ));
+    func (void wrap_cell(       mutable, :cell_s* cell ));
+    func (void             parse(               mutable,                        bcore_source* source ));
+    func (void             parse_body(          mutable,                        bcore_source* source ));
+    func (opal_sem*        evaluate_sem(        mutable,                        bcore_source* source ));
+    func (opal_sem*        evaluate_sem_stack(  mutable, bcore_arr_vd_s* stack, bcore_source* source ));
+    func (opal_sem_cell_s* evaluate_cell(       mutable,                        bcore_source* source ));
+    func (opal_sem_cell_s* evaluate_cell_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source ));
+    func (opal_sem_link_s* evaluate_link(       mutable,                        bcore_source* source ));
+    func (opal_sem_link_s* evaluate_link_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source ));
+    func (void             set_channels(        mutable, sz_t excs, sz_t encs ));
+
+    /// Context wrappers
+    func (sc_t nameof(   const, tp_t name )) = { return o.context.nameof( name ); };
+    func (sc_t ifnameof( const, tp_t name )) = { return o.context.ifnameof( name ); };
+    func (tp_t entypeof( const, sc_t name )) = { return o.context.entypeof( name ); };
+    func (tp_t entypeof_fv( const, sc_t format, va_list args )) = { return o.context.entypeof( st_s_create_fv( format, args ).scope()->sc ); };
+    func (tp_t entypeof_fa( const, sc_t format, ... )) =
+    {
+        va_list args; va_start( args, format );
+        tp_t tp = o.entypeof_fv( format, args );
+        va_end( args );
+        return tp;
+    };
+
+    func (tp_t parse_name(       const, bcore_source* source )) = { return o.context.parse_name( source ); };
+    func (tp_t parse_op2_symbol( const, bcore_source* source )) = { return o.context.parse_op2_symbol( source ); };
+    func (bl_t is_control_type(  const, tp_t name )) = { return o.context.is_control_type( name ); };
+    func (bl_t is_reserved_name( const, tp_t name )) = { return o.context.is_reserved_name( name ); };
+    func (tp_t parse_var_name(   const, bcore_source* source )) = { return o.context.parse_var_name( source ); };
+
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -422,22 +576,25 @@ group :tree = :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (sc_t nameof(      const, tp_t name ));
-func (:cell_s) (sc_t ifnameof(    const, tp_t name ));
-func (:cell_s) (tp_t entypeof(    const, sc_t name ));
-func (:cell_s) (tp_t entypeof_fv( const, sc_t format, va_list args ));
-func (:cell_s) (tp_t entypeof_fa( const, sc_t format, ... ));
-
 func (:link_s) (@* trace_to_cell_membrane( mutable ));
 
-func (:cell_s) (void parse( mutable, bcore_source* source ));
-func (:cell_s) (void parse_signature( mutable, bcore_source* source ));
-func (:cell_s) (void parse_body( mutable, bcore_source* source ));
-
 func (:tree_node_s) (bcore_source_point_s* get_nearest_source_point( mutable ));
+
+embed "opal_sem.x";
 
 #endif // XOILA_SECTION
 
 /**********************************************************************************************************************/
+
+void stack_push( bcore_arr_vd_s* o, vd_t value );
+vd_t stack_pop( bcore_arr_vd_s* o );
+vd_t stack_pop_of_type( bcore_arr_vd_s* o, tp_t type, bcore_source* source );
+vd_t stack_pop_of_value( bcore_arr_vd_s* o, vd_t value, bcore_source* source );
+bl_t stack_of_type( bcore_arr_vd_s* o, sz_t idx, tp_t type );
+bl_t stack_of_value( bcore_arr_vd_s* o, sz_t idx, vd_t value );
+opal_sem_link_s* stack_pop_link( bcore_arr_vd_s* o, bcore_source* source );
+opal_sem_cell_s* stack_pop_cell( bcore_arr_vd_s* o, bcore_source* source );
+opal_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source* source );
+
 
 #endif // OPAL_SEM_H
