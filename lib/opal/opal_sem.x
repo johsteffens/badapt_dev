@@ -540,7 +540,7 @@ func (:cell_s) (void parse_body( mutable, bcore_source* source )) =
 
 func (:cell_s) (void evaluate_set_encs( mutable, :cell_s* parent, bcore_source* source )) =
 {
-    bcore_arr_vd_s* stack = bcore_arr_vd_s!^;
+    :stack_s* stack = :stack_s!^;
     st_s* name = st_s!^;
 
     source.parse_fa( " (" );
@@ -583,7 +583,7 @@ func (:cell_s) (void evaluate_set_encs( mutable, :cell_s* parent, bcore_source* 
             }
             else
             {
-                stack_push( stack, name );
+                stack.push( name );
             }
         }
 
@@ -657,9 +657,9 @@ func (:cell_s) (:cell_s* recat_cell( mutable, :cell_s* c1, :cell_s* c2, bcore_so
         {
             assert( k < cell.encs.size );
             :link_s* c0_link = cell.encs.[ k++ ];
-            opal_sem_link_s_set_name_visible( c0_link, c1_link.name );
-            c0_link.up   = c1_link.up;
-            c1_link.up   = c0_link;
+            c0_link.set_name_visible( c1_link.name );
+            c0_link.up = c1_link.up;
+            c1_link.up = c0_link;
         }
         else
         {
@@ -684,14 +684,14 @@ func (:cell_s) (:cell_s* recat_cell( mutable, :cell_s* c1, :cell_s* c2, bcore_so
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source )) =
+func (:cell_s) (void evaluate_stack( mutable, :stack_s* stack, bcore_source* source )) =
 {
     st_s* name = st_s!^;
 
-    opal_sem_stack_flag_s* flag_bin_op    = opal_sem_stack_flag_s!^;
-    opal_sem_stack_flag_s* flag_una_op    = opal_sem_stack_flag_s!^;
-    opal_sem_stack_flag_s* flag_cell_cat  = opal_sem_stack_flag_s!^;
-    opal_sem_stack_flag_s* flag_inc_order = opal_sem_stack_flag_s!^;
+    $* flag_bin_op    = :stack_flag_s!^;
+    $* flag_una_op    = :stack_flag_s!^;
+    $* flag_cell_cat  = :stack_flag_s!^;
+    $* flag_inc_order = :stack_flag_s!^;
 
     tp_t op2_symbol = 0;
 
@@ -700,9 +700,9 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
         bl_t identifier = false;
 
         // identifier
-        if( stack_of_type( stack, 1, TYPEOF_st_s ) )
+        if( stack.is_of_type( 1, TYPEOF_st_s ) )
         {
-            name.copy( stack_pop( stack ) );
+            name.copy( stack.pop().cast( st_s* ) );
             identifier = true;
         }
         else if( source.parse_bl( " #?(([0]>='A'&&[0]<='Z')||([0]>='a'&&[0]<='z'))" ) )
@@ -719,9 +719,9 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
             {
                 if( tp_name == TYPEOF_cell ) // inline cell definition
                 {
-                    opal_sem_cell_s* cell = o.push_cell();
+                    :cell_s* cell = o.push_cell();
                     cell.parse( source );
-                    stack_push( stack, cell );
+                    stack.push( cell );
                 }
                 else
                 {
@@ -758,11 +758,11 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
                 {
                     case TYPEOF_:cell_s:
                     {
-                        stack_push( stack, item.cast( :cell_s* ) );
+                        stack.push( item.cast( :cell_s* ) );
                     }
                     break;
 
-                    case TYPEOF_opal_sem_link_s:
+                    case TYPEOF_:link_s:
                     {
                         :link_s* link = item.cast( :link_s* );
                         if( link.protected )
@@ -780,7 +780,7 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
                                 source.parse_err_fa( "Identifier '#<sc_t>' is protected (unusable) at this point.", name.sc );
                             }
                         }
-                        stack_push( stack, item );
+                        stack.push( item );
                     }
                     break;
 
@@ -801,9 +801,9 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
             source.parse_fa( " #<f3_t*>", &val );
             if(      source.parse_bl( "#?'f2'" ) ) type = TYPEOF_f2_t;
             else if( source.parse_bl( "#?'f3'" ) ) type = TYPEOF_f3_t;
-            opal_sem_cell_s* cell = o.push_cell_const_scalar( type, val );
+            :cell_s* cell = o.push_cell_const_scalar( type, val );
             cell.source_point.set( source );
-            stack_push( stack, cell.excs.data[ 0 ] );
+            stack.push( cell.excs.data[ 0 ] );
         }
 
         // undetermined scalar (falls back to 0)
@@ -814,22 +814,22 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
             else if( source.parse_bl( "#?'f3'" ) ) type = TYPEOF_f3_t;
             :cell_s* cell = o.push_cell_const_scalar( type, 0 );
             cell.source_point.set( source );
-            stack_push( stack, cell.excs.data[ 0 ] );
+            stack.push( cell.excs.data[ 0 ] );
         }
 
         // block or input channel selection in case l-value is a cell
         else if( source.parse_bl( " #=?'('" ) )
         {
-            if( stack_of_type( stack, 1, TYPEOF_:cell_s ) )
+            if( stack.is_of_type( 1, TYPEOF_:cell_s ) )
             {
-                :cell_s* cell = o.push_wrap_cell_set_source( stack_pop( stack ), source );
+                :cell_s* cell = o.push_wrap_cell_set_source( stack.pop().cast( :cell_s* ), source );
                 cell.evaluate_set_encs( o, source );
-                stack_push( stack, cell );
+                stack.push( cell );
             }
             else
             {
                 source.parse_fa( " (" );
-                stack_push( stack, o.evaluate_sem( source ) );
+                stack.push( o.evaluate_sem( source ) );
                 source.parse_fa( " )" );
             }
         }
@@ -837,9 +837,9 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
         // cell catenation
         else if( source.parse_bl( " #?'<:'" ) )
         {
-            if( stack_of_type( stack, 1, TYPEOF_:cell_s ) )
+            if( stack.is_of_type( 1, TYPEOF_:cell_s ) )
             {
-                stack_push( stack, flag_cell_cat );
+                stack.push( flag_cell_cat );
             }
             else
             {
@@ -852,22 +852,22 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
         {
             if // if( binary op not applicable):
             (
-                 stack.size == 0 ||
-               ( stack.size >= 1 && stack_of_value( stack, 1, flag_una_op ) ) ||
-               ( stack.size >= 3 && stack_of_value( stack, 3, flag_bin_op ) )
+                 stack.size() == 0 ||
+               ( stack.size() >= 1 && stack.is_of_value( 1, flag_una_op ) ) ||
+               ( stack.size() >= 3 && stack.is_of_value( 3, flag_bin_op ) )
             )
             {
-                opal_sem_cell_s* cell = o.get_cell_by_name( op2_symbol );
+                :cell_s* cell = o.get_cell_by_name( op2_symbol );
                 opal_nop* nop_unary = cell.nop.create_op_of_arn( 1 );
                 if( nop_unary )
                 {
-                    opal_sem_cell_s* cell = o.push_cell_nop_d_invisible_set_source( nop_unary, source );
-                    stack_push( stack, cell );
-                    stack_push( stack, flag_una_op ); // flag after cell to avoid incorrect stack evaluation
+                    :cell_s* cell = o.push_cell_nop_d_invisible_set_source( nop_unary, source );
+                    stack.push( cell );
+                    stack.push( flag_una_op ); // flag after cell to avoid incorrect stack evaluation
                 }
                 else
                 {
-                    if( stack.size == 0 )
+                    if( stack.size() == 0 )
                     {
                         source.parse_err_fa
                         (
@@ -892,8 +892,8 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
 
                 cell = o.push_wrap_cell_set_source( cell, source );
 
-                stack_push( stack, flag_bin_op );
-                stack_push( stack, cell );
+                stack.push( flag_bin_op );
+                stack.push( cell );
             }
         }
 
@@ -901,12 +901,12 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
         else if( source.parse_bl( " #?'<<'" ) )
         {
             source.parse_fa( "#until'>'>>", name );
-            if( stack.size == 0 ) source.parse_err_fa( "Operator '#<sc_t>': Left operand missing.", name.sc );
+            if( stack.size() == 0 ) source.parse_err_fa( "Operator '#<sc_t>': Left operand missing.", name.sc );
             :cell_s* cell = o.get_cell_by_name( typeof( name.sc ) );
             if( !cell ) source.parse_err_fa( "Cell '#<sc_t>' not found.", name.sc );
             cell = o.push_wrap_cell_set_source( cell, source );
-            stack_push( stack, flag_bin_op );
-            stack_push( stack, cell );
+            stack.push( flag_bin_op );
+            stack.push( cell );
         }
 
         // output channel selection
@@ -915,12 +915,12 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
             source.parse_fa( "#name", name );
             if( name.size == 0 ) source.parse_err_fa( "Identifier expected." );
 
-            if( !stack_of_type( stack, 1, TYPEOF_:cell_s ) )
+            if( !stack.is_of_type( 1, TYPEOF_:cell_s ) )
             {
                 source.parse_err_fa( "Output channel selection on non-cell." );
             }
 
-            :cell_s* cell = stack_pop( stack );
+            :cell_s* cell = stack.pop().cast( :cell_s* );
             :link_s* link = cell.get_exc_by_name( typeof( name.sc ) );
 
             if( cell.get_arity() > 0 )
@@ -941,24 +941,24 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
                     o.ifnameof( cell.name ), name.sc
                 );
             }
-            stack_push( stack, link );
+            stack.push( link );
         }
 
         // postfix htp
         else if( source.parse_bl( " #?'~'" ) )
         {
             :cell_s* htp_cell = o.push_cell_nop_d_invisible_set_source( opal_nop_ar1_cast_htp_s!, source );
-            if( stack_of_type( stack, 1, TYPEOF_:link_s ) )
+            if( stack.is_of_type( 1, TYPEOF_:link_s ) )
             {
-                htp_cell.encs.[ 0 ].up = stack_pop_of_type( stack, TYPEOF_:link_s, source );
-                stack_push( stack, htp_cell.excs.[ 0 ] );
+                htp_cell.encs.[ 0 ].up = stack.pop_link( source );
+                stack.push( htp_cell.excs.[ 0 ] );
             }
-            else if( stack_of_type( stack, 1, TYPEOF_opal_sem_cell_s ) )
+            else if( stack.is_of_type( 1, TYPEOF_:cell_s ) )
             {
-                :cell_s* r_cell = stack_pop_of_type( stack, TYPEOF_:cell_s, source );
-                stack_push( stack, htp_cell );
-                stack_push( stack, flag_cell_cat );
-                stack_push( stack, r_cell );
+                :cell_s* r_cell = stack.pop_cell( source );
+                stack.push( htp_cell );
+                stack.push( flag_cell_cat );
+                stack.push( r_cell );
             }
             else
             {
@@ -980,21 +980,21 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
         /// priority stack processing ...
 
         // unary operator: right operand
-        while( stack.size >= 3 && stack_of_value( stack, 2, flag_una_op ) && stack_of_type( stack, 1, TYPEOF_:link_s ) )
+        while( stack.size() >= 3 && stack.is_of_value( 2, flag_una_op ) && stack.is_of_type( 1, TYPEOF_:link_s ) )
         {
-            :link_s* link = stack_pop_link( stack, source );
-            stack_pop_of_value( stack, flag_una_op, source );
-            :cell_s* cell = stack_pop_cell( stack, source );
+            :link_s* link = stack.pop_link( source );
+            stack.pop_of_value( flag_una_op, source );
+            :cell_s* cell = stack.pop_cell( source );
             ASSERT( cell.encs.size == 1 );
             cell.encs.[ 0 ].up = link;
-            stack_push( stack, cell.excs.[ 0 ] );
+            stack.push( cell.excs.[ 0 ] );
         }
 
-        if( stack.size >= 3 && stack_of_value( stack, 2, flag_bin_op ) )
+        if( stack.size() >= 3 && stack.is_of_value( 2, flag_bin_op ) )
         {
-            :cell_s* cell = stack_pop_of_type( stack, TYPEOF_:cell_s, source );
-            stack_pop_of_value( stack, flag_bin_op, source );
-            opal_sem* arg1 = stack_pop( stack );
+            :cell_s* cell = stack.pop_cell( source );
+            stack.pop_of_value( flag_bin_op, source );
+            opal_sem* arg1 = stack.pop();
 
             if( arg1._ == TYPEOF_:cell_s )
             {
@@ -1032,31 +1032,31 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
                 );
             }
 
-            stack_push( stack, arg1 );
-            stack_push( stack, flag_bin_op );
-            stack_push( stack, cell );
-            stack_push( stack, cell.excs.[ 0 ] );
+            stack.push( arg1 );
+            stack.push( flag_bin_op );
+            stack.push( cell );
+            stack.push( cell.excs.[ 0 ] );
         }
 
         // cell-catenation
-        if( stack.size >= 3 && stack_of_value( stack, 2, flag_cell_cat ) )
+        if( stack.size() >= 3 && stack.is_of_value( 2, flag_cell_cat ) )
         {
-            if( stack_of_type( stack, 1, TYPEOF_:cell_s ) )  // cell1 : cell2
+            if( stack.is_of_type( 1, TYPEOF_:cell_s ) )  // cell1 : cell2
             {
-                :cell_s* cell2 = stack_pop_cell( stack, source );
-                stack_pop_of_value( stack, flag_cell_cat, source );
-                :cell_s* cell1 = stack_pop_cell( stack, source );
-                stack_push( stack, o.recat_cell( cell1, cell2, source ) );
+                :cell_s* cell2 = stack.pop_cell( source );
+                stack.pop_of_value( flag_cell_cat, source );
+                :cell_s* cell1 = stack.pop_cell( source );
+                stack.push( o.recat_cell( cell1, cell2, source ) );
             }
-            else if( stack_of_type( stack, 1, TYPEOF_:link_s ) ) // cell : link
+            else if( stack.is_of_type( 1, TYPEOF_:link_s ) ) // cell : link
             {
-                :link_s* link = stack_pop_link( stack, source );
-                stack_pop_of_value( stack, flag_cell_cat, source );
-                :cell_s* cell = stack_pop_cell( stack, source );
+                :link_s* link = stack.pop_link( source );
+                stack.pop_of_value( flag_cell_cat, source );
+                :cell_s* cell = stack.pop_cell( source );
                 cell = o.push_wrap_cell_soft( cell );
                 if( cell.encs.size != 1 ) source.parse_err_fa( "Catenation 'Cell : Link': Cell has #<sz_t> free entry channels; required is 1", cell.encs.size );
                 cell.encs.[ 0 ].up = link;
-                stack_push( stack, cell );
+                stack.push( cell );
             }
             else
             {
@@ -1065,34 +1065,34 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
         }
 
         // order incrementations (loop because multiple [] can be next to each other)
-        while( stack_of_value( stack, 2, flag_inc_order ) && stack_of_type( stack, 1, TYPEOF_:link_s ) )
+        while( stack.is_of_value( 2, flag_inc_order ) && stack.is_of_type( 1, TYPEOF_:link_s ) )
         {
-            :link_s* link2 = stack_pop_link( stack, source );
-            stack_pop_of_value( stack, flag_inc_order, source );
-            :cell_s* cell  = stack_pop_cell( stack, source );
+            :link_s* link2 = stack.pop_link( source );
+            stack.pop_of_value( flag_inc_order, source );
+            :cell_s* cell  = stack.pop_cell( source );
             ASSERT( cell.encs.[ 0 ].up ); // was set at cell creation
             cell.encs.[ 1 ].up = link2;
-            stack_push( stack, cell.excs.[ 0 ] );
+            stack.push( cell.excs.[ 0 ] );
         }
     }
 
     /// remaining stack processing ...
 
     /// Binary operators
-    while( stack.size >= 5 && stack_of_value( stack, 4, flag_bin_op ) ) // <left arg> <flag> <bin-operator> <output> <right arg>
+    while( stack.size() >= 5 && stack.is_of_value( 4, flag_bin_op ) ) // <left arg> <flag> <bin-operator> <output> <right arg>
     {
-        :link_s* link2 = stack_pop_link_or_exit( stack, source );
-        :link_s* out   = stack_pop_link( stack, source );
-        :cell_s* cell  = stack_pop_cell( stack, source );
-        stack_pop_of_value( stack, flag_bin_op, source );
-        :link_s* link1 = stack_pop_link_or_exit( stack, source );
+        :link_s* link2 = stack.pop_link_or_exit( source );
+        :link_s* out   = stack.pop_link( source );
+        :cell_s* cell  = stack.pop_cell( source );
+        stack.pop_of_value( flag_bin_op, source );
+        :link_s* link1 = stack.pop_link_or_exit( source );
 
-        if( stack.size >= 4 && stack_of_value( stack, 3, flag_bin_op ) ) // merge with prior operation considering priority
+        if( stack.size() >= 4 && stack.is_of_value( 3, flag_bin_op ) ) // merge with prior operation considering priority
         {
-            :link_s* prior_out   = stack_pop_link( stack, source );
-            :cell_s* prior_cell  = stack_pop_cell( stack, source );
-            stack_pop_of_value( stack, flag_bin_op, source );
-            :link_s* prior_link1 = stack_pop_link_or_exit( stack, source );
+            :link_s* prior_out   = stack.pop_link( source );
+            :cell_s* prior_cell  = stack.pop_cell( source );
+            stack.pop_of_value( flag_bin_op, source );
+            :link_s* prior_link1 = stack.pop_link_or_exit( source );
 
             sz_t prior_priority = prior_cell.get_priority();
             sz_t cell_priority  = cell.get_priority();
@@ -1106,52 +1106,52 @@ func (:cell_s) (void evaluate_stack( mutable, bcore_arr_vd_s* stack, bcore_sourc
                 cell.get_enc_by_open().up = link1;
                 cell.get_enc_by_open().up = link2;
 
-                stack_push( stack, prior_link1 );
-                stack_push( stack, flag_bin_op );
-                stack_push( stack, prior_cell );
-                stack_push( stack, prior_out );
-                stack_push( stack, out );           // out becomes right argument for prior_cell
+                stack.push( prior_link1 );
+                stack.push( flag_bin_op );
+                stack.push( prior_cell );
+                stack.push( prior_out );
+                stack.push( out );           // out becomes right argument for prior_cell
             }
             else
             {
                 cell.get_enc_by_open().up = prior_out;
                 cell.get_enc_by_open().up = link2;
 
-                stack_push( stack, prior_link1 );
-                stack_push( stack, flag_bin_op );
-                stack_push( stack, prior_cell );
-                stack_push( stack, out );
-                stack_push( stack, link1 );
+                stack.push( prior_link1 );
+                stack.push( flag_bin_op );
+                stack.push( prior_cell );
+                stack.push( out );
+                stack.push( link1 );
             }
         }
         else // fully resolve operation
         {
             cell.get_enc_by_open().up = link1;
             cell.get_enc_by_open().up = link2;
-            stack_push( stack, out );
+            stack.push( out );
         }
     }
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:* evaluate_sem_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source )) =
+func (:cell_s) (:* evaluate_sem_stack( mutable, :stack_s* stack, bcore_source* source )) =
 {
     o.evaluate_stack( stack, source );
-    if( stack.size != 1 ) source.parse_err_fa( "Expression syntax error." );
-    return stack_pop( stack );
+    if( stack.size() != 1 ) source.parse_err_fa( "Expression syntax error." );
+    return stack.pop();
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 func (:cell_s) (:* evaluate_sem( mutable, bcore_source* source )) =
 {
-    return o.evaluate_sem_stack( bcore_arr_vd_s!^, source );
+    return o.evaluate_sem_stack( :stack_s!^, source );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:link_s* evaluate_link_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source )) =
+func (:cell_s) (:link_s* evaluate_link_stack( mutable, :stack_s* stack, bcore_source* source )) =
 {
     :* ret = o.evaluate_sem_stack( stack, source );
     if( ret._ == TYPEOF_:cell_s )
@@ -1170,12 +1170,12 @@ func (:cell_s) (:link_s* evaluate_link_stack( mutable, bcore_arr_vd_s* stack, bc
 
 func (:cell_s) (:link_s* evaluate_link( mutable, bcore_source* source )) =
 {
-    return o.evaluate_link_stack( bcore_arr_vd_s!^, source );
+    return o.evaluate_link_stack( :stack_s!^, source );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:cell_s* evaluate_cell_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source )) =
+func (:cell_s) (:cell_s* evaluate_cell_stack( mutable, :stack_s* stack, bcore_source* source )) =
 {
     :* ret = o.evaluate_sem_stack( stack, source );
     if( ret._ != TYPEOF_:cell_s )
@@ -1189,7 +1189,141 @@ func (:cell_s) (:cell_s* evaluate_cell_stack( mutable, bcore_arr_vd_s* stack, bc
 
 func (:cell_s) (:cell_s* evaluate_cell( mutable, bcore_source* source )) =
 {
-    return o.evaluate_cell_stack( bcore_arr_vd_s!^, source );
+    return o.evaluate_cell_stack( :stack_s!^, source );
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+/// :builder_s
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+func (:builder_s) :.build_from_source =
+{
+    ::cell_s* root_cell = cell;
+    o.context =< ::context_s!;
+
+    /** Triple-nested semantic cell-frame:
+     *  Level 0: context level: contains all global operators
+     *  Level 1: frame level  : holds operators defined outside the root cell
+     *  Level 2: root level   : represents the root cell defined in source
+     */
+
+    o.context_cell =< ::context_s_create_cell( o.context );
+    o.frame_cell   =< ::context_s_create_cell( o.context );
+
+    o.context.setup_cell( root_cell );
+    o.context.setup( o.context_cell );
+
+    o.context_cell.set_name_invisible( o.context.entypeof( "$CX" ) );
+    o.frame_cell  .set_name_invisible( o.context.entypeof( "$CF" ) );
+
+    o.frame_cell.parent = o.context_cell;
+      root_cell .parent = o.frame_cell;
+
+    o.frame_cell.source_point.set( source );
+       root_cell.source_point.set( source );
+
+    source.parse_fa( " #-?'cell'" ); // leading 'cell' keyword is optional
+    root_cell.parse( source );
+
+    return 0;
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**********************************************************************************************************************/
+/// :tree
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Node process for a semantic cell.
+ *
+ *  Entering a cell:
+ *    Ascend the tree if matching or add a new node to the tree.
+ *    node_out is set to the node referencing the cell
+ *
+ *  Exiting a cell:
+ *     Descend the tree until a matching node is found.
+ *     node_out is set to the parent of the node referencing the cell.
+ *     Returns 1 in case no match is found.
+ *
+ *  Enter/Exit functions return 0 in case of success. !=0 is considered an error
+ */
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+func (:tree_node_s) (er_t enter( mutable, ::cell_s* cell, :node_s.2 node_out )) =
+{
+    :node_s* node = NULL;
+    foreach( :node_s* e in o ) node = ( e.cell == cell ) ? e : node;
+
+    if( !node )
+    {
+        node = o.push_d( :node_s! );
+        node.cell = cell;
+        node.parent = o;
+    }
+    node_out.1 = node;
+    return 0;
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+func (:tree_node_s) (er_t exit( mutable, ::cell_s* cell, bl_t test_for_wrapper, :node_s.2 node_out )) =
+{
+    :node_s* node = o;
+
+    /** Descend tree until node.cell == cell.
+      * This part covers specific (rare) situations in which a link exits a cell without passing through its membrane
+      * It is unclear if this handling is sensitive. Probably all relevant cases are covered using test_for_wrapper
+      * scheme.
+      */
+    while( node && node.cell != cell ) node = node.parent;
+
+    if( node && node.cell == cell )
+    {
+        node = node.parent;
+        while( test_for_wrapper && node && node.cell.is_wrapper() ) node = node.parent;
+        node_out.1 = node;
+        return 0;
+    }
+    else
+    {
+        return TYPEOF_general_error; // exiting from untraced cell
+    }
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+func (:tree_node_s) (bcore_source_point_s* get_nearest_source_point( mutable )) =
+{
+    if( !o || !o.cell ) return NULL;
+    return ( o.cell.source_point.source ) ? o.cell.source_point.1 : o.parent.get_nearest_source_point();
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+func (:tree_s) :.enter =
+{
+    if( !o.root )
+    {
+        o.root = :node_s!;
+        o.root.id = o.id_base++;
+        o.root.cell = cell;
+        node_out.1 = o.root;
+    }
+    else if( node_in )
+    {
+        node_in.enter( cell, node_out ).try();
+        if( node_out.1.id < 0 ) node_out.1.id = o.id_base++;
+    }
+    else // we just entered the tree frame
+    {
+        node_out.1 = o.root;
+    }
+    return 0;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------

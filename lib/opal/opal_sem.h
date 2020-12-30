@@ -173,6 +173,7 @@ group :stack =
     stamp :s = aware :
     {
         bcore_arr_vd_s arr;
+        func (sz_t size( const )) = { return o.arr.size; };
         func (x_inst* push( mutable, x_inst* value )) = { o.arr.push( value ); return value; };
         func (x_inst* pop(  mutable )) = { return (x_inst*)o.arr.pop(); };
         func (x_inst* pop_of_type(  mutable, tp_t type, bcore_source* source )) =
@@ -206,7 +207,7 @@ group :stack =
         func (::link_s* pop_link( mutable, bcore_source* source )) = { return o.pop_of_type( TYPEOF_::link_s, source ).cast(::link_s*); };
         func (::cell_s* pop_cell( mutable, bcore_source* source )) = { return o.pop_of_type( TYPEOF_::cell_s, source ).cast(::cell_s*); };
 
-        func (::link_s* stack_pop_link_or_exit( mutable, bcore_source* source )) =
+        func (::link_s* pop_link_or_exit( mutable, bcore_source* source )) =
         {
             x_inst* v = o.pop();
             if     ( v._ == TYPEOF_::link_s )
@@ -507,10 +508,9 @@ group :builder = :
 
     stamp :s = aware :
     {
-        opal_sem_context_s => context;
-        opal_sem_cell_s => cell_context;
-        opal_sem_cell_s => cell_frame;
-
+        ::context_s => context;
+        ::cell_s => context_cell;
+        ::cell_s => frame_cell;
         func :.build_from_source;
     };
 };
@@ -570,7 +570,7 @@ group :tree = :
         :node_s => root;
 
         func :.enter;
-        func :.exit;
+        func :.exit = { return node_in.exit( cell, test_for_wrapper, node_out ); };
     };
 };
 
