@@ -15,6 +15,17 @@
 
 /**********************************************************************************************************************/
 
+include "bmath_std.h";
+include "bhvm_mcode.h";
+include "opal_holor.h";
+include "opal_context.h";
+include "opal.xo.h";
+
+/// forwards
+
+forward opal_net_node_s;
+forward opal_net_node_adl_s;
+
 /// node operator
 
 // ---------------------------------------------------------------------------------------------------------------------

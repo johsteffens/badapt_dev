@@ -1261,7 +1261,7 @@ func (:tree_node_s) (er_t enter( mutable, ::cell_s* cell, :node_s.2 node_out )) 
 
     if( !node )
     {
-        node = o.push_d( :node_s! );
+        node = o.push();
         node.cell = cell;
         node.parent = o;
     }
@@ -1300,7 +1300,7 @@ func (:tree_node_s) (er_t exit( mutable, ::cell_s* cell, bl_t test_for_wrapper, 
 func (:tree_node_s) (bcore_source_point_s* get_nearest_source_point( mutable )) =
 {
     if( !o || !o.cell ) return NULL;
-    return ( o.cell.source_point.source ) ? o.cell.source_point.1 : o.parent.get_nearest_source_point();
+    return o.cell.source_point.ifd( o.cell.source_point.source, o.parent.get_nearest_source_point() );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1309,8 +1309,7 @@ func (:tree_s) :.enter =
 {
     if( !o.root )
     {
-        o.root = :node_s!;
-        o.root.id = o.id_base++;
+        o.root!.id = o.id_base++;
         o.root.cell = cell;
         node_out.1 = o.root;
     }

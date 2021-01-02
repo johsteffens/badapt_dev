@@ -22,18 +22,11 @@
 #ifndef OPAL_NOP_H
 #define OPAL_NOP_H
 
-#include "bmath_std.h"
-#include "bhvm_mcode.h"
-#include "opal_holor.h"
-#include "opal_context.h"
-#include "opal.xo.h"
+#include "bcore_std.h"
 
 /**********************************************************************************************************************/
 
-BCORE_FORWARD_OBJECT( opal_net_node_s );
-BCORE_FORWARD_OBJECT( opal_net_node_adl_s );
-
-XOILA_DEFINE_GROUP( opal_nop, bcore_inst, "opal_nop.decl.x", "opal_nop.impl.x" )
+XOILA_DEFINE_GROUP( opal_nop, x_inst, "opal_nop.decl.x", "opal_nop.impl.x" )
 
 /**********************************************************************************************************************/
 

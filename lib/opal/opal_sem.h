@@ -89,7 +89,7 @@ BCORE_FORWARD_OBJECT( opal_sem_context_s );
 /// returns global context
 opal_sem_context_s* opal_sem_get_context( void );
 
-XOILA_DEFINE_GROUP( opal_sem, bcore_inst )
+XOILA_DEFINE_GROUP( opal_sem, x_inst )
 #ifdef XOILA_SECTION
 
 // ---------------------------------------------------------------------------------------------------------------------
