@@ -34,7 +34,7 @@ XOILA_DEFINE_GROUP( opal_eval_nop, bcore_inst )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-signature void resolve( const );
+signature void resolve( c @* o );
 
 stamp :result_s = aware bcore_inst
 {
@@ -67,7 +67,7 @@ stamp :result_s = aware bcore_inst
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-signature void set( mutable, const :param_s* src );
+signature void set( m @* o, const :param_s* src );
 
 stamp :param_s = aware bcore_inst
 {
@@ -97,8 +97,8 @@ stamp :param_s = aware bcore_inst
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-feature void set_param( mutable, const :param_s* param );
-feature :result_s* run( const, :result_s* result ); // creates result or returns NULL
+feature void set_param( m @* o, c :param_s* param );
+feature m :result_s* run( c @* o, m :result_s* result ); // creates result or returns NULL
 
 /// template
 stump :std_s = aware :

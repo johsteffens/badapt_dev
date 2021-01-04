@@ -98,15 +98,15 @@ stamp :links_s = aware x_array
     wrap x_array.push;
 };
 
-signature void solve( mutable );
+signature void solve( m @* o );
 
 /// returns the uplink index pointing to node; returns -1 if not found
-signature sz_t up_index( const, const :node_s* node );
-signature void set_nop_d( mutable, lion_nop* nop );
+signature sz_t up_index( c @* o, const :node_s* node );
+signature void set_nop_d( m @* o, d lion_nop* nop );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature bl_t is_cyclic( const ) = { return false; };
+feature bl_t is_cyclic( c @* o ) = { return false; };
 
 stamp :node_s = aware :
 {
@@ -164,7 +164,7 @@ stamp :node_adl_s = aware x_array
     wrap x_array.push_d;
 };
 
-signature :node_s* get_by_id( mutable, sz_t id );
+signature m :node_s* get_by_id( m @* o, sz_t id );
 
 stamp :nodes_s = aware x_array
 {
@@ -181,12 +181,12 @@ stamp :nodes_s = aware x_array
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-signature void normalize( mutable );
-signature void clear_flags( mutable ); /// clears flags
-signature void clear_all_flags( mutable ); /// clears flags and probes
-signature bl_t is_consistent( const );
-signature void clear_downlinks( mutable );
-signature void set_downlinks( mutable );
+signature void normalize( m @* o );
+signature void clear_flags( m @* o ); /// clears flags
+signature void clear_all_flags( m @* o ); /// clears flags and probes
+signature bl_t is_consistent( c @* o );
+signature void clear_downlinks( m @* o );
+signature void set_downlinks( m @* o );
 
 stamp :cell_s = aware :
 {

@@ -33,7 +33,7 @@
 XOILA_DEFINE_GROUP( lion, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-signature void clear( mutable );
+signature void clear( m @* o );
 
 stamp :hmeta_s = aware bhvm_mcode_hmeta
 {

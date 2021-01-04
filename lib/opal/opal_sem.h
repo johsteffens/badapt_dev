@@ -97,9 +97,9 @@ XOILA_DEFINE_GROUP( opal_sem, x_inst )
 // semantic context
 group :context = opal_context
 {
-    signature void setup( mutable, opal_sem_cell_s* frame );
-    signature opal_sem_cell_s* setup_cell( mutable, opal_sem_cell_s* cell ); // returns cell
-    signature opal_sem_cell_s* create_cell( mutable ); // creates and setups cell
+    signature void setup( m @* o, m opal_sem_cell_s* frame );
+    signature m opal_sem_cell_s* setup_cell( m @* o, m opal_sem_cell_s* cell ); // returns cell
+    signature d opal_sem_cell_s* create_cell( m @* o ); // creates and setups cell
 
     stamp :s = aware :
     {
@@ -130,12 +130,12 @@ group :context = opal_context
             return o.setup_cell( ::cell_s! );
         };
 
-        func (tp_t entypeof_fv( mutable, sc_t format, va_list args )) =
+        func (tp_t entypeof_fv( m @* o, sc_t format, va_list args )) =
         {
             return o.entypeof( st_s_create_fv( format, args ).scope().sc );
         };
 
-        func (tp_t entypeof_fa( mutable, sc_t format, ... )) =
+        func (tp_t entypeof_fa( m @* o, sc_t format, ... )) =
         {
             va_list args; va_start( args, format );
             tp_t tp = o.entypeof_fv( format, args );
@@ -143,7 +143,7 @@ group :context = opal_context
             return tp;
         };
 
-        func (tp_t parse_name( mutable, bcore_source* source )) =
+        func (tp_t parse_name( m @* o, m bcore_source* source )) =
         {
             st_s* name = st_s!^;
             source.parse_fa( " #name", name );
@@ -151,10 +151,10 @@ group :context = opal_context
             return o.entypeof( name.sc );
         };
 
-        func (bl_t is_control_type(  const, tp_t name )) = { return o.control_types.exists( name ); };
-        func (bl_t is_reserved_name( const, tp_t name )) = { return o.reserved_names.exists( name ); };
+        func (bl_t is_control_type(  c @* o, tp_t name )) = { return o.control_types.exists( name ); };
+        func (bl_t is_reserved_name( c @* o, tp_t name )) = { return o.reserved_names.exists( name ); };
 
-        func (tp_t parse_var_name( mutable, bcore_source* source )) =
+        func (tp_t parse_var_name( m @* o, m bcore_source* source )) =
         {
             tp_t name = o.parse_name( source );
             if( o.is_reserved_name( name ) )
@@ -173,10 +173,10 @@ group :stack =
     stamp :s = aware :
     {
         bcore_arr_vd_s arr;
-        func (sz_t size( const )) = { return o.arr.size; };
-        func (x_inst* push( mutable, x_inst* value )) = { o.arr.push( value ); return value; };
-        func (x_inst* pop(  mutable )) = { return (x_inst*)o.arr.pop(); };
-        func (x_inst* pop_of_type(  mutable, tp_t type, bcore_source* source )) =
+        func (sz_t size( c @* o )) = { return o.arr.size; };
+        func (m x_inst* push( m @* o, m x_inst* value )) = { o.arr.push( value ); return value; };
+        func (m x_inst* pop(  m @* o )) = { return (x_inst*)o.arr.pop(); };
+        func (m x_inst* pop_of_type(  m @* o, tp_t type, m bcore_source* source )) =
         {
             x_inst* v = o.pop();
             if( v._ == type ) return v;
@@ -184,7 +184,7 @@ group :stack =
             return NULL;
         };
 
-        func (x_inst* pop_of_value( mutable, x_inst* value, bcore_source* source )) =
+        func (m x_inst* pop_of_value( m @* o, m x_inst* value, m bcore_source* source )) =
         {
             x_inst* v = o.pop();
             if( v == value ) return v;
@@ -192,22 +192,22 @@ group :stack =
             return NULL;
         };
 
-        func (bl_t is_of_type( mutable, sz_t idx, tp_t type )) =
+        func (bl_t is_of_type( m @* o, sz_t idx, tp_t type )) =
         {
             if( idx <= 0 || idx > o.arr.size ) return false;
             return *(aware_t*)o.arr.[ o.arr.size - idx ] == type;
         };
 
-        func (bl_t is_of_value( mutable, sz_t idx, x_inst* value )) =
+        func (bl_t is_of_value( m @* o, sz_t idx, m x_inst* value )) =
         {
             if( idx <= 0 || idx > o.arr.size ) return false;
             return ( o.arr.[ o.arr.size - idx ].cast( x_inst* ) == value );
         };
 
-        func (::link_s* pop_link( mutable, bcore_source* source )) = { return o.pop_of_type( TYPEOF_::link_s, source ).cast(::link_s*); };
-        func (::cell_s* pop_cell( mutable, bcore_source* source )) = { return o.pop_of_type( TYPEOF_::cell_s, source ).cast(::cell_s*); };
+        func (m ::link_s* pop_link( m @* o, m bcore_source* source )) = { return o.pop_of_type( TYPEOF_::link_s, source ).cast(::link_s*); };
+        func (m ::cell_s* pop_cell( m @* o, m bcore_source* source )) = { return o.pop_of_type( TYPEOF_::cell_s, source ).cast(::cell_s*); };
 
-        func (::link_s* pop_link_or_exit( mutable, bcore_source* source )) =
+        func (m ::link_s* pop_link_or_exit( m @* o, m bcore_source* source )) =
         {
             x_inst* v = o.pop();
             if     ( v._ == TYPEOF_::link_s )
@@ -240,11 +240,11 @@ group :stack =
  */
 group :id = :
 {
-    signature void clear(       mutable );
-    signature void set(         mutable, tp_t tp );
-    signature void push_child(  mutable, tp_t tp );
-    signature void push_parent( mutable, tp_t tp );
-    signature void to_string(   const, const opal_context* context, st_s* s );
+    signature void clear(       m @* o );
+    signature void set(         m @* o, tp_t tp );
+    signature void push_child(  m @* o, tp_t tp );
+    signature void push_parent( m @* o, tp_t tp );
+    signature void to_string(   c @* o, c opal_context* context, m st_s* s );
 
     stamp :s = aware :
     {
@@ -265,7 +265,7 @@ group :id = :
     };
 
     /// for use in other objects
-    signature void get_sem_id( const, :s* sem_id );
+    signature void get_sem_id( c @* o, m :s* sem_id );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -273,12 +273,12 @@ group :id = :
 // language control types
 name cell;
 
-signature   sz_t get_arity( const );
-signature   sz_t get_priority( const );
-feature tp_t get_name( const ) = { return 0; };
-feature bl_t is_visible( const ) = { return true; }; // invisible objects are not searchable via get_by_name functions
-feature void set_name_visible(   mutable, tp_t name );
-feature void set_name_invisible( mutable, tp_t name );
+signature   sz_t get_arity( c @* o );
+signature   sz_t get_priority( c @* o );
+feature tp_t get_name( c @* o ) = { return 0; };
+feature bl_t is_visible( c @* o ) = { return true; }; // invisible objects are not searchable via get_by_name functions
+feature void set_name_visible(   m @* o, tp_t name );
+feature void set_name_invisible( m @* o, tp_t name );
 
 body             get_name_ = { return o->name; };
 
@@ -301,14 +301,14 @@ stamp :link_s = aware :
     func :.is_visible = { return o->visible; };
 };
 
-signature bl_t     name_exists(       const,   tp_t name );
-signature :*       get_sem_by_name(   mutable, tp_t name );
-signature :link_s* get_link_by_name(  mutable, tp_t name );
-signature :link_s* get_link_by_open(  mutable );
-signature :link_s* get_link_by_up(    mutable, :link_s* up );
-signature :link_s* get_link_by_dn(    mutable, :link_s* dn );
-signature sz_t     get_index_by_link( mutable, :link_s* link ); // returns -1 if not found
-signature sz_t     count_open( const );
+signature bl_t       name_exists(       c @* o, tp_t name );
+signature m :*       get_sem_by_name(   m @* o, tp_t name );
+signature m :link_s* get_link_by_name(  m @* o, tp_t name );
+signature m :link_s* get_link_by_open(  m @* o );
+signature m :link_s* get_link_by_up(    m @* o, c :link_s* up );
+signature m :link_s* get_link_by_dn(    m @* o, c :link_s* dn );
+signature sz_t       get_index_by_link( m @* o, c :link_s* link ); // returns -1 if not found
+signature sz_t       count_open( c @* o );
 
 stamp :links_s = aware x_array
 {
@@ -383,13 +383,13 @@ stamp :body_s = aware x_array
 // ---------------------------------------------------------------------------------------------------------------------
 // cell
 
-signature :link_s* get_enc_by_name(  mutable, tp_t name );
-signature :link_s* get_enc_by_open(  mutable );
-signature :link_s* get_enc_by_dn(    mutable, :link_s* dn );
-signature :link_s* get_exc_by_name(  mutable, tp_t name );
-signature :cell_s* get_cell_by_name( mutable, tp_t name );
+signature m :link_s* get_enc_by_name(  m @* o, tp_t name );
+signature m :link_s* get_enc_by_open(  m @* o );
+signature m :link_s* get_enc_by_dn(    m @* o, c :link_s* dn );
+signature m :link_s* get_exc_by_name(  m @* o, tp_t name );
+signature m :cell_s* get_cell_by_name( m @* o, tp_t name );
 
-signature bl_t is_wrapper( const );
+signature bl_t is_wrapper( c @* o );
 
 stamp :cell_s = aware :
 {
@@ -439,9 +439,9 @@ stamp :cell_s = aware :
     };
 
     // push semantic item to cell's body ...
-    func (:* push_sem( mutable, tp_t type )) = { return o.body!.push_t( type ); };
-    func (:link_s* push_link( mutable )) = { return o.push_sem( TYPEOF_:link_s ).cast( :link_s* ); };
-    func (@* push_cell( mutable )) =
+    func (m :* push_sem( m @* o, tp_t type )) = { return o.body!.push_t( type ); };
+    func (m :link_s* push_link( m @* o )) = { return o.push_sem( TYPEOF_:link_s ).cast( :link_s* ); };
+    func (m @* push_cell( m @* o )) =
     {
         @* cell = o.push_sem( TYPEOF_@ ).cast( @* );
         cell->parent = o;
@@ -450,35 +450,35 @@ stamp :cell_s = aware :
         return cell;
     };
 
-    func (@* push_cell_nop_d_invisible( mutable, opal_nop* nop )) = { @* cell = o.push_cell_nop_d( nop ); cell.visible = false; return cell; };
-    func (@* set_source( mutable, bcore_source* source )) = { o.source_point.set( source ); return o; };
-    func (@* push_cell_nop_d_set_source( mutable, opal_nop* nop, bcore_source* source )) = { return o.push_cell_nop_d( nop ).set_source( source ); };
-    func (@* push_cell_nop_d(                      mutable, opal_nop* nop ));
-    func (@* push_cell_nop_d_invisible_set_source( mutable, opal_nop* nop, bcore_source* source )) = { return o.push_cell_nop_d_invisible( nop ).set_source( source ); };
-    func (@* push_wrap_cell_hard( mutable, @* src )) = { return o.push_cell().wrap_cell_hard( src ); };
-    func (@* push_wrap_cell_soft( mutable, @* src )) = { return o.push_cell().wrap_cell_soft( src ); };
-    func (@* push_rewrap_cell_soft(     mutable, @* src )) = { return o.push_cell().rewrap_cell_soft( src ); };
-    func (@* push_wrap_cell_set_source( mutable, @* src, bcore_source* source )) = { return o.push_wrap_cell_soft( src ).set_source( source ); };
+    func (m @* push_cell_nop_d_invisible( m @* o, d opal_nop* nop )) = { @* cell = o.push_cell_nop_d( nop ); cell.visible = false; return cell; };
+    func (m @* set_source( m @* o, m bcore_source* source )) = { o.source_point.set( source ); return o; };
+    func (m @* push_cell_nop_d_set_source( m @* o, d opal_nop* nop, m bcore_source* source )) = { return o.push_cell_nop_d( nop ).set_source( source ); };
+    func (m @* push_cell_nop_d(                      m @* o, d opal_nop* nop ));
+    func (m @* push_cell_nop_d_invisible_set_source( m @* o, d opal_nop* nop, m bcore_source* source )) = { return o.push_cell_nop_d_invisible( nop ).set_source( source ); };
+    func (m @* push_wrap_cell_hard( m @* o, m @* src )) = { return o.push_cell().wrap_cell_hard( src ); };
+    func (m @* push_wrap_cell_soft( m @* o, m @* src )) = { return o.push_cell().wrap_cell_soft( src ); };
+    func (m @* push_rewrap_cell_soft(     m @* o, m @* src )) = { return o.push_cell().rewrap_cell_soft( src ); };
+    func (m @* push_wrap_cell_set_source( m @* o, m @* src, m bcore_source* source )) = { return o.push_wrap_cell_soft( src ).set_source( source ); };
 
-    func (void create_args_out( mutable, bcore_source* source ));
-    func (void create_args_in(  mutable, :cell_s* frame, bcore_source* source ));
-    func (void wrap_cell(       mutable, :cell_s* cell ));
-    func (void             parse(               mutable,                        bcore_source* source ));
-    func (void             parse_body(          mutable,                        bcore_source* source ));
-    func (opal_sem*        evaluate_sem(        mutable,                        bcore_source* source ));
-    func (opal_sem*        evaluate_sem_stack(  mutable, bcore_arr_vd_s* stack, bcore_source* source ));
-    func (opal_sem_cell_s* evaluate_cell(       mutable,                        bcore_source* source ));
-    func (opal_sem_cell_s* evaluate_cell_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source ));
-    func (opal_sem_link_s* evaluate_link(       mutable,                        bcore_source* source ));
-    func (opal_sem_link_s* evaluate_link_stack( mutable, bcore_arr_vd_s* stack, bcore_source* source ));
-    func (void             set_channels(        mutable, sz_t excs, sz_t encs ));
+    func (void create_args_out( m @* o, m bcore_source* source ));
+    func (void create_args_in(  m @* o, m :cell_s* frame, m bcore_source* source ));
+    func (void wrap_cell(       m @* o, m :cell_s* cell ));
+    func (void             parse(               m @* o,                          m bcore_source* source ));
+    func (void             parse_body(          m @* o,                          m bcore_source* source ));
+    func (m opal_sem*        evaluate_sem(        m @* o,                          m bcore_source* source ));
+    func (m opal_sem*        evaluate_sem_stack(  m @* o, m bcore_arr_vd_s* stack, m bcore_source* source ));
+    func (m opal_sem_cell_s* evaluate_cell(       m @* o,                          m bcore_source* source ));
+    func (m opal_sem_cell_s* evaluate_cell_stack( m @* o, m bcore_arr_vd_s* stack, m bcore_source* source ));
+    func (m opal_sem_link_s* evaluate_link(       m @* o,                          m bcore_source* source ));
+    func (m opal_sem_link_s* evaluate_link_stack( m @* o, m bcore_arr_vd_s* stack, m bcore_source* source ));
+    func (void             set_channels(        m @* o, sz_t excs, sz_t encs ));
 
     /// Context wrappers
-    func (sc_t nameof(   const, tp_t name )) = { return o.context.nameof( name ); };
-    func (sc_t ifnameof( const, tp_t name )) = { return o.context.ifnameof( name ); };
-    func (tp_t entypeof( const, sc_t name )) = { return o.context.entypeof( name ); };
-    func (tp_t entypeof_fv( const, sc_t format, va_list args )) = { return o.context.entypeof( st_s_create_fv( format, args ).scope()->sc ); };
-    func (tp_t entypeof_fa( const, sc_t format, ... )) =
+    func (sc_t nameof(   c @* o, tp_t name )) = { return o.context.nameof( name ); };
+    func (sc_t ifnameof( c @* o, tp_t name )) = { return o.context.ifnameof( name ); };
+    func (tp_t entypeof( c @* o, sc_t name )) = { return o.context.entypeof( name ); };
+    func (tp_t entypeof_fv( c @* o, sc_t format, va_list args )) = { return o.context.entypeof( st_s_create_fv( format, args ).scope()->sc ); };
+    func (tp_t entypeof_fa( c @* o, sc_t format, ... )) =
     {
         va_list args; va_start( args, format );
         tp_t tp = o.entypeof_fv( format, args );
@@ -486,11 +486,11 @@ stamp :cell_s = aware :
         return tp;
     };
 
-    func (tp_t parse_name(       const, bcore_source* source )) = { return o.context.parse_name( source ); };
-    func (tp_t parse_op2_symbol( const, bcore_source* source )) = { return o.context.parse_op2_symbol( source ); };
-    func (bl_t is_control_type(  const, tp_t name )) = { return o.context.is_control_type( name ); };
-    func (bl_t is_reserved_name( const, tp_t name )) = { return o.context.is_reserved_name( name ); };
-    func (tp_t parse_var_name(   const, bcore_source* source )) = { return o.context.parse_var_name( source ); };
+    func (tp_t parse_name(       c @* o, m bcore_source* source )) = { return o.context.parse_name( source ); };
+    func (tp_t parse_op2_symbol( c @* o, m bcore_source* source )) = { return o.context.parse_op2_symbol( source ); };
+    func (bl_t is_control_type(  c @* o, tp_t name )) = { return o.context.is_control_type( name ); };
+    func (bl_t is_reserved_name( c @* o, tp_t name )) = { return o.context.is_reserved_name( name ); };
+    func (tp_t parse_var_name(   c @* o, m bcore_source* source )) = { return o.context.parse_var_name( source ); };
 
 };
 
@@ -504,7 +504,7 @@ stamp :stack_flag_s = aware : {};
 // semantic builder
 group :builder = :
 {
-    signature er_t build_from_source( mutable, opal_sem_cell_s* cell, bcore_source* source );
+    signature er_t build_from_source( m @* o, m opal_sem_cell_s* cell, m bcore_source* source );
 
     stamp :s = aware :
     {
@@ -536,8 +536,8 @@ group :builder = :
  */
 group :tree = :
 {
-    signature void push_parents_to_sem_id( const, ::id_s* sem_id );
-    signature void get_sem_id(             const, ::id_s* sem_id );
+    signature void push_parents_to_sem_id( c @* o, m ::id_s* sem_id );
+    signature void get_sem_id(             c @* o, m ::id_s* sem_id );
 
     stamp :node_s = aware x_array
     {
@@ -561,8 +561,8 @@ group :tree = :
         };
     };
 
-    signature er_t enter( mutable, ::cell_s* cell,                        :node_s* node_in, :node_s** node_out );
-    signature er_t exit ( mutable, ::cell_s* cell, bl_t test_for_wrapper, :node_s* node_in, :node_s** node_out );
+    signature er_t enter( m @* o, m ::cell_s* cell,                        m :node_s* node_in, m :node_s** node_out );
+    signature er_t exit ( m @* o, m ::cell_s* cell, bl_t test_for_wrapper, m :node_s* node_in, m :node_s** node_out );
 
     stamp :s = aware :
     {
@@ -576,9 +576,9 @@ group :tree = :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:link_s) (@* trace_to_cell_membrane( mutable ));
+func (:link_s) (m @* trace_to_cell_membrane( m @* o ));
 
-func (:tree_node_s) (bcore_source_point_s* get_nearest_source_point( mutable ));
+func (:tree_node_s) (m bcore_source_point_s* get_nearest_source_point( m @* o ));
 
 embed "opal_sem.x";
 

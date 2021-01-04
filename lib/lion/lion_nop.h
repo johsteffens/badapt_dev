@@ -83,15 +83,15 @@ name track_ap_cyclic_update;
  */
 name track_dp_adaptive_zero_grad;
 
-feature sz_t arity( const ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o->_ ) ); return -1; };
-feature sz_t priority( const ) = { return 10; };
-feature sc_t symbol( const )   = { return NULL; };
+feature sz_t arity( c @* o ) = { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o->_ ) ); return -1; };
+feature sz_t priority( c @* o ) = { return 10; };
+feature sc_t symbol( c @* o )   = { return NULL; };
 
 /// Overload 'true' when the symbol shall be declared as reserved keyword in the syntax. In that case the cell of that name cannot be defined locally.
-feature bl_t reserved( const ) = { return false; };
+feature bl_t reserved( c @* o ) = { return false; };
 
 /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
-feature :* create_op_of_arn( const, sz_t n ) = { return ( :a_arity( o ) == n ) ? :a_clone( o ) : NULL; };
+feature m :* create_op_of_arn( c @* o, sz_t n ) = { return ( :a_arity( o ) == n ) ? :a_clone( o ) : NULL; };
 
 /** Solve computes the result 'r' from an array of arguments 'a'.
   * 'a' represents an array of pointers. The array size is equal to arity.
@@ -138,21 +138,21 @@ stamp :solve_result_s = aware bcore_inst
 };
 
 /// returns true when the operator supports 'elementary cyclic indexing'
-feature bl_t eci( const ) = { return false; };
+feature bl_t eci( c @* o ) = { return false; };
 
 /** Low level solving.
   * Returns 'true' in case of success, otherwise check result->msg
   * The default implementation solves all elementary operators
   */
-feature bl_t solve( const, lion_holor_s** a, :solve_result_s* result ) extern solve__;
+feature bl_t solve( c @* o, m lion_holor_s** a, m :solve_result_s* result ) extern solve__;
 
 /** Node-level solving. */
-feature void solve_node( mutable, lion_net_node_s* node, lion_net_node_adl_s* deferred ) extern solve_node__;
+feature void solve_node( m @* o, m lion_net_node_s* node, m lion_net_node_adl_s* deferred ) extern solve_node__;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature bl_t is_cyclic(   const ) = { return false; };
-feature bl_t is_adaptive( const ) = { return false; };
+feature bl_t is_cyclic(   c @* o ) = { return false; };
+feature bl_t is_adaptive( c @* o ) = { return false; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -160,7 +160,7 @@ feature bl_t is_adaptive( const ) = { return false; };
  *  Default implementation turns it into a literal.
  *  For better control consider overloading feature 'solve_node'.
  */
-feature void settle( const, const :solve_result_s* result, :** out_nop, :solve_result_s** out_result ) =
+feature void settle( c @* o, c :solve_result_s* result, d :** out_nop, m :solve_result_s** out_result ) =
 {
     :ar0_literal_s* literal = :ar0_literal_s_create();
     literal->h = lion_holor_s_clone( result->h );
@@ -173,15 +173,15 @@ feature void settle( const, const :solve_result_s* result, :** out_nop, :solve_r
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// preferred vop type (optional, when the type does not depend on holor parameters)
-feature tp_t type_vop_ap( const );
-feature tp_t type_vop_dp_a( const );
-feature tp_t type_vop_dp_b( const );
-feature tp_t type_vop_dp_c( const );
+feature tp_t type_vop_ap( c @* o );
+feature tp_t type_vop_dp_a( c @* o );
+feature tp_t type_vop_dp_b( c @* o );
+feature tp_t type_vop_dp_c( c @* o );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// axon pass (output) holor + initialization code
-feature sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature sz_t mcode_push_ap_holor( c @* o, c :solve_result_s* result, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
     bhvm_holor_s* h = &result->h->h;
     lion_hmeta_s* m = &result->h->m;
@@ -202,7 +202,7 @@ feature sz_t mcode_push_ap_holor( const, const :solve_result_s* result, const bh
  *  then the function should be overloaded simply returning -1. This keeps the compiler from producing
  *  ineffective dp-mcode.
  */
-feature sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature sz_t mcode_push_dp_holor( c @* o, c :solve_result_s* result, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
     BLM_INIT();
 
@@ -219,7 +219,7 @@ feature sz_t mcode_push_dp_holor( const, const :solve_result_s* result, const bh
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature void mcode_push_ap_track( const, const :solve_result_s* result, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature void mcode_push_ap_track( c @* o, c :solve_result_s* result, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
     tp_t type = ( :defines_type_vop_ap( o ) ) ? :a_type_vop_ap( o ) : result->type_vop_ap;
     if( type ) bhvm_mcode_frame_s_track_vop_set_args_push_d( mcf, TYPEOF_track_ap, bhvm_vop_t_create( type ), arr_ci );
@@ -227,7 +227,7 @@ feature void mcode_push_ap_track( const, const :solve_result_s* result, const bh
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature void mcode_push_dp_track( const, const :solve_result_s* result, u0_t ch_id, const bhvm_vop_arr_ci_s* arr_ci, bhvm_mcode_frame_s* mcf ) =
+feature void mcode_push_dp_track( c @* o, c :solve_result_s* result, u0_t ch_id, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
     if( ch_id >= :a_arity( o ) + 'a' ) ERR_fa( "Invalid channel id '#<char>'", ( char )ch_id );
     tp_t type = 0;

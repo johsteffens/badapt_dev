@@ -17,7 +17,7 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, const opal_context* context, st_s* st )) =
+func (m st_s* hmeta_get_global_name_st( c bhvm_mcode_hmeta* hmeta, c opal_context* context, m st_s* st )) =
 {
     st.clear();
     if( hmeta && hmeta._ == TYPEOF_opal_holor_meta_s )
@@ -33,7 +33,7 @@ func (st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, const opal_contex
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) (void disassemble_hbase_to_sink( const, const bhvm_mcode_hbase_s* hbase, sz_t indent, bcore_sink* sink )) =
+func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t indent, m bcore_sink* sink )) =
 {
     $* st_buf = st_s!^^;
     sz_t hname_length = 0;
@@ -90,7 +90,7 @@ func (:s) (void disassemble_hbase_to_sink( const, const bhvm_mcode_hbase_s* hbas
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) (void disassemble_hidx_to_sink( const, const bhvm_mcode_hbase_s* hbase, const bcore_arr_sz_s* hidx, sz_t indent, bcore_sink* sink ) ) =
+func (:s) (void disassemble_hidx_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, c bcore_arr_sz_s* hidx, sz_t indent, m bcore_sink* sink ) ) =
 {
     $* st_buf = st_s!^^;
     sz_t hname_length = 0;
@@ -115,7 +115,7 @@ func (:s) (void disassemble_hidx_to_sink( const, const bhvm_mcode_hbase_s* hbase
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) (void disassemble_track_to_sink( const, const bhvm_mcode_track_s* track, sz_t indent, bcore_sink* sink )) =
+func (:s) (void disassemble_track_to_sink( c @* o, c bhvm_mcode_track_s* track, sz_t indent, m bcore_sink* sink )) =
 {
     if( !track ) return;
     foreach( $* op in track )

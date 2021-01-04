@@ -17,7 +17,7 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:generator_s) (void randomize_holor( const, opal_holor_s* h, bcore_prsg* prsg )) =
+func (:generator_s) (void randomize_holor( c @* o, m opal_holor_s* h, m bcore_prsg* prsg )) =
 {
     if( o.set_htp ) h.m.htp = ( prsg.gen_f3( 0, 1 ) > 0.5 );
 

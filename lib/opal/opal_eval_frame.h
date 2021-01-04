@@ -33,7 +33,7 @@
 XOILA_DEFINE_GROUP( opal_eval_frame, bcore_inst )
 #ifdef XOILA_SECTION // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-signature void resolve( mutable );
+signature void resolve( m @* o );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -58,11 +58,11 @@ stamp :result_s = aware bcore_inst
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature :result_s* run( const, :result_s* result ); // returns result
+feature m :result_s* run( c @* o, m :result_s* result ); // returns result
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-signature void set( mutable, const :param_s* src );
+signature void set( m @* o, const :param_s* src );
 stamp :param_s = aware bcore_inst
 {
     hidden aware bcore_sink -> log;
@@ -132,7 +132,7 @@ stamp :show_param_s = extending :std_s
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature void set_param( mutable, const :param_s* param );
+feature void set_param( m @* o, const :param_s* param );
 
 stamp :arr_s = aware x_array { aware : => []; };
 

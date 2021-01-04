@@ -18,7 +18,7 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:context_s) (tp_t parse_op2_symbol( const, bcore_source* source )) =
+func (:context_s) (tp_t parse_op2_symbol( c @* o, m bcore_source* source )) =
 {
     const bcore_arr_st_s* arr = o.arr_symbol_op2;
 
@@ -93,7 +93,7 @@ func (:context_s) :.setup =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:link_s* link_s_create_setup( tp_t name, :link_s* up, :link_s* dn, :cell_s* cell, bl_t exit )) =
+func (m :link_s* link_s_create_setup( tp_t name, m :link_s* up, m :link_s* dn, m :cell_s* cell, bl_t exit )) =
 {
     :link_s* o = :link_s!;
     o.set_name_visible( name );
@@ -107,7 +107,7 @@ func (:link_s* link_s_create_setup( tp_t name, :link_s* up, :link_s* dn, :cell_s
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Traces link to next membrane; returns NULL in case trace ends in open link
-func (:link_s) (@* trace_to_cell_membrane( mutable )) =
+func (:link_s) (m @* trace_to_cell_membrane( m @* o )) =
 {
     if( !o || o.cell ) return o;
     return o.up.trace_to_cell_membrane();
@@ -116,7 +116,7 @@ func (:link_s) (@* trace_to_cell_membrane( mutable )) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Traces link to next cell; returns NULL in case trace ends in open link
-func (:link_s) (:cell_s* trace_to_cell( mutable )) =
+func (:link_s) (m :cell_s* trace_to_cell( m @* o )) =
 {
     :link_s* link = o.trace_to_cell_membrane();
     if( link )
@@ -137,7 +137,7 @@ func (:link_s) (:cell_s* trace_to_cell( mutable )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void set_channels( mutable, sz_t excs, sz_t encs )) =
+func (:cell_s) (void set_channels( m @* o, sz_t excs, sz_t encs )) =
 {
     o.excs.set_size( excs );
     o.encs.set_size( encs );
@@ -150,7 +150,7 @@ func (:cell_s) (void set_channels( mutable, sz_t excs, sz_t encs )) =
 /** Adds a wrapping membrane only exposing unspecified entry links.
   * links of src are not modified; returns o
   */
-func (:cell_s) (@* wrap_cell_soft( mutable, @* src )) =
+func (:cell_s) (m @* wrap_cell_soft( m @* o, m @* src )) =
 {
     ASSERT( !o.body );
     ASSERT( !o.nop  );
@@ -184,7 +184,7 @@ func (:cell_s) (@* wrap_cell_soft( mutable, @* src )) =
   * Explicitly moves entry links of src to the wrapping membrane
   * Returns o.
   */
-func (:cell_s) (@* wrap_cell_hard( mutable, :cell_s* src )) =
+func (:cell_s) (m @* wrap_cell_hard( m @* o, m :cell_s* src )) =
 {
     ASSERT( !o.body );
     ASSERT( !o.nop  );
@@ -216,7 +216,7 @@ func (:cell_s) (@* wrap_cell_hard( mutable, :cell_s* src )) =
  *  Does not (!) move specified links of the root cell.
  *  Returns o.
  */
-func (:cell_s) (@* rewrap_cell_soft( mutable, :cell_s* src )) =
+func (:cell_s) (m @* rewrap_cell_soft( m @* o, m :cell_s* src )) =
 {
     ASSERT( !o.body );
     ASSERT( !o.nop  );
@@ -254,7 +254,7 @@ func (:cell_s) (@* rewrap_cell_soft( mutable, :cell_s* src )) =
  * Input channels are named in order 'a', 'b' ...
  * If ever more than 24 input channels are used, excess channels carry no name.
  */
-func (:cell_s) (@* push_cell_nop_d( mutable, opal_nop* nop )) =
+func (:cell_s) (m @* push_cell_nop_d( m @* o, m opal_nop* nop )) =
 {
     @* cell = o.push_cell();
     cell.set_channels( 1, nop.arity() );
@@ -269,7 +269,7 @@ func (:cell_s) (@* push_cell_nop_d( mutable, opal_nop* nop )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (@* push_cell_const_scalar( mutable, tp_t type, f3_t v )) =
+func (:cell_s) (m @* push_cell_const_scalar( m @* o, tp_t type, f3_t v )) =
 {
     opal_nop_ar0_literal_s* literal = opal_nop_ar0_literal_s!;
     literal.h = opal_holor_s!;
@@ -280,7 +280,7 @@ func (:cell_s) (@* push_cell_const_scalar( mutable, tp_t type, f3_t v )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void assert_identifier_not_yet_defined( const, tp_t name, bcore_source* source )) =
+func (:cell_s) (void assert_identifier_not_yet_defined( c @* o, tp_t name, m bcore_source* source )) =
 {
     if( o.encs.name_exists( name ) || ( o.body && o.body.name_exists( name ) ) )
     {
@@ -291,7 +291,7 @@ func (:cell_s) (void assert_identifier_not_yet_defined( const, tp_t name, bcore_
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// parses ( ... <- ... )
-func (:cell_s) (void parse_signature( mutable, bcore_source* source )) =
+func (:cell_s) (void parse_signature( m @* o, m bcore_source* source )) =
 {
     source.parse_fa( " (" );
 
@@ -328,7 +328,7 @@ func (:cell_s) (void parse_signature( mutable, bcore_source* source )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void parse( mutable, bcore_source* source )) =
+func (:cell_s) (void parse( m @* o, m bcore_source* source )) =
 {
     :cell_s* frame = o.parent;
 
@@ -359,7 +359,7 @@ func (:cell_s) (void parse( mutable, bcore_source* source )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (st_s* create_signature( const )) =
+func (:cell_s) (d st_s* create_signature( c @* o )) =
 {
     st_s* s = st_s!;
     s.push_fa( "(" );
@@ -372,7 +372,7 @@ func (:cell_s) (st_s* create_signature( const )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void parse_verify_signature( const, bcore_source* source )) =
+func (:cell_s) (void parse_verify_signature( c @* o, m bcore_source* source )) =
 {
     source.parse_fa( " (" );
 
@@ -423,7 +423,7 @@ func (:cell_s) (void parse_verify_signature( const, bcore_source* source )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void parse_body( mutable, bcore_source* source )) =
+func (:cell_s) (void parse_body( m @* o, m bcore_source* source )) =
 {
     source.parse_fa( " " );
     while( !source.eos() && !source.parse_bl( " #=?'}'" ) )
@@ -538,7 +538,7 @@ func (:cell_s) (void parse_body( mutable, bcore_source* source )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void evaluate_set_encs( mutable, :cell_s* parent, bcore_source* source )) =
+func (:cell_s) (void evaluate_set_encs( m @* o, m :cell_s* parent, m bcore_source* source )) =
 {
     :stack_s* stack = :stack_s!^;
     st_s* name = st_s!^;
@@ -612,7 +612,7 @@ func (:cell_s) (void evaluate_set_encs( mutable, :cell_s* parent, bcore_source* 
  *  The catenated cell is then wrapped again to leave only undefined input links exposed.
  *  The last soft-wrapping is done for convenience because some code using this function assumes arity == encs.size.
  */
-func (:cell_s) (:cell_s* recat_cell( mutable, :cell_s* c1, :cell_s* c2, bcore_source* source )) =
+func (:cell_s) (m :cell_s* recat_cell( m @* o, m :cell_s* c1, m :cell_s* c2, m bcore_source* source )) =
 {
     :cell_s* cell = o.push_cell();
     cell.source_point.set( source );
@@ -684,7 +684,7 @@ func (:cell_s) (:cell_s* recat_cell( mutable, :cell_s* c1, :cell_s* c2, bcore_so
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void evaluate_stack( mutable, :stack_s* stack, bcore_source* source )) =
+func (:cell_s) (void evaluate_stack( m @* o, m :stack_s* stack, m bcore_source* source )) =
 {
     st_s* name = st_s!^;
 
@@ -1135,7 +1135,7 @@ func (:cell_s) (void evaluate_stack( mutable, :stack_s* stack, bcore_source* sou
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:* evaluate_sem_stack( mutable, :stack_s* stack, bcore_source* source )) =
+func (:cell_s) (m :* evaluate_sem_stack( m @* o, m :stack_s* stack, m bcore_source* source )) =
 {
     o.evaluate_stack( stack, source );
     if( stack.size() != 1 ) source.parse_err_fa( "Expression syntax error." );
@@ -1144,14 +1144,14 @@ func (:cell_s) (:* evaluate_sem_stack( mutable, :stack_s* stack, bcore_source* s
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:* evaluate_sem( mutable, bcore_source* source )) =
+func (:cell_s) (m :* evaluate_sem( m @* o, m bcore_source* source )) =
 {
     return o.evaluate_sem_stack( :stack_s!^, source );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:link_s* evaluate_link_stack( mutable, :stack_s* stack, bcore_source* source )) =
+func (:cell_s) (m :link_s* evaluate_link_stack( m @* o, m :stack_s* stack, m bcore_source* source )) =
 {
     :* ret = o.evaluate_sem_stack( stack, source );
     if( ret._ == TYPEOF_:cell_s )
@@ -1168,14 +1168,14 @@ func (:cell_s) (:link_s* evaluate_link_stack( mutable, :stack_s* stack, bcore_so
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:link_s* evaluate_link( mutable, bcore_source* source )) =
+func (:cell_s) (m :link_s* evaluate_link( m @* o, m bcore_source* source )) =
 {
     return o.evaluate_link_stack( :stack_s!^, source );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:cell_s* evaluate_cell_stack( mutable, :stack_s* stack, bcore_source* source )) =
+func (:cell_s) (m :cell_s* evaluate_cell_stack( m @* o, m :stack_s* stack, m bcore_source* source )) =
 {
     :* ret = o.evaluate_sem_stack( stack, source );
     if( ret._ != TYPEOF_:cell_s )
@@ -1187,7 +1187,7 @@ func (:cell_s) (:cell_s* evaluate_cell_stack( mutable, :stack_s* stack, bcore_so
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (:cell_s* evaluate_cell( mutable, bcore_source* source )) =
+func (:cell_s) (m :cell_s* evaluate_cell( m @* o, m bcore_source* source )) =
 {
     return o.evaluate_cell_stack( :stack_s!^, source );
 };
@@ -1254,7 +1254,7 @@ func (:builder_s) :.build_from_source =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:tree_node_s) (er_t enter( mutable, ::cell_s* cell, :node_s.2 node_out )) =
+func (:tree_node_s) (er_t enter( m @* o, m ::cell_s* cell, m :node_s.2 node_out )) =
 {
     :node_s* node = NULL;
     foreach( :node_s* e in o ) node = ( e.cell == cell ) ? e : node;
@@ -1271,7 +1271,7 @@ func (:tree_node_s) (er_t enter( mutable, ::cell_s* cell, :node_s.2 node_out )) 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:tree_node_s) (er_t exit( mutable, ::cell_s* cell, bl_t test_for_wrapper, :node_s.2 node_out )) =
+func (:tree_node_s) (er_t exit( m @* o, m ::cell_s* cell, bl_t test_for_wrapper, m :node_s.2 node_out )) =
 {
     :node_s* node = o;
 
@@ -1297,7 +1297,7 @@ func (:tree_node_s) (er_t exit( mutable, ::cell_s* cell, bl_t test_for_wrapper, 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:tree_node_s) (bcore_source_point_s* get_nearest_source_point( mutable )) =
+func (:tree_node_s) (m bcore_source_point_s* get_nearest_source_point( m @* o )) =
 {
     if( !o || !o.cell ) return NULL;
     return o.cell.source_point.ifd( o.cell.source_point.source, o.parent.get_nearest_source_point() );

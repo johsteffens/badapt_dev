@@ -19,7 +19,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// recursive trace; exits when the enter membrane of the root cell is reached
-func (:node_s) (void trace_to_sink( const, sz_t indent, bcore_sink* sink )) =
+func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m bcore_sink* sink )) =
 {
     if( !o )
     {
@@ -63,7 +63,7 @@ func (:node_s) (void trace_to_sink( const, sz_t indent, bcore_sink* sink )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:node_s) (void err_fa( mutable, sc_t format, ... )) =
+func (:node_s) (void err_fa( m @* o, sc_t format, ... )) =
 {
     va_list args;
     va_start( args, format );
@@ -81,7 +81,7 @@ func (:node_s) (void err_fa( mutable, sc_t format, ... )) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// calls op-solve and sets node-holor
-func(:node_s) (void nop_solve( mutable, opal_holor_s** arg_h )) =
+func(:node_s) (void nop_solve( m @* o, m opal_holor_s** arg_h )) =
 {
     o.result =< opal_nop_solve_result_s!;
 
@@ -118,7 +118,7 @@ func(:node_s) (void nop_solve( mutable, opal_holor_s** arg_h )) =
 /** Recursively skips identities.
  *  Assumes initial state was normal and downlinks not set
  */
-func( :node_s) (void skip_identities( mutable )) =
+func( :node_s) (void skip_identities( m @* o )) =
 {
     if( o.flag ) return;
     o.flag = true;
@@ -292,7 +292,7 @@ func (:cell_s) :.set_downlinks =
 /** Removes all body-nodes not reachable via uplink from exit channels
  *  Creates a warning in case an entry channel is unreachable.
  */
-func (:cell_s) (void remove_unreachable_nodes( mutable )) =
+func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
 {
     o.clear_flags();
     foreach( :node_s* node in o.excs ) node.set_flags();
@@ -322,7 +322,7 @@ func (:cell_s) (void remove_unreachable_nodes( mutable )) =
 /** Removes all body-nodes containing an identity operator and relinks remaining nodes accordingly
  *  Clears all downlinks;
  */
-func (:cell_s) (void remove_identities( mutable )) =
+func (:cell_s) (void remove_identities( m @* o )) =
 {
     o.clear_downlinks();
     o.clear_flags();
@@ -343,13 +343,13 @@ func (:cell_s)
 (
     void from_sem_recursive
     (
-        mutable,
-        opal_sem_link_s* link,
-        opal_sem_tree_s* sem_tree,
-        opal_sem_tree_node_s* sem_tree_node,
-        opal_net_node_s* net_node_dn,
+        m @* o,
+        m opal_sem_link_s* link,
+        m opal_sem_tree_s* sem_tree,
+        m opal_sem_tree_node_s* sem_tree_node,
+        m opal_net_node_s* net_node_dn,
         sz_t             depth,
-        bcore_sink*      log  // optional
+        m bcore_sink*      log  // optional
     )
 ) =
 {
@@ -551,7 +551,7 @@ func (:cell_s)
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Finalization steps: Solves graph and optimizes it
-func (:cell_s) (void finalize( mutable )) =
+func (:cell_s) (void finalize( m @* o )) =
 {
     o.solve();
     o.remove_identities();
@@ -566,12 +566,12 @@ func (:cell_s) (void finalize( mutable )) =
  */
 func (:cell_s)
 (
-    opal_net_cell_s* from_sem_cell
+    m opal_net_cell_s* from_sem_cell
     (
-        mutable,
-        opal_sem_cell_s* sem_cell,
-        const opal_net* input_nop_creator,
-        bcore_sink* log
+        m @* o,
+        m opal_sem_cell_s* sem_cell,
+        c opal_net* input_nop_creator,
+        m bcore_sink* log
     )
 ) =
 {
@@ -641,7 +641,7 @@ func (:cell_s)
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// node occurs in the downtree of o
-func (:node_s) (bl_t recurses_in_downtree( mutable, const opal_net_node_s* node )) =
+func (:node_s) (bl_t recurses_in_downtree( m @* o, const opal_net_node_s* node )) =
 {
     if( o == node ) return true;
     if( o.probe ) return false;
@@ -978,7 +978,7 @@ func (:cell_s) :.mcode_push_ap =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void mcode_push_dp( mutable, bhvm_mcode_frame_s* mcf, bl_t entry_channels )) =
+func (:cell_s) (void mcode_push_dp( m @* o, m bhvm_mcode_frame_s* mcf, bl_t entry_channels )) =
 {
     ASSERT( o.is_consistent() );
     opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^^;

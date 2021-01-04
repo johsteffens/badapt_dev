@@ -39,20 +39,20 @@ XOILA_DEFINE_GROUP( lion_frame, bcore_inst )
 /// holor indexing group
 group :hidx =
 {
-    signature @* clear( mutable );
-    signature @* push(  mutable, sz_t index );
+    signature m @* clear( m @* o );
+    signature m @* push(  m @* o, sz_t index );
 
-    signature sz_t get_idx( const, sz_t index );
-    signature sz_t get_pclass_idx( const, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
-    signature sz_t get_size( const );
+    signature sz_t get_idx( c @* o, sz_t index );
+    signature sz_t get_pclass_idx( c @* o, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature sz_t get_size( c @* o );
 
-    signature bhvm_holor_s*     get_holor( const, const bhvm_mcode_hbase_s* hbase, sz_t index );
-    signature bhvm_mcode_hmeta* get_hmeta( const, const bhvm_mcode_hbase_s* hbase, sz_t index );
+    signature m bhvm_holor_s*     get_holor( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t index );
+    signature m bhvm_mcode_hmeta* get_hmeta( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t index );
 
-    signature bhvm_holor_s*     get_pclass_holor( const, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
-    signature bhvm_mcode_hmeta* get_pclass_hmeta( const, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature m bhvm_holor_s*     get_pclass_holor( c @* o, c bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature m bhvm_mcode_hmeta* get_pclass_hmeta( c @* o, c bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
 
-    signature @* replace_index( mutable, bcore_arr_sz_s* index_map );
+    signature m @* replace_index( m @* o, m bcore_arr_sz_s* index_map );
 
     stamp :s = aware :
     {
@@ -98,45 +98,45 @@ group :hidx =
 
 /// frame member functions
 
-signature void reset( mutable );
-signature void setup( mutable );
-signature void check_integrity( const );
+signature void reset( m @* o );
+signature void setup( m @* o );
+signature void check_integrity( c @* o );
 
-signature @* setup_from_source(      mutable, bcore_source* source, const bhvm_holor_s** en, sz_t size_en );
-signature @* setup_from_st(          mutable,   const st_s* st,     const bhvm_holor_s** en, sz_t size_en );
-signature @* setup_from_sc(          mutable,         sc_t  sc,     const bhvm_holor_s** en, sz_t size_en );
-signature @* create_from_source(              bcore_source* source, const bhvm_holor_s** en, sz_t size_en );
-signature @* create_from_st(                    const st_s* st,     const bhvm_holor_s** en, sz_t size_en );
-signature @* create_from_sc(                          sc_t  sc,     const bhvm_holor_s** en, sz_t size_en );
-signature @* setup_from_source_adl(  mutable, bcore_source* source, const bhvm_holor_adl_s* en );
-signature @* setup_from_st_adl(      mutable,   const st_s* st,     const bhvm_holor_adl_s* en );
-signature @* setup_from_sc_adl(      mutable,         sc_t  sc,     const bhvm_holor_adl_s* en );
-signature @* create_from_source_adl(          bcore_source* source, const bhvm_holor_adl_s* en );
-signature @* create_from_st_adl(                const st_s* st,     const bhvm_holor_adl_s* en );
-signature @* create_from_sc_adl(                      sc_t  sc,     const bhvm_holor_adl_s* en );
+signature m @* setup_from_source(      m @* o, m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
+signature m @* setup_from_st(          m @* o,         c st_s* st,     c bhvm_holor_s** en, sz_t size_en );
+signature m @* setup_from_sc(          m @* o,           sc_t  sc,     c bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_source(             m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_st(                        c st_s* st,      c bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_sc(                          sc_t  sc,      c bhvm_holor_s** en, sz_t size_en );
+signature m @* setup_from_source_adl(  m @* o, m bcore_source* source, c bhvm_holor_adl_s* en );
+signature m @* setup_from_st_adl(      m @* o,        c st_s* st,      c bhvm_holor_adl_s* en );
+signature m @* setup_from_sc_adl(      m @* o,          sc_t  sc,      c bhvm_holor_adl_s* en );
+signature d @* create_from_source_adl(         m bcore_source* source, c bhvm_holor_adl_s* en );
+signature d @* create_from_st_adl(                    c st_s* st,      c bhvm_holor_adl_s* en );
+signature d @* create_from_sc_adl(                      sc_t  sc,      c bhvm_holor_adl_s* en );
 
-signature sz_t get_size_en( const ); // number of entry channels
-signature sz_t get_size_ex( const ); // number of exit channels
-signature sz_t get_size_ada( const ); // number of adaptive channels
+signature sz_t get_size_en( c @* o ); // number of entry channels
+signature sz_t get_size_ex( c @* o ); // number of exit channels
+signature sz_t get_size_ada( c @* o ); // number of adaptive channels
 
-signature bhvm_holor_s* get_ap_en(  mutable, sz_t index );
-signature bhvm_holor_s* get_dp_en(  mutable, sz_t index );
-signature bhvm_holor_s* get_ap_ex(  mutable, sz_t index );
-signature bhvm_holor_s* get_dp_ex(  mutable, sz_t index );
-signature bhvm_holor_s* get_ap_ada( mutable, sz_t index );
-signature bhvm_holor_s* get_dp_ada( mutable, sz_t index );
+signature m bhvm_holor_s* get_ap_en(  m @* o, sz_t index );
+signature m bhvm_holor_s* get_dp_en(  m @* o, sz_t index );
+signature m bhvm_holor_s* get_ap_ex(  m @* o, sz_t index );
+signature m bhvm_holor_s* get_dp_ex(  m @* o, sz_t index );
+signature m bhvm_holor_s* get_ap_ada( m @* o, sz_t index );
+signature m bhvm_holor_s* get_dp_ada( m @* o, sz_t index );
 
-signature @* run( mutable, tp_t track);
-signature @* run_ap(     mutable, const bhvm_holor_s** en, sz_t size_en, bhvm_holor_s** ex, sz_t size_ex );
-signature @* run_dp(     mutable, const bhvm_holor_s** ex, sz_t size_ex, bhvm_holor_s** en, sz_t size_en );
-signature @* run_ap_adl( mutable, const bhvm_holor_adl_s* en, bhvm_holor_adl_s* ex ); // allocates out
-signature @* run_dp_adl( mutable, const bhvm_holor_adl_s* ex, bhvm_holor_adl_s* en ); // allocates out
+signature m @* run( m @* o, tp_t track);
+signature m @* run_ap(     m @* o, c bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex );
+signature m @* run_dp(     m @* o, c bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en );
+signature m @* run_ap_adl( m @* o, c bhvm_holor_adl_s* en, m bhvm_holor_adl_s* ex ); // allocates out
+signature m @* run_dp_adl( m @* o, c bhvm_holor_adl_s* ex, m bhvm_holor_adl_s* en ); // allocates out
 
 /** Explicitly re-binds holors (typically by running setup tracks).
  *  This can be necessary when certain holors have been externally reallocated.
  *  Use with care!
  */
-signature @* bind_holors( mutable );
+signature m @* bind_holors( m @* o );
 
 stamp :s = aware :
 {

@@ -33,8 +33,8 @@ XOILA_DEFINE_GROUP( opal_holor, bcore_inst )
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-signature void clear( mutable );
-signature void parse( mutable, bcore_source* source );
+signature void clear( m @* o );
+signature void parse( m @* o, m bcore_source* source );
 
 stamp :meta_s = aware bhvm_mcode_hmeta
 {
@@ -84,7 +84,7 @@ stamp :s = aware :
     bhvm_holor_s h;
     func bcore_fp.copy_typed;
 
-    func (void to_sink( const, bcore_sink* sink )) =
+    func (void to_sink( c @* o, m bcore_sink* sink )) =
     {
         if( !o.m.active ) sink.push_fa( "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>" );
@@ -92,29 +92,29 @@ stamp :s = aware :
     };
 
     // appends newline
-    func (void to_sink_nl( const, bcore_sink* sink )) =
+    func (void to_sink_nl( c @* o, m bcore_sink* sink )) =
     {
         o.to_sink( sink );
         sink.push_fa( "\n" );
     };
 
-    func (void to_stdout( const )) = { o.to_sink( BCORE_STDOUT ); };
+    func (void to_stdout( c @* o )) = { o.to_sink( BCORE_STDOUT ); };
 
     // appends newline
-    func (void to_stdout_nl( const )) = { o.to_sink_nl( BCORE_STDOUT ); };
+    func (void to_stdout_nl( c @* o )) = { o.to_sink_nl( BCORE_STDOUT ); };
 
     /** compacted version, single line */
-    func (void brief_to_sink( const, bcore_sink* sink )) =
+    func (void brief_to_sink( c @* o, m bcore_sink* sink )) =
     {
         sink.push_fa( o.m.active ? "<active>" : "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>" );
         o.h.brief_to_sink( sink );
     };
 
-    func (void brief_to_stdout( const )) = { o.brief_to_sink( BCORE_STDOUT ); };
+    func (void brief_to_stdout( c @* o )) = { o.brief_to_sink( BCORE_STDOUT ); };
 
     /** multiline version */
-    func (void formatted_to_sink( const, bcore_sink* sink )) =
+    func (void formatted_to_sink( c @* o, m bcore_sink* sink )) =
     {
         sink.push_fa( o.m.active ? "<active>" : "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>(" );
@@ -122,7 +122,7 @@ stamp :s = aware :
         if( o.m.htp ) sink.push_fa( ")" );
     };
 
-    func (void formatted_to_stdout( const )) = { o.formatted_to_sink( BCORE_STDOUT ); };
+    func (void formatted_to_stdout( c @* o )) = { o.formatted_to_sink( BCORE_STDOUT ); };
 
     /// sets holor from text source
     func :.parse;

@@ -112,10 +112,10 @@ stamp :context_s = aware bcore_inst
 // language control types
 name cell;
 
-signature   sz_t get_arity( const );
-signature   sz_t get_priority( const );
-feature tp_t get_name( const ) = { return 0; };
-feature bl_t is_visible( const ) = { return true; }; // an object can be made syntactically invisible
+signature   sz_t get_arity( c @* o );
+signature   sz_t get_priority( c @* o );
+feature tp_t get_name( c @* o ) = { return 0; };
+feature bl_t is_visible( c @* o ) = { return true; }; // an object can be made syntactically invisible
 body             get_name_ = { return o->name; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,14 +133,14 @@ stamp :link_s = aware :
     func : . is_visible = { return o->visible; };
 };
 
-signature bl_t     name_exists(       const,   tp_t name );
-signature :*       get_sem_by_name(   mutable, tp_t name );
-signature :link_s* get_link_by_name(  mutable, tp_t name );
-signature :link_s* get_link_by_open(  mutable );
-signature :link_s* get_link_by_up(    mutable, :link_s* up );
-signature :link_s* get_link_by_dn(    mutable, :link_s* dn );
-signature sz_t     get_index_by_link( mutable, :link_s* link ); // returns -1 if not found
-signature sz_t     count_open( const );
+signature bl_t name_exists(       c @* o, tp_t name );
+signature m :* get_sem_by_name(   m @* o, tp_t name );
+signature m :link_s* get_link_by_name( m @* o, tp_t name );
+signature m :link_s* get_link_by_open( m @* o );
+signature m :link_s* get_link_by_up(   m @* o, m :link_s* up );
+signature m :link_s* get_link_by_dn(   m @* o, m :link_s* dn );
+signature sz_t get_index_by_link( m @* o, m :link_s* link ); // returns -1 if not found
+signature sz_t count_open( c @* o );
 
 stamp :links_s = aware x_array
 {
@@ -211,13 +211,13 @@ stamp :body_s = aware x_array
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // cell
 
-signature :link_s* get_enc_by_name(  mutable, tp_t name );
-signature :link_s* get_enc_by_open(  mutable );
-signature :link_s* get_enc_by_dn(    mutable, :link_s* dn );
-signature :link_s* get_exc_by_name(  mutable, tp_t name );
-signature :cell_s* get_cell_by_name( mutable, tp_t name );
+signature m :link_s* get_enc_by_name(  m @* o, tp_t name );
+signature m :link_s* get_enc_by_open(  m @* o );
+signature m :link_s* get_enc_by_dn(    m @* o, m :link_s* dn );
+signature m :link_s* get_exc_by_name(  m @* o, tp_t name );
+signature m :cell_s* get_cell_by_name( m @* o, tp_t name );
 
-signature bl_t is_wrapper( const );
+signature bl_t is_wrapper( c @* o );
 
 stamp :cell_s = aware :
 {

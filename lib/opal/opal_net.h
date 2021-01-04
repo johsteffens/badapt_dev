@@ -41,27 +41,27 @@ stamp :links_s = aware x_array
     wrap x_array.push;
 };
 
-signature void solve( mutable );
+signature void solve( m @* o );
 
 /// returns the uplink index pointing to node; returns -1 if not found
-signature sz_t up_index( const, const :node_s* node );
-signature void set_nop_d( mutable, opal_nop* nop );
+signature sz_t up_index( c @* o, const :node_s* node );
+signature void set_nop_d( m @* o, d opal_nop* nop );
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-feature bl_t is_cyclic( const ) = { return false; };
+feature bl_t is_cyclic( c @* o ) = { return false; };
 
-signature void mcode_push_ap(               mutable, bhvm_mcode_frame_s* mcf );
-signature void cyclic_mcode_push_ap_phase0( mutable, bhvm_mcode_frame_s* mcf );
-signature void cyclic_mcode_push_ap_phase1( mutable, bhvm_mcode_frame_s* mcf );
+signature void mcode_push_ap(               m @* o, m bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_ap_phase0( m @* o, m bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_ap_phase1( m @* o, m bhvm_mcode_frame_s* mcf );
 
-signature void mcode_push_dp(               mutable, sz_t up_index, bhvm_mcode_frame_s* mcf );
-signature void cyclic_mcode_push_dp_phase0( mutable, sz_t up_index, bhvm_mcode_frame_s* mcf );
-signature void cyclic_mcode_push_dp_phase1( mutable,                bhvm_mcode_frame_s* mcf );
-signature void cyclic_mcode_push_dp_phase2( mutable,                bhvm_mcode_frame_s* mcf );
+signature void mcode_push_dp(               m @* o, sz_t up_index, m bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_dp_phase0( m @* o, sz_t up_index, m bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_dp_phase1( m @* o,                m bhvm_mcode_frame_s* mcf );
+signature void cyclic_mcode_push_dp_phase2( m @* o,                m bhvm_mcode_frame_s* mcf );
 
 /// Provides necessary mcode and holor data for isolated nodes that do not actively participate in computing an output
-signature void isolated_mcode_push( mutable, bhvm_mcode_frame_s* mcf );
+signature void isolated_mcode_push( m @* o, m bhvm_mcode_frame_s* mcf );
 
 stamp :node_s = aware :
 {
@@ -115,19 +115,19 @@ stamp :node_s = aware :
     func :.is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
 
     /// s. opal_nop_solve_node__
-    func (void solve( mutable, opal_net_node_adl_s* deferred )) =
+    func (void solve( m @* o, m opal_net_node_adl_s* deferred )) =
     {
         if( !o->nop ) o.err_fa( "Node has no operator." );
         o.nop.solve_node( o, deferred );
     };
 
     /// Outputs the graph structure in text form to sink
-    func (void graph_to_sink( const, bcore_sink* sink )) = { o.trace_to_sink( 0, sink ); sink.push_fa( "\n" ); };
+    func (void graph_to_sink( c @* o, m bcore_sink* sink )) = { o.trace_to_sink( 0, sink ); sink.push_fa( "\n" ); };
 
     /** Recursively sets downlinks for all non-flagged uplinks.
      *  Assumes initial state was normal.
      */
-    func (void set_downlinks( mutable )) =
+    func (void set_downlinks( m @* o )) =
     {
         if( !o.flag )
         {
@@ -143,7 +143,7 @@ stamp :node_s = aware :
     /** Recursively sets flags for all nodes reachable via uplink.
      *  Assumes initial state was normal.
      */
-    func (void set_flags( mutable )) =
+    func (void set_flags( m @* o )) =
     {
         if( !o.flag )
         {
@@ -169,7 +169,7 @@ stamp :node_adl_s = aware x_array
     wrap x_array.push_d;
 };
 
-signature :node_s* get_by_id( mutable, sz_t id );
+signature m :node_s* get_by_id( m @* o, sz_t id );
 
 stamp :nodes_s = aware x_array
 {
@@ -187,12 +187,12 @@ stamp :nodes_s = aware x_array
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-signature void normalize( mutable );
-signature void clear_flags( mutable ); /// clears flags
-signature void clear_all_flags( mutable ); /// clears flags and probes
-signature bl_t is_consistent( const );
-signature void clear_downlinks( mutable );
-signature void set_downlinks( mutable );
+signature void normalize( m @* o );
+signature void clear_flags( m @* o ); /// clears flags
+signature void clear_all_flags( m @* o ); /// clears flags and probes
+signature bl_t is_consistent( c @* o );
+signature void clear_downlinks( m @* o );
+signature void set_downlinks( m @* o );
 
 stamp :cell_s = aware :
 {
@@ -239,27 +239,27 @@ stamp :cell_s = aware :
     // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
     func bcore_via_call.mutated = { ERR_fa( "Cannot reconstitute." ); };
 
-    func (void graph_to_sink( const, bcore_sink* sink )) =
+    func (void graph_to_sink( c @* o, m bcore_sink* sink )) =
     {
         foreach( const opal_net_node_s* node in o.excs ) node.graph_to_sink( sink );
     };
 
     func :.mcode_push_ap;
-    func (void mcode_push_dp( mutable, bhvm_mcode_frame_s* mcf, bl_t entry_channels ));
+    func (void mcode_push_dp( m @* o, m bhvm_mcode_frame_s* mcf, bl_t entry_channels ));
 
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Creates an input node operator at indexed global input channel
-feature opal_nop* create_input_nop( const, sz_t in_idx, tp_t in_name, const opal_nop* cur_nop );
+feature m opal_nop* create_input_nop( c @* o, sz_t in_idx, tp_t in_name, c opal_nop* cur_nop );
 
 // network builder
 group :builder = :
 {
-    signature void fork_log( mutable, bcore_sink* log );
-    signature void fork_input_holors( mutable, const bhvm_holor_s** input_holors, sz_t size_input_holors );
-    signature void build_from_source( mutable, opal_net_cell_s* net_cell, bcore_source* source );
+    signature void fork_log( m @* o, m bcore_sink* log );
+    signature void fork_input_holors( m @* o, c bhvm_holor_s** input_holors, sz_t size_input_holors );
+    signature void build_from_source( m @* o, m opal_net_cell_s* net_cell, m bcore_source* source );
 
     stamp :s = aware :
     {

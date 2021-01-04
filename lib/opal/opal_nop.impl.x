@@ -17,7 +17,7 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (bl_t solve_default( const, opal_context* context, opal_holor_s** a, :solve_result_s* result )) =
+func (bl_t solve_default( c @* o, m opal_context* context, d opal_holor_s** a, m :solve_result_s* result )) =
 {
     ASSERT( result );
     opal_holor_s.2 r = result.h;
@@ -112,7 +112,7 @@ func (bl_t solve_default( const, opal_context* context, opal_holor_s** a, :solve
  *  version via opal_op_a_settle.
  *  After settling, the graph can be run through an optimizer minimizing its structure.
  */
-func (void solve_node_default( mutable, opal_net_node_s* node, opal_net_node_adl_s* deferred )) =
+func (void solve_node_default( m @* o, m opal_net_node_s* node, m opal_net_node_adl_s* deferred )) =
 {
     if( node.flag ) return; // cyclic link
 

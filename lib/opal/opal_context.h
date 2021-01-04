@@ -34,11 +34,11 @@ XOILA_DEFINE_GROUP( opal_context, bcore_inst )
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature bcore_prsg* get_prsg( mutable )     = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
-feature sc_t   nameof(   const, tp_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
-feature sc_t ifnameof(   const, tp_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
-feature tp_t   typeof(   const, sc_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return 0; };
-feature tp_t entypeof( mutable, sc_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return 0; };
+feature m bcore_prsg* get_prsg( m @* o )   = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
+feature sc_t   nameof( c @* o, tp_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
+feature sc_t ifnameof( c @* o, tp_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return NULL; };
+feature tp_t   typeof( c @* o, sc_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return 0; };
+feature tp_t entypeof( m @* o, sc_t name ) = { OPAL_CONTEXT_ERR_NOT_IMPLEMENTED(); return 0; };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

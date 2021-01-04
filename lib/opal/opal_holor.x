@@ -87,7 +87,7 @@ forward opal_sem_cell_s;
 
 include deferred "opal_net.h";
 
-func (:s) (void from_sem_link( mutable, opal_sem_link_s* link, opal_sem_cell_s* root, bcore_sink* log )) =
+func (:s) (void from_sem_link( m @* o, m opal_sem_link_s* link, m opal_sem_cell_s* root, m bcore_sink* log )) =
 {
     ASSERT( link.up );
     ASSERT( link.cell );
