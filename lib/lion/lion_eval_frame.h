@@ -98,7 +98,7 @@ stamp :param_s = aware bcore_inst
         }
         else if( src->name.size > 0 )
         {
-            st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
+            m st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
             st_s_copy( &o->name, new_name );
             st_s_discard( new_name );
         }
@@ -147,7 +147,7 @@ stamp :set_s = extending :std_s
         BFOR_EACH( i, &o->arr )
         {
             BLM_INIT();
-            :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+            m :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
             :a_set_param( eval, &o->param );
             :a_run( eval, result );
             if( result->error )

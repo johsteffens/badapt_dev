@@ -162,9 +162,9 @@ feature bl_t is_adaptive( c @* o ) = { return false; };
  */
 feature void settle( c @* o, c :solve_result_s* result, d :** out_nop, m :solve_result_s** out_result ) =
 {
-    :ar0_literal_s* literal = :ar0_literal_s_create();
+    d :ar0_literal_s* literal = :ar0_literal_s_create();
     literal->h = lion_holor_s_clone( result->h );
-    :solve_result_s* r = :solve_result_s_create();
+    d :solve_result_s* r = :solve_result_s_create();
     r->h = bcore_fork( literal->h );
     :solve_result_s_attach( out_result, r );
     :a_attach( out_nop, (:*)literal );
@@ -183,8 +183,8 @@ feature tp_t type_vop_dp_c( c @* o );
 /// axon pass (output) holor + initialization code
 feature sz_t mcode_push_ap_holor( c @* o, c :solve_result_s* result, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
-    bhvm_holor_s* h = &result->h->h;
-    lion_hmeta_s* m = &result->h->m;
+    m bhvm_holor_s* h = &result->h->h;
+    m lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
     if( m->active )
     {
@@ -206,8 +206,8 @@ feature sz_t mcode_push_dp_holor( c @* o, c :solve_result_s* result, c bhvm_vop_
 {
     BLM_INIT();
 
-    bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
-    lion_hmeta_s* m = &result->h->m;
+    m bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
+    m lion_hmeta_s* m = &result->h->m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
 
     bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
@@ -303,8 +303,8 @@ group :ar0 = retrievable
 
         func :: .mcode_push_ap_holor =
         {
-            bhvm_holor_s* h = &result->h->h;
-            lion_hmeta_s* m = &result->h->m;
+            m bhvm_holor_s* h = &result->h->h;
+            m lion_hmeta_s* m = &result->h->m;
             sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
             if( result->h->h.v.size == 0 ) // randomize holor if result is vacant
             {
@@ -318,8 +318,8 @@ group :ar0 = retrievable
         func :: .mcode_push_dp_holor =
         {
             BLM_INIT();
-            bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
-            lion_hmeta_s* m = &result->h->m;
+            m bhvm_holor_s* h = BLM_CREATEC( bhvm_holor_s, copy_shape_type, &result->h->h );
+            m lion_hmeta_s* m = &result->h->m;
             sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
 
             bhvm_mcode_frame_s_track_vop_push_d( mcf, TYPEOF_track_dp_setup,  bhvm_vop_a_set_index( ( ( bhvm_vop* )bhvm_vop_ar0_determine_s_create() ), 0, idx ) );
@@ -348,11 +348,11 @@ group :ar0 = retrievable
 
         func :: .mcode_push_ap_holor =
         {
-            bhvm_holor_s* h = &result->h->h;
-            lion_hmeta_s* m = &result->h->m;
+            m bhvm_holor_s* h = &result->h->h;
+            m lion_hmeta_s* m = &result->h->m;
             sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, ( bhvm_mcode_hmeta* )m );
 
-            bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s_create();
+            m bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s_create();
             vop_rand->rval = o->rval;
             vop_rand->min = o->min;
             vop_rand->max = o->max;

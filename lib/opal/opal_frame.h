@@ -74,7 +74,7 @@ group :hidx =
 
         func :.replace_index =
         {
-            foreach( sz_t* e in o.arr )
+            foreach( m sz_t* e in o.arr )
             {
                 sz_t old_index = *e;
                 assert( old_index >= 0 && old_index < index_map->size );

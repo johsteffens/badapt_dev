@@ -22,10 +22,10 @@ func (m st_s* hmeta_get_global_name_st( c bhvm_mcode_hmeta* hmeta, c opal_contex
     st.clear();
     if( hmeta && hmeta._ == TYPEOF_opal_holor_meta_s )
     {
-        $* holor_meta = hmeta.cast( opal_holor_meta_s* );
+        m $* holor_meta = hmeta.cast( m opal_holor_meta_s* );
         if( holor_meta.sem_id && holor_meta.sem_id._ == TYPEOF_opal_sem_id_s )
         {
-            holor_meta.sem_id.cast( opal_sem_id_s* ).to_string( context, st );
+            holor_meta.sem_id.cast( m opal_sem_id_s* ).to_string( context, st );
         }
     }
     return st;
@@ -35,30 +35,30 @@ func (m st_s* hmeta_get_global_name_st( c bhvm_mcode_hmeta* hmeta, c opal_contex
 
 func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t indent, m bcore_sink* sink )) =
 {
-    $* st_buf = st_s!^^;
+    m $* st_buf = st_s!^^;
     sz_t hname_length = 0;
     sz_t hbrief_length = 0;
 
-    foreach( bhvm_holor_s* h in hbase->holor_adl )
+    foreach( m bhvm_holor_s* h in hbase->holor_adl )
     {
-        bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ __i ];
+        m bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ __i ];
         sc_t sc_name = opal_frame_hmeta_get_global_name_st( hmeta, o->context, st_buf )->sc;
         hname_length = sz_max( hname_length, bcore_strlen( sc_name ) );
-        st_s* st = st_s!^;
+        m st_s* st = st_s!^;
         h.compact_to_sink( 12, st );
         hbrief_length = sz_max( hbrief_length, st.size );
     }
 
-    foreach( bhvm_holor_s* h in hbase->holor_adl )
+    foreach( m bhvm_holor_s* h in hbase->holor_adl )
     {
-        bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ __i ];
+        m bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.data[ __i ];
         tp_t pclass = hmeta.get_pclass();
         sc_t sc_name = opal_frame_hmeta_get_global_name_st( hmeta, o->context, st_buf ).sc;
 
-        $* msg = st_s!^;
+        m $* msg = st_s!^;
         msg.push_fa( "#rn{ }#pl3 {#<sz_t>}", indent, __i );
 
-        bhvm_mcode_node_s* mnode = hmeta.get_node();
+        m bhvm_mcode_node_s* mnode = hmeta.get_node();
         ASSERT( mnode );
 
         if(      pclass == TYPEOF_pclass_ax0 ) msg.push_fa( " ax0 #pl5 {[#<sz_t>]}", mnode.ax0 );
@@ -73,7 +73,7 @@ func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, 
         else if( hmeta.is_active() ) msg.push_fa( " active  " );
         else                         msg.push_fa( " const   " );
 
-        $* st = st_s!^;
+        m $* st = st_s!^;
         h.compact_to_sink( 12, st );
 
         msg.push_fa( " #pn' '{#<st_s*>} ", hbrief_length, st );
@@ -81,7 +81,7 @@ func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, 
         const x_inst* custom = hmeta.get_custom();
         if( custom && custom._ == TYPEOF_opal_frame_custom_hmeta_s )
         {
-            msg.push_fa( " ur_slot #pl2 {#<sz_t>}", custom.cast( opal_frame_custom_hmeta_s* ).ur_slot );
+            msg.push_fa( " ur_slot #pl2 {#<sz_t>}", custom.cast( m opal_frame_custom_hmeta_s* ).ur_slot );
         }
 
         sink.push_fa( "#<st_s*>\n", msg );
@@ -92,22 +92,22 @@ func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, 
 
 func (:s) (void disassemble_hidx_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, c bcore_arr_sz_s* hidx, sz_t indent, m bcore_sink* sink ) ) =
 {
-    $* st_buf = st_s!^^;
+    m $* st_buf = st_s!^^;
     sz_t hname_length = 0;
 
     foreach( sz_t idx_ap in hidx )
     {
-        bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.[ idx_ap ];
+        m bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.[ idx_ap ];
         hname_length = sz_max( hname_length, opal_frame_hmeta_get_global_name_st( hmeta, o.context, st_buf ).size );
     }
 
     foreach( sz_t idx_ap in hidx )
     {
-        bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.[ idx_ap ];
+        m bhvm_mcode_hmeta* hmeta = hbase->hmeta_adl.[ idx_ap ];
         assert( hmeta );
         sink.push_fa( "#rn{ }#pn'.'{#<sc_t> } :", indent, hname_length + 1, opal_frame_hmeta_get_global_name_st( hmeta, o.context, st_buf ).sc );
         if( idx_ap >= 0 ) sink.push_fa( " (ap)#<sz_t>", idx_ap );
-        bhvm_mcode_node_s* mnode = hmeta.get_node();
+        m bhvm_mcode_node_s* mnode = hmeta.get_node();
         if( mnode && mnode->ag0 >= 0 ) sink.push_fa( " (dp)#<sz_t>", mnode->ag0 );
         sink.push_fa( "\n" );
     }
@@ -118,7 +118,7 @@ func (:s) (void disassemble_hidx_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, c
 func (:s) (void disassemble_track_to_sink( c @* o, c bhvm_mcode_track_s* track, sz_t indent, m bcore_sink* sink )) =
 {
     if( !track ) return;
-    foreach( $* op in track )
+    foreach( m $* op in track )
     {
         sink.push_fa( "#rn{ }", indent );
         op.vop.to_sink( sink );
@@ -130,8 +130,8 @@ func (:s) (void disassemble_track_to_sink( c @* o, c bhvm_mcode_track_s* track, 
 
 func (:s) :.disassemble_to_sink =
 {
-    bhvm_mcode_frame_s* mcf = o->mcf;
-    bhvm_mcode_hbase_s* hbase = mcf->hbase;
+    m bhvm_mcode_frame_s* mcf = o->mcf;
+    m bhvm_mcode_hbase_s* hbase = mcf->hbase;
 
     sink.push_fa( "Holorbase size: #<sz_t>\n", hbase ? bhvm_mcode_hbase_s_get_size( hbase ) : 0 );
     sink.push_fa( "Entry channels:\n" );
@@ -170,7 +170,7 @@ func (:s) :.disassemble_to_sink =
     for( sz_t i = 0; i < sizeof( track_types ) / sizeof( tp_t ); i++ )
     {
         tp_t track_type = track_types[ i ];
-        bhvm_mcode_track_s* track = mcf.track_get( track_type );
+        m bhvm_mcode_track_s* track = mcf.track_get( track_type );
         if( track )
         {
             sink.push_fa( "#<sc_t>:\n", ifnameof( track_type ) );
@@ -184,8 +184,8 @@ func (:s) :.disassemble_to_sink =
 
 func (:s) :.setup_from_source =
 {
-    $* net_cell = opal_net_cell_s!^^;
-    $* net_builder = opal_net_builder_s!^^;
+    m $* net_cell = opal_net_cell_s!^^;
+    m $* net_builder = opal_net_builder_s!^^;
 
     net_builder.fork_log( o.log );
     net_builder.fork_input_holors( en, size_en );
@@ -204,7 +204,7 @@ func (:s) :.setup_from_source =
     o.size_en = net_cell.encs.size;
     o.size_ex = net_cell.excs.size;
 
-    foreach( opal_net_node_s* node in net_cell.encs )
+    foreach( m opal_net_node_s* node in net_cell.encs )
     {
         /** An entry node without mnode does not actively contribute to the output of the cell.
          *  We therefore construct an mnode formally to provide a holor for the input channel
@@ -215,13 +215,13 @@ func (:s) :.setup_from_source =
         o.hidx_en.push( node.mnode.ax0 );
     }
 
-    foreach( opal_net_node_s* node in net_cell.excs )
+    foreach( m opal_net_node_s* node in net_cell.excs )
     {
         ASSERT( node.mnode?.ax0 >= 0 );
         opal_frame_hidx_s_push( &o->hidx_ex, node->mnode->ax0 );
     }
 
-    foreach( opal_net_node_s* node  in net_cell.body )
+    foreach( m opal_net_node_s* node  in net_cell.body )
     {
         if( node.nop )
         {
@@ -245,19 +245,19 @@ func (:s) :.run_ap =
 {
     ASSERT( o.is_setup );
 
-    bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
+    m bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
     const opal_frame_hidx_s* hidx_en = o.hidx_en;
     const opal_frame_hidx_s* hidx_ex = o.hidx_ex;
 
     ASSERT( size_en >= o.size_en );
     for( sz_t i = 0; i < o.size_en; i++ )
     {
-        bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
+        m bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
         const bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
         if( !h_m.s.is_equal( h_i.s ) )
         {
-            st_s* st = st_s!^;
+            m st_s* st = st_s!^;
             st.push_fa( "Entry channel #<sz_t> size mismatch:", i );
             st.push_fa( "\nGiven holor:   " );
             h_i.brief_to_sink( st );
@@ -276,8 +276,8 @@ func (:s) :.run_ap =
         ASSERT( size_ex >= o.size_ex );
         for( sz_t i = 0; i < o.size_ex; i++ )
         {
-            bhvm_holor_s* h_m = hidx_ex.get_holor( hbase, i );
-            bhvm_holor_s* h_o = ex[ i ];
+            m bhvm_holor_s* h_m = hidx_ex.get_holor( hbase, i );
+            m bhvm_holor_s* h_o = ex[ i ];
             ASSERT( h_o && h_o._ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_o.s ) ) h_o.copy_shape_type( h_m );
             if( h_o.v.size == 0 )  h_o.fit_size();
@@ -295,7 +295,7 @@ func (:s) :.run_dp =
     ASSERT( o.is_setup );
     ASSERT( !o.is_cyclic );
 
-    bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
+    m bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
     const opal_frame_hidx_s* hidx_en = o.hidx_en;
     const opal_frame_hidx_s* hidx_ex = o.hidx_ex;
 
@@ -305,12 +305,12 @@ func (:s) :.run_dp =
         sz_t idx = hidx_ex.get_pclass_idx( hbase, TYPEOF_pclass_ag0, i );
         if( idx >= 0 )
         {
-            bhvm_holor_s* h_m = hbase.get_holor( idx );
+            m bhvm_holor_s* h_m = hbase.get_holor( idx );
             const bhvm_holor_s* h_i = ex[ i ];
             ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_i.s ) )
             {
-                st_s* st = st_s!^;
+                m st_s* st = st_s!^;
                 st.push_fa( "Exit channel #<sz_t> shape mismatch:", i );
                 st.push_fa( "\nGiven holor:   " );
                 h_i.brief_to_sink( st );
@@ -332,8 +332,8 @@ func (:s) :.run_dp =
             sz_t idx = hidx_en.get_pclass_idx( hbase, TYPEOF_pclass_ag0, i );
             if( idx >= 0 )
             {
-                bhvm_holor_s* h_m = hbase.get_holor( idx );
-                bhvm_holor_s* h_o = en[ i ];
+                m bhvm_holor_s* h_m = hbase.get_holor( idx );
+                m bhvm_holor_s* h_o = en[ i ];
                 ASSERT( h_o && h_o._ == TYPEOF_bhvm_holor_s );
                 if( !h_m.s.is_equal( h_o.s ) ) h_o.copy_shape_type( h_m );
                 if( h_o.v.size == 0 ) h_o.fit_size();
@@ -350,12 +350,12 @@ func (:s) :.run_dp =
 func (:s) :.run_ap_adl =
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
-    foreach( $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_ap
     (
         en ? en.data.cast( const bhvm_holor_s** ) : NULL,
         en ? en.size : 0,
-        ex ? ex.data.cast( bhvm_holor_s** ) : NULL,
+        ex ? ex.data.cast( m bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0
     );
 };
@@ -365,12 +365,12 @@ func (:s) :.run_ap_adl =
 func (:s) :.run_dp_adl =
 {
     if( en && en.size != o.get_size_en() ) en.set_size( o.get_size_en() );
-    foreach( $.2 e in en ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in en ) if( !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_dp
     (
         ex ? ex.data.cast( const bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0,
-        en ? en.data.cast( bhvm_holor_s** ) : NULL,
+        en ? en.data.cast( m bhvm_holor_s** ) : NULL,
         en ? en.size : 0
     );
 };
@@ -407,7 +407,7 @@ func (:cyclic_s) :.reset =
 func (:cyclic_s) :.bind_holors =
 {
     o.frame.bind_holors();
-    bhvm_mcode_hbase_s* hbase = o.frame.mcf.hbase;
+    m bhvm_mcode_hbase_s* hbase = o.frame.mcf.hbase;
     for( sz_t i = 1; i < o.unroll_size; i++ ) o.track_adl_ap_setup.[ i ].run( hbase.holor_adl.data );
     return o;
 };
@@ -421,58 +421,58 @@ func (:cyclic_s) :.setup =
 
     ASSERT( o.unroll_size >= 2 );
 
-    opal_frame_s* frame = o.frame;
+    m opal_frame_s* frame = o.frame;
     frame.reset();
 
     o.track_adl_ap =< bhvm_mcode_track_adl_s!;
     o.track_adl_dp =< bhvm_mcode_track_adl_s!;
     o.track_adl_ap_setup =< bhvm_mcode_track_adl_s!;
 
-    bhvm_mcode_track_s* track0_ap        = o.frame.mcf.track_get( TYPEOF_track_ap );
-    bhvm_mcode_track_s* track0_dp        = o.frame.mcf.track_get( TYPEOF_track_dp );
-    bhvm_mcode_track_s* track0_ap_setup  = o.frame.mcf.track_get( TYPEOF_track_ap_setup );
-    bhvm_mcode_hbase_s* hbase = o.frame.mcf.hbase;
+    m bhvm_mcode_track_s* track0_ap        = o.frame.mcf.track_get( TYPEOF_track_ap );
+    m bhvm_mcode_track_s* track0_dp        = o.frame.mcf.track_get( TYPEOF_track_dp );
+    m bhvm_mcode_track_s* track0_ap_setup  = o.frame.mcf.track_get( TYPEOF_track_ap_setup );
+    m bhvm_mcode_hbase_s* hbase = o.frame.mcf.hbase;
 
     sz_t rolled_hbase_size = hbase.holor_adl.size;
     hbase.copy_size_limit = rolled_hbase_size;
 
-    bcore_arr_sz_s* idx_arr_track0_ap = bcore_arr_sz_s!^^;
+    m bcore_arr_sz_s* idx_arr_track0_ap = bcore_arr_sz_s!^^;
     track0_ap.get_index_arr( idx_arr_track0_ap );
 
     /// unrollable indices
-    bcore_arr_sz_s* ur_idx_arr = bcore_arr_sz_s!^^;
+    m bcore_arr_sz_s* ur_idx_arr = bcore_arr_sz_s!^^;
 
     foreach( sz_t src_idx in idx_arr_track0_ap )
     {
         if( !hbase->hmeta_adl.[ src_idx ].is_rollable() ) ur_idx_arr.push( src_idx );
     }
 
-    opal_frame_custom_hmeta_s* custom = opal_frame_custom_hmeta_s!^^;
+    m opal_frame_custom_hmeta_s* custom = opal_frame_custom_hmeta_s!^^;
 
-    bhvm_mcode_track_s* track_ap_prev = NULL;
+    m bhvm_mcode_track_s* track_ap_prev = NULL;
 
     for( sz_t i = 0; i < o.unroll_size; i++ )
     {
         custom->ur_slot = i;
-        bhvm_mcode_track_s* track_ap_curr   = o.track_adl_ap.push_c( track0_ap );
-        bhvm_mcode_track_s* track_dp        = o.track_adl_dp.push_c( track0_dp );
-        bhvm_mcode_track_s* track_ap_setup  = o.track_adl_ap_setup.push_c( track0_ap_setup );
+        m bhvm_mcode_track_s* track_ap_curr   = o.track_adl_ap.push_c( track0_ap );
+        m bhvm_mcode_track_s* track_dp        = o.track_adl_dp.push_c( track0_dp );
+        m bhvm_mcode_track_s* track_ap_setup  = o.track_adl_ap_setup.push_c( track0_ap_setup );
 
-        opal_frame_hidx_s* hidx_en = o.hidx_ads_en.push_c( o.frame.hidx_en );
-        opal_frame_hidx_s* hidx_ex = o.hidx_ads_ex.push_c( o.frame.hidx_ex );
+        m opal_frame_hidx_s* hidx_en = o.hidx_ads_en.push_c( o.frame.hidx_en );
+        m opal_frame_hidx_s* hidx_ex = o.hidx_ads_ex.push_c( o.frame.hidx_ex );
 
         if( i > 0 )
         {
-            bcore_arr_sz_s* ur_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
-            bcore_arr_sz_s* rc_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
+            m bcore_arr_sz_s* ur_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
+            m bcore_arr_sz_s* rc_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
             foreach( sz_t src_idx in ur_idx_arr )
             {
                 sz_t dst_idx = hbase.push_copy_from_index( src_idx );
                 ur_idx_map.[ src_idx ] = dst_idx;
 
-                bhvm_mcode_hmeta* src_hmeta = hbase->hmeta_adl.[ src_idx ];
-                bhvm_mcode_hmeta* dst_hmeta = hbase->hmeta_adl.[ dst_idx ];
-                bhvm_mcode_node_s* src_node = src_hmeta.get_node();
+                m bhvm_mcode_hmeta* src_hmeta = hbase->hmeta_adl.[ src_idx ];
+                m bhvm_mcode_hmeta* dst_hmeta = hbase->hmeta_adl.[ dst_idx ];
+                m bhvm_mcode_node_s* src_node = src_hmeta.get_node();
                 if( src_node.cyclic ) rc_idx_map.data[ src_node.ax1 ] = dst_idx;
 
                 dst_hmeta.set_custom( custom );
@@ -516,8 +516,8 @@ func( :cyclic_s) :.run_ap =
     assert( o.is_setup );
     assert( o.unroll_index < o.unroll_size );
 
-    opal_frame_s* frame = o.frame;
-    bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
+    m opal_frame_s* frame = o.frame;
+    m bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
     const opal_frame_hidx_s* hidx_en = o.hidx_ads_en .[ o.unroll_index ];
     const opal_frame_hidx_s* hidx_ex = o.hidx_ads_ex .[ o.unroll_index ];
     const bhvm_mcode_track_s* track  = o.track_adl_ap.[ o.unroll_index ];
@@ -526,7 +526,7 @@ func( :cyclic_s) :.run_ap =
 
     for( sz_t i = 0; i < frame.size_en; i++ )
     {
-        bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
+        m bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
         const bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
         if( !h_m.s.is_equal( h_i.s ) ) ERR_fa( "Input shape mismatch" );
@@ -541,8 +541,8 @@ func( :cyclic_s) :.run_ap =
         ASSERT( size_ex >= frame.size_ex );
         for( sz_t i = 0; i < frame.size_ex; i++ )
         {
-            bhvm_holor_s* h_m = hidx_ex.get_holor( hbase, i );
-            bhvm_holor_s* h_o = ex[ i ];
+            m bhvm_holor_s* h_m = hidx_ex.get_holor( hbase, i );
+            m bhvm_holor_s* h_o = ex[ i ];
             ASSERT( h_o && h_o._ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_o.s ) ) h_o.copy_shape_type( h_m );
             if( h_o.v.size == 0 ) h_o.fit_size();
@@ -560,12 +560,12 @@ func( :cyclic_s) :.run_ap =
 func( :cyclic_s) :.run_ap_adl =
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
-    foreach( $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_ap
     (
         en ? en.data.cast( const bhvm_holor_s** ) : NULL,
         en ? en.size : 0,
-        ex ? ex.data.cast( bhvm_holor_s** ) : NULL,
+        ex ? ex.data.cast( m bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0
     );
 };
@@ -574,9 +574,9 @@ func( :cyclic_s) :.run_ap_adl =
 
 func( :cyclic_s) :.disassemble_to_sink =
 {
-    opal_frame_s* frame = o.frame;
-    bhvm_mcode_frame_s* mcf = frame.mcf;
-    bhvm_mcode_hbase_s* hbase = mcf.hbase;
+    m opal_frame_s* frame = o.frame;
+    m bhvm_mcode_frame_s* mcf = frame.mcf;
+    m bhvm_mcode_hbase_s* hbase = mcf.hbase;
 
     sink.push_fa( "Holorbase:\n" );
     frame.disassemble_hbase_to_sink( hbase, 2, sink );
@@ -592,7 +592,7 @@ func( :cyclic_s) :.disassemble_to_sink =
     sink.push_fa( "\n" );
     sink.push_fa( "Global Tracks:\n" );
 
-    bhvm_mcode_track_s* track = NULL;
+    m bhvm_mcode_track_s* track = NULL;
 
     track = mcf.track_get( TYPEOF_track_dp_setup );
     if( track )
@@ -660,7 +660,7 @@ func( :cyclic_s) :.run_ap_adl_flat =
     sz_t size_ex = o.frame.get_size_ex();
 
     if( ex && ex.size != size_ex * o.unroll_size ) ex.set_size( size_ex * o.unroll_size );
-    foreach( $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
 
     for( sz_t i = 0; i < o.unroll_size; i++ )
     {
@@ -687,10 +687,10 @@ func( :cyclic_s) :.run_dp_adl_flat =
     sz_t size_ex = o.frame.get_size_ex();
 
     if( en && en.size != size_en * o.unroll_size ) en.set_size( size_en * o.unroll_size );
-    foreach( $.2 e in en ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in en ) if( !e.1 ) e.1 = bhvm_holor_s!;
 
-    opal_frame_s* frame = o.frame;
-    bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
+    m opal_frame_s* frame = o.frame;
+    m bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
 
     frame.run( TYPEOF_track_dp_cyclic_zero_grad );
 
@@ -705,14 +705,14 @@ func( :cyclic_s) :.run_dp_adl_flat =
         ASSERT( en ? ( unroll_index * size_en < en.size ) : true );
 
         const bhvm_holor_s** p_ex = ( const bhvm_holor_s** )( ex->data + unroll_index * size_ex );
-              bhvm_holor_s** p_en = en ? (  bhvm_holor_s** )( en->data + unroll_index * size_en ) : NULL;
+            m bhvm_holor_s** p_en = en ? (  bhvm_holor_s** )( en->data + unroll_index * size_en ) : NULL;
 
         for( sz_t i = 0; i < size_ex; i++ )
         {
             sz_t idx = hidx_ex.get_pclass_idx( hbase, TYPEOF_pclass_ag0, i );
             if( idx >= 0 )
             {
-                bhvm_holor_s* h_m = hbase.get_holor( idx );
+                m bhvm_holor_s* h_m = hbase.get_holor( idx );
                 const bhvm_holor_s* h_i = p_ex[ i ];
                 ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
                 if( !h_m.s.is_equal( h_i.s ) ) ERR_fa( "Input shape mismatch" );
@@ -729,8 +729,8 @@ func( :cyclic_s) :.run_dp_adl_flat =
                 sz_t idx = hidx_en.get_pclass_idx( hbase, TYPEOF_pclass_ag0, i );
                 if( idx >= 0 )
                 {
-                    bhvm_holor_s* h_m = hbase.get_holor( idx );
-                    bhvm_holor_s* h_o = p_en[ i ];
+                    m bhvm_holor_s* h_m = hbase.get_holor( idx );
+                    m bhvm_holor_s* h_o = p_en[ i ];
                     ASSERT( h_o && h_o._ == TYPEOF_bhvm_holor_s );
                     if( !h_m.s.is_equal( h_o.s ) ) h_o.copy_shape_type( h_m );
                     if( h_o.v.size == 0 ) h_o.fit_size();

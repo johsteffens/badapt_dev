@@ -52,7 +52,7 @@ func (:frame_s) bhpt_adaptor.adapt =
 {
     if( !o.frame )
     {
-        bcore_source* source = NULL;
+        m bcore_source* source = NULL;
 
         switch( o.src._ )
         {
@@ -64,7 +64,7 @@ func (:frame_s) bhpt_adaptor.adapt =
 
             case TYPEOF_st_s:
             {
-                source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( bcore_source* ).scope();
+                source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( m bcore_source* ).scope();
             }
             break;
 

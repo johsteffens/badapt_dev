@@ -193,9 +193,9 @@ stamp :s = aware :
     func : .setup_from_source;
     func : .setup_from_st = { BLM_INIT(); BLM_RETURNV( @*, @_setup_from_source( o, BLM_A_PUSH( bcore_source_string_s_create_from_string( st ) ), en, size_en ) ); };
     func : .setup_from_sc = { st_s st; st_s_init_weak_sc( &st, sc ); return @_setup_from_st( o, &st, en, size_en ); };
-    func : .create_from_source     = { @* o = @_create(); return @_setup_from_source( o, source, en, size_en ); };
-    func : .create_from_st         = { @* o = @_create(); return @_setup_from_st(     o, st,     en, size_en ); };
-    func : .create_from_sc         = { @* o = @_create(); return @_setup_from_sc(     o, sc,     en, size_en ); };
+    func : .create_from_source     = { d @* o = @_create(); return @_setup_from_source( o, source, en, size_en ); };
+    func : .create_from_st         = { d @* o = @_create(); return @_setup_from_st(     o, st,     en, size_en ); };
+    func : .create_from_sc         = { d @* o = @_create(); return @_setup_from_sc(     o, sc,     en, size_en ); };
     func : .setup_from_source_adl  = { return @_setup_from_source( o, source, en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
     func : .setup_from_st_adl      = { return @_setup_from_st(     o, st,     en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };
     func : .setup_from_sc_adl      = { return @_setup_from_sc(     o, sc,     en ? ( const bhvm_holor_s** )en->data : NULL, en ? en->size : 0 ); };

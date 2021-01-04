@@ -31,7 +31,7 @@ func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m bcore_sink* sink )) =
 
     if( recurring ) sink.push_fa( "(recurring)" );
 
-    o.cast($*).flag = true;
+    o.cast(m $*).flag = true;
 
     if( o.result ) o.result.h.brief_to_sink( sink );
 
@@ -53,12 +53,12 @@ func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m bcore_sink* sink )) =
         {
             sz_t incr = 4;
             sink.push_fa( "\n#rn{ }#rn{-}", indent, incr );
-            opal_net_node_s* node = o.upls.[ i ].node;
+            m opal_net_node_s* node = o.upls.[ i ].node;
             node.trace_to_sink( indent + incr, sink );
         }
     }
 
-    o.cast($*).flag = false;
+    o.cast(m $*).flag = false;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ func(:node_s) (void nop_solve( m @* o, m opal_holor_s** arg_h )) =
     {
         sc_t name = o.nop.symbol();
         if( !name ) name = ifnameof( o.nop._ );
-        st_s* msg = st_s!^^;
+        m st_s* msg = st_s!^^;
         msg.push_fa( "Operator '#<sc_t>' failed:", name );
         if( o.result.msg ) msg.push_fa( " #<sc_t>", o.result.msg.sc );
         msg.push_fa( "\n" );
@@ -122,9 +122,9 @@ func( :node_s) (void skip_identities( m @* o )) =
 {
     if( o.flag ) return;
     o.flag = true;
-    foreach( $* e in o.upls )
+    foreach( m $* e in o.upls )
     {
-        $* node = e.node;
+        m $* node = e.node;
         while( node && node.nop && node.nop._ == TYPEOF_opal_nop_ar1_identity_s ) node = node.upls.[ 0 ].node;
         ASSERT( e.node = node );
         node.skip_identities();
@@ -151,10 +151,10 @@ func (s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 )) =
 
 func (:cell_s) :.normalize =
 {
-    bcore_arr_vd_s* arr = bcore_arr_vd_s!^^;
-    foreach( $* e in o.body ) arr.push( e );
-    foreach( $* e in o.encs ) arr.push( e );
-    foreach( $* e in o.excs ) arr.push( e );
+    m bcore_arr_vd_s* arr = bcore_arr_vd_s!^^;
+    foreach( m $* e in o.body ) arr.push( e );
+    foreach( m $* e in o.encs ) arr.push( e );
+    foreach( m $* e in o.excs ) arr.push( e );
 
     // sort references descending (to move zeros to the end)
     verbatim_C
@@ -191,7 +191,7 @@ func (:cell_s) :.normalize =
     o.body.set_size( 0 );
     for( sz_t i = 0; i < arr.size; i++ )
     {
-        opal_net_node_s* node = o.body.push_d( ( opal_net_node_s* )arr.[ i ] );
+        m opal_net_node_s* node = o.body.push_d( ( opal_net_node_s* )arr.[ i ] );
         assert( node == arr.[ i ] );
         node.id = i;
         node.flag = false;
@@ -246,29 +246,29 @@ func (:cell_s) :.is_consistent =
 
 func (:cell_s) bcore_inst_call.copy_x =
 {
-    foreach( :node_s* node in o.body )
+    foreach( m :node_s* node in o.body )
     {
         ASSERT( node.id == __i );
-        foreach( :link_s* e in node.upls )
+        foreach( m :link_s* e in node.upls )
         {
             ASSERT( e.node.id >= 0 && e.node.id < o.body.size );
             e.node = o.body.data[ e.node.id ];
         }
-        foreach( :link_s* e in node.dnls )
+        foreach( m :link_s* e in node.dnls )
         {
             ASSERT( e.node.id >= 0 && e.node.id < o.body.size );
             e.node = o.body.data[ e.node.id ];
         }
     }
 
-    foreach( :node_s.2 node in o.encs )
+    foreach( m :node_s.2 node in o.encs )
     {
         sz_t id = node.1.id;
         ASSERT( id >= 0 && id < o.body.size );
         node.1 =< o.body.[ id ].fork();
     }
 
-    foreach( :node_s.2 node in o.excs )
+    foreach( m :node_s.2 node in o.excs )
     {
         sz_t id = node.1.id;
         ASSERT( id >= 0 && id < o.body.size );
@@ -282,7 +282,7 @@ func (:cell_s) :.set_downlinks =
 {
     o.clear_flags();
     o.clear_downlinks();
-    foreach( :node_s* node in o.excs ) node.set_downlinks();
+    foreach( m :node_s* node in o.excs ) node.set_downlinks();
     o.clear_flags();
     assert( o.is_consistent() );
 };
@@ -295,8 +295,8 @@ func (:cell_s) :.set_downlinks =
 func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
 {
     o.clear_flags();
-    foreach( :node_s* node in o.excs ) node.set_flags();
-    foreach( :node_s* node in o.encs )
+    foreach( m :node_s* node in o.excs ) node.set_flags();
+    foreach( m :node_s* node in o.encs )
     {
         if( !node.flag && ( !( node.result && node.result.h.h.v.size > 0 ) ) )
         {
@@ -311,7 +311,7 @@ func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
         node.flag = true;
     }
 
-    foreach( :node_s.2 node in o.body ) if( !node.1.flag ) node.1 =< NULL;
+    foreach( m :node_s.2 node in o.body ) if( !node.1.flag ) node.1 =< NULL;
     o.normalize();
 
     ASSERT( o.is_consistent() );
@@ -326,7 +326,7 @@ func (:cell_s) (void remove_identities( m @* o )) =
 {
     o.clear_downlinks();
     o.clear_flags();
-    foreach( :node_s* node in o.excs ) node.skip_identities();
+    foreach( m :node_s* node in o.excs ) node.skip_identities();
     o.clear_flags();
     o.remove_unreachable_nodes();
     assert( o.is_consistent() );
@@ -361,8 +361,8 @@ func (:cell_s)
 
     if( !link ) ERR_fa( "Backtracing '#<sc_t>':\nTrace terminates in an open link.", o.context.ifnameof( name ) );
 
-    opal_sem_cell_s* cell = link.cell;
-    opal_sem_link_s* next_link = NULL;
+    m opal_sem_cell_s* cell = link.cell;
+    m opal_sem_link_s* next_link = NULL;
 
     sc_t cell_type = cell.nop ? "node" : cell.body ? "graph" : cell.is_wrapper() ? "wrapper" : "";
 
@@ -393,7 +393,7 @@ func (:cell_s)
             if( log ) log.push_fa( "cell nop: #<sc_t>\n", ifnameof( cell.nop._ ) );
 
             bl_t trace_up = false;
-            opal_net_node_s* net_node_up = o.body.get_by_id( sem_tree_node.id );
+            m opal_net_node_s* net_node_up = o.body.get_by_id( sem_tree_node.id );
             if( !net_node_up )
             {
                 net_node_up = o.body.push();
@@ -427,9 +427,9 @@ func (:cell_s)
                 {
                     if( log ) log.push_fa( "Branch channel 0:\n" );
                     o.from_sem_recursive( cell.encs.[ 0 ], sem_tree, sem_tree_node, net_node_up, depth, log );
-                    opal_net_node_s* arg0 = net_node_up.upls.[ 0 ].node;
+                    m opal_net_node_s* arg0 = net_node_up.upls.[ 0 ].node;
                     arg0.solve( NULL );
-                    opal_holor_s* result_h = arg0.result.h;
+                    m opal_holor_s* result_h = arg0.result.h;
                     if( result_h.h.v.size == 1 && !result_h.m.active ) // determined constant holor
                     {
                         net_node_up.upls.clear();
@@ -510,7 +510,7 @@ func (:cell_s)
                 cell.source_point.parse_err_fa( "Backtracing '#<sc_t>':\nInput channel boundary exceeded.", o.context.ifnameof( name ) );
             }
 
-            opal_net_node_s* net_node_up = o.encs.[ index ];
+            m opal_net_node_s* net_node_up = o.encs.[ index ];
             net_node_dn.upls.push().node = net_node_up;
 
             next_link = NULL;
@@ -579,10 +579,10 @@ func (:cell_s)
 
     if( !o.context ) o.context = sem_cell.context.fork();
 
-    opal_sem_tree_s* tree = opal_sem_tree_s!^^;
-    foreach( opal_sem_link_s* sem_link in sem_cell.encs )
+    m opal_sem_tree_s* tree = opal_sem_tree_s!^^;
+    foreach( m opal_sem_link_s* sem_link in sem_cell.encs )
     {
-        opal_net_node_s* net_node =  o.encs.push();
+        m opal_net_node_s* net_node =  o.encs.push();
         net_node.context = o.context.fork();
         net_node.name = sem_link.name;
         net_node.sem_id = opal_sem_id_s!;
@@ -593,7 +593,7 @@ func (:cell_s)
         if( sem_link.up )
         {
             if( log ) log.push_fa( "Evaluating literal in root entry channel '#<sz_t>' ... \n", __i );
-            opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
+            m opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
             param.h = opal_holor_s!;
 
             param.h.from_sem_link( sem_link, sem_cell.parent, log );
@@ -606,13 +606,13 @@ func (:cell_s)
             }
         }
 
-        opal_nop* new_nop = input_nop_creator ? input_nop_creator.create_input_nop( __i, sem_link.name, net_node.nop ) : NULL;
+        m opal_nop* new_nop = input_nop_creator ? input_nop_creator.create_input_nop( __i, sem_link.name, net_node.nop ) : NULL;
         if( new_nop ) net_node.set_nop_d( new_nop );
     }
 
-    foreach( opal_sem_link_s* sem_link in sem_cell.excs )
+    foreach( m opal_sem_link_s* sem_link in sem_cell.excs )
     {
-        opal_net_node_s* net_node =  o.excs.push();
+        m opal_net_node_s* net_node =  o.excs.push();
         net_node.context = o.context.fork();
         net_node.name = sem_link.name;
 
@@ -647,7 +647,7 @@ func (:node_s) (bl_t recurses_in_downtree( m @* o, const opal_net_node_s* node )
     if( o.probe ) return false;
 
     o.probe = true;
-    foreach( :link_s* link in o.dnls )
+    foreach( m :link_s* link in o.dnls )
     {
         if( link.node.recurses_in_downtree( node ) )
         {
@@ -677,7 +677,7 @@ func (:node_s) :.mcode_push_ap =
     if( !o.result ) ERR_fa( "Result is missing." );
     if( !o.result.codable ) o.source_point.parse_err_fa( "Operator '#<sc_t>': Not codable.", ifnameof( o.nop._ ) );
 
-    bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
+    m bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
 
     if( !o.mnode )
     {
@@ -687,7 +687,7 @@ func (:node_s) :.mcode_push_ap =
         o.mnode.adaptive = o.nop.is_adaptive();
     }
 
-    foreach( :link_s* link in o.upls )
+    foreach( m :link_s* link in o.upls )
     {
         link.node.mcode_push_ap( mcf );
         arr_ci.push_ci( 'a' + __i, link.node.mnode.ax0 );
@@ -699,7 +699,7 @@ func (:node_s) :.mcode_push_ap =
 
     if( o.mnode.ax0 >= 0 )
     {
-        opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( opal_holor_meta_s* );
+        m opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( m opal_holor_meta_s* );
         if( !hmeta.name   ) hmeta.name = o.name;
         if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
 
@@ -724,7 +724,7 @@ func (:node_s) :.isolated_mcode_push =
     }
 
     o.mnode.ax0 = o.nop.mcode_push_ap_holor( o.result, NULL, mcf );
-    opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( opal_holor_meta_s* );
+    m opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( m opal_holor_meta_s* );
     if( !hmeta.name ) hmeta.name = o.name;
     if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
     hmeta.pclass = TYPEOF_pclass_ax0;
@@ -750,8 +750,8 @@ func (:node_s) :.cyclic_mcode_push_ap_phase0 =
         o.mnode.ax0 = o.nop.mcode_push_ap_holor( o.result, NULL, mcf );
         o.mnode.ax1 = o.nop.mcode_push_ap_holor( o.result, NULL, mcf );
 
-        opal_holor_meta_s* hmeta0 = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( opal_holor_meta_s* );
-        opal_holor_meta_s* hmeta1 = mcf.hbase.hmeta_adl.[ o.mnode.ax1 ].cast( opal_holor_meta_s* );
+        m opal_holor_meta_s* hmeta0 = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( m opal_holor_meta_s* );
+        m opal_holor_meta_s* hmeta1 = mcf.hbase.hmeta_adl.[ o.mnode.ax1 ].cast( m opal_holor_meta_s* );
 
         if( !hmeta0.name   ) hmeta0.name = o.name;
         if( !hmeta0.sem_id ) hmeta0.sem_id = o.sem_id.fork();
@@ -763,7 +763,7 @@ func (:node_s) :.cyclic_mcode_push_ap_phase0 =
         hmeta0.mnode =< o.mnode.fork();
         hmeta1.mnode =< o.mnode.fork();
 
-        opal_net_node_s* node = o.upls.[ 0 ].node;
+        m opal_net_node_s* node = o.upls.[ 0 ].node;
         node.mcode_push_ap( mcf );
 
         mcf.track_vop_push_d( TYPEOF_track_ap_setup,         bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
@@ -785,7 +785,7 @@ func (:node_s) :.cyclic_mcode_push_ap_phase1 =
     if( !o.flag )
     {
         o.flag = true;
-        opal_net_node_s* node = o.upls.[ 1 ].node;
+        m opal_net_node_s* node = o.upls.[ 1 ].node;
         node.mcode_push_ap( mcf );
         mcf.track_vop_push_d( TYPEOF_track_ap, bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
     }
@@ -808,13 +808,13 @@ func (:node_s) :.mcode_push_dp =
         return;
     }
 
-    bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
+    m bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
 
     bl_t up_index_is_valid = false;
 
-    foreach( :link_s* link in o.upls )
+    foreach( m :link_s* link in o.upls )
     {
-        opal_net_node_s* node = link.node;
+        m opal_net_node_s* node = link.node;
         arr_ci.push_ci( 'a' + __i, node.mnode.ax0 );
         sz_t agx = node.mnode.ag1 >= 0 ? node.mnode.ag1 : node.mnode.ag0;
         arr_ci.push_ci( 'f' + __i, agx );
@@ -831,9 +831,9 @@ func (:node_s) :.mcode_push_dp =
         if( o.mnode.ag0 >= 0 )
         {
             // build this gradient from all downlinks ...
-            foreach( :link_s* link in o.dnls )
+            foreach( m :link_s* link in o.dnls )
             {
-                opal_net_node_s* node = link.node;
+                m opal_net_node_s* node = link.node;
 
                 /// we do not accumulate downtree recurrences at this point
                 if( !o.nop.is_cyclic() || ! node.recurses_in_downtree( o ) )
@@ -844,7 +844,7 @@ func (:node_s) :.mcode_push_dp =
                 }
             }
 
-            opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ag0 ].cast( opal_holor_meta_s* );
+            m opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ag0 ].cast( m opal_holor_meta_s* );
             if( !hmeta.name ) hmeta.name = o.name;
             if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
             hmeta.pclass = TYPEOF_pclass_ag0;
@@ -870,8 +870,8 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
     {
         o.flag = true;
 
-        bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
-        opal_holor_meta_s* m = o.result.h.m.clone().scope();
+        m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
+        m opal_holor_meta_s* m = o.result.h.m.clone().scope();
         if( !m.name ) m.name = o.name;
         if( !m.sem_id ) m.sem_id = o.sem_id.fork();
 
@@ -885,9 +885,9 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
         o.mnode.ag0 = idx;
 
         // build this gradient from all downlinks ...
-        foreach( :link_s* link in o.dnls )
+        foreach( m :link_s* link in o.dnls )
         {
-            opal_net_node_s* node = link.node;
+            m opal_net_node_s* node = link.node;
 
             /// we do not accumulate downtree recurrences at this point
             if( !node.recurses_in_downtree( o ) )
@@ -901,7 +901,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
 
     if( up_index == 1 )
     {
-        opal_net_node_s* node1 = o.upls.[ 1 ].node;
+        m opal_net_node_s* node1 = o.upls.[ 1 ].node;
         mcf.track_vop_push_d( TYPEOF_track_dp, bhvm_vop_ar1_acc_s!.setup( o.mnode.ag0, node1.mnode.ag1 >= 0 ? node1.mnode.ag1 : node1.mnode.ag0 ) );
     }
 };
@@ -916,8 +916,8 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
     ASSERT( o.nop.is_cyclic() );
 
     {
-        bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
-        opal_holor_meta_s* m = o.result.h.m.clone().scope();
+        m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
+        m opal_holor_meta_s* m = o.result.h.m.clone().scope();
         if( !m.name ) m.name = o.name;
         if( !m.sem_id ) m.sem_id = o.sem_id.fork();
         m.pclass = TYPEOF_pclass_ag1;
@@ -929,9 +929,9 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
         o.mnode.ag1 = idx;
     }
 
-    foreach( :link_s* link in o.dnls )
+    foreach( m :link_s* link in o.dnls )
     {
-        opal_net_node_s* node = link.node;
+        m opal_net_node_s* node = link.node;
 
         /// we only accumulate downtree recurrences at this point
         if( node.recurses_in_downtree( o ) )
@@ -960,17 +960,17 @@ func (:cell_s) :.mcode_push_ap =
 {
     ASSERT( o.is_consistent() );
 
-    opal_net_node_adl_s* cyclic_adl = opal_net_node_adl_s!^^;
-    foreach( :node_s* node in o.body ) if( node.nop && node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
+    m opal_net_node_adl_s* cyclic_adl = opal_net_node_adl_s!^^;
+    foreach( m :node_s* node in o.body ) if( node.nop && node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
 
-    foreach( :node_s* node in o.excs )
+    foreach( m :node_s* node in o.excs )
     {
         if( !node.result ) ERR_fa( "Unsolved node '#<sc_t>'\n", o.context.ifnameof( node.name ) );
         node.mcode_push_ap( mcf );
     }
 
     /// cyclic nodes phase 1, 2
-    foreach( :node_s* node in cyclic_adl ) node.cyclic_mcode_push_ap_phase1( mcf );
+    foreach( m :node_s* node in cyclic_adl ) node.cyclic_mcode_push_ap_phase1( mcf );
 
     o.clear_all_flags();
     mcf.check_integrity();
@@ -981,10 +981,10 @@ func (:cell_s) :.mcode_push_ap =
 func (:cell_s) (void mcode_push_dp( m @* o, m bhvm_mcode_frame_s* mcf, bl_t entry_channels )) =
 {
     ASSERT( o.is_consistent() );
-    opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^^;
-    opal_net_node_adl_s* adaptive_adl = opal_net_node_adl_s!^^;
+    m opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^^;
+    m opal_net_node_adl_s* adaptive_adl = opal_net_node_adl_s!^^;
 
-    foreach( :node_s* node in o.body ) if( node.nop )
+    foreach( m :node_s* node in o.body ) if( node.nop )
     {
         if( node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
         if( node.nop.is_adaptive() ) adaptive_adl.push_d( node.fork() );
@@ -992,15 +992,15 @@ func (:cell_s) (void mcode_push_dp( m @* o, m bhvm_mcode_frame_s* mcf, bl_t entr
 
     if( entry_channels )
     {
-        foreach( :node_s* node in o.encs ) if( node.nop ) node.mcode_push_dp( -1, mcf );
+        foreach( m :node_s* node in o.encs ) if( node.nop ) node.mcode_push_dp( -1, mcf );
     }
 
     /// adaptive nodes
-    foreach( :node_s* node in adaptive_adl ) node.mcode_push_dp( -1, mcf );
+    foreach( m :node_s* node in adaptive_adl ) node.mcode_push_dp( -1, mcf );
 
     /// cyclic nodes phase 1, 2
-    foreach( :node_s* node in cyclic_adl ) node.cyclic_mcode_push_dp_phase1( mcf );
-    foreach( :node_s* node in cyclic_adl ) node.cyclic_mcode_push_dp_phase2( mcf );
+    foreach( m :node_s* node in cyclic_adl ) node.cyclic_mcode_push_dp_phase1( mcf );
+    foreach( m :node_s* node in cyclic_adl ) node.cyclic_mcode_push_dp_phase2( mcf );
 
     o.clear_all_flags();
     mcf.check_integrity();
@@ -1020,14 +1020,14 @@ func (:builder_s) ::.create_input_nop =
 
     if( cur_nop && cur_nop._ == TYPEOF_opal_nop_ar0_param_s )
     {
-        const bhvm_holor_s* h_cur = cur_nop.cast( opal_nop_ar0_param_s* ).h.h;
+        const bhvm_holor_s* h_cur = cur_nop.cast( m opal_nop_ar0_param_s* ).h.h;
         if( !h_in )
         {
             h_in = h_cur;
         }
         else if( !h_cur.s.is_equal( h_in.s ) )
         {
-            st_s* msg = st_s!^^;
+            m st_s* msg = st_s!^^;
             msg.push_fa( "Shape deviation at input holor '#<sz_t>':", in_idx );
             msg.push_fa( "\n#p20.{Passed input} " );
             h_in.brief_to_sink( msg );
@@ -1039,7 +1039,7 @@ func (:builder_s) ::.create_input_nop =
 
     if( h_in )
     {
-        opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
+        m opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
         param.h = opal_holor_s!;
         param.h.h.copy( h_in );
         return param;
@@ -1054,7 +1054,7 @@ func (:builder_s) ::.create_input_nop =
 
 func (:builder_s) :.build_from_source =
 {
-    opal_sem_cell_s* sem_cell = opal_sem_cell_s!^^;
+    m opal_sem_cell_s* sem_cell = opal_sem_cell_s!^^;
     o.sem_builder.build_from_source( sem_cell, source );
     net_cell.from_sem_cell( sem_cell, o, o->log );
 };

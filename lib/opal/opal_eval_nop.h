@@ -153,9 +153,9 @@ stamp :set_s = extending :std_s
 
     func :.run =
     {
-        foreach( :* e in o.arr )
+        foreach( m :* e in o.arr )
         {
-            :* eval = e.clone().scope( scope_local );
+            m :* eval = e.clone().scope( scope_local );
             eval.set_param( &o.param );
             eval.run( result );
             if( result.error )

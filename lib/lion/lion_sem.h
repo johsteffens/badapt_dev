@@ -246,7 +246,7 @@ stamp :cell_s = aware :
     // search for a cell descends the tree
     func : .get_cell_by_name =
     {
-        :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
+        m :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
         if( sem && sem->_ == TYPEOF_:cell_s ) return ( :cell_s* )sem;
         if( o->parent ) return :cell_s_get_cell_by_name( o->parent, name );
         return NULL;
@@ -255,7 +255,7 @@ stamp :cell_s = aware :
     // search for a link only looks up the body of this cell
     func : .get_link_by_name =
     {
-        :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
+        m :* sem = o->body ? :body_s_get_sem_by_name( o->body, name ) : NULL;
         if( sem && sem->_ == TYPEOF_:link_s ) return ( :link_s* )sem;
         return NULL;
     };

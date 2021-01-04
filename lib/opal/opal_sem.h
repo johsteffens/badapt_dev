@@ -145,7 +145,7 @@ group :context = opal_context
 
         func (tp_t parse_name( m @* o, m bcore_source* source )) =
         {
-            st_s* name = st_s!^;
+            m st_s* name = st_s!^;
             source.parse_fa( " #name", name );
             if( name.size == 0 ) source.parse_err_fa( "Identifier expected." );
             return o.entypeof( name.sc );
@@ -178,7 +178,7 @@ group :stack =
         func (m x_inst* pop(  m @* o )) = { return (x_inst*)o.arr.pop(); };
         func (m x_inst* pop_of_type(  m @* o, tp_t type, m bcore_source* source )) =
         {
-            x_inst* v = o.pop();
+            m x_inst* v = o.pop();
             if( v._ == type ) return v;
             source.parse_err_fa( "Type error: '#<sc_t>' present but '#<sc_t>' expected.", ifnameof( v._ ), ifnameof( type ) );
             return NULL;
@@ -186,7 +186,7 @@ group :stack =
 
         func (m x_inst* pop_of_value( m @* o, m x_inst* value, m bcore_source* source )) =
         {
-            x_inst* v = o.pop();
+            m x_inst* v = o.pop();
             if( v == value ) return v;
             source.parse_err_fa( "Internal error: Stack holds invalid value." );
             return NULL;
@@ -201,22 +201,22 @@ group :stack =
         func (bl_t is_of_value( m @* o, sz_t idx, m x_inst* value )) =
         {
             if( idx <= 0 || idx > o.arr.size ) return false;
-            return ( o.arr.[ o.arr.size - idx ].cast( x_inst* ) == value );
+            return ( o.arr.[ o.arr.size - idx ].cast( m x_inst* ) == value );
         };
 
-        func (m ::link_s* pop_link( m @* o, m bcore_source* source )) = { return o.pop_of_type( TYPEOF_::link_s, source ).cast(::link_s*); };
-        func (m ::cell_s* pop_cell( m @* o, m bcore_source* source )) = { return o.pop_of_type( TYPEOF_::cell_s, source ).cast(::cell_s*); };
+        func (m ::link_s* pop_link( m @* o, m bcore_source* source )) = { return o.pop_of_type( TYPEOF_::link_s, source ).cast(m ::link_s*); };
+        func (m ::cell_s* pop_cell( m @* o, m bcore_source* source )) = { return o.pop_of_type( TYPEOF_::cell_s, source ).cast(m ::cell_s*); };
 
         func (m ::link_s* pop_link_or_exit( m @* o, m bcore_source* source )) =
         {
-            x_inst* v = o.pop();
+            m x_inst* v = o.pop();
             if     ( v._ == TYPEOF_::link_s )
             {
-                return v.cast(::link_s*);
+                return v.cast(m ::link_s*);
             }
             else if( v._ == TYPEOF_::cell_s )
             {
-                ::cell_s* cell = v.cast(::cell_s*);
+                m ::cell_s* cell = v.cast(m ::cell_s*);
                 if( cell.excs.size != 1 )
                 {
                     source.parse_err_fa( "Cell has #<sz_t> exit channels. Require is 1.", cell.excs.size );
@@ -319,7 +319,7 @@ stamp :links_s = aware x_array
 
     func :.get_link_by_name =
     {
-        foreach( $* e in o ) if( e.name == name ) return e;
+        foreach( m $* e in o ) if( e.name == name ) return e;
         return NULL;
     };
 
@@ -331,26 +331,26 @@ stamp :links_s = aware x_array
 
     func :.get_link_by_up =
     {
-        foreach( $* e in o ) if( e.up == up ) return e;
+        foreach( m $* e in o ) if( e.up == up ) return e;
         return NULL;
     };
 
     func :.get_link_by_dn =
     {
-        foreach( $* e in o ) if( e.dn == dn ) return e;
+        foreach( m $* e in o ) if( e.dn == dn ) return e;
         return NULL;
     };
 
     func :.get_index_by_link =
     {
-        foreach( $* e in o ) if( e == link ) return __i;
+        foreach( m $* e in o ) if( e == link ) return __i;
         return -1;
     };
 
     func :.count_open =
     {
         sz_t count = 0;
-        foreach( $* e in o ) count += ( e.up == NULL );
+        foreach( m $* e in o ) count += ( e.up == NULL );
         return count;
     };
 };
@@ -363,13 +363,13 @@ stamp :body_s = aware x_array
 
     func :.name_exists =
     {
-        foreach( $* e in o ) if( e.get_name() == name ) return true;
+        foreach( m $* e in o ) if( e.get_name() == name ) return true;
         return false;
     };
 
     func :.get_sem_by_name =
     {
-        foreach( $* e in o )
+        foreach( m $* e in o )
         {
             if( e.get_name() == name )
             {
@@ -424,8 +424,8 @@ stamp :cell_s = aware :
     // search for a cell descends the tree
     func :.get_cell_by_name =
     {
-        :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
-        if( sem && sem._ == TYPEOF_:cell_s ) return sem.cast( :cell_s* );
+        m :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
+        if( sem && sem._ == TYPEOF_:cell_s ) return sem.cast( m :cell_s* );
         if( o.parent ) return o.parent.get_cell_by_name( name );
         return NULL;
     };
@@ -433,24 +433,24 @@ stamp :cell_s = aware :
     // search for a link only looks up the body of this cell
     func :.get_link_by_name =
     {
-        :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
-        if( sem && sem._ == TYPEOF_:link_s ) return sem.cast( :link_s* );
+        m :* sem = o.body ? o.body.get_sem_by_name( name ) : NULL;
+        if( sem && sem._ == TYPEOF_:link_s ) return sem.cast( m :link_s* );
         return NULL;
     };
 
     // push semantic item to cell's body ...
     func (m :* push_sem( m @* o, tp_t type )) = { return o.body!.push_t( type ); };
-    func (m :link_s* push_link( m @* o )) = { return o.push_sem( TYPEOF_:link_s ).cast( :link_s* ); };
+    func (m :link_s* push_link( m @* o )) = { return o.push_sem( TYPEOF_:link_s ).cast( m :link_s* ); };
     func (m @* push_cell( m @* o )) =
     {
-        @* cell = o.push_sem( TYPEOF_@ ).cast( @* );
+        m @* cell = o.push_sem( TYPEOF_@ ).cast( m @* );
         cell->parent = o;
         cell->context = o->context.fork();
         cell.set_name_invisible( o.entypeof_fa( "$#<sz_t>", o.body.size - 1 ) );
         return cell;
     };
 
-    func (m @* push_cell_nop_d_invisible( m @* o, d opal_nop* nop )) = { @* cell = o.push_cell_nop_d( nop ); cell.visible = false; return cell; };
+    func (m @* push_cell_nop_d_invisible( m @* o, d opal_nop* nop )) = { m @* cell = o.push_cell_nop_d( nop ); cell.visible = false; return cell; };
     func (m @* set_source( m @* o, m bcore_source* source )) = { o.source_point.set( source ); return o; };
     func (m @* push_cell_nop_d_set_source( m @* o, d opal_nop* nop, m bcore_source* source )) = { return o.push_cell_nop_d( nop ).set_source( source ); };
     func (m @* push_cell_nop_d(                      m @* o, d opal_nop* nop ));

@@ -143,7 +143,7 @@ stamp :set_s = extending :std_s
     {
         foreach( const :* e in o.arr )
         {
-            :* eval = e.clone().scope( eval );
+            m :* eval = e.clone().scope( eval );
             eval.set_param( &o.param );
             eval.run( result );
             if( result.error )

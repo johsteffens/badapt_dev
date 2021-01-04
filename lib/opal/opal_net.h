@@ -102,7 +102,7 @@ stamp :node_s = aware :
 
     func :.up_index =
     {
-        foreach( $* e in o.upls ) if( e.node == node ) return __i;
+        foreach( m $* e in o.upls ) if( e.node == node ) return __i;
         return -1;
     };
 
@@ -132,7 +132,7 @@ stamp :node_s = aware :
         if( !o.flag )
         {
             o.flag = true;
-            foreach( $* e in o.upls )
+            foreach( m $* e in o.upls )
             {
                 e.node.dnls.push().node = o;
                 e.node.set_downlinks();
@@ -148,7 +148,7 @@ stamp :node_s = aware :
         if( !o.flag )
         {
             o.flag = true;
-            foreach( $* e in o->upls ) e.node.set_flags();
+            foreach( m $* e in o->upls ) e.node.set_flags();
         }
     };
 
@@ -176,7 +176,7 @@ stamp :nodes_s = aware x_array
     :node_s => [];
     func :.get_by_id =
     {
-        foreach( $* e in o ) if( e.id == id ) return e;
+        foreach( m $* e in o ) if( e.id == id ) return e;
         return NULL;
     };
 
@@ -208,12 +208,12 @@ stamp :cell_s = aware :
 
     func :.clear_flags =
     {
-        foreach( $* e in o.body ) e.flag = false;
+        foreach( m $* e in o.body ) e.flag = false;
     };
 
     func :.clear_all_flags =
     {
-        foreach( $* e in o.body )
+        foreach( m $* e in o.body )
         {
             e.flag = false;
             e.probe = false;
@@ -222,14 +222,14 @@ stamp :cell_s = aware :
 
     func :.solve =
     {
-        $* deferred = opal_net_node_adl_s!^^;
-        foreach( $* e in o->excs  ) e.solve( deferred );
-        foreach( $* e in deferred ) e.solve( NULL );
+        m $* deferred = opal_net_node_adl_s!^^;
+        foreach( m $* e in o->excs  ) e.solve( deferred );
+        foreach( m $* e in deferred ) e.solve( NULL );
     };
 
     func :.clear_downlinks =
     {
-        foreach( $* e in o.body ) e.dnls.clear();
+        foreach( m $* e in o.body ) e.dnls.clear();
     };
 
     func :.set_downlinks;

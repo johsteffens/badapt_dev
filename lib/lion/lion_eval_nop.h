@@ -148,12 +148,12 @@ stamp :set_s = extending :std_s
         BFOR_EACH( i, &o->arr )
         {
             BLM_INIT();
-            :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
+            m :* eval = BLM_A_PUSH( bcore_inst_a_clone( (bcore_inst*)o->arr.data[ i ] ) );
             :a_set_param( eval, &o->param );
             :a_run( eval, result );
             if( result->error )
             {
-                st_s* s = BLM_A_PUSH( st_s_clone( &result->msg ) );
+                m st_s* s = BLM_A_PUSH( st_s_clone( &result->msg ) );
                 st_s_copy_fa( &result->msg, "At set entry #<sz_t>:\n#<st_s*>", i, s );
                 BLM_RETURNV( :result_s*, result );
             }

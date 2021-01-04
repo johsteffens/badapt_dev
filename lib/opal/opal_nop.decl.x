@@ -167,9 +167,9 @@ feature bl_t is_adaptive( c @* o ) = { return false; };
  */
 feature void settle( c @* o, m opal_context* context, c :solve_result_s* result, d :** out_nop, d :solve_result_s** out_result ) =
 {
-    :ar0_literal_s* literal = :ar0_literal_s!;
+    m :ar0_literal_s* literal = :ar0_literal_s!;
     literal.h = result.h.clone();
-    :solve_result_s* r = :solve_result_s!;
+    m :solve_result_s* r = :solve_result_s!;
     r.h = literal.h.fork();
     :solve_result_s_attach( out_result, r );
     :a_attach( out_nop, (:*)literal );
@@ -188,8 +188,8 @@ feature tp_t type_vop_dp_c( c @* o );
 /// axon pass (output) holor + initialization code
 feature sz_t mcode_push_ap_holor( c @* o, c :solve_result_s* result, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
-    bhvm_holor_s* h = &result.h.h;
-    opal_holor_meta_s* m = &result.h.m;
+    m bhvm_holor_s* h = &result.h.h;
+    m opal_holor_meta_s* m = &result.h.m;
     sz_t idx = mcf.push_hm( h, m );
     if( m.active )
     {
@@ -209,8 +209,8 @@ feature sz_t mcode_push_ap_holor( c @* o, c :solve_result_s* result, c bhvm_vop_
  */
 feature sz_t mcode_push_dp_holor( c @* o, c :solve_result_s* result, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
-    bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
-    opal_holor_meta_s* m = &result.h.m;
+    m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
+    m opal_holor_meta_s* m = &result.h.m;
     sz_t idx = mcf.push_hm( h, m );
     mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
     mcf.track_vop_push_d( TYPEOF_track_dp,        bhvm_vop_ar0_zro_s!      .setup( idx ) );
@@ -292,8 +292,8 @@ group :ar0 = retrievable
 
         func ::.mcode_push_ap_holor =
         {
-            bhvm_holor_s* h = &result.h.h;
-            opal_holor_meta_s* m = &result.h.m;
+            m bhvm_holor_s* h = &result.h.h;
+            m opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, m );
             if( result.h.h.v.size == 0 ) // randomize holor if result is vacant
             {
@@ -306,8 +306,8 @@ group :ar0 = retrievable
 
         func ::.mcode_push_dp_holor =
         {
-            bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
-            opal_holor_meta_s* m = &result.h.m;
+            m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
+            m opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, m );
             mcf.track_vop_push_d( TYPEOF_track_dp_setup,              bhvm_vop_ar0_determine_s!.setup( idx ) );
             mcf.track_vop_push_d( TYPEOF_track_dp_shelve,             bhvm_vop_ar0_vacate_s!   .setup( idx ) );
@@ -335,11 +335,11 @@ group :ar0 = retrievable
 
         func ::.mcode_push_ap_holor =
         {
-            bhvm_holor_s* h = &result.h.h;
-            opal_holor_meta_s* m = &result.h.m;
+            m bhvm_holor_s* h = &result.h.h;
+            m opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, m );
 
-            bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s!;
+            m bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s!;
             vop_rand.prsg = o.prsg.clone();
             vop_rand.min = o.min;
             vop_rand.max = o.max;

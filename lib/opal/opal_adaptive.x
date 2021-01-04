@@ -22,10 +22,10 @@ func (:s) bhpt_adaptive.get_adaptor_probe =
 {
     probe.set_size( o.frame.get_size_ada() );
     ASSERT( o.frame.is_setup );
-    foreach( $* e in probe )
+    foreach( m $* e in probe )
     {
-        e.axon = o.frame.cast($*).get_ap_ada(__i);
-        e.grad = o.frame.cast($*).get_dp_ada(__i);
+        e.axon = o.frame.cast(m $*).get_ap_ada(__i);
+        e.grad = o.frame.cast(m $*).get_dp_ada(__i);
     }
     return probe;
 };
@@ -42,9 +42,9 @@ func (:s) bhpt_adaptive.status_to_sink =
 
 func (:builder_s) bhpt_builder.create_adaptive =
 {
-    opal_adaptive_s* adaptive = opal_adaptive_s!;
+    m opal_adaptive_s* adaptive = opal_adaptive_s!;
 
-    bcore_source* source = NULL;
+    m bcore_source* source = NULL;
 
     switch( o.src._ )
     {
@@ -56,7 +56,7 @@ func (:builder_s) bhpt_builder.create_adaptive =
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).scope().cast( bcore_source* );
+            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).scope().cast( m bcore_source* );
         }
         break;
 
@@ -70,7 +70,7 @@ func (:builder_s) bhpt_builder.create_adaptive =
     adaptive.holor_frame_en.copy( o.holor_frame_en );
     adaptive.holor_frame_ex.copy( o.holor_frame_ex );
 
-    opal_frame_s* frame = adaptive.frame;
+    m opal_frame_s* frame = adaptive.frame;
     const bhvm_holor_s* holor_frame_en = o.holor_frame_en;
 
     frame.setup_from_source( source, holor_frame_en, 1 );
@@ -97,9 +97,9 @@ func (:cyclic_s) (void dp_buffer_create( m @* o )) =
 {
     o.dp_buffer =< bhvm_holor_adl_s!;
     o.dp_buffer.set_size( o.frame.unroll_size );
-    foreach( $** e in o.dp_buffer )
+    foreach( m $** e in o.dp_buffer )
     {
-        bhvm_holor_s* h = ( *e = o.holor_frame_ex.clone() );
+        m bhvm_holor_s* h = ( *e = o.holor_frame_ex.clone() );
         h.fit_size();
     }
 };
@@ -109,7 +109,7 @@ func (:cyclic_s) (void dp_buffer_create( m @* o )) =
 func (:cyclic_s) (void dp_buffer_reset( m @* o )) =
 {
     if( !o.dp_buffer ) opal_adaptive_cyclic_s_dp_buffer_create( o );
-    foreach( $* e in o.dp_buffer ) e.v.zro();
+    foreach( m $* e in o.dp_buffer ) e.v.zro();
     o.dp_value = false;
 };
 
@@ -137,7 +137,7 @@ func (:cyclic_s) bhpt_adaptive.dendrite_pass =
     if( !o.dp_buffer ) o.dp_buffer_create();
     sz_t dp_index = ( o.frame.unroll_index == 0 ) ? o.frame.unroll_size - 1 : o.frame.unroll_index - 1;
 
-    bhvm_holor_s* h = o.dp_buffer.[ dp_index ];
+    m bhvm_holor_s* h = o.dp_buffer.[ dp_index ];
     ag_ex.v.cpy( &h.v );
     o.dp_value = true;
 
@@ -157,9 +157,9 @@ func (:cyclic_s) bhpt_adaptive.cyclic_reset =
 func (:cyclic_s) bhpt_adaptive.get_adaptor_probe =
 {
     bhpt_adaptor_probe_s_set_size( probe, o.frame.get_size_ada() );
-    opal_frame_s* frame = o.frame.frame;
+    m opal_frame_s* frame = o.frame.frame;
     ASSERT( frame.is_setup );
-    foreach( $* e in probe )
+    foreach( m $* e in probe )
     {
         e.axon = frame.get_ap_ada(__i);
         e.grad = frame.get_dp_ada(__i);
@@ -179,9 +179,9 @@ func (:cyclic_s) bhpt_adaptive.status_to_sink =
 
 func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 {
-    opal_adaptive_cyclic_s* adaptive = opal_adaptive_cyclic_s!;
+    m opal_adaptive_cyclic_s* adaptive = opal_adaptive_cyclic_s!;
 
-    bcore_source* source = NULL;
+    m bcore_source* source = NULL;
 
     switch( o.src._ )
     {
@@ -193,7 +193,7 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( m bcore_source* ).scope();
         }
         break;
 
@@ -207,7 +207,7 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
     adaptive.holor_frame_en.copy( o.holor_frame_en );
     adaptive.holor_frame_ex.copy( o.holor_frame_ex );
 
-    opal_frame_s* frame = opal_frame_s!^^;
+    m opal_frame_s* frame = opal_frame_s!^^;
     const bhvm_holor_s* holor_frame_en = o.holor_frame_en;
     frame.setup_from_source( source, holor_frame_en, 1 );
 
