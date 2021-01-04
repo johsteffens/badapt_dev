@@ -50,13 +50,13 @@ func (:builder_s) bhpt_builder.create_adaptive =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.src.cast( const bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.src.cast( c bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).scope().cast( m bcore_source* );
+            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) ).scope().cast( m bcore_source* );
         }
         break;
 
@@ -71,7 +71,7 @@ func (:builder_s) bhpt_builder.create_adaptive =
     adaptive.holor_frame_ex.copy( o.holor_frame_ex );
 
     m opal_frame_s* frame = adaptive.frame;
-    const bhvm_holor_s* holor_frame_en = o.holor_frame_en;
+    c bhvm_holor_s* holor_frame_en = o.holor_frame_en;
 
     frame.setup_from_source( source, holor_frame_en, 1 );
 
@@ -187,13 +187,13 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.src.cast( const bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.src.cast( c bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( m bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) ).cast( m bcore_source* ).scope();
         }
         break;
 
@@ -208,7 +208,7 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
     adaptive.holor_frame_ex.copy( o.holor_frame_ex );
 
     m opal_frame_s* frame = opal_frame_s!^^;
-    const bhvm_holor_s* holor_frame_en = o.holor_frame_en;
+    c bhvm_holor_s* holor_frame_en = o.holor_frame_en;
     frame.setup_from_source( source, holor_frame_en, 1 );
 
     ASSERT( frame.get_size_en() == 1 );

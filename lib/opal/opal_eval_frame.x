@@ -157,13 +157,13 @@ func (:plain_s) :.run =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.param.src.cast( const bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( const st_s* ) ).cast( m bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).cast( m bcore_source* ).scope();
         }
         break;
 
@@ -174,8 +174,8 @@ func (:plain_s) :.run =
         break;
     }
 
-    const bhvm_holor_adl_s* adl_ap_en = o.param.in;
-        m bhvm_holor_adl_s* adl_ap_ex = bhvm_holor_adl_s!^^;
+    c bhvm_holor_adl_s* adl_ap_en = o.param.in;
+    m bhvm_holor_adl_s* adl_ap_ex = bhvm_holor_adl_s!^^;
 
     m opal_frame_s* frame0 = opal_frame_s!^^;
     if( verbosity >= 20 ) frame0.log = log.fork();
@@ -359,7 +359,7 @@ func (:plain_s) :.run =
             {
                 if( verbosity >= 10 ) log.push_fa( "adc #<sz_t>:\n", i );
 
-                const bhvm_holor_s* dp_ada1 = frame.get_dp_ada( i );
+                c bhvm_holor_s* dp_ada1 = frame.get_dp_ada( i );
                 m bhvm_holor_s* dp_ada2 = bhvm_holor_s!^.copy_vector_isovol( dp_ada1 );
                 dp_ada2.v.zro();
 
@@ -505,13 +505,13 @@ func (:cyclic_s) :.run =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.param.src.cast( const bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) ).scope();
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( const st_s* ) ).cast( m bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).cast( m bcore_source* ).scope();
         }
         break;
 
@@ -522,9 +522,9 @@ func (:cyclic_s) :.run =
         break;
     }
 
-    const bhvm_holor_adl_s* adl_ap_en = o.param.in;
-        m bhvm_holor_adl_s* adl_ap_ex1 = bhvm_holor_adl_s!^^;
-        m bhvm_holor_adl_s* adl_ap_ex2 = bhvm_holor_adl_s!^^;
+    c bhvm_holor_adl_s* adl_ap_en = o.param.in;
+    m bhvm_holor_adl_s* adl_ap_ex1 = bhvm_holor_adl_s!^^;
+    m bhvm_holor_adl_s* adl_ap_ex2 = bhvm_holor_adl_s!^^;
 
     frame.setup_from_source_adl( source, adl_ap_en );
 

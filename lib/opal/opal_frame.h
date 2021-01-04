@@ -65,7 +65,7 @@ group :hidx =
 
         func :.get_pclass_idx =
         {
-            const bhvm_mcode_hmeta* hmeta = o.get_hmeta( hbase, index );
+            c bhvm_mcode_hmeta* hmeta = o.get_hmeta( hbase, index );
             return ( hmeta ) ? hmeta.get_node().get_pclass_idx( pclass ) : -1;
         };
 
@@ -207,9 +207,9 @@ stamp :s = aware :
     func :.create_from_source     = { return @!.setup_from_source( source, en, size_en ); };
     func :.create_from_st         = { return @!.setup_from_st( st, en, size_en ); };
     func :.create_from_sc         = { return @!.setup_from_sc( sc, en, size_en ); };
-    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? en.data.cast( const bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
-    func :.setup_from_st_adl      = { return o.setup_from_st( st, en ? en.data.cast( const bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
-    func :.setup_from_sc_adl      = { return o.setup_from_sc( sc, en ? en.data.cast( const bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? en.data.cast( c bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_st_adl      = { return o.setup_from_st( st, en ? en.data.cast( c bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_sc_adl      = { return o.setup_from_sc( sc, en ? en.data.cast( c bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
     func :.create_from_source_adl = { return @!.setup_from_source_adl( source, en ); };
     func :.create_from_st_adl     = { return @!.setup_from_st_adl( st, en ); };
     func :.create_from_sc_adl     = { return @!.setup_from_sc_adl( sc, en ); };

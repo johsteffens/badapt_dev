@@ -62,7 +62,7 @@ feature m :result_s* run( c @* o, m :result_s* result ); // returns result
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-signature void set( m @* o, const :param_s* src );
+signature void set( m @* o, c :param_s* src );
 stamp :param_s = aware bcore_inst
 {
     hidden aware bcore_sink -> log;
@@ -135,7 +135,7 @@ stamp :show_param_s = extending :std_s
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-feature void set_param( m @* o, const :param_s* param );
+feature void set_param( m @* o, c :param_s* param );
 
 stamp :arr_s = aware x_array { aware :=> []; };
 

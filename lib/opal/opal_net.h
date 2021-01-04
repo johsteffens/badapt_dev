@@ -44,7 +44,7 @@ stamp :links_s = aware x_array
 signature void solve( m @* o );
 
 /// returns the uplink index pointing to node; returns -1 if not found
-signature sz_t up_index( c @* o, const :node_s* node );
+signature sz_t up_index( c @* o, c :node_s* node );
 signature void set_nop_d( m @* o, d opal_nop* nop );
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -241,7 +241,7 @@ stamp :cell_s = aware :
 
     func (void graph_to_sink( c @* o, m bcore_sink* sink )) =
     {
-        foreach( const opal_net_node_s* node in o.excs ) node.graph_to_sink( sink );
+        foreach( c opal_net_node_s* node in o.excs ) node.graph_to_sink( sink );
     };
 
     func :.mcode_push_ap;

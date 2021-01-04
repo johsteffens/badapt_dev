@@ -325,7 +325,7 @@ stamp :links_s = aware x_array
 
     func :.name_exists =
     {
-        foreach( const $* e in o ) if( e.name == name ) return true;
+        foreach( c $* e in o ) if( e.name == name ) return true;
         return false;
     };
 

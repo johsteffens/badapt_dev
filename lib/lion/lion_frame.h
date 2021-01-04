@@ -43,7 +43,7 @@ group :hidx =
     signature m @* push(  m @* o, sz_t index );
 
     signature sz_t get_idx( c @* o, sz_t index );
-    signature sz_t get_pclass_idx( c @* o, const bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature sz_t get_pclass_idx( c @* o, c bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
     signature sz_t get_size( c @* o );
 
     signature m bhvm_holor_s*     get_holor( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t index );
@@ -67,7 +67,7 @@ group :hidx =
 
         func : .get_pclass_idx =
         {
-            const bhvm_mcode_hmeta* hmeta = @_get_hmeta( o, hbase, index );
+            c bhvm_mcode_hmeta* hmeta = @_get_hmeta( o, hbase, index );
             if( hmeta ) return bhvm_mcode_node_s_get_pclass_idx( bhvm_mcode_hmeta_a_get_node( hmeta ), pclass );
             return -1;
         };

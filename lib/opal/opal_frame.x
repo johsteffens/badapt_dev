@@ -78,7 +78,7 @@ func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, 
 
         msg.push_fa( " #pn' '{#<st_s*>} ", hbrief_length, st );
 
-        const x_inst* custom = hmeta.get_custom();
+        c x_inst* custom = hmeta.get_custom();
         if( custom && custom._ == TYPEOF_opal_frame_custom_hmeta_s )
         {
             msg.push_fa( " ur_slot #pl2 {#<sz_t>}", custom.cast( m opal_frame_custom_hmeta_s* ).ur_slot );
@@ -225,7 +225,7 @@ func (:s) :.setup_from_source =
     {
         if( node.nop )
         {
-            const bhvm_mcode_node_s* mnode = node.mnode;
+            c bhvm_mcode_node_s* mnode = node.mnode;
             if( mnode?.adaptive && node.mnode.ax0 >= 0 ) o.hidx_ada.push( node.mnode.ax0 );
             if( mnode?.cyclic ) o.is_cyclic = true;
         }
@@ -246,14 +246,14 @@ func (:s) :.run_ap =
     ASSERT( o.is_setup );
 
     m bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
-    const opal_frame_hidx_s* hidx_en = o.hidx_en;
-    const opal_frame_hidx_s* hidx_ex = o.hidx_ex;
+    c opal_frame_hidx_s* hidx_en = o.hidx_en;
+    c opal_frame_hidx_s* hidx_ex = o.hidx_ex;
 
     ASSERT( size_en >= o.size_en );
     for( sz_t i = 0; i < o.size_en; i++ )
     {
         m bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
-        const bhvm_holor_s* h_i = en[ i ];
+        c bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
         if( !h_m.s.is_equal( h_i.s ) )
         {
@@ -296,8 +296,8 @@ func (:s) :.run_dp =
     ASSERT( !o.is_cyclic );
 
     m bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
-    const opal_frame_hidx_s* hidx_en = o.hidx_en;
-    const opal_frame_hidx_s* hidx_ex = o.hidx_ex;
+    c opal_frame_hidx_s* hidx_en = o.hidx_en;
+    c opal_frame_hidx_s* hidx_ex = o.hidx_ex;
 
     ASSERT( size_ex >= o.size_ex );
     for( sz_t i = 0; i < o.size_ex; i++ )
@@ -306,7 +306,7 @@ func (:s) :.run_dp =
         if( idx >= 0 )
         {
             m bhvm_holor_s* h_m = hbase.get_holor( idx );
-            const bhvm_holor_s* h_i = ex[ i ];
+            c bhvm_holor_s* h_i = ex[ i ];
             ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_i.s ) )
             {
@@ -353,7 +353,7 @@ func (:s) :.run_ap_adl =
     foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_ap
     (
-        en ? en.data.cast( const bhvm_holor_s** ) : NULL,
+        en ? en.data.cast( c bhvm_holor_s** ) : NULL,
         en ? en.size : 0,
         ex ? ex.data.cast( m bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0
@@ -368,7 +368,7 @@ func (:s) :.run_dp_adl =
     foreach( m $.2 e in en ) if( !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_dp
     (
-        ex ? ex.data.cast( const bhvm_holor_s** ) : NULL,
+        ex ? ex.data.cast( c bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0,
         en ? en.data.cast( m bhvm_holor_s** ) : NULL,
         en ? en.size : 0
@@ -518,16 +518,16 @@ func( :cyclic_s) :.run_ap =
 
     m opal_frame_s* frame = o.frame;
     m bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
-    const opal_frame_hidx_s* hidx_en = o.hidx_ads_en .[ o.unroll_index ];
-    const opal_frame_hidx_s* hidx_ex = o.hidx_ads_ex .[ o.unroll_index ];
-    const bhvm_mcode_track_s* track  = o.track_adl_ap.[ o.unroll_index ];
+    c opal_frame_hidx_s* hidx_en = o.hidx_ads_en .[ o.unroll_index ];
+    c opal_frame_hidx_s* hidx_ex = o.hidx_ads_ex .[ o.unroll_index ];
+    c bhvm_mcode_track_s* track  = o.track_adl_ap.[ o.unroll_index ];
 
     ASSERT( size_en >= frame.size_en );
 
     for( sz_t i = 0; i < frame.size_en; i++ )
     {
         m bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
-        const bhvm_holor_s* h_i = en[ i ];
+        c bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
         if( !h_m.s.is_equal( h_i.s ) ) ERR_fa( "Input shape mismatch" );
         h_i.v.cpy( h_m.v );
@@ -563,7 +563,7 @@ func( :cyclic_s) :.run_ap_adl =
     foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_ap
     (
-        en ? en.data.cast( const bhvm_holor_s** ) : NULL,
+        en ? en.data.cast( c bhvm_holor_s** ) : NULL,
         en ? en.size : 0,
         ex ? ex.data.cast( m bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0
@@ -697,14 +697,14 @@ func( :cyclic_s) :.run_dp_adl_flat =
     for( sz_t i = 0; i < o.unroll_size; i++ )
     {
         sz_t unroll_index = ( o.unroll_size - i - 1 ) % o.unroll_size;
-        const opal_frame_hidx_s*  hidx_en  = o.hidx_ads_en.[ unroll_index ];
-        const opal_frame_hidx_s*  hidx_ex  = o.hidx_ads_ex.[ unroll_index ];
-        const bhvm_mcode_track_s* track_dp = o.track_adl_dp.[ unroll_index ];
+        c opal_frame_hidx_s*  hidx_en  = o.hidx_ads_en.[ unroll_index ];
+        c opal_frame_hidx_s*  hidx_ex  = o.hidx_ads_ex.[ unroll_index ];
+        c bhvm_mcode_track_s* track_dp = o.track_adl_dp.[ unroll_index ];
 
         ASSERT(        unroll_index * size_ex < ex.size          );
         ASSERT( en ? ( unroll_index * size_en < en.size ) : true );
 
-        const bhvm_holor_s** p_ex = ( const bhvm_holor_s** )( ex->data + unroll_index * size_ex );
+        c bhvm_holor_s** p_ex = ( const bhvm_holor_s** )( ex->data + unroll_index * size_ex );
             m bhvm_holor_s** p_en = en ? (  bhvm_holor_s** )( en->data + unroll_index * size_en ) : NULL;
 
         for( sz_t i = 0; i < size_ex; i++ )
@@ -713,7 +713,7 @@ func( :cyclic_s) :.run_dp_adl_flat =
             if( idx >= 0 )
             {
                 m bhvm_holor_s* h_m = hbase.get_holor( idx );
-                const bhvm_holor_s* h_i = p_ex[ i ];
+                c bhvm_holor_s* h_i = p_ex[ i ];
                 ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
                 if( !h_m.s.is_equal( h_i.s ) ) ERR_fa( "Input shape mismatch" );
                 h_i.v.cpy( h_m.v );

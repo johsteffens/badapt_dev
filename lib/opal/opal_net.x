@@ -203,18 +203,18 @@ func (:cell_s) :.normalize =
 /// Checks consistency of a normalized cell
 func (:cell_s) :.is_consistent =
 {
-    foreach( const $* node in o.body )
+    foreach( c $* node in o.body )
     {
         if( node.flag ) return false;
         if( node.id != __i ) return false;
-        foreach( const $* e in node.upls )
+        foreach( c $* e in node.upls )
         {
             if( e.node.id < 0 ) return false;
             if( e.node.id >= o.body.size ) return false;
             if( e.node != o.body.[ e.node.id ] ) return false;
         }
 
-        foreach( const $* e in node.dnls )
+        foreach( c $* e in node.dnls )
         {
             if( e.node.id < 0 ) return false;
             if( e.node.id >= o.body.size ) return false;
@@ -223,7 +223,7 @@ func (:cell_s) :.is_consistent =
         if( node.result && !node.result.h.h.is_consistent() ) return false;
     }
 
-    foreach( const $* node in o.encs )
+    foreach( c $* node in o.encs )
     {
         if( node.id < 0 ) return false;
         if( node.id >= o.body.size ) return false;
@@ -231,7 +231,7 @@ func (:cell_s) :.is_consistent =
         if( node.result && !node.result.h.h.is_consistent() ) return false;
     }
 
-    foreach( const $* node in o.excs )
+    foreach( c $* node in o.excs )
     {
         if( node.id < 0 ) return false;
         if( node.id >= o.body.size ) return false;
@@ -641,7 +641,7 @@ func (:cell_s)
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// node occurs in the downtree of o
-func (:node_s) (bl_t recurses_in_downtree( m @* o, const opal_net_node_s* node )) =
+func (:node_s) (bl_t recurses_in_downtree( m @* o, c opal_net_node_s* node )) =
 {
     if( o == node ) return true;
     if( o.probe ) return false;
@@ -1016,11 +1016,11 @@ func (:builder_s) ::.create_input_nop =
 {
     ASSERT( in_idx < o.input_holors.size );
 
-    const bhvm_holor_s* h_in = o.input_holors.[ in_idx ];
+    c bhvm_holor_s* h_in = o.input_holors.[ in_idx ];
 
     if( cur_nop && cur_nop._ == TYPEOF_opal_nop_ar0_param_s )
     {
-        const bhvm_holor_s* h_cur = cur_nop.cast( m opal_nop_ar0_param_s* ).h.h;
+        c bhvm_holor_s* h_cur = cur_nop.cast( m opal_nop_ar0_param_s* ).h.h;
         if( !h_in )
         {
             h_in = h_cur;

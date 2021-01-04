@@ -67,7 +67,7 @@ stamp :result_s = aware bcore_inst
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-signature void set( m @* o, const :param_s* src );
+signature void set( m @* o, c :param_s* src );
 
 stamp :param_s = aware bcore_inst
 {

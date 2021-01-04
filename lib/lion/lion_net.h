@@ -101,7 +101,7 @@ stamp :links_s = aware x_array
 signature void solve( m @* o );
 
 /// returns the uplink index pointing to node; returns -1 if not found
-signature sz_t up_index( c @* o, const :node_s* node );
+signature sz_t up_index( c @* o, c :node_s* node );
 signature void set_nop_d( m @* o, d lion_nop* nop );
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

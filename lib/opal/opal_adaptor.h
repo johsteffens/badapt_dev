@@ -58,13 +58,13 @@ func (:frame_s) bhpt_adaptor.adapt =
         {
             case TYPEOF_bcore_file_path_s:
             {
-                source = bcore_file_open_source_path( o.src.cast( const bcore_file_path_s* ) ).scope();
+                source = bcore_file_open_source_path( o.src.cast( c bcore_file_path_s* ) ).scope();
             }
             break;
 
             case TYPEOF_st_s:
             {
-                source = bcore_source_string_s_create_from_string( o.src.cast( const st_s* ) ).cast( m bcore_source* ).scope();
+                source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) ).cast( m bcore_source* ).scope();
             }
             break;
 

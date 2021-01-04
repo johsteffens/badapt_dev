@@ -20,7 +20,7 @@
 
 func (:context_s) (tp_t parse_op2_symbol( c @* o, m bcore_source* source )) =
 {
-    const bcore_arr_st_s* arr = o.arr_symbol_op2;
+    c bcore_arr_st_s* arr = o.arr_symbol_op2;
 
     m st_s* format = st_s!^;
     tp_t ret = 0;
