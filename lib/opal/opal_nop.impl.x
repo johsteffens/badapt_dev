@@ -17,7 +17,8 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (bl_t solve_default( c @* o, m opal_context* context, d opal_holor_s** a, m :solve_result_s* result )) =
+//func (bl_t solve_default( c @* o, m opal_context* context, d opal_holor_s** a, m :solve_result_s* result )) =
+func :.solve_default =
 {
     ASSERT( result );
     m opal_holor_s.2 r = result.h;
@@ -112,7 +113,8 @@ func (bl_t solve_default( c @* o, m opal_context* context, d opal_holor_s** a, m
  *  version via opal_op_a_settle.
  *  After settling, the graph can be run through an optimizer minimizing its structure.
  */
-func (void solve_node_default( m @* o, m opal_net_node_s* node, m opal_net_node_adl_s* deferred )) =
+//func (void solve_node_default( m @* o, m opal_net_node_s* node, m opal_net_node_adl_s* deferred )) =
+func :.solve_node_default =
 {
     if( node.flag ) return; // cyclic link
 
@@ -146,7 +148,7 @@ func (void solve_node_default( m @* o, m opal_net_node_s* node, m opal_net_node_
 
     if( node.result.can_settle )
     {
-        o.settle( node.context, node.result, node.nop, node.result );
+        o.settle( node.context, node.result, node.nop.cast( d $.2 ), node.result.cast( d $.2 ) );
         node.upls.clear();
         if( !node.result.reducible )
         {
@@ -177,10 +179,10 @@ func (:ar1_param_s) ::.solve =
 
 func (:ar1_param_s) ::.settle =
 {
-    m opal_nop_ar0_param_s* nop_param = opal_nop_ar0_param_s!;
+    d opal_nop_ar0_param_s* nop_param = opal_nop_ar0_param_s!;
     nop_param.h = result.h.clone();
     out_nop.1 =< nop_param;
-    m opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
+    d opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
     r.h = nop_param.h.fork();
     out_result.1 =< r;
 };
@@ -220,10 +222,10 @@ func (:ar1_adaptive_s) ::.solve =
 
 func( :ar1_adaptive_s ) ::.settle =
 {
-    m opal_nop_ar0_adaptive_s* adaptive = opal_nop_ar0_adaptive_s!;
+    d opal_nop_ar0_adaptive_s* adaptive = opal_nop_ar0_adaptive_s!;
     adaptive.h = result.h.clone();
     adaptive.h.m.name = o.name;
-    m opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
+    d opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
     r.h = adaptive.h.fork();
     out_result.1 =< r;
     out_nop.1 =< adaptive;
@@ -278,7 +280,7 @@ func (:ar1_rand_s) ::.solve =
         f3_t max     =  0.5;
         f3_t density =  1.0;
 
-        m opal_nop_ar0_rand_s* nop_rand = opal_nop_ar0_rand_s!;
+        d opal_nop_ar0_rand_s* nop_rand = opal_nop_ar0_rand_s!;
         nop_rand.prsg = prsg.clone();
         nop_rand.min = min;
         nop_rand.max = max;
@@ -303,7 +305,7 @@ func (:ar1_rand_s) ::.settle =
     ASSERT( result.attached?._ == TYPEOF_opal_nop_ar0_rand_s );
     m opal_nop_ar0_rand_s* nop_rand = result.attached.cast( m opal_nop_ar0_rand_s* );
     out_nop.1 =< nop_rand.fork();
-    m opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
+    d opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
     r.h = nop_rand.h.fork();
     out_result.1 =< r;
 };
@@ -410,7 +412,7 @@ func (:ar2_reshape_s) ::.solve_node =
         ASSERT( arg0.result && arg0.result.h );
         ASSERT( arg1.result && arg1.result.h );
 
-        m opal_nop_ar1_reshape_s* ar1_reshape = opal_nop_ar1_reshape_s!;
+        d opal_nop_ar1_reshape_s* ar1_reshape = opal_nop_ar1_reshape_s!;
         ar1_reshape.shape.copy( arg0.result.h.h.s );
 
         node.upls.clear();
@@ -421,7 +423,7 @@ func (:ar2_reshape_s) ::.solve_node =
 
         if( node.result.can_settle )
         {
-            o.settle( node.context, node.result, node.nop, node.result );
+            o.settle( node.context, node.result, node.nop.cast( d$.2 ), node.result.cast( d$.2 ) );
             node.upls.clear();
         }
     }
@@ -436,7 +438,7 @@ func (:ar1_reshape_s) ::.mcode_push_ap_holor =
     m bhvm_holor_s* h = result.h.h;
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, m );
-    m bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s!.setup( arr_ci.i_of_c( 'a' ), idx );
+    d bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s!.setup( arr_ci.i_of_c( 'a' ), idx );
     vop_reshape.shape.copy( o.shape );
     mcf.track_vop_push_d( TYPEOF_track_ap_setup, vop_reshape );
     mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
@@ -450,7 +452,7 @@ func (:ar1_reshape_s) ::.mcode_push_dp_holor =
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, m );
-    m bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s!.setup( arr_ci.i_of_c( 'f' ), idx );
+    d bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s!.setup( arr_ci.i_of_c( 'f' ), idx );
     vop_reshape.shape.copy( o.shape );
     mcf.track_vop_push_d( TYPEOF_track_dp_setup, vop_reshape );
     mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
@@ -756,7 +758,7 @@ func (:ar2_order_inc_s) ::.solve =
         if( dim <= 0 ) return false;
         hb.order_inc_set( dim, hr );
 
-        m bhvm_vop_ar1_order_inc_s* order_inc = bhvm_vop_ar1_order_inc_s!;
+        d bhvm_vop_ar1_order_inc_s* order_inc = bhvm_vop_ar1_order_inc_s!;
         order_inc.dim = dim;
         result.attached =< order_inc;
     }
@@ -768,7 +770,7 @@ func (:ar2_order_inc_s) ::.solve =
 
 func (:ar2_order_inc_s) ::.mcode_push_ap_track =
 {
-    m bhvm_vop* vop = result.attached.clone();
+    d bhvm_vop* vop = result.attached.clone();
     vop.set_index( 0, arr_ci.i_of_c( 'b' ) );  // default signature 'ay' would be incorrect in this case
     vop.set_index( 1, arr_ci.i_of_c( 'y' ) );
     mcf.track_vop_push_d( TYPEOF_track_ap, vop );
@@ -812,7 +814,7 @@ func (:ar2_order_dec_s) ::.solve =
         }
 
         ha.order_dec_weak( index, hr );
-        m bhvm_vop_ar1_order_dec_weak_s* order_dec_weak = bhvm_vop_ar1_order_dec_weak_s!;
+        d bhvm_vop_ar1_order_dec_weak_s* order_dec_weak = bhvm_vop_ar1_order_dec_weak_s!;
         order_dec_weak.idx = index;
         result.attached =< order_dec_weak;
     }
@@ -827,7 +829,7 @@ func (:ar2_order_dec_s) ::.mcode_push_ap_holor =
     m bhvm_holor_s* h = result.h.h;
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = mcf.push_hm( h, m );
-    m bhvm_vop_ar1_order_dec_weak_s* weak = result.attached.cast( m bhvm_vop_ar1_order_dec_weak_s* ).clone();
+    d bhvm_vop_ar1_order_dec_weak_s* weak = result.attached.cast( m bhvm_vop_ar1_order_dec_weak_s* ).clone();
     mcf.track_vop_push_d( TYPEOF_track_ap_setup, weak.setup( arr_ci.i_of_c( 'a' ), idx ) );
     mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
@@ -840,7 +842,7 @@ func (:ar2_order_dec_s) ::.mcode_push_dp_holor =
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = mcf.push_hm( h, m );
-    m bhvm_vop_ar1_order_dec_weak_s* weak = result.attached.cast( m bhvm_vop_ar1_order_dec_weak_s* ).clone();
+    d bhvm_vop_ar1_order_dec_weak_s* weak = result.attached.cast( m bhvm_vop_ar1_order_dec_weak_s* ).clone();
     mcf.track_vop_push_d( TYPEOF_track_dp_setup, weak.setup( arr_ci.i_of_c( 'f' ), idx ) );
     mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
@@ -963,7 +965,7 @@ func (:ar2_rands_s) ::.solve =
         result.can_settle = true;
         result.codable    = false;
 
-        m opal_nop_ar0_rand_s* nop_rand = opal_nop_ar0_rand_s!;
+        d opal_nop_ar0_rand_s* nop_rand = opal_nop_ar0_rand_s!;
         nop_rand.h = result.h.clone();
 
         prsg.reseed( rseed );
@@ -983,7 +985,7 @@ func (:ar2_rands_s) ::.settle =
     ASSERT( result.attached?._ == TYPEOF_opal_nop_ar0_rand_s );
     m opal_nop_ar0_rand_s* nop_rand = result.attached.cast( m opal_nop_ar0_rand_s* );
     out_nop.1 =< nop_rand.fork();
-    m opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
+    d opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
     r.h = nop_rand.h.fork();
     out_result.1 =< r;
 };

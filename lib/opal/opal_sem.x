@@ -51,7 +51,7 @@ func (:context_s) :.setup =
 
     for( sz_t i = 0; i < arr_tp.size; i++ )
     {
-        m opal_nop* nop = opal_nop_t_create( arr_tp.[ i ] );
+        d opal_nop* nop = opal_nop_t_create( arr_tp.[ i ] );
         sc_t symbol   = nop.symbol();
 
         // bcore_msg_fa( "#<sc_t>\n", symbol );
@@ -93,9 +93,9 @@ func (:context_s) :.setup =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (m :link_s* link_s_create_setup( tp_t name, m :link_s* up, m :link_s* dn, m :cell_s* cell, bl_t exit )) =
+func (d :link_s* link_s_create_setup( tp_t name, m :link_s* up, m :link_s* dn, m :cell_s* cell, bl_t exit )) =
 {
-    m :link_s* o = :link_s!;
+    d :link_s* o = :link_s!;
     o.set_name_visible( name );
     o.up = up;
     o.dn = dn;
@@ -137,7 +137,8 @@ func (:link_s) (m :cell_s* trace_to_cell( m @* o )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void set_channels( m @* o, sz_t excs, sz_t encs )) =
+//func (:cell_s) (void set_channels( m @* o, sz_t excs, sz_t encs )) =
+func (:cell_s) set_channels =
 {
     o.excs.set_size( excs );
     o.encs.set_size( encs );
@@ -254,7 +255,7 @@ func (:cell_s) (m @* rewrap_cell_soft( m @* o, m :cell_s* src )) =
  * Input channels are named in order 'a', 'b' ...
  * If ever more than 24 input channels are used, excess channels carry no name.
  */
-func (:cell_s) (m @* push_cell_nop_d( m @* o, m opal_nop* nop )) =
+func (:cell_s) push_cell_nop_d =
 {
     m @* cell = o.push_cell();
     cell.set_channels( 1, nop.arity() );
@@ -271,7 +272,7 @@ func (:cell_s) (m @* push_cell_nop_d( m @* o, m opal_nop* nop )) =
 
 func (:cell_s) (m @* push_cell_const_scalar( m @* o, tp_t type, f3_t v )) =
 {
-    m opal_nop_ar0_literal_s* literal = opal_nop_ar0_literal_s!;
+    d opal_nop_ar0_literal_s* literal = opal_nop_ar0_literal_s!;
     literal.h = opal_holor_s!;
     literal.h.h.set_type_scalar( type, v );
     literal.h.m.active = false;
@@ -314,7 +315,7 @@ func (:cell_s) (void parse_signature( m @* o, m bcore_source* source )) =
         while( !source.parse_bl( " #?')'" ) )
         {
             if( !first ) source.parse_fa( " ," );
-            m :link_s* link = :link_s_create_setup( o.parse_var_name( source ), NULL, NULL, o, false );
+            d :link_s* link = :link_s_create_setup( o.parse_var_name( source ), NULL, NULL, o, false );
             if( source.parse_bl( " #?([0]=='='&&[1]!='=')" ) )
             {
                 source.parse_fa( "=" );
@@ -328,7 +329,7 @@ func (:cell_s) (void parse_signature( m @* o, m bcore_source* source )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void parse( m @* o, m bcore_source* source )) =
+func (:cell_s) parse =
 {
     m :cell_s* frame = o.parent;
 
@@ -361,7 +362,7 @@ func (:cell_s) (void parse( m @* o, m bcore_source* source )) =
 
 func (:cell_s) (d st_s* create_signature( c @* o )) =
 {
-    m st_s* s = st_s!;
+    d st_s* s = st_s!;
     s.push_fa( "(" );
     foreach( m :link_s* link in o.excs ) st_s_push_fa( s, "#<sc_t>#<sc_t>", __i > 0 ? "," : "", o.ifnameof( link.name ) );
     s.push_fa( "<-" );
@@ -423,7 +424,7 @@ func (:cell_s) (void parse_verify_signature( c @* o, m bcore_source* source )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void parse_body( m @* o, m bcore_source* source )) =
+func (:cell_s) parse_body =
 {
     source.parse_fa( " " );
     while( !source.eos() && !source.parse_bl( " #=?'}'" ) )
@@ -454,7 +455,7 @@ func (:cell_s) (void parse_body( m @* o, m bcore_source* source )) =
             m :link_s* link = o.push_link();
             o.assert_identifier_not_yet_defined( tp_name, source );
             link.set_name_visible( tp_name );
-            m opal_nop_ar1_adaptive_s* nop_adaptive = opal_nop_ar1_adaptive_s!;
+            d opal_nop_ar1_adaptive_s* nop_adaptive = opal_nop_ar1_adaptive_s!;
             nop_adaptive.name = tp_name;
             m :cell_s* cell = o.push_cell_nop_d_invisible_set_source( nop_adaptive, source );
             cell.set_name_invisible( tp_name );
@@ -468,7 +469,7 @@ func (:cell_s) (void parse_body( m @* o, m bcore_source* source )) =
             m :link_s* link = o.push_link();
             o.assert_identifier_not_yet_defined( tp_name, source );
             link.set_name_visible( tp_name );
-            m opal_nop_ar2_cyclic_s* nop_cyclic = opal_nop_ar2_cyclic_s!;
+            d opal_nop_ar2_cyclic_s* nop_cyclic = opal_nop_ar2_cyclic_s!;
             nop_cyclic.name = tp_name;
             m :cell_s* cell = o.push_cell_nop_d_invisible_set_source( nop_cyclic, source );
             cell.set_name_invisible( tp_name );
@@ -858,7 +859,7 @@ func (:cell_s) (void evaluate_stack( m @* o, m :stack_s* stack, m bcore_source* 
             )
             {
                 m :cell_s* cell = o.get_cell_by_name( op2_symbol );
-                m opal_nop* nop_unary = cell.nop.create_op_of_arn( 1 );
+                d opal_nop* nop_unary = cell.nop.create_op_of_arn( 1 );
                 if( nop_unary )
                 {
                     m :cell_s* cell = o.push_cell_nop_d_invisible_set_source( nop_unary, source );
@@ -1135,7 +1136,7 @@ func (:cell_s) (void evaluate_stack( m @* o, m :stack_s* stack, m bcore_source* 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (m :* evaluate_sem_stack( m @* o, m :stack_s* stack, m bcore_source* source )) =
+func (:cell_s) evaluate_sem_stack =
 {
     o.evaluate_stack( stack, source );
     if( stack.size() != 1 ) source.parse_err_fa( "Expression syntax error." );
@@ -1144,14 +1145,14 @@ func (:cell_s) (m :* evaluate_sem_stack( m @* o, m :stack_s* stack, m bcore_sour
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (m :* evaluate_sem( m @* o, m bcore_source* source )) =
+func (:cell_s) evaluate_sem =
 {
     return o.evaluate_sem_stack( :stack_s!^, source );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (m :link_s* evaluate_link_stack( m @* o, m :stack_s* stack, m bcore_source* source )) =
+func (:cell_s) evaluate_link_stack =
 {
     m :* ret = o.evaluate_sem_stack( stack, source );
     if( ret._ == TYPEOF_:cell_s )
@@ -1168,14 +1169,14 @@ func (:cell_s) (m :link_s* evaluate_link_stack( m @* o, m :stack_s* stack, m bco
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (m :link_s* evaluate_link( m @* o, m bcore_source* source )) =
+func (:cell_s) evaluate_link =
 {
     return o.evaluate_link_stack( :stack_s!^, source );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (m :cell_s* evaluate_cell_stack( m @* o, m :stack_s* stack, m bcore_source* source )) =
+func (:cell_s) evaluate_cell_stack =
 {
     m :* ret = o.evaluate_sem_stack( stack, source );
     if( ret._ != TYPEOF_:cell_s )
@@ -1187,7 +1188,7 @@ func (:cell_s) (m :cell_s* evaluate_cell_stack( m @* o, m :stack_s* stack, m bco
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (m :cell_s* evaluate_cell( m @* o, m bcore_source* source )) =
+func (:cell_s) evaluate_cell =
 {
     return o.evaluate_cell_stack( :stack_s!^, source );
 };

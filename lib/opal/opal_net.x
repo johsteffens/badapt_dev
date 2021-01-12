@@ -593,7 +593,7 @@ func (:cell_s)
         if( sem_link.up )
         {
             if( log ) log.push_fa( "Evaluating literal in root entry channel '#<sz_t>' ... \n", __i );
-            m opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
+            d opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
             param.h = opal_holor_s!;
 
             param.h.from_sem_link( sem_link, sem_cell.parent, log );
@@ -606,7 +606,7 @@ func (:cell_s)
             }
         }
 
-        m opal_nop* new_nop = input_nop_creator ? input_nop_creator.create_input_nop( __i, sem_link.name, net_node.nop ) : NULL;
+        d opal_nop* new_nop = input_nop_creator ? input_nop_creator.create_input_nop( __i, sem_link.name, net_node.nop ) : NULL;
         if( new_nop ) net_node.set_nop_d( new_nop );
     }
 
@@ -978,7 +978,7 @@ func (:cell_s) :.mcode_push_ap =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void mcode_push_dp( m @* o, m bhvm_mcode_frame_s* mcf, bl_t entry_channels )) =
+func (:cell_s) mcode_push_dp =
 {
     ASSERT( o.is_consistent() );
     m opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^^;
@@ -1039,7 +1039,7 @@ func (:builder_s) ::.create_input_nop =
 
     if( h_in )
     {
-        m opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
+        d opal_nop_ar0_param_s* param = opal_nop_ar0_param_s!;
         param.h = opal_holor_s!;
         param.h.h.copy( h_in );
         return param;

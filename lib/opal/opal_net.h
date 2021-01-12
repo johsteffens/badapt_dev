@@ -252,7 +252,7 @@ stamp :cell_s = aware :
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Creates an input node operator at indexed global input channel
-feature m opal_nop* create_input_nop( c @* o, sz_t in_idx, tp_t in_name, c opal_nop* cur_nop );
+feature d opal_nop* create_input_nop( c @* o, sz_t in_idx, tp_t in_name, c opal_nop* cur_nop );
 
 // network builder
 group :builder = :

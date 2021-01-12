@@ -98,7 +98,7 @@ XOILA_DEFINE_GROUP( opal_sem, x_inst )
 group :context = opal_context
 {
     signature void setup( m @* o, m opal_sem_cell_s* frame );
-    signature m opal_sem_cell_s* setup_cell( m @* o, m opal_sem_cell_s* cell ); // returns cell
+    signature cell setup_cell( m @* o, m opal_sem_cell_s* cell ); // returns cell
     signature d opal_sem_cell_s* create_cell( m @* o ); // creates and setups cell
 
     stamp :s = aware :
@@ -353,6 +353,9 @@ stamp :links_s = aware x_array
         foreach( m $* e in o ) count += ( e.up == NULL );
         return count;
     };
+
+    func (m @* trace_to_cell_membrane( m @* o ));
+
 };
 
 stamp :body_s = aware x_array
@@ -463,14 +466,14 @@ stamp :cell_s = aware :
     func (void create_args_out( m @* o, m bcore_source* source ));
     func (void create_args_in(  m @* o, m :cell_s* frame, m bcore_source* source ));
     func (void wrap_cell(       m @* o, m :cell_s* cell ));
-    func (void             parse(               m @* o,                          m bcore_source* source ));
-    func (void             parse_body(          m @* o,                          m bcore_source* source ));
-    func (m opal_sem*        evaluate_sem(        m @* o,                          m bcore_source* source ));
-    func (m opal_sem*        evaluate_sem_stack(  m @* o, m bcore_arr_vd_s* stack, m bcore_source* source ));
-    func (m opal_sem_cell_s* evaluate_cell(       m @* o,                          m bcore_source* source ));
-    func (m opal_sem_cell_s* evaluate_cell_stack( m @* o, m bcore_arr_vd_s* stack, m bcore_source* source ));
-    func (m opal_sem_link_s* evaluate_link(       m @* o,                          m bcore_source* source ));
-    func (m opal_sem_link_s* evaluate_link_stack( m @* o, m bcore_arr_vd_s* stack, m bcore_source* source ));
+    func (void             parse(               m @* o,                      m bcore_source* source ));
+    func (void             parse_body(          m @* o,                      m bcore_source* source ));
+    func (m opal_sem*        evaluate_sem(        m @* o,                    m bcore_source* source ));
+    func (m opal_sem*        evaluate_sem_stack(  m @* o, m :stack_s* stack, m bcore_source* source ));
+    func (m opal_sem_cell_s* evaluate_cell(       m @* o,                    m bcore_source* source ));
+    func (m opal_sem_cell_s* evaluate_cell_stack( m @* o, m :stack_s* stack, m bcore_source* source ));
+    func (m opal_sem_link_s* evaluate_link(       m @* o,                    m bcore_source* source ));
+    func (m opal_sem_link_s* evaluate_link_stack( m @* o, m :stack_s* stack, m bcore_source* source ));
     func (void             set_channels(        m @* o, sz_t excs, sz_t encs ));
 
     /// Context wrappers
@@ -576,25 +579,10 @@ group :tree = :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:link_s) (m @* trace_to_cell_membrane( m @* o ));
-
-func (:tree_node_s) (m bcore_source_point_s* get_nearest_source_point( m @* o ));
-
 embed "opal_sem.x";
 
 #endif // XOILA_SECTION
 
 /**********************************************************************************************************************/
-
-void stack_push( bcore_arr_vd_s* o, vd_t value );
-vd_t stack_pop( bcore_arr_vd_s* o );
-vd_t stack_pop_of_type( bcore_arr_vd_s* o, tp_t type, bcore_source* source );
-vd_t stack_pop_of_value( bcore_arr_vd_s* o, vd_t value, bcore_source* source );
-bl_t stack_of_type( bcore_arr_vd_s* o, sz_t idx, tp_t type );
-bl_t stack_of_value( bcore_arr_vd_s* o, sz_t idx, vd_t value );
-opal_sem_link_s* stack_pop_link( bcore_arr_vd_s* o, bcore_source* source );
-opal_sem_cell_s* stack_pop_cell( bcore_arr_vd_s* o, bcore_source* source );
-opal_sem_link_s* stack_pop_link_or_exit( bcore_arr_vd_s* o, bcore_source* source );
-
 
 #endif // OPAL_SEM_H

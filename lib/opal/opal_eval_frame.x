@@ -163,7 +163,7 @@ func (:plain_s) :.run =
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).cast( m bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).scope();
         }
         break;
 
@@ -511,7 +511,7 @@ func (:cyclic_s) :.run =
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).cast( m bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).scope();
         }
         break;
 

@@ -98,7 +98,7 @@ stamp :param_s = aware bcore_inst
         }
         else if( src->name.size > 0 )
         {
-            m st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
+            d st_s* new_name = st_s_create_fa( "<sc_t>_<sc_t>", o->name.sc, src->name.sc );
             st_s_copy( &o->name, new_name );
             st_s_discard( new_name );
         }

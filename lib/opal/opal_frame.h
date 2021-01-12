@@ -101,18 +101,19 @@ signature void reset( m @* o );
 signature void setup( m @* o );
 signature void check_integrity( c @* o );
 
-signature m @* setup_from_source(      m @* o, m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
-signature m @* setup_from_st(          m @* o,         c st_s* st,     c bhvm_holor_s** en, sz_t size_en );
-signature m @* setup_from_sc(          m @* o,           sc_t  sc,     c bhvm_holor_s** en, sz_t size_en );
-signature d @* create_from_source(             m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
-signature d @* create_from_st(                         c st_s* st,     c bhvm_holor_s** en, sz_t size_en );
-signature d @* create_from_sc(                           sc_t  sc,     c bhvm_holor_s** en, sz_t size_en );
-signature m @* setup_from_source_adl(  m @* o, m bcore_source* source, c bhvm_holor_adl_s* en );
-signature m @* setup_from_st_adl(      m @* o,         c st_s* st,     c bhvm_holor_adl_s* en );
-signature m @* setup_from_sc_adl(      m @* o,           sc_t  sc,     c bhvm_holor_adl_s* en );
-signature d @* create_from_source_adl(         m bcore_source* source, c bhvm_holor_adl_s* en );
-signature d @* create_from_st_adl(                     c st_s* st,     c bhvm_holor_adl_s* en );
-signature d @* create_from_sc_adl(                       sc_t  sc,     c bhvm_holor_adl_s* en );
+signature o setup_from_source(      m @* o, m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
+signature o setup_from_st(          m @* o,         c st_s* st,     c bhvm_holor_s** en, sz_t size_en );
+signature o setup_from_sc(          m @* o,           sc_t  sc,     c bhvm_holor_s** en, sz_t size_en );
+signature o setup_from_source_adl(  m @* o, m bcore_source* source, c bhvm_holor_adl_s* en );
+signature o setup_from_st_adl(      m @* o,         c st_s* st,     c bhvm_holor_adl_s* en );
+signature o setup_from_sc_adl(      m @* o,           sc_t  sc,     c bhvm_holor_adl_s* en );
+
+signature d @* create_from_source(     m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_st(                 c st_s* st,     c bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_sc(                   sc_t  sc,     c bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_source_adl( m bcore_source* source, c bhvm_holor_adl_s* en );
+signature d @* create_from_st_adl(             c st_s* st,     c bhvm_holor_adl_s* en );
+signature d @* create_from_sc_adl(               sc_t  sc,     c bhvm_holor_adl_s* en );
 
 signature sz_t get_size_en( c @* o ); // number of entry channels
 signature sz_t get_size_ex( c @* o ); // number of exit channels

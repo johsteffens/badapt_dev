@@ -88,7 +88,7 @@ feature sc_t symbol( c @* o )   = { return NULL; };
 feature bl_t reserved( c @* o ) = { return false; };
 
 /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
-feature m :* create_op_of_arn( c @* o, sz_t n ) = { return ( o.arity() == n ) ? o.clone() : NULL; };
+feature d :* create_op_of_arn( c @* o, sz_t n ) = { return ( o.arity() == n ) ? o.clone() : NULL; };
 
 /** Solve computes the result 'r' from an array of arguments 'a'.
   * 'a' represents an array of pointers. The array size is equal to arity.
@@ -141,7 +141,7 @@ feature bl_t eci( c @* o ) = { return false; };
   * Returns 'true' in case of success, otherwise check result.msg
   * The default implementation solves all elementary operators
   */
-feature bl_t solve( c @* o, m opal_context* context, d opal_holor_s** a, m :solve_result_s* result ) extern solve_default;
+feature bl_t solve( c @* o, m opal_context* context, m opal_holor_s** a, m :solve_result_s* result ) extern solve_default;
 
 /** Node-level solving.
  *  Implemented in opal_net.c
@@ -167,12 +167,12 @@ feature bl_t is_adaptive( c @* o ) = { return false; };
  */
 feature void settle( c @* o, m opal_context* context, c :solve_result_s* result, d :** out_nop, d :solve_result_s** out_result ) =
 {
-    m :ar0_literal_s* literal = :ar0_literal_s!;
+    d :ar0_literal_s* literal = :ar0_literal_s!;
     literal.h = result.h.clone();
-    m :solve_result_s* r = :solve_result_s!;
+    d :solve_result_s* r = :solve_result_s!;
     r.h = literal.h.fork();
-    :solve_result_s_attach( out_result, r );
-    :a_attach( out_nop, (:*)literal );
+    out_result.1 =< r;
+    out_nop.1 =< literal;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -339,7 +339,7 @@ group :ar0 = retrievable
             m opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, m );
 
-            m bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s!;
+            d bhvm_vop_ar0_rand_s* vop_rand = bhvm_vop_ar0_rand_s!;
             vop_rand.prsg = o.prsg.clone();
             vop_rand.min = o.min;
             vop_rand.max = o.max;

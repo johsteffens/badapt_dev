@@ -42,7 +42,7 @@ func (:s) bhpt_adaptive.status_to_sink =
 
 func (:builder_s) bhpt_builder.create_adaptive =
 {
-    m opal_adaptive_s* adaptive = opal_adaptive_s!;
+    d opal_adaptive_s* adaptive = opal_adaptive_s!;
 
     m bcore_source* source = NULL;
 
@@ -179,7 +179,7 @@ func (:cyclic_s) bhpt_adaptive.status_to_sink =
 
 func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 {
-    m opal_adaptive_cyclic_s* adaptive = opal_adaptive_cyclic_s!;
+    d opal_adaptive_cyclic_s* adaptive = opal_adaptive_cyclic_s!;
 
     m bcore_source* source = NULL;
 
@@ -193,7 +193,7 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) ).cast( m bcore_source* ).scope();
+            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) ).scope();
         }
         break;
 
