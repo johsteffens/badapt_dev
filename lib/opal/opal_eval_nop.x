@@ -65,17 +65,17 @@ func (:generator_s) (void randomize_holor( c @* o, m opal_holor_s* h, m bcore_pr
 func (:generator_s) :.run =
 {
     ASSERT( o->eval );
-    m bcore_prsg* prsg = o.param.prsg.clone().scope();
+    m bcore_prsg* prsg = o.param.prsg.clone()^^;
 
     for( sz_t i = 0; i < o->cycles; i++ )
     {
-        m opal_eval_nop_param_s* param = o->param.clone().scope( scope_local );
+        m opal_eval_nop_param_s* param = o->param.clone()^;
         param.prsg.set_state_mix( param->prsg, prsg );
         if( param.ha ) o.randomize_holor( param.ha, prsg );
         if( param.hb ) o.randomize_holor( param.hb, prsg );
         if( param.hc ) o.randomize_holor( param.hc, prsg );
         if( param.hr ) o.randomize_holor( param.hr, prsg );
-        m opal_eval_nop* eval = o.eval.clone().scope( scope_local );
+        m opal_eval_nop* eval = o.eval.clone()^;
         eval.set_param( param );
         eval.run( result );
         if( result )
@@ -84,7 +84,7 @@ func (:generator_s) :.run =
             {
                 if( o.tolerated_cycles.find( 0, -1, i ) == o.tolerated_cycles.size )
                 {
-                    m st_s* s = result.msg.clone().scope( scope_local );
+                    m st_s* s = result.msg.clone()^;
                     result.msg.copy_fa( "At cycle #<sz_t>:\n#<st_s*>", i, s );
                     return result;
                 }
@@ -114,7 +114,7 @@ func (:ar1_s) :.run =
 
     ASSERT( ha );
 
-    m bcore_prsg* prsg = o->param.prsg.clone().scope();
+    m bcore_prsg* prsg = o->param.prsg.clone()^^;
 
     if( o.param.verbosity >= 4 )
     {
@@ -210,7 +210,7 @@ func (:ar1_s) :.run =
         m bhvm_holor_s* gina = frame.hbase.holor_adl.[ i_gina ];
         m bhvm_holor_s* gout = frame.hbase.holor_adl.[ i_gout ];
 
-        m bhvm_holor_s* fin = out.clone().scope();
+        m bhvm_holor_s* fin = out.clone()^^;
         m bhvm_holor_s* scl = bhvm_holor_s!^^;
         scl.set_scalar_f3( 1.0 );
 
@@ -239,7 +239,7 @@ func (:ar1_s) :.run =
 
         if( !out.is_equal( r.h ) )
         {
-            m st_s* msg = st_s_create_fa( "\n:result   : " ).scope();
+            m st_s* msg = st_s_create_fa( "\n:result   : " )^^;
             out.brief_to_sink( msg );
             msg.push_fa( "\n:expected : " );
             r.h.brief_to_sink( msg );
@@ -331,7 +331,7 @@ func (:ar2_s) :.run =
     ASSERT( ha );
     ASSERT( hb );
 
-    m bcore_prsg* prsg = o->param.prsg.clone().scope();
+    m bcore_prsg* prsg = o->param.prsg.clone()^^;
 
     if( o.param.verbosity >= 4 )
     {
@@ -435,7 +435,7 @@ func (:ar2_s) :.run =
         m bhvm_holor_s* ginb = frame.hbase.holor_adl.[ i_ginb ];
         m bhvm_holor_s* gout = frame.hbase.holor_adl.[ i_gout ];
 
-        m bhvm_holor_s*  fin = out.clone().scope();
+        m bhvm_holor_s*  fin = out.clone()^^;
         m bhvm_holor_s*  scl = bhvm_holor_s!^^;
         scl.set_scalar_f3( 1.0 );
 

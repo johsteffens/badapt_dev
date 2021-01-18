@@ -148,7 +148,7 @@ stamp :set_s = extending :std_s
             eval.run( result );
             if( result.error )
             {
-                result.msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, result.msg.clone().scope( scope_local ) );
+                result.msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, result.msg.clone()^ );
                 return result;
             }
         }

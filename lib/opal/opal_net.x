@@ -871,7 +871,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
         o.flag = true;
 
         m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
-        m opal_holor_meta_s* m = o.result.h.m.clone().scope();
+        m opal_holor_meta_s* m = o.result.h.m.clone()^^;
         if( !m.name ) m.name = o.name;
         if( !m.sem_id ) m.sem_id = o.sem_id.fork();
 
@@ -917,7 +917,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
 
     {
         m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
-        m opal_holor_meta_s* m = o.result.h.m.clone().scope();
+        m opal_holor_meta_s* m = o.result.h.m.clone()^^;
         if( !m.name ) m.name = o.name;
         if( !m.sem_id ) m.sem_id = o.sem_id.fork();
         m.pclass = TYPEOF_pclass_ag1;

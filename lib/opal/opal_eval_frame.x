@@ -26,7 +26,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl
 {
     ASSERT( o.is_setup );
 
-    m bhvm_holor_adl_s* adl_en = en.clone().scope();
+    m bhvm_holor_adl_s* adl_en = en.clone()^^;
     m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
     m bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^^;
     o.run_ap_adl( adl_en, adl_ex );
@@ -77,7 +77,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl
 
 func (opal_frame_s) (void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )) =
 {
-    o.clone().scope().mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
+    o.clone()^^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_ad
 
 func (opal_frame_s) (void estimate_jacobian_ada( c @* o, c bhvm_holor_adl_s* adl_en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )) =
 {
-    o.clone().scope().mutable_estimate_jacobian_ada( adl_en, epsilon, jac_mdl );
+    o.clone()^^.mutable_estimate_jacobian_ada( adl_en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -157,13 +157,13 @@ func (:plain_s) :.run =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) )^^;
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).scope();
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) )^^;
         }
         break;
 
@@ -191,7 +191,7 @@ func (:plain_s) :.run =
     }
 
     /// test copying
-    m opal_frame_s* frame = frame0.clone().scope();
+    m opal_frame_s* frame = frame0.clone()^^;
 
     if( frame.size_en > 0 )
     {
@@ -262,8 +262,8 @@ func (:plain_s) :.run =
 
         if( verbosity >= 10 ) log.push_fa( "\nJacobian DP Test:\n" );
 
-        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone().scope();
-        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex.clone().scope();
+        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone()^^;
+        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex.clone()^^;
         foreach( m $* e in adl_dp_en ) e.zro();
 
         foreach( m $* e in adl_dp_ex )
@@ -430,7 +430,7 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_ho
 {
     ASSERT( o.is_setup );
 
-    m bhvm_holor_adl_s* adl_en = en.clone().scope();
+    m bhvm_holor_adl_s* adl_en = en.clone()^^;
     m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
     m bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^^;
     o.run_ap_adl_flat( adl_en, adl_ex );
@@ -485,7 +485,7 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_ho
  */
 func (opal_frame_cyclic_s) (void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )) =
 {
-    o.clone().scope().mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
+    o.clone()^^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -505,13 +505,13 @@ func (:cyclic_s) :.run =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) )^^;
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) ).scope();
+            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) )^^;
         }
         break;
 
@@ -542,7 +542,7 @@ func (:cyclic_s) :.run =
         frame_cyclic0 = frame_cyclic1;
     }
 
-    m opal_frame_cyclic_s* frame_cyclic  = frame_cyclic0.clone().scope();
+    m opal_frame_cyclic_s* frame_cyclic  = frame_cyclic0.clone()^^;
 
     frame_cyclic.run_ap_adl_flat( adl_ap_en, adl_ap_ex1 );
     adl_ap_ex2.set_size( adl_ap_ex1.size );
@@ -619,8 +619,8 @@ func (:cyclic_s) :.run =
 
         if( o.param.verbosity >= 10 ) o.param.log.push_fa( "\nJacobian DP Test:\n" );
 
-        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone().scope();
-        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex1.clone().scope();
+        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone()^^;
+        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex1.clone()^^;
 
         foreach( m bhvm_holor_s* e in adl_dp_ex )
         {

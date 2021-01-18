@@ -155,12 +155,12 @@ stamp :set_s = extending :std_s
     {
         foreach( m :* e in o.arr )
         {
-            m :* eval = e.clone().scope( scope_local );
+            m :* eval = e.clone()^;
             eval.set_param( &o.param );
             eval.run( result );
             if( result.error )
             {
-                result.msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, result.msg.clone().scope( scope_local ) );
+                result.msg.copy_fa( "At set entry #<sz_t>:\n#<st_s*>", __i, result.msg.clone()^ );
                 return result;
             }
         }

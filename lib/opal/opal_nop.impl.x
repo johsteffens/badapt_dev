@@ -96,7 +96,7 @@ func :.solve_default =
         result.type_vop_ap = o.defines_type_vop_ap() ? o.type_vop_ap() : 0;
         assert( result.type_vop_ap );
 
-        bhvm_vop_a_run( bhvm_vop_t_create( result.type_vop_ap ).scope().set_args( arr_ci ), hbase.holor_adl.data );
+        bhvm_vop_a_run( bhvm_vop_t_create( result.type_vop_ap )^^.set_args( arr_ci ), hbase.holor_adl.data );
     }
 
     result.can_settle = can_settle;
@@ -957,7 +957,7 @@ func (:ar2_rands_s) ::.solve =
         f3_t density =  1.0;
         u3_t rseed   =  ( ( tanh( vseed ) + 1.0 ) * 0.5 ) * 0xFFFFFFFFFFFFFFFFull;
 
-        m bcore_prsg* prsg = opal_context_a_get_prsg( context ).clone().scope();
+        m bcore_prsg* prsg = opal_context_a_get_prsg( context ).clone()^^;
         prsg.reseed( rseed );
 
         result.h.h.v.set_random( density, min, max, prsg );

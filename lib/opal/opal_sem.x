@@ -394,7 +394,7 @@ func (:cell_s) (void parse_verify_signature( c @* o, m bcore_source* source )) =
         if( !err ) err = index != o.excs.size;
         if( err )
         {
-            m st_s* sig =  o.create_signature().scope( scope_local );
+            m st_s* sig =  o.create_signature()^;
             source.parse_err_fa( "Cell signature is '#<sc_t>'", sig.sc );
         }
     }
@@ -416,7 +416,7 @@ func (:cell_s) (void parse_verify_signature( c @* o, m bcore_source* source )) =
         if( !err ) err = index != o.encs.size;
         if( err )
         {
-            m st_s* sig = o.create_signature().scope( scope_local );
+            m st_s* sig = o.create_signature()^;
             source.parse_err_fa( "Cell signature is '#<sc_t>'", sig.sc );
         }
     }

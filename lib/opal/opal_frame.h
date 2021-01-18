@@ -203,8 +203,8 @@ stamp :s = aware :
 
     /// frame setup from string or source; 'in' can be NULL
     func :.setup_from_source;
-    func :.setup_from_st = { return o.setup_from_source( bcore_source_string_s_create_from_string( st ).scope(), en, size_en ); };
-    func :.setup_from_sc = { return o.setup_from_st( st_s_create_sc( sc ).scope(), en, size_en ); };
+    func :.setup_from_st = { return o.setup_from_source( bcore_source_string_s_create_from_string( st )^^, en, size_en ); };
+    func :.setup_from_sc = { return o.setup_from_st( st_s_create_sc( sc )^^, en, size_en ); };
     func :.create_from_source     = { return @!.setup_from_source( source, en, size_en ); };
     func :.create_from_st         = { return @!.setup_from_st( st, en, size_en ); };
     func :.create_from_sc         = { return @!.setup_from_sc( sc, en, size_en ); };
@@ -323,14 +323,14 @@ stamp :cyclic_s = aware :
 
 func (void sc_run_ap( sc_t sc, c bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex )) =
 {
-    opal_frame_s_create_from_sc( sc, en, size_en ).scope().run_ap( en, size_en, ex, size_ex );
+    opal_frame_s_create_from_sc( sc, en, size_en )^^.run_ap( en, size_en, ex, size_ex );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 func (void sc_run_dp( sc_t sc, c bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en )) =
 {
-    opal_frame_s_create_from_sc( sc, ex, size_ex ).scope().run_dp( ex, size_ex, en, size_en );
+    opal_frame_s_create_from_sc( sc, ex, size_ex )^^.run_dp( ex, size_ex, en, size_en );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------

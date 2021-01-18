@@ -50,13 +50,13 @@ func (:builder_s) bhpt_builder.create_adaptive =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.src.cast( c bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.src.cast( c bcore_file_path_s* ) )^^;
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) ).scope().cast( m bcore_source* );
+            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) )^^.cast( m bcore_source* );
         }
         break;
 
@@ -187,13 +187,13 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
     {
         case TYPEOF_bcore_file_path_s:
         {
-            source = bcore_file_open_source_path( o.src.cast( c bcore_file_path_s* ) ).scope();
+            source = bcore_file_open_source_path( o.src.cast( c bcore_file_path_s* ) )^^;
         }
         break;
 
         case TYPEOF_st_s:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) ).scope();
+            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) )^^;
         }
         break;
 

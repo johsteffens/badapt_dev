@@ -132,7 +132,7 @@ group :context = opal_context
 
         func (tp_t entypeof_fv( m @* o, sc_t format, va_list args )) =
         {
-            return o.entypeof( st_s_create_fv( format, args ).scope().sc );
+            return o.entypeof( st_s_create_fv( format, args )^^.sc );
         };
 
         func (tp_t entypeof_fa( m @* o, sc_t format, ... )) =
@@ -480,7 +480,7 @@ stamp :cell_s = aware :
     func (sc_t nameof(   c @* o, tp_t name )) = { return o.context.nameof( name ); };
     func (sc_t ifnameof( c @* o, tp_t name )) = { return o.context.ifnameof( name ); };
     func (tp_t entypeof( c @* o, sc_t name )) = { return o.context.entypeof( name ); };
-    func (tp_t entypeof_fv( c @* o, sc_t format, va_list args )) = { return o.context.entypeof( st_s_create_fv( format, args ).scope()->sc ); };
+    func (tp_t entypeof_fv( c @* o, sc_t format, va_list args )) = { return o.context.entypeof( st_s_create_fv( format, args )^^->sc ); };
     func (tp_t entypeof_fa( c @* o, sc_t format, ... )) =
     {
         va_list args; va_start( args, format );
