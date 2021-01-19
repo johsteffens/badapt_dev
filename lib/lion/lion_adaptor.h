@@ -23,7 +23,7 @@
 #define LION_ADAPTOR_H
 
 #include "bmath_std.h"
-#include "bhpt_sketch.h"
+#include "bhpt.h"
 #include "lion_net.h"
 #include "lion_frame.h"
 #include "lion.xo.h"

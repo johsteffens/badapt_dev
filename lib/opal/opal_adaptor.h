@@ -23,7 +23,7 @@
 #define OPAL_ADAPTOR_H
 
 #include "bmath_std.h"
-#include "bhpt_sketch.h"
+#include "bhpt.h"
 #include "opal_net.h"
 #include "opal_frame.h"
 #include "opal.xo.h"

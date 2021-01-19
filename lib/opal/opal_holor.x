@@ -85,7 +85,7 @@ func (:s) :.parse =
 forward opal_sem_link_s;
 forward opal_sem_cell_s;
 
-include deferred "opal_net.h";
+include 'c' "opal_net.h";
 
 func (:s) (void from_sem_link( m @* o, m opal_sem_link_s* link, m opal_sem_cell_s* root, m bcore_sink* log )) =
 {
