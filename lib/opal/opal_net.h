@@ -132,10 +132,10 @@ stamp :node_s = aware :
         if( !o.flag )
         {
             o.flag = true;
-            foreach( m $* e in o.upls )
+            foreach( m $* node in o.upls..node )
             {
-                e.node.dnls.push().node = o;
-                e.node.set_downlinks();
+                node.dnls.push().node = o;
+                node.set_downlinks();
             }
         }
     };
@@ -148,7 +148,7 @@ stamp :node_s = aware :
         if( !o.flag )
         {
             o.flag = true;
-            foreach( m $* e in o->upls ) e.node.set_flags();
+            foreach( m $* node in o->upls..node ) node.set_flags();
         }
     };
 
@@ -223,7 +223,7 @@ stamp :cell_s = aware :
     func :.solve =
     {
         m $* deferred = opal_net_node_adl_s!^^;
-        foreach( m $* e in o->excs  ) e.solve( deferred );
+        foreach( m $* e in o.excs  ) e.solve( deferred );
         foreach( m $* e in deferred ) e.solve( NULL );
     };
 

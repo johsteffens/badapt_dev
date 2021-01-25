@@ -137,7 +137,6 @@ func (:link_s) (m :cell_s* trace_to_cell( m @* o )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-//func (:cell_s) (void set_channels( m @* o, sz_t excs, sz_t encs )) =
 func (:cell_s) set_channels =
 {
     o.excs.set_size( excs );
@@ -164,9 +163,9 @@ func (:cell_s) (m @* wrap_cell_soft( m @* o, m @* src )) =
 
     sz_t k = 0;
 
-    foreach( m :link_s* link in src.encs )
+    foreach( m :link_s* link in src.encs; !link.up )
     {
-        if( !link.up ) o.encs.[ k++ ] = :link_s_create_setup( link.name, NULL, link, o, false );
+        o.encs.[ k++ ] = :link_s_create_setup( link.name, NULL, link, o, false );
     }
 
     assert( k == o.encs.size );
@@ -230,13 +229,13 @@ func (:cell_s) (m @* rewrap_cell_soft( m @* o, m :cell_s* src )) =
     m :cell_s* wrap = src;
     while( wrap.wrapped_cell )
     {
-        foreach( m :link_s* wrap_link in wrap.encs ) if( wrap_link.up )
+        foreach( m :link_s* wrap_link in wrap.encs; wrap_link.up )
         {
             m :link_s* root_link = wrap_link;
             while( root_link.cell != root && root_link.dn ) root_link = root_link.dn;
             ASSERT( root_link.cell == root );
 
-            foreach( m :link_s* link in o.encs ) if( link.dn == root_link )
+            foreach( m :link_s* link in o.encs; link.dn == root_link )
             {
                 link.up = wrap_link.up;
                 break;

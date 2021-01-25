@@ -207,18 +207,18 @@ func (:cell_s) :.is_consistent =
     {
         if( node.flag ) return false;
         if( node.id != __i ) return false;
-        foreach( c $* e in node.upls )
+        foreach( c $* e in node.upls..node )
         {
-            if( e.node.id < 0 ) return false;
-            if( e.node.id >= o.body.size ) return false;
-            if( e.node != o.body.[ e.node.id ] ) return false;
+            if( e.id < 0 ) return false;
+            if( e.id >= o.body.size ) return false;
+            if( e != o.body.[ e.id ] ) return false;
         }
 
-        foreach( c $* e in node.dnls )
+        foreach( c $* e in node.dnls..node )
         {
-            if( e.node.id < 0 ) return false;
-            if( e.node.id >= o.body.size ) return false;
-            if( e.node != o.body.[ e.node.id ] ) return false;
+            if( e.id < 0 ) return false;
+            if( e.id >= o.body.size ) return false;
+            if( e != o.body.[ e.id ] ) return false;
         }
         if( node.result && !node.result.h.h.is_consistent() ) return false;
     }
@@ -311,7 +311,7 @@ func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
         node.flag = true;
     }
 
-    foreach( m :node_s.2 node in o.body ) if( !node.1.flag ) node.1 =< NULL;
+    foreach( m :node_s.2 node in o.body; !node.1.flag ) node.1 =< NULL;
     o.normalize();
 
     ASSERT( o.is_consistent() );
@@ -831,17 +831,11 @@ func (:node_s) :.mcode_push_dp =
         if( o.mnode.ag0 >= 0 )
         {
             // build this gradient from all downlinks ...
-            foreach( m :link_s* link in o.dnls )
+            foreach( m opal_net_node_s* node in o.dnls..node; !o.nop.is_cyclic() || !node.recurses_in_downtree( o ) ) /// we do not accumulate downtree recurrences at this point
             {
-                m opal_net_node_s* node = link.node;
-
-                /// we do not accumulate downtree recurrences at this point
-                if( !o.nop.is_cyclic() || ! node.recurses_in_downtree( o ) )
-                {
-                    sz_t node_up_index = node.up_index( o );
-                    ASSERT( node_up_index >= 0 );
-                    node.mcode_push_dp( node_up_index, mcf );
-                }
+                sz_t node_up_index = node.up_index( o );
+                ASSERT( node_up_index >= 0 );
+                node.mcode_push_dp( node_up_index, mcf );
             }
 
             m opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ag0 ].cast( m opal_holor_meta_s* );
@@ -885,17 +879,11 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
         o.mnode.ag0 = idx;
 
         // build this gradient from all downlinks ...
-        foreach( m :link_s* link in o.dnls )
+        foreach( m opal_net_node_s* node in o.dnls..node; !node.recurses_in_downtree( o ) ) /// we do not accumulate downtree recurrences at this point
         {
-            m opal_net_node_s* node = link.node;
-
-            /// we do not accumulate downtree recurrences at this point
-            if( !node.recurses_in_downtree( o ) )
-            {
-                sz_t node_up_index = node.up_index( o );
-                ASSERT( node_up_index >= 0 );
-                node.mcode_push_dp( node_up_index, mcf );
-            }
+            sz_t node_up_index = node.up_index( o );
+            ASSERT( node_up_index >= 0 );
+            node.mcode_push_dp( node_up_index, mcf );
         }
     }
 
@@ -929,17 +917,11 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
         o.mnode.ag1 = idx;
     }
 
-    foreach( m :link_s* link in o.dnls )
+    foreach( m opal_net_node_s* node in o.dnls..node; node.recurses_in_downtree( o ) ) /// we only accumulate downtree recurrences at this point
     {
-        m opal_net_node_s* node = link.node;
-
-        /// we only accumulate downtree recurrences at this point
-        if( node.recurses_in_downtree( o ) )
-        {
-            sz_t node_up_index = node.up_index( o );
-            ASSERT( node_up_index >= 0 );
-            node.mcode_push_dp( node_up_index, mcf );
-        }
+        sz_t node_up_index = node.up_index( o );
+        ASSERT( node_up_index >= 0 );
+        node.mcode_push_dp( node_up_index, mcf );
     }
 };
 
@@ -961,7 +943,7 @@ func (:cell_s) :.mcode_push_ap =
     ASSERT( o.is_consistent() );
 
     m opal_net_node_adl_s* cyclic_adl = opal_net_node_adl_s!^^;
-    foreach( m :node_s* node in o.body ) if( node.nop && node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
+    foreach( m :node_s* node in o.body; node.nop && node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
 
     foreach( m :node_s* node in o.excs )
     {
@@ -984,7 +966,7 @@ func (:cell_s) mcode_push_dp =
     m opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^^;
     m opal_net_node_adl_s* adaptive_adl = opal_net_node_adl_s!^^;
 
-    foreach( m :node_s* node in o.body ) if( node.nop )
+    foreach( m :node_s* node in o.body; node.nop )
     {
         if( node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
         if( node.nop.is_adaptive() ) adaptive_adl.push_d( node.fork() );
@@ -992,7 +974,7 @@ func (:cell_s) mcode_push_dp =
 
     if( entry_channels )
     {
-        foreach( m :node_s* node in o.encs ) if( node.nop ) node.mcode_push_dp( -1, mcf );
+        foreach( m :node_s* node in o.encs; node.nop ) node.mcode_push_dp( -1, mcf );
     }
 
     /// adaptive nodes

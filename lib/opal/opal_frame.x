@@ -118,10 +118,10 @@ func (:s) (void disassemble_hidx_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, c
 func (:s) (void disassemble_track_to_sink( c @* o, c bhvm_mcode_track_s* track, sz_t indent, m bcore_sink* sink )) =
 {
     if( !track ) return;
-    foreach( m $* op in track )
+    foreach( m $* vop in track..vop )
     {
         sink.push_fa( "#rn{ }", indent );
-        op.vop.to_sink( sink );
+        vop.to_sink( sink );
         sink.push_fa( "\n" );
     }
 };
@@ -221,14 +221,11 @@ func (:s) :.setup_from_source =
         opal_frame_hidx_s_push( &o->hidx_ex, node->mnode->ax0 );
     }
 
-    foreach( m opal_net_node_s* node  in net_cell.body )
+    foreach( m opal_net_node_s* node  in net_cell.body; node.nop )
     {
-        if( node.nop )
-        {
-            c bhvm_mcode_node_s* mnode = node.mnode;
-            if( mnode?.adaptive && node.mnode.ax0 >= 0 ) o.hidx_ada.push( node.mnode.ax0 );
-            if( mnode?.cyclic ) o.is_cyclic = true;
-        }
+        c bhvm_mcode_node_s* mnode = node.mnode;
+        if( mnode?.adaptive && node.mnode.ax0 >= 0 ) o.hidx_ada.push( node.mnode.ax0 );
+        if( mnode?.cyclic ) o.is_cyclic = true;
     }
 
     o.is_setup = true;
@@ -350,7 +347,7 @@ func (:s) :.run_dp =
 func (:s) :.run_ap_adl =
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
-    foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in ex; !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_ap
     (
         en ? en.data.cast( c bhvm_holor_s** ) : NULL,
@@ -365,7 +362,7 @@ func (:s) :.run_ap_adl =
 func (:s) :.run_dp_adl =
 {
     if( en && en.size != o.get_size_en() ) en.set_size( o.get_size_en() );
-    foreach( m $.2 e in en ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in en; !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_dp
     (
         ex ? ex.data.cast( c bhvm_holor_s** ) : NULL,
@@ -442,10 +439,7 @@ func (:cyclic_s) :.setup =
     /// unrollable indices
     m bcore_arr_sz_s* ur_idx_arr = bcore_arr_sz_s!^^;
 
-    foreach( sz_t src_idx in idx_arr_track0_ap )
-    {
-        if( !hbase->hmeta_adl.[ src_idx ].is_rollable() ) ur_idx_arr.push( src_idx );
-    }
+    foreach( sz_t src_idx in idx_arr_track0_ap; !hbase.hmeta_adl.[ src_idx ].is_rollable() ) ur_idx_arr.push( src_idx );
 
     m opal_frame_custom_hmeta_s* custom = opal_frame_custom_hmeta_s!^^;
 
@@ -560,7 +554,7 @@ func( :cyclic_s) :.run_ap =
 func( :cyclic_s) :.run_ap_adl =
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
-    foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in ex; !e.1 ) e.1 = bhvm_holor_s!;
     return o.run_ap
     (
         en ? en.data.cast( c bhvm_holor_s** ) : NULL,
@@ -660,7 +654,7 @@ func( :cyclic_s) :.run_ap_adl_flat =
     sz_t size_ex = o.frame.get_size_ex();
 
     if( ex && ex.size != size_ex * o.unroll_size ) ex.set_size( size_ex * o.unroll_size );
-    foreach( m $.2 e in ex ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in ex; !e.1 ) e.1 = bhvm_holor_s!;
 
     for( sz_t i = 0; i < o.unroll_size; i++ )
     {
@@ -687,7 +681,7 @@ func( :cyclic_s) :.run_dp_adl_flat =
     sz_t size_ex = o.frame.get_size_ex();
 
     if( en && en.size != size_en * o.unroll_size ) en.set_size( size_en * o.unroll_size );
-    foreach( m $.2 e in en ) if( !e.1 ) e.1 = bhvm_holor_s!;
+    foreach( m $.2 e in en; !e.1 ) e.1 = bhvm_holor_s!;
 
     m opal_frame_s* frame = o.frame;
     m bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
