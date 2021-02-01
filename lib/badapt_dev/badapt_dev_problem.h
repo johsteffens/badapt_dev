@@ -31,9 +31,8 @@ XOILA_DEFINE_GROUP( badapt_dev_problem_objects, bcore_inst )
 /** Type: Recurrent Sequence Estimator
  *  Method: Simple UTF alphabet (for testing)
  */
-stamp badapt_problem_recurrent_abc_s = badapt_supplier
+stamp badapt_problem_recurrent_abc_s = aware badapt_supplier
 {
-    aware_t _;
     sz_t index = 0;
 
     u3_t rval    = 1234;
@@ -78,9 +77,8 @@ stamp badapt_problem_recurrent_text_s = aware badapt_supplier
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp badapt_guide_char_encode_s = badapt_guide
+stamp badapt_guide_char_encode_s = aware badapt_guide
 {
-    aware_t _;
     aware badapt_guide => guide_default = badapt_guide_std_s;
     bcore_arr_sz_s   -> charmap;
     st_s             -> charset;
@@ -127,9 +125,8 @@ stamp badapt_problem_recurrent_utf8_s = aware badapt_supplier
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stamp badapt_guide_utf8_encode_s = badapt_guide
+stamp badapt_guide_utf8_encode_s = aware badapt_guide
 {
-    aware_t _;
     aware badapt_guide => guide_default = badapt_guide_std_s;
 
     hidden aware bcore_sink -> sink;
