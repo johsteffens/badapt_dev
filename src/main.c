@@ -19,6 +19,6 @@ int main( int argc, char** argv )
     if( retv ) bcore_error_pop_to_stderr();
     BLM_DOWN();
 
-    BETH_CLOSEV( 1 );
+    BETH_CLOSEV( 0 );
     return retv;
 }
