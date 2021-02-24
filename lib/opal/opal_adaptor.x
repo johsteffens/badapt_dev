@@ -68,7 +68,7 @@ func (:frame_s) bhpt_adaptor.adapt =
         ASSERT( o.frame.get_size_ex() == 2 );
     }
 
-    o.frame.run_ap
+    o.frame.run_axon_pass
     (
         verbatim_C{ ( const bhvm_holor_s*[] ){ node->axon, node->grad } },
         2,

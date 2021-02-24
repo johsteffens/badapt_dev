@@ -208,7 +208,7 @@ stamp :cell_s = aware :
 
     func :.solve =
     {
-        m $* deferred = opal_net_node_adl_s!^^;
+        m $* deferred = opal_net_node_adl_s!^;
         foreach( m $* e in o.excs  ) e.solve( deferred );
         foreach( m $* e in deferred ) e.solve( NULL );
     };
@@ -349,7 +349,7 @@ func(:node_s) (void nop_solve( m @* o, m opal_holor_s** arg_h )) =
     {
         sc_t name = o.nop.symbol();
         if( !name ) name = ifnameof( o.nop._ );
-        m st_s* msg = st_s!^^;
+        m st_s* msg = st_s!^;
         msg.push_fa( "Operator '#<sc_t>' failed:", name );
         if( o.result.msg ) msg.push_fa( " #<sc_t>", o.result.msg.sc );
         msg.push_fa( "\n" );
@@ -411,7 +411,7 @@ func (s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 )) =
 
 func (:cell_s) :.normalize =
 {
-    m bcore_arr_vd_s* arr = bcore_arr_vd_s!^^;
+    m bcore_arr_vd_s* arr = bcore_arr_vd_s!^;
     foreach( m $* e in o.body ) arr.push( e );
     foreach( m $* e in o.encs ) arr.push( e );
     foreach( m $* e in o.excs ) arr.push( e );
@@ -839,7 +839,7 @@ func (:cell_s)
 
     if( !o.context ) o.context = sem_cell.context.fork();
 
-    m opal_sem_tree_s* tree = opal_sem_tree_s!^^;
+    m opal_sem_tree_s* tree = opal_sem_tree_s!^;
     foreach( m opal_sem_link_s* sem_link in sem_cell.encs )
     {
         m opal_net_node_s* net_node =  o.encs.push();
@@ -937,7 +937,7 @@ func (:node_s) :.mcode_push_ap =
     if( !o.result ) ERR_fa( "Result is missing." );
     if( !o.result.codable ) o.source_point.parse_err_fa( "Operator '#<sc_t>': Not codable.", ifnameof( o.nop._ ) );
 
-    m bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
+    m bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^;
 
     if( !o.mnode )
     {
@@ -1068,7 +1068,7 @@ func (:node_s) :.mcode_push_dp =
         return;
     }
 
-    m bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^^;
+    m bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^;
 
     bl_t up_index_is_valid = false;
 
@@ -1124,8 +1124,9 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
     {
         o.flag = true;
 
-        m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
-        m opal_holor_meta_s* m = o.result.h.m.clone()^^;
+        mutable bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( o.result.h.h );
+        mutable opal_holor_meta_s* m = o.result.h.m.clone()^;
+
         if( !m.name ) m.name = o.name;
         if( !m.sem_id ) m.sem_id = o.sem_id.fork();
 
@@ -1164,8 +1165,8 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
     ASSERT( o.nop.is_cyclic() );
 
     {
-        m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
-        m opal_holor_meta_s* m = o.result.h.m.clone()^^;
+        mutable bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
+        mutable opal_holor_meta_s* m = o.result.h.m.clone()^;
         if( !m.name ) m.name = o.name;
         if( !m.sem_id ) m.sem_id = o.sem_id.fork();
         m.pclass = TYPEOF_pclass_ag1;
@@ -1202,7 +1203,7 @@ func (:cell_s) :.mcode_push_ap =
 {
     ASSERT( o.is_consistent() );
 
-    m opal_net_node_adl_s* cyclic_adl = opal_net_node_adl_s!^^;
+    m opal_net_node_adl_s* cyclic_adl = opal_net_node_adl_s!^;
     foreach( m :node_s* node in o.body; node.nop && node.nop.is_cyclic() ) cyclic_adl.push_d( node.fork() );
 
     foreach( m :node_s* node in o.excs )
@@ -1223,8 +1224,8 @@ func (:cell_s) :.mcode_push_ap =
 func (:cell_s) mcode_push_dp =
 {
     ASSERT( o.is_consistent() );
-    m opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^^;
-    m opal_net_node_adl_s* adaptive_adl = opal_net_node_adl_s!^^;
+    m opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^;
+    m opal_net_node_adl_s* adaptive_adl = opal_net_node_adl_s!^;
 
     foreach( m :node_s* node in o.body; node.nop )
     {
@@ -1269,7 +1270,7 @@ func (:builder_s) ::.create_input_nop =
         }
         else if( !h_cur.s.is_equal( h_in.s ) )
         {
-            m st_s* msg = st_s!^^;
+            m st_s* msg = st_s!^;
             msg.push_fa( "Shape deviation at input holor '#<sz_t>':", in_idx );
             msg.push_fa( "\n#p20.{Passed input} " );
             h_in.brief_to_sink( msg );
@@ -1296,7 +1297,7 @@ func (:builder_s) ::.create_input_nop =
 
 func (:builder_s) :.build_from_source =
 {
-    m opal_sem_cell_s* sem_cell = opal_sem_cell_s!^^;
+    m opal_sem_cell_s* sem_cell = opal_sem_cell_s!^;
     o.sem_builder.build_from_source( sem_cell, source );
     net_cell.from_sem_cell( sem_cell, o, o->log );
 };

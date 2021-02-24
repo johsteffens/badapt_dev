@@ -105,17 +105,43 @@ g_out = lstm( dim_h = 200, x = g_in ).y;
 - once a cell is complete, data types can be finalized
 
 ================================================================================
-Semantic Cell Concept:
-A semantic graph communicates with the objects outside its body through input an output channels.
-All links of a graph 'x' to outside objects the node must pass though an input channel of 'x'.
-Inside objects may not be referenced directly by outside objects.
-A graph adhering to this concept is called 'cell'
-A construction of a new graph must conclude with converting it to a cell.
-Cells can be used as objects for constructing new graphs.
+Abstraction stages:
 
-Static Links:
-Defined links of an input channel of a semantic graph are never changed or freed again.
-Different use cases of a graph are achieved by creating graph-copies and assigning links of those copies differently.
+Semantic Graph:
+The semantic graph is the fist translation stage from the haptive source code.
+It is a fractal structure of cells. A cell contains cell definitions and cell-embeddings.
+The all-encompassing cell is called 'Root'.
+Cells have input and output channels. They are defined in a structure called 'Membrane'.
+An embedded cell has a double-layered membrane. The inner layer is owned by the cell,
+the outer layer is owned by by the embedding environment. Inner and outer layers are
+connected by association (not physically). This allows the same cell to be re-used in different
+places without physically copying it for each use. Only the outer layer is copied.
+The semantic graph framework is implemented in opal_sem.x.
+Outer membrane-layers are realized by cells containing just one (inner) cell by reference.
+
+Wired Graph:
+The wired graph is the next translation stage and created from a semantic graph.
+The entire network is composed of wired nodes with their associated holors.
+The cell-structure is dissolved. Cell re-uses are converted to separate sub-graphs.
+This stage also applies graph optimizations.
+E.g.: Inert sub-graphs are removed. Specific nodes are converted so simpler ones
+where possible.
+The implementation still defines a stamp 'cell', but this only represents the root cell
+of the entire graph.
+The wired graph framework is implemented in opal_net.x.
+
+Frame:
+The frame is the serializable last translation stage. It contains the holor database and
+virtual machine code to perform all operations. The wired graph is widely dissolved.
+
+Adaptive:
+The Adaptive owns the frame and represents the functional layer between the frame and
+the training framework (bhpt).
+
+TODO:
+Exporting/Importing a sub-cell from/into a frame.
+
+================================================================================
 
 Binary operators:
 Binary operators have a priority-level. Higher priority is resolved before lower priority.
@@ -184,6 +210,7 @@ TODO:
    - (done) add cast operator 'reshape( new_shape, holor )' converting the shape of a holor
    - (done) rename lgst -> sigm
    - (done) create a dedicated compiler; the compiler holds the context for a given build. (No more system wide global context)
+
    - switch to er_t based error handling
    - expand matrix multiplication to involve higher order holors using an eci-like-approach (elements being 2x2 matrices)
    - implement ar3-convolution operator

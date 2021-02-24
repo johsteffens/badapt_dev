@@ -58,6 +58,8 @@ stamp :meta_s = aware bhvm_mcode_hmeta
     func bhvm_mcode_hmeta.get_custom = { return o.custom; };
     func bhvm_mcode_hmeta.set_custom = { return o.custom =< custom.clone(); };
 
+    func bhvm_mcode_hmeta.get_sem_id = { return o.sem_id; };
+
     func bhvm_mcode_hmeta.get_node = { return o.mnode; };
     func bhvm_mcode_hmeta.set_node = { o.mnode =< bcore_fork( node ); };
 };

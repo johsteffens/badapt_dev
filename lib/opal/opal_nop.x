@@ -206,7 +206,7 @@ feature sz_t mcode_push_ap_holor( c @* o, c :solve_result_s* result, c bhvm_vop_
  */
 feature sz_t mcode_push_dp_holor( c @* o, c :solve_result_s* result, c bhvm_vop_arr_ci_s* arr_ci, m bhvm_mcode_frame_s* mcf ) =
 {
-    m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
+    m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     m opal_holor_meta_s* m = &result.h.m;
     sz_t idx = mcf.push_hm( h, m );
     mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
@@ -303,7 +303,7 @@ group :ar0 = retrievable
 
         func ::.mcode_push_dp_holor =
         {
-            m bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( result.h.h );
+            m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
             m opal_holor_meta_s* m = &result.h.m;
             sz_t idx = mcf.push_hm( h, m );
             mcf.track_vop_push_d( TYPEOF_track_dp_setup,              bhvm_vop_ar0_determine_s!.setup( idx ) );

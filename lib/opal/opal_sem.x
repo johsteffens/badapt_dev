@@ -56,7 +56,7 @@ group :context = opal_context
 
         func (tp_t entypeof_fv( m @* o, sc_t format, va_list args )) =
         {
-            return o.entypeof( st_s_create_fv( format, args )^^.sc );
+            return o.entypeof( st_s_create_fv( format, args )^.sc );
         };
 
         func (tp_t entypeof_fa( m @* o, sc_t format, ... )) =
@@ -166,15 +166,22 @@ group :id = :
 {
     signature void clear(       m @* o );
     signature void set(         m @* o, tp_t tp );
+    signature void push_tp(     m @* o, tp_t tp );
     signature void push_child(  m @* o, tp_t tp );
     signature void push_parent( m @* o, tp_t tp );
     signature void to_string(   c @* o, c opal_context* context, m st_s* s );
+    signature    o parse( m @* o, mutable bcore_source* source );
+    signature    o parse_sc( m @* o, sc_t sc );
+
+    /// for use in other objects
+    signature void get_sem_id( c @* o, m :s* sem_id );
 
     stamp :s = aware :
     {
         bcore_arr_tp_s arr_tp;
         func :.clear       = { o.arr_tp.clear(); };
         func :.set         = { o.arr_tp.clear(); o.arr_tp.push( tp ); };
+        func :.push_tp     = { o.arr_tp.push( tp ); };
         func :.push_child  = { o.arr_tp.push( tp ); };
         func :.push_parent = { o.arr_tp.push_left( tp ); };
         func :.to_string   =
@@ -186,10 +193,72 @@ group :id = :
                 s.push_sc( context.ifnameof( t ) );
             }
         };
+
+        func :.parse =
+        {
+            o.clear();
+            while( !source.eos() )
+            {
+                if( o.arr_tp.size > 0 ) source.parse_fa( "." );
+                st_s^ name;
+                source.parse_fa( "#name", name.1 );
+                o.push_tp( btypeof( name.sc ) );
+            }
+            return o;
+        };
+
+        func :.parse_sc = { return o.parse( bcore_source_string_s_create_sc( sc )^ ); };
+
+        func (s2_t cmp(           @* o, @* b )) = { return o.arr_tp.cmp( b.arr_tp ); };
+        func (bl_t is_equal(      @* o, @* b )) = { return o.cmp( b ) == 0; };
+        func (bl_t matches_front( @* o, @* b )) = { s2_t v = o.cmp( b ); return v == 0 || v == 1; };
+        func (bl_t matches_tail(  @* o, @* b )) =
+        {
+            if( o.arr_tp.size > b.arr_tp.size ) return false;
+            foreach( tp_t t in o.arr_tp ) if( t != b.arr_tp.[ b.arr_tp.size - o.arr_tp.size + __i ] ) return false;
+            return true;
+        };
+
+        func (o copy_front( mutable @* o, @* b, sz_t size )) =
+        {
+            sz_t min_size = sz_min( size, b.arr_tp.size );
+            o.arr_tp.set_size( min_size );
+            for( sz_t i = 0; i < min_size; i++ ) o.arr_tp.[ i ] = b.arr_tp.[ i ];
+            return o;
+        };
+
+        func (o copy_tail( mutable @* o, @* b, sz_t size )) =
+        {
+            sz_t min_size = sz_min( size, b.arr_tp.size );
+            o.arr_tp.set_size( min_size );
+            for( sz_t i = 0; i < min_size; i++ ) o.arr_tp.[ i ] = b.arr_tp.[ b.arr_tp.size - min_size + i ];
+            return o;
+        };
+
+        func (d @* create_front( @* o, sz_t size )) = { return @!.copy_front( o, size ); };
+        func (d @* create_tail ( @* o, sz_t size )) = { return @!.copy_tail ( o, size ); };
+
+        /// returns index of first match or -1 if not found;
+        func (sz_t find( @* o, @* b )) =
+        {
+            if( b.arr_tp.size > o.arr_tp.size ) return -1;
+            for( sz_t i = 0; i < o.arr_tp.size; i++ )
+            {
+                bl_t match = true;
+                for( sz_t j = 0; j < b.arr_tp.size; j++ )
+                {
+                    if( o.arr_tp.[ i + j ] != b.arr_tp.[ j ] )
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if( match ) return i;
+            }
+            return -1;
+        };
     };
 
-    /// for use in other objects
-    signature void get_sem_id( c @* o, m :s* sem_id );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -404,7 +473,7 @@ stamp :cell_s = aware :
     func (sc_t nameof(   c @* o, tp_t name )) = { return o.context.nameof( name ); };
     func (sc_t ifnameof( c @* o, tp_t name )) = { return o.context.ifnameof( name ); };
     func (tp_t entypeof( c @* o, sc_t name )) = { return o.context.entypeof( name ); };
-    func (tp_t entypeof_fv( c @* o, sc_t format, va_list args )) = { return o.context.entypeof( st_s_create_fv( format, args )^^->sc ); };
+    func (tp_t entypeof_fv( c @* o, sc_t format, va_list args )) = { return o.context.entypeof( st_s_create_fv( format, args )^->sc ); };
     func (tp_t entypeof_fa( c @* o, sc_t format, ... )) =
     {
         va_list args; va_start( args, format );
@@ -1136,8 +1205,6 @@ func (:cell_s) (m :cell_s* recat_cell( m @* o, m :cell_s* c1, m :cell_s* c2, m b
         c0_link.up = c2_link.up;
         c2_link.up = c0_link;
     }
-
-
 
     sz_t l = 0;
     sz_t k = c2.encs.size;

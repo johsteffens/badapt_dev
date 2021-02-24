@@ -54,7 +54,7 @@ stamp :param_s = aware bcore_inst
     sz_t verbosity = 1;
     u3_t rval = 1234; // for random generators
 
-    st_s name;               // name of test (only for logging)
+    st_s name;           // name of test (only for logging)
     aware x_inst => src; // source (bcore_file_path_s or st_s with inline code)
 
     bhvm_holor_adl_s => in;  // input holors
@@ -103,7 +103,7 @@ stump :std_s = aware :
     func :.set_param = { o.param.set( param ); };
     func bcore_main .main =
     {
-        o.run( :result_s!^^ ).resolve();
+        o.run( :result_s!^ ).resolve();
         return 0;
     };
 };
@@ -170,10 +170,10 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl
 {
     ASSERT( o.is_setup );
 
-    m bhvm_holor_adl_s* adl_en = en.clone()^^;
-    m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
-    m bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^^;
-    o.run_ap_adl( adl_en, adl_ex );
+    m bhvm_holor_adl_s* adl_en = en.clone()^;
+    m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^;
+    m bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^;
+    o.run_axon_pass_adl( adl_en, adl_ex );
     adl_rf.copy( adl_ex );
 
     jac_mdl.clear();
@@ -189,7 +189,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl
         {
             f3_t v_en = h_en.v.get_f3( j );
             h_en.v.set_f3( j, v_en + epsilon );
-            o.run_ap_adl( adl_en, adl_ex );
+            o.run_axon_pass_adl( adl_en, adl_ex );
             for( sz_t k = 0; k < adl_ex.size; k++ )
             {
                 m bhvm_holor_s* h_ex = adl_ex.[ k ];
@@ -221,7 +221,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl
 
 func (opal_frame_s) (void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )) =
 {
-    o.clone()^^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
+    o.clone()^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -233,15 +233,13 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_ad
 {
     ASSERT( o.is_setup );
 
-    m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
-    o.run_ap_adl( adl_en, adl_ex );
-
-    sz_t size_ada = o.hidx_ada.get_size();
+    m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^;
+    o.run_axon_pass_adl( adl_en, adl_ex );
 
     jac_mdl.clear();
-    jac_mdl.set_size( size_ada );
+    jac_mdl.set_size( o.hidx_ada.size );
 
-    for( sz_t i = 0; i < size_ada; i++ )
+    for( sz_t i = 0; i < o.hidx_ada.size; i++ )
     {
         m bhvm_holor_s* h_ada = o.get_ap_ada( i );
         m bhvm_holor_adl_s* jac_adl = jac_mdl.[ i ] = bhvm_holor_adl_s!;
@@ -283,7 +281,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_ad
 
 func (opal_frame_s) (void estimate_jacobian_ada( c @* o, c bhvm_holor_adl_s* adl_en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )) =
 {
-    o.clone()^^.mutable_estimate_jacobian_ada( adl_en, epsilon, jac_mdl );
+    o.clone()^.mutable_estimate_jacobian_ada( adl_en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -319,9 +317,9 @@ func (:plain_s) :.run =
     }
 
     c bhvm_holor_adl_s* adl_ap_en = o.param.in;
-    m bhvm_holor_adl_s* adl_ap_ex = bhvm_holor_adl_s!^^;
+    m bhvm_holor_adl_s* adl_ap_ex = bhvm_holor_adl_s!^;
 
-    m opal_frame_s* frame0 = opal_frame_s!^^;
+    m opal_frame_s* frame0 = opal_frame_s!^;
     if( verbosity >= 20 ) frame0.log = log.fork();
 
     frame0.setup_from_source_adl( source, adl_ap_en );
@@ -335,7 +333,7 @@ func (:plain_s) :.run =
     }
 
     /// test copying
-    m opal_frame_s* frame = frame0.clone()^^;
+    m opal_frame_s* frame = frame0.clone()^;
 
     if( frame.size_en > 0 )
     {
@@ -351,7 +349,7 @@ func (:plain_s) :.run =
 
     for( sz_t i = 0; i < o.ap_cycles; i++ )
     {
-        frame.run_ap_adl( adl_ap_en, adl_ap_ex );
+        frame.run_axon_pass_adl( adl_ap_en, adl_ap_ex );
 
         if( verbosity >= 2 )
         {
@@ -406,8 +404,8 @@ func (:plain_s) :.run =
 
         if( verbosity >= 10 ) log.push_fa( "\nJacobian DP Test:\n" );
 
-        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone()^^;
-        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex.clone()^^;
+        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone()^;
+        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex.clone()^;
         foreach( m $* e in adl_dp_en ) e.zro();
 
         foreach( m $* e in adl_dp_ex )
@@ -420,10 +418,10 @@ func (:plain_s) :.run =
             }
         }
 
-        frame.run_dp_adl( adl_dp_ex, adl_dp_en );
+        frame.run_dendrite_pass_adl( adl_dp_ex, adl_dp_en );
 
         sz_t size_ex = frame.get_size_ex();
-        m bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!^^;
+        m bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!^;
 
         /// testing entry channels
         if( frame.get_size_en() )
@@ -574,10 +572,10 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_ho
 {
     ASSERT( o.is_setup );
 
-    m bhvm_holor_adl_s* adl_en = en.clone()^^;
-    m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^^;
-    m bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^^;
-    o.run_ap_adl_flat( adl_en, adl_ex );
+    m bhvm_holor_adl_s* adl_en = en.clone()^;
+    m bhvm_holor_adl_s* adl_ex = bhvm_holor_adl_s!^;
+    m bhvm_holor_adl_s* adl_rf = bhvm_holor_adl_s!^;
+    o.run_axon_pass_adl_flat( adl_en, adl_ex );
     adl_rf.copy( adl_ex );
 
     jac_mdl.clear();
@@ -593,7 +591,7 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_ho
         {
             f3_t v_en = h_en.v.get_f3( j );
             h_en.v.set_f3( j, v_en + epsilon );
-            o.run_ap_adl_flat( adl_en, adl_ex );
+            o.run_axon_pass_adl_flat( adl_en, adl_ex );
             for( sz_t k = 0; k < adl_ex.size; k++ )
             {
                 m bhvm_holor_s* h_ex = adl_ex.[ k ];
@@ -629,7 +627,7 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_ho
  */
 func (opal_frame_cyclic_s) (void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )) =
 {
-    o.clone()^^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
+    o.clone()^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -640,7 +638,7 @@ func (:cyclic_s) :.run =
 
     if( !o.param.src ) ERR_fa( "Source missing." );
 
-    m opal_frame_s* frame = opal_frame_s!^^;
+    m opal_frame_s* frame = opal_frame_s!^;
     if( o.param.verbosity >= 20 ) frame.log = o.param.log.fork();
 
     m bcore_source* source = NULL;
@@ -667,15 +665,15 @@ func (:cyclic_s) :.run =
     }
 
     c bhvm_holor_adl_s* adl_ap_en = o.param.in;
-    m bhvm_holor_adl_s* adl_ap_ex1 = bhvm_holor_adl_s!^^;
-    m bhvm_holor_adl_s* adl_ap_ex2 = bhvm_holor_adl_s!^^;
+    m bhvm_holor_adl_s* adl_ap_ex1 = bhvm_holor_adl_s!^;
+    m bhvm_holor_adl_s* adl_ap_ex2 = bhvm_holor_adl_s!^;
 
     frame.setup_from_source_adl( source, adl_ap_en );
 
     sz_t unroll_size = adl_ap_en.size / frame.size_en;
     ASSERT( unroll_size * frame.size_en == adl_ap_en.size );
 
-    m opal_frame_cyclic_s* frame_cyclic0 = opal_frame_cyclic_s!^^;
+    m opal_frame_cyclic_s* frame_cyclic0 = opal_frame_cyclic_s!^;
     frame_cyclic0.setup_from_frame( frame, unroll_size );
 
     /// test frame recovery/copying
@@ -686,9 +684,9 @@ func (:cyclic_s) :.run =
         frame_cyclic0 = frame_cyclic1;
     }
 
-    m opal_frame_cyclic_s* frame_cyclic  = frame_cyclic0.clone()^^;
+    m opal_frame_cyclic_s* frame_cyclic  = frame_cyclic0.clone()^;
 
-    frame_cyclic.run_ap_adl_flat( adl_ap_en, adl_ap_ex1 );
+    frame_cyclic.run_axon_pass_adl_flat( adl_ap_en, adl_ap_ex1 );
     adl_ap_ex2.set_size( adl_ap_ex1.size );
     foreach( m $** e in adl_ap_ex2 ) *e = bhvm_holor_s!;
 
@@ -699,7 +697,7 @@ func (:cyclic_s) :.run =
     {
         ASSERT( adl_ap_en .size >= ( i + 1 ) * size_en );
         ASSERT( adl_ap_ex2.size >= ( i + 1 ) * size_ex );
-        frame.run_ap( ( const bhvm_holor_s** ) adl_ap_en.data + i * size_en, size_en, adl_ap_ex2.data + i * size_ex, size_ex );
+        frame.run_axon_pass( ( const bhvm_holor_s** ) adl_ap_en.data + i * size_en, size_en, adl_ap_ex2.data + i * size_ex, size_ex );
     }
 
     if( o.param.verbosity >= 10 )
@@ -763,8 +761,8 @@ func (:cyclic_s) :.run =
 
         if( o.param.verbosity >= 10 ) o.param.log.push_fa( "\nJacobian DP Test:\n" );
 
-        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone()^^;
-        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex1.clone()^^;
+        m bhvm_holor_adl_s* adl_dp_en = adl_ap_en.clone()^;
+        m bhvm_holor_adl_s* adl_dp_ex = adl_ap_ex1.clone()^;
 
         foreach( m bhvm_holor_s* e in adl_dp_ex )
         {
@@ -776,7 +774,7 @@ func (:cyclic_s) :.run =
             }
         }
 
-        frame_cyclic.run_dp_adl_flat( adl_dp_ex, adl_dp_en );
+        frame_cyclic.run_dendrite_pass_adl_flat( adl_dp_ex, adl_dp_en );
 
         if( o.param.verbosity >= 10 )
         {
@@ -789,7 +787,7 @@ func (:cyclic_s) :.run =
 
         sz_t size_en = adl_dp_en.size;
         sz_t size_ex = adl_dp_ex.size;
-        m bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!^^;
+        m bhvm_holor_mdl_s* mdl_jc = bhvm_holor_mdl_s!^;
 
         /// testing entry channels
         if( size_en )

@@ -21,44 +21,70 @@
 /// holor indexing group
 group :hidx =
 {
-    signature m @* clear( m @* o );
-    signature m @* push(  m @* o, sz_t index );
+    signature o push(  m @* o, sz_t index );
 
-    signature sz_t get_idx( c @* o, sz_t index );
-    signature sz_t get_pclass_idx( c @* o, c bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
-    signature sz_t get_size( c @* o );
+    signature sz_t get_idx( @* o, sz_t index );
+    signature sz_t get_pclass_idx( @* o, bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
 
-    signature m bhvm_holor_s*     get_holor( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t index );
-    signature m bhvm_mcode_hmeta* get_hmeta( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t index );
+    signature m bhvm_holor_s*     get_pclass_holor( @* o, bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature m bhvm_mcode_hmeta* get_pclass_hmeta( @* o, bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
 
-    signature m bhvm_holor_s*     get_pclass_holor( c @* o, c bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
-    signature m bhvm_mcode_hmeta* get_pclass_hmeta( c @* o, c bhvm_mcode_hbase_s* hbase, tp_t pclass, sz_t index );
+    signature o           sub_index_by_sub_id( m @* o, @* src, bhvm_mcode_hbase_s* hbase, opal_sem_id_s* sub_id );
+    signature d @* create_sub_index_by_sub_id(   @* o,         bhvm_mcode_hbase_s* hbase, opal_sem_id_s* sub_id );
 
-    signature m @* replace_index( m @* o, m bcore_arr_sz_s* index_map );
+    /// true if all indexed elements contain sub_id and all front-paths are identical; false otherwise
+    signature bl_t has_unique_sub_id( @* o, bhvm_mcode_hbase_s* hbase, opal_sem_id_s* sub_id );
 
-    stamp :s = aware :
+    signature o replace_index( m @* o, m bcore_arr_sz_s* index_map );
+
+    stamp :s = aware x_array
     {
-        bcore_arr_sz_s => arr;
-        func :.clear     = { if( o.arr ) o.arr.clear(); return o; };
-        func :.push      = { o.arr!.push( index ); return o; };
+        sz_t [];
 
-        func :.get_idx   = { assert( index >= 0 && index < o.arr.size ); return o.arr?.[ index ]; };
-        func :.get_size  = { return o.arr ? o.arr.size : 0; };
-        func :.get_holor = { return hbase.get_holor( o.get_idx( index ) ); };
-        func :.get_hmeta = { return hbase.get_hmeta( o.get_idx( index ) ); };
+        func :.push      = { o.push_c( index ); return o; };
+        func :.get_idx   = { assert( index >= 0 && index < o.size ); return o.[ index ]; };
 
         func :.get_pclass_idx =
         {
-            c bhvm_mcode_hmeta* hmeta = o.get_hmeta( hbase, index );
+            bhvm_mcode_hmeta* hmeta = hbase.get_hmeta( o.[ index ] );
             return ( hmeta ) ? hmeta.get_node().get_pclass_idx( pclass ) : -1;
         };
 
         func :.get_pclass_holor = { return hbase.get_holor( o.get_pclass_idx( hbase, pclass, index ) ); };
         func :.get_pclass_hmeta = { return hbase.get_hmeta( o.get_pclass_idx( hbase, pclass, index ) ); };
 
+        func :.create_sub_index_by_sub_id = { return @!.sub_index_by_sub_id( o, hbase, sub_id ); };
+
+        func :.sub_index_by_sub_id =
+        {
+            o.clear();
+            foreach( sz_t e in o )
+            {
+                if( hbase.get_hmeta( e ).get_sem_id().cast( opal_sem_id_s* ).find( sub_id ) >= 0 )
+                {
+                    o.push( e );
+                }
+            }
+            return o;
+        };
+
+        func :.has_unique_sub_id =
+        {
+            opal_sem_id_s* front_id = NULL;
+            foreach( sz_t e in o )
+            {
+                $* full_id = hbase.get_hmeta( e ).get_sem_id().cast( opal_sem_id_s* );
+                sz_t index = full_id.find( sub_id );
+                if( index < 0 ) return false;
+                if(  front_id ) if( !front_id.matches_front( full_id ) ) return false;
+                if( !front_id ) front_id = full_id.create_front( index )^^;
+            }
+            return true;
+        };
+
         func :.replace_index =
         {
-            foreach( m sz_t* e in o.arr )
+            foreach( m sz_t* e in o )
             {
                 sz_t old_index = *e;
                 assert( old_index >= 0 && old_index < index_map->size );
@@ -67,7 +93,6 @@ group :hidx =
             }
             return o;
         };
-
     };
 
     stamp :ads_s = aware x_array
@@ -83,25 +108,26 @@ group :hidx =
 
 signature void reset( m @* o );
 signature void setup( m @* o );
-signature void check_integrity( c @* o );
+signature void check_integrity( @* o );
 
-signature o setup_from_source(      m @* o, m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
-signature o setup_from_st(          m @* o,         c st_s* st,     c bhvm_holor_s** en, sz_t size_en );
-signature o setup_from_sc(          m @* o,           sc_t  sc,     c bhvm_holor_s** en, sz_t size_en );
-signature o setup_from_source_adl(  m @* o, m bcore_source* source, c bhvm_holor_adl_s* en );
-signature o setup_from_st_adl(      m @* o,         c st_s* st,     c bhvm_holor_adl_s* en );
-signature o setup_from_sc_adl(      m @* o,           sc_t  sc,     c bhvm_holor_adl_s* en );
+signature o setup_from_source(      m @* o, m bcore_source* source, bhvm_holor_s** en, sz_t size_en );
+signature o setup_from_st(          m @* o,           st_s* st,     bhvm_holor_s** en, sz_t size_en );
+signature o setup_from_sc(          m @* o,           sc_t  sc,     bhvm_holor_s** en, sz_t size_en );
+signature o setup_from_source_adl(  m @* o, m bcore_source* source, bhvm_holor_adl_s* en );
+signature o setup_from_st_adl(      m @* o,           st_s* st,     bhvm_holor_adl_s* en );
+signature o setup_from_sc_adl(      m @* o,           sc_t  sc,     bhvm_holor_adl_s* en );
 
-signature d @* create_from_source(     m bcore_source* source, c bhvm_holor_s** en, sz_t size_en );
-signature d @* create_from_st(                 c st_s* st,     c bhvm_holor_s** en, sz_t size_en );
-signature d @* create_from_sc(                   sc_t  sc,     c bhvm_holor_s** en, sz_t size_en );
-signature d @* create_from_source_adl( m bcore_source* source, c bhvm_holor_adl_s* en );
-signature d @* create_from_st_adl(             c st_s* st,     c bhvm_holor_adl_s* en );
-signature d @* create_from_sc_adl(               sc_t  sc,     c bhvm_holor_adl_s* en );
+signature d @* create_from_source(     m bcore_source* source, bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_st(                   st_s* st,     bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_sc(                   sc_t  sc,     bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_source_adl( m bcore_source* source, bhvm_holor_adl_s* en );
+signature d @* create_from_st_adl(               st_s* st,     bhvm_holor_adl_s* en );
+signature d @* create_from_sc_adl(               sc_t  sc,     bhvm_holor_adl_s* en );
 
-signature sz_t get_size_en( c @* o ); // number of entry channels
-signature sz_t get_size_ex( c @* o ); // number of exit channels
-signature sz_t get_size_ada( c @* o ); // number of adaptive channels
+signature sz_t get_size_en( @* o ); // number of entry channels
+signature sz_t get_size_ex( @* o ); // number of exit channels
+signature sz_t get_size_ada( @* o ); // number of adaptive nodes
+signature sz_t get_size_cyc( @* o ); // number of cyclic nodes
 
 signature m bhvm_holor_s* get_ap_en(  m @* o, sz_t index );
 signature m bhvm_holor_s* get_dp_en(  m @* o, sz_t index );
@@ -109,15 +135,31 @@ signature m bhvm_holor_s* get_ap_ex(  m @* o, sz_t index );
 signature m bhvm_holor_s* get_dp_ex(  m @* o, sz_t index );
 signature m bhvm_holor_s* get_ap_ada( m @* o, sz_t index );
 signature m bhvm_holor_s* get_dp_ada( m @* o, sz_t index );
+signature m bhvm_holor_s* get_ap_cyc( m @* o, sz_t index );
 
-signature m @* run( m @* o, tp_t track);
-signature m @* run_ap(     m @* o, c bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex );
-signature m @* run_dp(     m @* o, c bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en );
-signature m @* run_ap_adl( m @* o, c bhvm_holor_adl_s* en, m bhvm_holor_adl_s* ex ); // allocates out
-signature m @* run_dp_adl( m @* o, c bhvm_holor_adl_s* ex, m bhvm_holor_adl_s* en ); // allocates out
+/** Transfers adaptive and cyclic holors from src_id to dst_id.
+ *  The id is a sub-section (or just a simple name) contained in the
+ *  associated holor-id. It typically specifies a cell.
+ *  The id must be unique in the sense that all matches inside the frame have identical
+ *  front-sections. The tail sections across frames must match bijectively.
+ *  Matching holors across frames must have the same shape.
+ *  Matching errors are detected and cause a descriptive termination.
+ */
+signature o transfer( mutable @* o, @* src, opal_sem_id_s* src_id, opal_sem_id_s* dst_id );
 
-signature void disassemble_to_sink( c @* o, m bcore_sink* sink );
-signature void cyclic_reset( m @* o );
+signature m @* run_track( m @* o, tp_t track );
+signature m @* run_axon_pass    (     m @* o, bhvm_holor_s** en, sz_t size_en, mutable bhvm_holor_s** ex, sz_t size_ex );
+signature m @* run_dendrite_pass(     m @* o, bhvm_holor_s** ex, sz_t size_ex, mutable bhvm_holor_s** en, sz_t size_en );
+signature m @* run_axon_pass_adl    ( m @* o, bhvm_holor_adl_s* en, mutable bhvm_holor_adl_s* ex ); // allocates out
+signature m @* run_dendrite_pass_adl( m @* o, bhvm_holor_adl_s* ex, mutable bhvm_holor_adl_s* en ); // allocates out
+
+signature void disassemble_to_sink(       @* o, mutable bcore_sink* sink );
+signature void disassemble_hbase_to_sink( @* o, bhvm_mcode_hbase_s* hbase, sz_t indent, mutable bcore_sink* sink );
+signature void disassemble_hidx_to_sink(  @* o, bhvm_mcode_hbase_s* hbase, :hidx_s* hidx, sz_t indent, mutable bcore_sink* sink );
+signature void disassemble_track_to_sink( @* o, bhvm_mcode_track_s* track, sz_t indent, mutable bcore_sink* sink );
+
+signature void source_code_to_sink( @* o, mutable bcore_sink* sink );
+signature void cyclic_reset( mutable @* o );
 
 
 /** Explicitly re-binds holors (typically by running setup tracks).
@@ -126,15 +168,25 @@ signature void cyclic_reset( m @* o );
  */
 signature m @* bind_holors( m @* o );
 
+/** Frame for training (non-cyclic) and inference (all-networks).
+ *  Note: Use opal_cyclic_frame_s for training cyclic networks.
+ */
 stamp :s = aware :
 {
-    /// pre-setup parameters
+    /** pre-setup parameters ****/
+
+    /// advanced logging
     aware bcore_sink -> log;
 
     /// In frames the context is part of the regular parameter set including serialization.
     aware opal_context -> context;
 
-    /// post-setup data
+    /** post-setup data ****/
+
+    /// haptive source code (logging only)
+    st_s => source_code;
+
+    /// virtual machine (machine code frame)
     bhvm_mcode_frame_s => mcf;
 
     bl_t is_cyclic; // indicates that the underlying graph is cyclic
@@ -148,6 +200,7 @@ stamp :s = aware :
     :hidx_s hidx_en;  // entry index
     :hidx_s hidx_ex;  // exit index
     :hidx_s hidx_ada; // adaptive index
+    :hidx_s hidx_cyc; // cyclic index
 
     func :.reset =
     {
@@ -187,21 +240,22 @@ stamp :s = aware :
 
     /// frame setup from string or source; 'in' can be NULL
     func :.setup_from_source;
-    func :.setup_from_st = { return o.setup_from_source( bcore_source_string_s_create_from_string( st )^^, en, size_en ); };
-    func :.setup_from_sc = { return o.setup_from_st( st_s_create_sc( sc )^^, en, size_en ); };
+    func :.setup_from_st = { return o.setup_from_source( bcore_source_string_s_create_from_string( st )^, en, size_en ); };
+    func :.setup_from_sc = { return o.setup_from_st( st_s_create_sc( sc )^, en, size_en ); };
     func :.create_from_source     = { return @!.setup_from_source( source, en, size_en ); };
     func :.create_from_st         = { return @!.setup_from_st( st, en, size_en ); };
     func :.create_from_sc         = { return @!.setup_from_sc( sc, en, size_en ); };
-    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? en.data.cast( c bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
-    func :.setup_from_st_adl      = { return o.setup_from_st( st, en ? en.data.cast( c bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
-    func :.setup_from_sc_adl      = { return o.setup_from_sc( sc, en ? en.data.cast( c bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_st_adl      = { return o.setup_from_st( st, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_sc_adl      = { return o.setup_from_sc( sc, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
     func :.create_from_source_adl = { return @!.setup_from_source_adl( source, en ); };
     func :.create_from_st_adl     = { return @!.setup_from_st_adl( st, en ); };
     func :.create_from_sc_adl     = { return @!.setup_from_sc_adl( sc, en ); };
 
-    func :.get_size_en  = { return o.hidx_en .get_size(); };
-    func :.get_size_ex  = { return o.hidx_ex .get_size(); };
-    func :.get_size_ada = { return o.hidx_ada.get_size(); };
+    func :.get_size_en  = { return o.hidx_en .size; };
+    func :.get_size_ex  = { return o.hidx_ex .size; };
+    func :.get_size_ada = { return o.hidx_ada.size; };
+    func :.get_size_cyc = { return o.hidx_cyc.size; };
 
     func :.get_ap_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
     func :.get_dp_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
@@ -209,22 +263,30 @@ stamp :s = aware :
     func :.get_dp_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
     func :.get_ap_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
     func :.get_dp_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ag0, index ); };
+    func :.get_ap_cyc = { return o.hidx_cyc.get_pclass_holor( o.mcf.hbase, TYPEOF_pclass_ax0, index ); };
 
-    func (m @* run( m @* o, tp_t track )) =
-    {
-        ASSERT( o->mcf );
-        o.mcf.track_run( track );
-        return o;
-    };
+    func :.transfer;
 
     /// resets all cyclic values to the initialization value
     func :.cyclic_reset = { o.mcf.track_run( TYPEOF_track_ap_cyclic_reset ); };
 
-    func :.run_ap;
-    func :.run_dp;
-    func :.run_ap_adl;
-    func :.run_dp_adl;
+    func :.run_track = { o.mcf?.track_run( track ); return o; };
+    func :.run_axon_pass;
+    func :.run_dendrite_pass;
+    func :.run_axon_pass_adl;
+    func :.run_dendrite_pass_adl;
     func :.disassemble_to_sink;
+    func :.disassemble_hbase_to_sink;
+    func :.disassemble_hidx_to_sink;
+    func :.disassemble_track_to_sink;
+
+    func :.source_code_to_sink =
+    {
+        if( !o.source_code ) return;
+        sink.push_fa( "#<st_s*>\n", o.source_code );
+    };
+
+
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -237,15 +299,22 @@ stamp :custom_hmeta_s = aware :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-signature void setup_from_frame( m @* o, c opal_frame_s* frame, sz_t unroll_size );
+signature void setup_from_frame( m @* o, opal_frame_s* frame, sz_t unroll_size );
 
 /// resets cyclic values; runs track_ap for all slots assuming all input/output holors are provided in sequence
-signature void run_ap_adl_flat( m @* o, c bhvm_holor_adl_s* en, m bhvm_holor_adl_s* ex );
+signature void run_axon_pass_adl_flat( m @* o, bhvm_holor_adl_s* en, m bhvm_holor_adl_s* ex );
 
 /// runs track_dp for all slots assuming all input/output holors are provided in sequence
-signature void run_dp_adl_flat( m @* o, c bhvm_holor_adl_s* ex, m bhvm_holor_adl_s* en );
+signature void run_dendrite_pass_adl_flat( m @* o, bhvm_holor_adl_s* ex, m bhvm_holor_adl_s* en );
 
-/// frame specialized in unrolling cyclic networks
+/** Extended frame explicitly unfolding (unrolling) networks.
+ *  It is needed to train cyclic network. It performs unfolded inference.
+ *  Note: Folded and unfolded inference is numerically equivalent.
+ *  When no training s needed, inference in an unfolded state is spread
+ *  across more memory, which (depending on cache inefficiency) can
+ *  be slower than folded inference. opal_frame_s performs a folded
+ *  inference.
+ */
 stamp :cyclic_s = aware :
 {
     /// pre-setup parameters
@@ -285,14 +354,15 @@ stamp :cyclic_s = aware :
     func :.get_size_ex  = { return o.frame.get_size_ex(); };
     func :.get_size_ada = { return o.frame.get_size_ada(); };
 
-    func :.run_ap;
-    func :.run_ap_adl;
-    func :.run_ap_adl_flat;
-    func :.run_dp_adl_flat;
+    func :.run_axon_pass;
+    func :.run_axon_pass_adl;
+    func :.run_axon_pass_adl_flat;
+    func :.run_dendrite_pass_adl_flat;
 
     func :.setup_from_frame;
 
     func :.disassemble_to_sink;
+    func :.source_code_to_sink = { if( o.frame ) o.frame.source_code_to_sink( sink ); };
 
     /// resets all cyclic values to the initialization value
     func :.cyclic_reset =
@@ -305,16 +375,16 @@ stamp :cyclic_s = aware :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (void sc_run_ap( sc_t sc, c bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex )) =
+func (void sc_run_ap( sc_t sc, bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex )) =
 {
-    opal_frame_s_create_from_sc( sc, en, size_en )^^.run_ap( en, size_en, ex, size_ex );
+    opal_frame_s_create_from_sc( sc, en, size_en )^.run_axon_pass( en, size_en, ex, size_ex );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (void sc_run_dp( sc_t sc, c bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en )) =
+func (void sc_run_dp( sc_t sc, bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en )) =
 {
-    opal_frame_s_create_from_sc( sc, ex, size_ex )^^.run_dp( ex, size_ex, en, size_en );
+    opal_frame_s_create_from_sc( sc, ex, size_ex )^.run_dendrite_pass( ex, size_ex, en, size_en );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -323,7 +393,7 @@ func (void sc_run_dp( sc_t sc, c bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (m st_s* hmeta_get_global_name_st( c bhvm_mcode_hmeta* hmeta, c opal_context* context, m st_s* st )) =
+func (m st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, opal_context* context, m st_s* st )) =
 {
     st.clear();
     if( hmeta && hmeta._ == TYPEOF_opal_holor_meta_s )
@@ -339,9 +409,9 @@ func (m st_s* hmeta_get_global_name_st( c bhvm_mcode_hmeta* hmeta, c opal_contex
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, sz_t indent, m bcore_sink* sink )) =
+func (:s) disassemble_hbase_to_sink =
 {
-    m $* st_buf = st_s!^^;
+    st_s^ st_buf;
     sz_t hname_length = 0;
     sz_t hbrief_length = 0;
 
@@ -384,7 +454,7 @@ func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, 
 
         msg.push_fa( " #pn' '{#<st_s*>} ", hbrief_length, st );
 
-        c x_inst* custom = hmeta.get_custom();
+        x_inst* custom = hmeta.get_custom();
         if( custom && custom._ == TYPEOF_opal_frame_custom_hmeta_s )
         {
             msg.push_fa( " ur_slot #pl2 {#<sz_t>}", custom.cast( m opal_frame_custom_hmeta_s* ).ur_slot );
@@ -396,9 +466,9 @@ func (:s) (void disassemble_hbase_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) (void disassemble_hidx_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, c bcore_arr_sz_s* hidx, sz_t indent, m bcore_sink* sink ) ) =
+func (:s) disassemble_hidx_to_sink =
 {
-    m $* st_buf = st_s!^^;
+    st_s^ st_buf;
     sz_t hname_length = 0;
 
     foreach( sz_t idx_ap in hidx )
@@ -421,7 +491,7 @@ func (:s) (void disassemble_hidx_to_sink( c @* o, c bhvm_mcode_hbase_s* hbase, c
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) (void disassemble_track_to_sink( c @* o, c bhvm_mcode_track_s* track, sz_t indent, m bcore_sink* sink )) =
+func (:s) disassemble_track_to_sink =
 {
     if( !track ) return;
     foreach( m $* vop in track..vop )
@@ -441,17 +511,24 @@ func (:s) :.disassemble_to_sink =
 
     sink.push_fa( "Holorbase size: #<sz_t>\n", hbase ? bhvm_mcode_hbase_s_get_size( hbase ) : 0 );
     sink.push_fa( "Entry channels:\n" );
-    o.disassemble_hidx_to_sink( hbase, o->hidx_en.arr, 2, sink );
+    o.disassemble_hidx_to_sink( hbase, o->hidx_en, 2, sink );
     sink.push_fa( "\n" );
 
     sink.push_fa( "Exit channels:\n" );
-    o.disassemble_hidx_to_sink( hbase, o->hidx_ex.arr, 2, sink );
+    o.disassemble_hidx_to_sink( hbase, o->hidx_ex, 2, sink );
     sink.push_fa( "\n" );
 
-    if( o.hidx_ada.get_size() > 0 )
+    if( o.hidx_ada.size > 0 )
     {
         sink.push_fa( "Adaptive channels:\n" );
-        o.disassemble_hidx_to_sink( hbase, o->hidx_ada.arr, 2, sink );
+        o.disassemble_hidx_to_sink( hbase, o->hidx_ada, 2, sink );
+        sink.push_fa( "\n" );
+    }
+
+    if( o.hidx_cyc.size > 0 )
+    {
+        sink.push_fa( "Cyclic channels:\n" );
+        o.disassemble_hidx_to_sink( hbase, o->hidx_cyc, 2, sink );
         sink.push_fa( "\n" );
     }
     sink.push_fa( "\n" );
@@ -490,16 +567,29 @@ func (:s) :.disassemble_to_sink =
 
 func (:s) :.setup_from_source =
 {
-    m $* net_cell = opal_net_cell_s!^^;
-    m $* net_builder = opal_net_builder_s!^^;
+    m $* net_cell = opal_net_cell_s!^;
+    m $* net_builder = opal_net_builder_s!^;
+
+    sz_t index_start = source.get_index();
 
     net_builder.fork_log( o.log );
     net_builder.fork_input_holors( en, size_en );
     net_builder.build_from_source( net_cell, source );
 
+    sz_t index_end = source.get_index();
+
+    /// capture source code
+    {
+        o.source_code =< st_s!;
+        source.set_index( index_start );
+        while( source.get_index() < index_end || !source.eos() ) o.source_code.push_char( source.get_char() );
+        source.set_index( index_end );
+    }
+
     o.hidx_en.clear();
     o.hidx_ex.clear();
     o.hidx_ada.clear();
+    o.hidx_cyc.clear();
 
     o.context =< net_cell.context.fork();
     o.mcf =< bhvm_mcode_frame_s!;
@@ -524,14 +614,18 @@ func (:s) :.setup_from_source =
     foreach( m opal_net_node_s* node in net_cell.excs )
     {
         ASSERT( node.mnode?.ax0 >= 0 );
-        opal_frame_hidx_s_push( &o->hidx_ex, node->mnode->ax0 );
+        o.hidx_ex.push( node.mnode.ax0 );
     }
 
     foreach( m opal_net_node_s* node  in net_cell.body; node.nop )
     {
-        c bhvm_mcode_node_s* mnode = node.mnode;
-        if( mnode?.adaptive && node.mnode.ax0 >= 0 ) o.hidx_ada.push( node.mnode.ax0 );
-        if( mnode?.cyclic ) o.is_cyclic = true;
+        bhvm_mcode_node_s* mnode = node.mnode;
+        if( mnode )
+        {
+            if( mnode.adaptive && node.mnode.ax0 >= 0 ) o.hidx_ada.push( node.mnode.ax0 );
+            if( mnode.cyclic   && node.mnode.ax0 >= 0 ) o.hidx_cyc.push( node.mnode.ax0 );
+            if( mnode.cyclic ) o.is_cyclic = true;
+        }
     }
 
     o.is_setup = true;
@@ -544,19 +638,32 @@ func (:s) :.setup_from_source =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_ap =
+func (:s) transfer =
+{
+    if( !  o.is_setup ) ERR_fa( "o is not setup." );
+    if( !src.is_setup ) ERR_fa( "src is not setup." );
+
+//    foreach( sz_t idx in )
+
+
+    return o;
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+func (:s) :.run_axon_pass =
 {
     ASSERT( o.is_setup );
 
     m bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
-    c opal_frame_hidx_s* hidx_en = o.hidx_en;
-    c opal_frame_hidx_s* hidx_ex = o.hidx_ex;
+    opal_frame_hidx_s* hidx_en = o.hidx_en;
+    opal_frame_hidx_s* hidx_ex = o.hidx_ex;
 
     ASSERT( size_en >= o.size_en );
     for( sz_t i = 0; i < o.size_en; i++ )
     {
-        m bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
-        c bhvm_holor_s* h_i = en[ i ];
+        m bhvm_holor_s* h_m = hbase.get_holor( hidx_en.[ i ] );
+        bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
         if( !h_m.s.is_equal( h_i.s ) )
         {
@@ -579,7 +686,7 @@ func (:s) :.run_ap =
         ASSERT( size_ex >= o.size_ex );
         for( sz_t i = 0; i < o.size_ex; i++ )
         {
-            m bhvm_holor_s* h_m = hidx_ex.get_holor( hbase, i );
+            m bhvm_holor_s* h_m = hbase.get_holor( hidx_ex.[ i ] );
             m bhvm_holor_s* h_o = ex[ i ];
             ASSERT( h_o && h_o._ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_o.s ) ) h_o.copy_shape_type( h_m );
@@ -593,14 +700,18 @@ func (:s) :.run_ap =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_dp =
+func (:s) :.run_dendrite_pass =
 {
     ASSERT( o.is_setup );
-    ASSERT( !o.is_cyclic );
+
+    if( o.is_cyclic )
+    {
+        ERR_fa( "Network is cyclic. Frame '#<sc_t>' cannot dendrite-pass a cyclic network. Use 'opal_frame_cyclic_s' instead.", bnameof( o._ ) );
+    }
 
     m bhvm_mcode_hbase_s* hbase = o.mcf?.hbase;
-    c opal_frame_hidx_s* hidx_en = o.hidx_en;
-    c opal_frame_hidx_s* hidx_ex = o.hidx_ex;
+    opal_frame_hidx_s* hidx_en = o.hidx_en;
+    opal_frame_hidx_s* hidx_ex = o.hidx_ex;
 
     ASSERT( size_ex >= o.size_ex );
     for( sz_t i = 0; i < o.size_ex; i++ )
@@ -609,7 +720,7 @@ func (:s) :.run_dp =
         if( idx >= 0 )
         {
             m bhvm_holor_s* h_m = hbase.get_holor( idx );
-            c bhvm_holor_s* h_i = ex[ i ];
+            bhvm_holor_s* h_i = ex[ i ];
             ASSERT( h_i && h_i->_ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_i.s ) )
             {
@@ -650,13 +761,13 @@ func (:s) :.run_dp =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_ap_adl =
+func (:s) :.run_axon_pass_adl =
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
     foreach( m $.2 e in ex; !e.1 ) e.1 = bhvm_holor_s!;
-    return o.run_ap
+    return o.run_axon_pass
     (
-        en ? en.data.cast( c bhvm_holor_s** ) : NULL,
+        en ? en.data.cast( bhvm_holor_s** ) : NULL,
         en ? en.size : 0,
         ex ? ex.data.cast( m bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0
@@ -665,13 +776,13 @@ func (:s) :.run_ap_adl =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_dp_adl =
+func (:s) :.run_dendrite_pass_adl =
 {
     if( en && en.size != o.get_size_en() ) en.set_size( o.get_size_en() );
     foreach( m $.2 e in en; !e.1 ) e.1 = bhvm_holor_s!;
-    return o.run_dp
+    return o.run_dendrite_pass
     (
-        ex ? ex.data.cast( c bhvm_holor_s** ) : NULL,
+        ex ? ex.data.cast( bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0,
         en ? en.data.cast( m bhvm_holor_s** ) : NULL,
         en ? en.size : 0
@@ -739,15 +850,15 @@ func (:cyclic_s) :.setup =
     sz_t rolled_hbase_size = hbase.holor_adl.size;
     hbase.copy_size_limit = rolled_hbase_size;
 
-    m bcore_arr_sz_s* idx_arr_track0_ap = bcore_arr_sz_s!^^;
+    m bcore_arr_sz_s* idx_arr_track0_ap = bcore_arr_sz_s!^;
     track0_ap.get_index_arr( idx_arr_track0_ap );
 
     /// unrollable indices
-    m bcore_arr_sz_s* ur_idx_arr = bcore_arr_sz_s!^^;
+    m bcore_arr_sz_s* ur_idx_arr = bcore_arr_sz_s!^;
 
     foreach( sz_t src_idx in idx_arr_track0_ap; !hbase.hmeta_adl.[ src_idx ].is_rollable() ) ur_idx_arr.push( src_idx );
 
-    m opal_frame_custom_hmeta_s* custom = opal_frame_custom_hmeta_s!^^;
+    m opal_frame_custom_hmeta_s* custom = opal_frame_custom_hmeta_s!^;
 
     m bhvm_mcode_track_s* track_ap_prev = NULL;
 
@@ -763,8 +874,8 @@ func (:cyclic_s) :.setup =
 
         if( i > 0 )
         {
-            m bcore_arr_sz_s* ur_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
-            m bcore_arr_sz_s* rc_idx_map = bcore_arr_sz_s!^^.fill( rolled_hbase_size, -1 );
+            m bcore_arr_sz_s* ur_idx_map = bcore_arr_sz_s!^.fill( rolled_hbase_size, -1 );
+            m bcore_arr_sz_s* rc_idx_map = bcore_arr_sz_s!^.fill( rolled_hbase_size, -1 );
             foreach( sz_t src_idx in ur_idx_arr )
             {
                 sz_t dst_idx = hbase.push_copy_from_index( src_idx );
@@ -810,7 +921,7 @@ func (:cyclic_s) :.setup_from_frame =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_ap =
+func( :cyclic_s) :.run_axon_pass =
 {
     ASSERT( o.frame );
     assert( o.is_setup );
@@ -818,16 +929,16 @@ func( :cyclic_s) :.run_ap =
 
     m opal_frame_s* frame = o.frame;
     m bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
-    c opal_frame_hidx_s* hidx_en = o.hidx_ads_en .[ o.unroll_index ];
-    c opal_frame_hidx_s* hidx_ex = o.hidx_ads_ex .[ o.unroll_index ];
-    c bhvm_mcode_track_s* track  = o.track_adl_ap.[ o.unroll_index ];
+    opal_frame_hidx_s* hidx_en = o.hidx_ads_en .[ o.unroll_index ];
+    opal_frame_hidx_s* hidx_ex = o.hidx_ads_ex .[ o.unroll_index ];
+    bhvm_mcode_track_s* track  = o.track_adl_ap.[ o.unroll_index ];
 
     ASSERT( size_en >= frame.size_en );
 
     for( sz_t i = 0; i < frame.size_en; i++ )
     {
-        m bhvm_holor_s* h_m = hidx_en.get_holor( hbase, i );
-        c bhvm_holor_s* h_i = en[ i ];
+        m bhvm_holor_s* h_m = hbase.get_holor( hidx_en.[ i ] );
+        bhvm_holor_s* h_i = en[ i ];
         ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
         if( !h_m.s.is_equal( h_i.s ) ) ERR_fa( "Input shape mismatch" );
         h_i.v.cpy( h_m.v );
@@ -841,7 +952,7 @@ func( :cyclic_s) :.run_ap =
         ASSERT( size_ex >= frame.size_ex );
         for( sz_t i = 0; i < frame.size_ex; i++ )
         {
-            m bhvm_holor_s* h_m = hidx_ex.get_holor( hbase, i );
+            m bhvm_holor_s* h_m = hbase.get_holor( hidx_ex.[ i ] );
             m bhvm_holor_s* h_o = ex[ i ];
             ASSERT( h_o && h_o._ == TYPEOF_bhvm_holor_s );
             if( !h_m.s.is_equal( h_o.s ) ) h_o.copy_shape_type( h_m );
@@ -857,13 +968,13 @@ func( :cyclic_s) :.run_ap =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_ap_adl =
+func( :cyclic_s) :.run_axon_pass_adl =
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
     foreach( m $.2 e in ex; !e.1 ) e.1 = bhvm_holor_s!;
-    return o.run_ap
+    return o.run_axon_pass
     (
-        en ? en.data.cast( c bhvm_holor_s** ) : NULL,
+        en ? en.data.cast( bhvm_holor_s** ) : NULL,
         en ? en.size : 0,
         ex ? ex.data.cast( m bhvm_holor_s** ) : NULL,
         ex ? ex.size : 0
@@ -882,10 +993,17 @@ func( :cyclic_s) :.disassemble_to_sink =
     frame.disassemble_hbase_to_sink( hbase, 2, sink );
     sink.push_fa( "\n" );
 
-    if( frame.hidx_ada.get_size() > 0 )
+    if( frame.hidx_ada.size > 0 )
     {
         sink.push_fa( "Adaptive channels:\n" );
-        frame.disassemble_hidx_to_sink( hbase, frame->hidx_ada.arr, 2, sink );
+        frame.disassemble_hidx_to_sink( hbase, frame->hidx_ada, 2, sink );
+        sink.push_fa( "\n" );
+    }
+
+    if( frame.hidx_cyc.size > 0 )
+    {
+        sink.push_fa( "Cyclic channels:\n" );
+        frame.disassemble_hidx_to_sink( hbase, frame->hidx_cyc, 2, sink );
         sink.push_fa( "\n" );
     }
 
@@ -927,10 +1045,10 @@ func( :cyclic_s) :.disassemble_to_sink =
         sink.push_fa( "  Roll slot: #<sz_t>", i );
 
         sink.push_fa( "\n  Entry channels:\n" );
-        frame.disassemble_hidx_to_sink( hbase, o->hidx_ads_en.data[ i ].arr, 4, sink );
+        frame.disassemble_hidx_to_sink( hbase, o->hidx_ads_en.data[ i ], 4, sink );
 
         sink.push_fa( "\n  Exit channels:\n" );
-        frame.disassemble_hidx_to_sink( hbase, o->hidx_ads_ex.data[ i ].arr, 4, sink );
+        frame.disassemble_hidx_to_sink( hbase, o->hidx_ads_ex.data[ i ], 4, sink );
 
         track = o.track_adl_ap.[ i ];
         sink.push_fa( "\n  #<sc_t>:\n", ifnameof( track->name ) );
@@ -952,7 +1070,7 @@ func( :cyclic_s) :.disassemble_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_ap_adl_flat =
+func( :cyclic_s) :.run_axon_pass_adl_flat =
 {
     ASSERT( o.frame );
     o.cyclic_reset();
@@ -966,7 +1084,7 @@ func( :cyclic_s) :.run_ap_adl_flat =
     {
         ASSERT( i * size_en < en.size );
         ASSERT( ex ? ( i * size_ex < ex.size ) : true );
-        o.run_ap
+        o.run_axon_pass
         (
             ( const bhvm_holor_s** )( en.data + i * size_en ),
             size_en,
@@ -978,7 +1096,7 @@ func( :cyclic_s) :.run_ap_adl_flat =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_dp_adl_flat =
+func( :cyclic_s) :.run_dendrite_pass_adl_flat =
 {
     ASSERT( o.frame );
     ASSERT( o.is_setup );
@@ -992,20 +1110,20 @@ func( :cyclic_s) :.run_dp_adl_flat =
     m opal_frame_s* frame = o.frame;
     m bhvm_mcode_hbase_s* hbase = frame.mcf.hbase;
 
-    frame.run( TYPEOF_track_dp_cyclic_zero_grad );
+    frame.run_track( TYPEOF_track_dp_cyclic_zero_grad );
 
     for( sz_t i = 0; i < o.unroll_size; i++ )
     {
         sz_t unroll_index = ( o.unroll_size - i - 1 ) % o.unroll_size;
-        c opal_frame_hidx_s*  hidx_en  = o.hidx_ads_en.[ unroll_index ];
-        c opal_frame_hidx_s*  hidx_ex  = o.hidx_ads_ex.[ unroll_index ];
-        c bhvm_mcode_track_s* track_dp = o.track_adl_dp.[ unroll_index ];
+        opal_frame_hidx_s*  hidx_en  = o.hidx_ads_en.[ unroll_index ];
+        opal_frame_hidx_s*  hidx_ex  = o.hidx_ads_ex.[ unroll_index ];
+        bhvm_mcode_track_s* track_dp = o.track_adl_dp.[ unroll_index ];
 
         ASSERT(        unroll_index * size_ex < ex.size          );
         ASSERT( en ? ( unroll_index * size_en < en.size ) : true );
 
-        c bhvm_holor_s** p_ex = ( const bhvm_holor_s** )( ex->data + unroll_index * size_ex );
-            m bhvm_holor_s** p_en = en ? (  bhvm_holor_s** )( en->data + unroll_index * size_en ) : NULL;
+                bhvm_holor_s** p_ex = ( const bhvm_holor_s** )( ex->data + unroll_index * size_ex );
+        mutable bhvm_holor_s** p_en = en ? (  bhvm_holor_s** )( en->data + unroll_index * size_en ) : NULL;
 
         for( sz_t i = 0; i < size_ex; i++ )
         {
@@ -1013,7 +1131,7 @@ func( :cyclic_s) :.run_dp_adl_flat =
             if( idx >= 0 )
             {
                 m bhvm_holor_s* h_m = hbase.get_holor( idx );
-                c bhvm_holor_s* h_i = p_ex[ i ];
+                bhvm_holor_s* h_i = p_ex[ i ];
                 ASSERT( h_i && h_i._ == TYPEOF_bhvm_holor_s );
                 if( !h_m.s.is_equal( h_i.s ) ) ERR_fa( "Input shape mismatch" );
                 h_i.v.cpy( h_m.v );
