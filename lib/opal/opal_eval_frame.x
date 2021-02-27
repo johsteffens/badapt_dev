@@ -22,7 +22,7 @@ signature void resolve( m @* o );
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-stamp :result_s = aware bcore_inst
+stamp :result_s = aware x_inst
 {
     bl_t error = false;
     st_s msg;
@@ -32,11 +32,11 @@ stamp :result_s = aware bcore_inst
         if( !o ) return;
         if( o.error )
         {
-            bcore_sink_a_push_fa( BCORE_STDERR, "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_inst_stderr(), "#<sc_t>\n", o.msg.sc );
         }
         else if( o.msg.size > 0 )
         {
-            bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_inst_stdout(), "#<sc_t>\n", o.msg.sc );
         }
     };
 };
@@ -48,7 +48,7 @@ feature m :result_s* run( c @* o, m :result_s* result ); // returns result
 // ---------------------------------------------------------------------------------------------------------------------
 
 signature void set( m @* o, c :param_s* src );
-stamp :param_s = aware bcore_inst
+stamp :param_s = aware x_inst
 {
     hidden aware bcore_sink -> log;
     sz_t verbosity = 1;
@@ -66,7 +66,7 @@ stamp :param_s = aware bcore_inst
     f3_t max_dev = 1E-5;   // if output deviation exceeds this value, an error is generated
     f3_t epsilon = 1E-5;   // for Jacobian estimation
 
-    func bcore_inst_call . init_x = { o.log = bcore_fork( BCORE_STDOUT ); };
+    func bcore_inst_call . init_x = { o.log = x_inst_stdout().fork(); };
 
     func :.set =
     {
@@ -112,7 +112,7 @@ stump :std_s = aware :
 
 stamp :show_param_s = extending :std_s
 {
-    func : .run = { bcore_txt_ml_a_to_sink( &o.param, o.param.log ); return result; };
+    func : .run = { o.param.to_sink_txt_ml( o.param.log ); return result; };
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -200,7 +200,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl
                 if( h_jc.v.size == 0 )
                 {
                     h_jc.s.set_data_na( 2, h_ex.v.size, h_en.v.size );
-                    h_jc.set_type( TYPEOF_f3_t );
+                    h_jc.set_type( f3_t~ );
                     h_jc.fit_size();
                 }
 
@@ -249,7 +249,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_ad
         {
             f3_t v_ada = h_ada.v.get_f3( j );
             h_ada.v.set_f3( j, v_ada + epsilon );
-            o.mcf.track_run( TYPEOF_track_ap );
+            o.mcf.track_run( track_ap~ );
             for( sz_t k = 0; k < o.size_ex; k++ )
             {
                 m bhvm_holor_s* h_ex = o.get_ap_ex( k );
@@ -260,7 +260,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_ad
                 if( h_jc.v.size == 0 )
                 {
                     h_jc.s.set_data_na( 2, h_ex.v.size, h_ada.v.size );
-                    h_jc.set_type( TYPEOF_f3_t );
+                    h_jc.set_type( f3_t~ );
                     h_jc.fit_size();
                 }
 
@@ -297,13 +297,13 @@ func (:plain_s) :.run =
 
     switch( o.param.src._ )
     {
-        case TYPEOF_bcore_file_path_s:
+        case bcore_file_path_s~:
         {
             source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) )^^;
         }
         break;
 
-        case TYPEOF_st_s:
+        case st_s~:
         {
             source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) )^^;
         }
@@ -603,7 +603,7 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_ho
                 if( h_jc.v.size == 0 )
                 {
                     h_jc.s.set_data_na( 2, h_ex.v.size, h_en.v.size );
-                    h_jc.set_type( TYPEOF_f3_t );
+                    h_jc.set_type( f3_t~ );
                     h_jc.fit_size();
                 }
 
@@ -645,13 +645,13 @@ func (:cyclic_s) :.run =
 
     switch( o.param.src._ )
     {
-        case TYPEOF_bcore_file_path_s:
+        case bcore_file_path_s~:
         {
             source = bcore_file_open_source_path( o.param.src.cast( c bcore_file_path_s* ) )^^;
         }
         break;
 
-        case TYPEOF_st_s:
+        case st_s~:
         {
             source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) )^^;
         }
@@ -825,7 +825,7 @@ func (:cyclic_s) :.run =
 
                 if( error || o.param.verbosity >= 10 )
                 {
-                    m st_s* st = BLM_CREATE( st_s );
+                    m st_s* st = st_s!^;
                     st.push_fa( "dp-channel: #<sz_t>", i );
                     st.push_fa( ", dev: #<f3_t>", dev );
                     st.push_fa( "\ngradient (dp)          : " );

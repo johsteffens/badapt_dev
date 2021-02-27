@@ -27,10 +27,8 @@ stamp :meta_s = aware bhvm_mcode_hmeta
     /// associated mnode
     hidden bhvm_mcode_node_s -> mnode;
 
+    /// name obtained from the corresponding node (TODO: consider moving it to mnode)
     tp_t name;
-
-    // opal_sem_id_s
-    aware x_inst => sem_id;
 
     /// pass-class (see bhvm_mcode_hmeta)
     tp_t pclass;
@@ -52,16 +50,16 @@ stamp :meta_s = aware bhvm_mcode_hmeta
 
     func bhvm_mcode_hmeta.get_name    = { return o.name; };
     func bhvm_mcode_hmeta.get_pclass  = { return o.pclass; };
-    func bhvm_mcode_hmeta.is_rollable = { return !o.active || o.mnode.adaptive || ( o.mnode.cyclic && o.pclass == TYPEOF_pclass_ax1 ); };
+    func bhvm_mcode_hmeta.is_rollable = { return !o.active || o.mnode.adaptive || ( o.mnode.cyclic && o.pclass == pclass_ax1~ ); };
     func bhvm_mcode_hmeta.is_active   = { return  o.active; };
 
     func bhvm_mcode_hmeta.get_custom = { return o.custom; };
     func bhvm_mcode_hmeta.set_custom = { return o.custom =< custom.clone(); };
 
-    func bhvm_mcode_hmeta.get_sem_id = { return o.sem_id; };
+    func bhvm_mcode_hmeta.get_sem_id = { return o.mnode?.sem_id; };
 
     func bhvm_mcode_hmeta.get_node = { return o.mnode; };
-    func bhvm_mcode_hmeta.set_node = { o.mnode =< bcore_fork( node ); };
+    func bhvm_mcode_hmeta.set_node = { o.mnode =< node.fork(); };
 };
 
 stamp :s = aware :
@@ -84,10 +82,10 @@ stamp :s = aware :
         sink.push_fa( "\n" );
     };
 
-    func (void to_stdout( c @* o )) = { o.to_sink( BCORE_STDOUT ); };
+    func (void to_stdout( c @* o )) = { o.to_sink( x_inst_stdout() ); };
 
     // appends newline
-    func (void to_stdout_nl( c @* o )) = { o.to_sink_nl( BCORE_STDOUT ); };
+    func (void to_stdout_nl( c @* o )) = { o.to_sink_nl( x_inst_stdout() ); };
 
     /** compacted version, single line */
     func (void brief_to_sink( c @* o, m bcore_sink* sink )) =
@@ -97,7 +95,7 @@ stamp :s = aware :
         o.h.brief_to_sink( sink );
     };
 
-    func (void brief_to_stdout( c @* o )) = { o.brief_to_sink( BCORE_STDOUT ); };
+    func (void brief_to_stdout( c @* o )) = { o.brief_to_sink( x_inst_stdout() ); };
 
     /** multiline version */
     func (void formatted_to_sink( c @* o, m bcore_sink* sink )) =
@@ -108,7 +106,7 @@ stamp :s = aware :
         if( o.m.htp ) sink.push_fa( ")" );
     };
 
-    func (void formatted_to_stdout( c @* o )) = { o.formatted_to_sink( BCORE_STDOUT ); };
+    func (void formatted_to_stdout( c @* o )) = { o.formatted_to_sink( x_inst_stdout() ); };
 
     /// sets holor from text source
     func :.parse;
@@ -125,29 +123,29 @@ func (:s) bcore_fp.copy_typed =
     m x_inst* inst = ( x_inst* )src;
     switch( type )
     {
-        case TYPEOF_opal_holor_s:
+        case opal_holor_s~:
         {
-            assert( inst._ == TYPEOF_opal_holor_s );
+            assert( inst._ == opal_holor_s~ );
             o.copy( inst.cast( m opal_holor_s* ) );
         }
         break;
 
-        case TYPEOF_bhvm_holor_s:
-        case TYPEOF_bmath_mf2_s:
-        case TYPEOF_bmath_mf3_s:
-        case TYPEOF_bmath_vf2_s:
-        case TYPEOF_bmath_vf3_s:
-        case TYPEOF_f2_t:
-        case TYPEOF_f3_t:
-        case TYPEOF_sc_t:
+        case bhvm_holor_s~:
+        case bmath_mf2_s~:
+        case bmath_mf3_s~:
+        case bmath_vf2_s~:
+        case bmath_vf3_s~:
+        case f2_t~:
+        case f3_t~:
+        case sc_t~:
         {
             o.h.copy_typed( type, inst );
         }
         break;
 
-        case TYPEOF_st_s:
+        case st_s~:
         {
-            assert( inst._ == TYPEOF_st_s );
+            assert( inst._ == st_s~ );
             o.parse( bcore_source_string_s!^^.setup_from_string( inst.cast( m st_s* ) ) );
         }
         break;

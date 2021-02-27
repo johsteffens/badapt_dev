@@ -26,7 +26,7 @@ func :.solve_default =
     sz_t arity = o.arity();
     bl_t can_settle = ( arity > 0 );
     bl_t vacant = ( arity == 0 );
-    tp_t r_type = TYPEOF_f2_t;
+    tp_t r_type = f2_t~;
     bl_t r_htp  = false;
     bl_t active = false;
 
@@ -35,7 +35,7 @@ func :.solve_default =
     for( sz_t i = 0; i < arity; i++ )
     {
         if( !a[i] ) return false;
-        if( a[i].h.v.type == TYPEOF_f3_t ) r_type = TYPEOF_f3_t;
+        if( a[i].h.v.type == f3_t~ ) r_type = f3_t~;
         if( i == 0 )
         {
             base_shape.copy( a[i].h.s );
@@ -88,7 +88,7 @@ func :.solve_default =
 
         for( sz_t i = 0; i <= arity; i++ )
         {
-            hbase.holor_adl.[ i ] = bcore_fork( ( i < arity ) ? a[ i ].h.1 : hr );
+            hbase.holor_adl.[ i ] = ( i < arity ) ? a[ i ].h.1.fork() : hr.fork();
             arr_ci.[ i ].i = i;
             arr_ci.[ i ].c = ( i < arity ) ? 'a' + i : 'y';
         }
@@ -114,6 +114,9 @@ func :.solve_default =
  *  After settling, the graph can be run through an optimizer minimizing its structure.
  */
 //func (void solve_node_default( m @* o, m opal_net_node_s* node, m opal_net_node_adl_s* deferred )) =
+
+identifier opal_MAX_ARITY;
+
 func :.solve_node_default =
 {
     if( node.flag ) return; // cyclic link
@@ -170,8 +173,8 @@ func (:ar1_param_s) ::.solve =
 {
     result.h =< a[0].clone();
     result.can_settle    = !a[0].m.active;
-    result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
+    result.type_vop_ap   = bhvm_vop_ar1_cpy_s~;
+    result.type_vop_dp_a = bhvm_vop_ar1_acc_s~;
     return true;
 };
 
@@ -245,8 +248,8 @@ func (:ar1_output_s) ::.solve =
     result.h.m.htp = a[0].m.htp;
     result.h.m.active = a[0].m.active;
     result.can_settle = (result.h) && !result.h.m.active;
-    result.type_vop_ap   = TYPEOF_bhvm_vop_ar1_cpy_s;
-    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar1_acc_s;
+    result.type_vop_ap   = bhvm_vop_ar1_cpy_s~;
+    result.type_vop_dp_a = bhvm_vop_ar1_acc_s~;
     return true;
 };
 
@@ -256,8 +259,8 @@ func (:ar1_output_s) ::.mcode_push_dp_holor =
 {
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     sz_t idx = mcf.push_hm( h, result.h.m );
-    mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_dp_setup~,  bhvm_vop_ar0_determine_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_dp_shelve~, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
 };
 
@@ -302,7 +305,7 @@ func (:ar1_rand_s) ::.solve =
 
 func (:ar1_rand_s) ::.settle =
 {
-    ASSERT( result.attached?._ == TYPEOF_opal_nop_ar0_rand_s );
+    ASSERT( result.attached?._ == opal_nop_ar0_rand_s~ );
     m opal_nop_ar0_rand_s* nop_rand = result.attached.cast( m opal_nop_ar0_rand_s* );
     out_nop.1 =< nop_rand.fork();
     d opal_nop_solve_result_s* r = opal_nop_solve_result_s!;
@@ -337,8 +340,8 @@ func (:ar1_cast_htp_s) ::.mcode_push_ap_holor =
     m bhvm_holor_s* h = result.h.h;
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = mcf.push_hm( h, m );
-    mcf.track_vop_push_d( TYPEOF_track_ap_setup,  bhvm_vop_ar1_fork_s!.setup( arr_ci.i_of_c( 'a' ), idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_ap_setup~,  bhvm_vop_ar1_fork_s!.setup( arr_ci.i_of_c( 'a' ), idx ) );
+    mcf.track_vop_push_d( track_ap_shelve~, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
 };
 
@@ -349,8 +352,8 @@ func (:ar1_cast_htp_s) ::.mcode_push_dp_holor =
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = mcf.push_hm( h, m );
-    mcf.track_vop_push_d( TYPEOF_track_dp_setup, bhvm_vop_ar1_fork_s!.setup( arr_ci.i_of_c( 'f' ), idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_dp_setup~, bhvm_vop_ar1_fork_s!.setup( arr_ci.i_of_c( 'f' ), idx ) );
+    mcf.track_vop_push_d( track_dp_shelve~, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
 };
 
@@ -365,13 +368,13 @@ func (:ar1_reshape_s) ::.solve =
 {
     if( a[0] )
     {
-        opal_holor_s_attach( &result.h, opal_holor_s_create() );
+        result.h =< opal_holor_s!;
 
         m bhvm_holor_s* ha = &a[0].h;
         m bhvm_holor_s* hy = &result.h.h;
         if( bhvm_shape_s_get_volume( &o.shape ) !=  bhvm_shape_s_get_volume( &ha.s ) )
         {
-            st_s_attach( &result.msg, st_s_create() );
+            result.msg =< st_s!;
             st_s_push_fa( result.msg, "Reshaping from volume #<sz_t> to volume #<sz_t>.", bhvm_shape_s_get_volume( &ha.s ), bhvm_shape_s_get_volume( &o.shape ) );
             return false;
         }
@@ -440,8 +443,8 @@ func (:ar1_reshape_s) ::.mcode_push_ap_holor =
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, m );
     d bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s!.setup( arr_ci.i_of_c( 'a' ), idx );
     vop_reshape.shape.copy( o.shape );
-    mcf.track_vop_push_d( TYPEOF_track_ap_setup, vop_reshape );
-    mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_ap_setup~, vop_reshape );
+    mcf.track_vop_push_d( track_ap_shelve~, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
 };
 
@@ -454,8 +457,8 @@ func (:ar1_reshape_s) ::.mcode_push_dp_holor =
     sz_t idx = bhvm_mcode_frame_s_push_hm( mcf, h, m );
     d bhvm_vop_ar1_reshape_s* vop_reshape = bhvm_vop_ar1_reshape_s!.setup( arr_ci.i_of_c( 'f' ), idx );
     vop_reshape.shape.copy( o.shape );
-    mcf.track_vop_push_d( TYPEOF_track_dp_setup, vop_reshape );
-    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_dp_setup~, vop_reshape );
+    mcf.track_vop_push_d( track_dp_shelve~, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
 };
 
@@ -472,8 +475,8 @@ func (:ar2_bmul_s) ::.solve =
     m opal_holor_s** r = result.h;
     r.1 =< ( a[0] && a[1] ) ? opal_holor_s! : NULL;
 
-    void (*f)( const bhvm_holor_s* a, const bhvm_holor_s* b, bhvm_holor_s* r );
-    f = NULL;
+    verbatim_C{ void (*f)( const bhvm_holor_s* a, const bhvm_holor_s* b, bhvm_holor_s* r ); };
+    verbatim_C{ f = NULL; };
 
     if( *r )
     {
@@ -485,7 +488,7 @@ func (:ar2_bmul_s) ::.solve =
         m bhvm_holor_s* ha = lha.h;
         m bhvm_holor_s* hb = lhb.h;
         m bhvm_holor_s* hr = lhr.h;
-        hr.set_type( ha.v.type == TYPEOF_f2_t && hb.v.type == TYPEOF_f2_t ? TYPEOF_f2_t : TYPEOF_f3_t );
+        hr.set_type( ha.v.type == f2_t~ && hb.v.type == f2_t~ ? f2_t~ : f3_t~ );
 
         bl_t a_htp = lha.m.htp;
         bl_t b_htp = lhb.m.htp;
@@ -495,9 +498,9 @@ func (:ar2_bmul_s) ::.solve =
         {
             if( hb.s.size == 0 )
             {
-                result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_s;
-                result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_dp_a_s;
-                result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_dp_b_s;
+                result.type_vop_ap   = bhvm_vop_ar2_mul_s~;
+                result.type_vop_dp_a = bhvm_vop_ar2_mul_dp_a_s~;
+                result.type_vop_dp_b = bhvm_vop_ar2_mul_dp_b_s~;
                 verbatim_C{ f = bhvm_hop_ar2_eci_mul_s_f };
                 hr.s.set_data_na( 0 );
                 r_htp = false;
@@ -506,9 +509,9 @@ func (:ar2_bmul_s) ::.solve =
             {
                 if( b_htp )
                 {
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_eci_mul_s_f };
                     hr.s.set_data_na( 1, hb.s.[ 0 ] );
                     r_htp = true;
@@ -529,9 +532,9 @@ func (:ar2_bmul_s) ::.solve =
             {
                 if( !a_htp )
                 {
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_eci_mul_s_f };
                     hr.s.set_data_na( 1, ha.s.[ 0 ] );
                     r_htp = false;
@@ -546,18 +549,18 @@ func (:ar2_bmul_s) ::.solve =
                 if( a_htp && !b_htp )  // dot product
                 {
                     if( ha.s.[ 0 ] != hb.s.[ 0 ] ) return false;
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_eci_mul_s_f };
                     hr.s.set_data_na( 0 );
                     r_htp = false;
                 }
                 else if( !a_htp && b_htp )  // outer product
                 {
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_vvm_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_vvm_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_vvm_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_vvm_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_vvm_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_vvm_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_mul_vvm_s_f };
                     hr.s.set_data_na( 2, hb.s.[ 0 ], ha.s.[ 0 ] );
                     r_htp = false;
@@ -573,18 +576,18 @@ func (:ar2_bmul_s) ::.solve =
                 if( b_htp )
                 {
                     if( ha.s.[ 0 ] != hb.s.[ 0 ] ) return false;
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_vtv_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_vtv_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_vtv_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_vtv_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_vtv_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_vtv_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_mul_vtv_s_f };
                     hr.s.set_data_na( 1, hb.s.[ 1 ] );
                 }
                 else
                 {
                     if( ha.s.[ 0 ] != hb.s.[ 1 ] ) return false;
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_vmv_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_vmv_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_vmv_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_vmv_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_vmv_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_vmv_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_mul_vmv_s_f };
                     hr.s.set_data_na( 1, hb.s.[ 0 ] );
                 }
@@ -607,18 +610,18 @@ func (:ar2_bmul_s) ::.solve =
                 if( a_htp )
                 {
                     if( ha.s.[ 1 ] != hb.s.[ 0 ] ) return false;
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_tvv_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_tvv_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_tvv_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_tvv_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_tvv_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_tvv_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_mul_tvv_s_f };
                     hr.s.set_data_na( 1, ha.s.[ 0 ] );
                 }
                 else
                 {
                     if( ha.s.[ 0 ] != hb.s.[ 0 ] ) return false;
-                    result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_mvv_s;
-                    result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_mvv_dp_a_s;
-                    result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_mvv_dp_b_s;
+                    result.type_vop_ap   = bhvm_vop_ar2_mul_mvv_s~;
+                    result.type_vop_dp_a = bhvm_vop_ar2_mul_mvv_dp_a_s~;
+                    result.type_vop_dp_b = bhvm_vop_ar2_mul_mvv_dp_b_s~;
                     verbatim_C{ f = bhvm_hop_ar2_mul_mvv_s_f };
                     hr.s.set_data_na( 1, ha.s.[ 1 ] );
                 }
@@ -631,18 +634,18 @@ func (:ar2_bmul_s) ::.solve =
                     if( b_htp )
                     {
                         if( ha.s.[ 1 ] != hb.s.[ 0 ] ) return false;
-                        result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_ttm_s;
-                        result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_ttm_dp_a_s;
-                        result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_ttm_dp_b_s;
+                        result.type_vop_ap   = bhvm_vop_ar2_mul_ttm_s~;
+                        result.type_vop_dp_a = bhvm_vop_ar2_mul_ttm_dp_a_s~;
+                        result.type_vop_dp_b = bhvm_vop_ar2_mul_ttm_dp_b_s~;
                         verbatim_C{ f = bhvm_hop_ar2_mul_ttm_s_f };
                         hr.s.set_data_na( 2, hb.s.[ 1 ], ha.s.[ 0 ] );
                     }
                     else
                     {
                         if( ha.s.[ 1 ] != hb.s.[ 1 ] ) return false;
-                        result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_tmm_s;
-                        result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_tmm_dp_a_s;
-                        result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_tmm_dp_b_s;
+                        result.type_vop_ap   = bhvm_vop_ar2_mul_tmm_s~;
+                        result.type_vop_dp_a = bhvm_vop_ar2_mul_tmm_dp_a_s~;
+                        result.type_vop_dp_b = bhvm_vop_ar2_mul_tmm_dp_b_s~;
                         verbatim_C{ f = bhvm_hop_ar2_mul_tmm_s_f };
                         hr.s.set_data_na( 2, hb.s.[ 0 ], ha.s.[ 0 ] );
                     }
@@ -653,18 +656,18 @@ func (:ar2_bmul_s) ::.solve =
                     if( b_htp )
                     {
                         if( ha.s.[ 0 ] != hb.s.[ 0 ] ) return false;
-                        result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_mtm_s;
-                        result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_mtm_dp_a_s;
-                        result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_mtm_dp_b_s;
+                        result.type_vop_ap   = bhvm_vop_ar2_mul_mtm_s~;
+                        result.type_vop_dp_a = bhvm_vop_ar2_mul_mtm_dp_a_s~;
+                        result.type_vop_dp_b = bhvm_vop_ar2_mul_mtm_dp_b_s~;
                         verbatim_C{ f = bhvm_hop_ar2_mul_mtm_s_f };
                         hr.s.set_data_na( 2, hb.s.[ 1 ], ha.s.[ 1 ] );
                     }
                     else
                     {
                         if( ha.s.[ 0 ] != hb.s.[ 1 ] ) return false;
-                        result.type_vop_ap   = TYPEOF_bhvm_vop_ar2_mul_mmm_s;
-                        result.type_vop_dp_a = TYPEOF_bhvm_vop_ar2_mul_mmm_dp_a_s;
-                        result.type_vop_dp_b = TYPEOF_bhvm_vop_ar2_mul_mmm_dp_b_s;
+                        result.type_vop_ap   = bhvm_vop_ar2_mul_mmm_s~;
+                        result.type_vop_dp_a = bhvm_vop_ar2_mul_mmm_dp_a_s~;
+                        result.type_vop_dp_b = bhvm_vop_ar2_mul_mmm_dp_b_s~;
                         verbatim_C{ f = bhvm_hop_ar2_mul_mmm_s_f };
                         hr.s.set_data_na( 2, hb.s.[ 0 ], ha.s.[ 1 ] );
                     }
@@ -685,9 +688,9 @@ func (:ar2_bmul_s) ::.solve =
 
         if( ( ha.v.size > 0 ) && ( hb.v.size > 0 ) )
         {
-            ASSERT( f );
+            verbatim_C{ ASSERT( f ); };
             hr.fit_size();
-            f( ha, hb, hr );
+            verbatim_C{ f( ha, hb, hr ); };
         }
     }
 
@@ -773,7 +776,7 @@ func (:ar2_order_inc_s) ::.mcode_push_ap_track =
     d bhvm_vop* vop = result.attached.clone();
     vop.set_index( 0, arr_ci.i_of_c( 'b' ) );  // default signature 'ay' would be incorrect in this case
     vop.set_index( 1, arr_ci.i_of_c( 'y' ) );
-    mcf.track_vop_push_d( TYPEOF_track_ap, vop );
+    mcf.track_vop_push_d( track_ap~, vop );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -830,8 +833,8 @@ func (:ar2_order_dec_s) ::.mcode_push_ap_holor =
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = mcf.push_hm( h, m );
     d bhvm_vop_ar1_order_dec_weak_s* weak = result.attached.cast( m bhvm_vop_ar1_order_dec_weak_s* ).clone();
-    mcf.track_vop_push_d( TYPEOF_track_ap_setup, weak.setup( arr_ci.i_of_c( 'a' ), idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_ap_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_ap_setup~, weak.setup( arr_ci.i_of_c( 'a' ), idx ) );
+    mcf.track_vop_push_d( track_ap_shelve~, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
 };
 
@@ -843,8 +846,8 @@ func (:ar2_order_dec_s) ::.mcode_push_dp_holor =
     m opal_holor_meta_s* m = result.h.m;
     sz_t idx = mcf.push_hm( h, m );
     d bhvm_vop_ar1_order_dec_weak_s* weak = result.attached.cast( m bhvm_vop_ar1_order_dec_weak_s* ).clone();
-    mcf.track_vop_push_d( TYPEOF_track_dp_setup, weak.setup( arr_ci.i_of_c( 'f' ), idx ) );
-    mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s!.setup( idx ) );
+    mcf.track_vop_push_d( track_dp_setup~, weak.setup( arr_ci.i_of_c( 'f' ), idx ) );
+    mcf.track_vop_push_d( track_dp_shelve~, bhvm_vop_ar0_vacate_s!.setup( idx ) );
     return idx;
 };
 
@@ -914,7 +917,7 @@ func (:ar2_cyclic_s) ::.solve_node =
 
     if( deferred )
     {
-        deferred.push_d( bcore_fork( node ) );
+        deferred.push_d( node.fork() );
     }
     else
     {
@@ -982,7 +985,7 @@ func (:ar2_rands_s) ::.solve =
 
 func (:ar2_rands_s) ::.settle =
 {
-    ASSERT( result.attached?._ == TYPEOF_opal_nop_ar0_rand_s );
+    ASSERT( result.attached?._ == opal_nop_ar0_rand_s~ );
     m opal_nop_ar0_rand_s* nop_rand = result.attached.cast( m opal_nop_ar0_rand_s* );
     out_nop.1 =< nop_rand.fork();
     d opal_nop_solve_result_s* r = opal_nop_solve_result_s!;

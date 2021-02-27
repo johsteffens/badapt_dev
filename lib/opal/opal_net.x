@@ -253,15 +253,15 @@ group :builder = :
         hidden bhvm_holor_adl_s input_holors;
         hidden aware bcore_sink -> log;
 
-        func :.fork_log = { o->log =< bcore_fork( log ); };
+        func :.fork_log = { o->log =< log.fork(); };
 
         func :.fork_input_holors =
         {
             o.input_holors.set_size( size_input_holors );
-            BFOR_EACH( i, &o->input_holors )
+            for( sz_t i = 0; i < o.input_holors.size; i++ )
             {
                 ASSERT( input_holors[ i ] );
-                o->input_holors.[ i ] =< bcore_fork( ( bhvm_holor_s* )input_holors[ i ] );
+                o->input_holors.[ i ] =< input_holors[ i ].cast( m $* ).fork();
             }
         };
 
@@ -385,7 +385,7 @@ func( :node_s) (void skip_identities( m @* o )) =
     foreach( m $* e in o.upls )
     {
         m $* node = e.node;
-        while( node && node.nop && node.nop._ == TYPEOF_opal_nop_ar1_identity_s ) node = node.upls.[ 0 ].node;
+        while( node && node.nop && node.nop._ == opal_nop_ar1_identity_s~ ) node = node.upls.[ 0 ].node;
         ASSERT( e.node = node );
         node.skip_identities();
     }
@@ -445,7 +445,7 @@ func (:cell_s) :.normalize =
     }
 
     // fork references
-    for( sz_t i = 0; i < arr.size; i++ ) arr.[ i ] = bcore_fork( arr.[ i ] );
+    for( sz_t i = 0; i < arr.size; i++ ) arr.[ i ] = arr.[ i ].cast( m x_inst* ).fork();
 
     // new body
     o.body.set_size( 0 );
@@ -562,7 +562,7 @@ func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
         {
             node.source_point.parse_msg_to_sink_fa
             (
-                BCORE_STDERR,
+                x_inst_stderr(),
                 "Warning: Entry channel [#<sz_t>] '#<sc_t>' has no effect.",
                 __i,
                 node.context.ifnameof( node.name )
@@ -683,7 +683,7 @@ func (:cell_s)
                  *  branch target based on the condition value.
                  *  Otherwise the branch code is left intact.
                  */
-                if( net_node_up.nop._ == TYPEOF_opal_nop_ar3_iff_s )
+                if( net_node_up.nop._ == opal_nop_ar3_iff_s~ )
                 {
                     if( log ) log.push_fa( "Branch channel 0:\n" );
                     o.from_sem_recursive( cell.encs.[ 0 ], sem_tree, sem_tree_node, net_node_up, depth, log );
@@ -945,6 +945,7 @@ func (:node_s) :.mcode_push_ap =
         o.mnode.param    = o.nop.is_param();
         o.mnode.cyclic   = o.nop.is_cyclic();
         o.mnode.adaptive = o.nop.is_adaptive();
+        o.mnode.sem_id   = o.sem_id.fork();
     }
 
     foreach( m :link_s* link in o.upls )
@@ -961,9 +962,8 @@ func (:node_s) :.mcode_push_ap =
     {
         m opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( m opal_holor_meta_s* );
         if( !hmeta.name   ) hmeta.name = o.name;
-        if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
 
-        hmeta.pclass = TYPEOF_pclass_ax0;
+        hmeta.pclass = pclass_ax0~;
         hmeta.mnode =< o.mnode.fork();
     }
 };
@@ -981,13 +981,13 @@ func (:node_s) :.isolated_mcode_push =
         o.mnode.param    = o.nop.is_param();
         o.mnode.cyclic   = o.nop.is_cyclic();
         o.mnode.adaptive = o.nop.is_adaptive();
+        o.mnode.sem_id   = o.sem_id.fork();
     }
 
     o.mnode.ax0 = o.nop.mcode_push_ap_holor( o.result, NULL, mcf );
     m opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ax0 ].cast( m opal_holor_meta_s* );
     if( !hmeta.name ) hmeta.name = o.name;
-    if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
-    hmeta.pclass = TYPEOF_pclass_ax0;
+    hmeta.pclass = pclass_ax0~;
     hmeta.mnode =< o.mnode.fork();
 };
 
@@ -1007,6 +1007,7 @@ func (:node_s) :.cyclic_mcode_push_ap_phase0 =
         o.mnode.param    = o.nop.is_param();
         o.mnode.cyclic   = true;
         o.mnode.adaptive = o.nop.is_adaptive();
+        o.mnode.sem_id   = o.sem_id.fork();
         o.mnode.ax0 = o.nop.mcode_push_ap_holor( o.result, NULL, mcf );
         o.mnode.ax1 = o.nop.mcode_push_ap_holor( o.result, NULL, mcf );
 
@@ -1014,21 +1015,19 @@ func (:node_s) :.cyclic_mcode_push_ap_phase0 =
         m opal_holor_meta_s* hmeta1 = mcf.hbase.hmeta_adl.[ o.mnode.ax1 ].cast( m opal_holor_meta_s* );
 
         if( !hmeta0.name   ) hmeta0.name = o.name;
-        if( !hmeta0.sem_id ) hmeta0.sem_id = o.sem_id.fork();
         if( !hmeta1.name   ) hmeta1.name = o.name;
-        if( !hmeta1.sem_id ) hmeta1.sem_id = o.sem_id.fork();
 
-        hmeta0.pclass = TYPEOF_pclass_ax0;
-        hmeta1.pclass = TYPEOF_pclass_ax1;
+        hmeta0.pclass = pclass_ax0~;
+        hmeta1.pclass = pclass_ax1~;
         hmeta0.mnode =< o.mnode.fork();
         hmeta1.mnode =< o.mnode.fork();
 
         m opal_net_node_s* node = o.upls.[ 0 ].node;
         node.mcode_push_ap( mcf );
 
-        mcf.track_vop_push_d( TYPEOF_track_ap_setup,         bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
-        mcf.track_vop_push_d( TYPEOF_track_ap_cyclic_reset,  bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
-        mcf.track_vop_push_d( TYPEOF_track_ap_cyclic_update, bhvm_vop_ar1_cpy_s!.setup(    o.mnode.ax1, o.mnode.ax0 ) );
+        mcf.track_vop_push_d( track_ap_setup~,         bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
+        mcf.track_vop_push_d( track_ap_cyclic_reset~,  bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
+        mcf.track_vop_push_d( track_ap_cyclic_update~, bhvm_vop_ar1_cpy_s!.setup(    o.mnode.ax1, o.mnode.ax0 ) );
     }
 };
 
@@ -1047,7 +1046,7 @@ func (:node_s) :.cyclic_mcode_push_ap_phase1 =
         o.flag = true;
         m opal_net_node_s* node = o.upls.[ 1 ].node;
         node.mcode_push_ap( mcf );
-        mcf.track_vop_push_d( TYPEOF_track_ap, bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
+        mcf.track_vop_push_d( track_ap~, bhvm_vop_ar1_cpy_s!.setup( node.mnode.ax0, o.mnode.ax1 ) );
     }
 };
 
@@ -1100,8 +1099,7 @@ func (:node_s) :.mcode_push_dp =
 
             m opal_holor_meta_s* hmeta = mcf.hbase.hmeta_adl.[ o.mnode.ag0 ].cast( m opal_holor_meta_s* );
             if( !hmeta.name ) hmeta.name = o.name;
-            if( !hmeta.sem_id ) hmeta.sem_id = o.sem_id.fork();
-            hmeta.pclass = TYPEOF_pclass_ag0;
+            hmeta.pclass = pclass_ag0~;
             hmeta.mnode =< o.mnode.fork();
         }
     }
@@ -1128,15 +1126,14 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
         mutable opal_holor_meta_s* m = o.result.h.m.clone()^;
 
         if( !m.name ) m.name = o.name;
-        if( !m.sem_id ) m.sem_id = o.sem_id.fork();
 
-        m.pclass = TYPEOF_pclass_ag0;
+        m.pclass = pclass_ag0~;
         m.mnode =< o.mnode.fork();
 
         sz_t idx = mcf.push_hm( h, m );
-        mcf.track_vop_push_d( TYPEOF_track_dp_setup,            bhvm_vop_ar0_determine_s!.setup( idx ) );
-        mcf.track_vop_push_d( TYPEOF_track_dp_shelve,           bhvm_vop_ar0_vacate_s   !.setup( idx ) );
-        mcf.track_vop_push_d( TYPEOF_track_dp_cyclic_zero_grad, bhvm_vop_ar0_zro_s      !.setup( idx ) );
+        mcf.track_vop_push_d( track_dp_setup~,            bhvm_vop_ar0_determine_s!.setup( idx ) );
+        mcf.track_vop_push_d( track_dp_shelve~,           bhvm_vop_ar0_vacate_s   !.setup( idx ) );
+        mcf.track_vop_push_d( track_dp_cyclic_zero_grad~, bhvm_vop_ar0_zro_s      !.setup( idx ) );
         o.mnode.ag0 = idx;
 
         // build this gradient from all downlinks ...
@@ -1151,7 +1148,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
     if( up_index == 1 )
     {
         m opal_net_node_s* node1 = o.upls.[ 1 ].node;
-        mcf.track_vop_push_d( TYPEOF_track_dp, bhvm_vop_ar1_acc_s!.setup( o.mnode.ag0, node1.mnode.ag1 >= 0 ? node1.mnode.ag1 : node1.mnode.ag0 ) );
+        mcf.track_vop_push_d( track_dp~, bhvm_vop_ar1_acc_s!.setup( o.mnode.ag0, node1.mnode.ag1 >= 0 ? node1.mnode.ag1 : node1.mnode.ag0 ) );
     }
 };
 
@@ -1168,13 +1165,12 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
         mutable bhvm_holor_s* h = bhvm_holor_s!^^.copy_shape_type( o.result.h.h );
         mutable opal_holor_meta_s* m = o.result.h.m.clone()^;
         if( !m.name ) m.name = o.name;
-        if( !m.sem_id ) m.sem_id = o.sem_id.fork();
-        m.pclass = TYPEOF_pclass_ag1;
+        m.pclass = pclass_ag1~;
         m.mnode =< o.mnode.fork();
         sz_t idx = mcf.push_hm( h, m );
-        mcf.track_vop_push_d( TYPEOF_track_dp_setup,  bhvm_vop_ar0_determine_s!.setup( idx ) );
-        mcf.track_vop_push_d( TYPEOF_track_dp_shelve, bhvm_vop_ar0_vacate_s   !.setup( idx ) );
-        mcf.track_vop_push_d( TYPEOF_track_dp,        bhvm_vop_ar0_zro_s      !.setup( idx ) );
+        mcf.track_vop_push_d( track_dp_setup~,  bhvm_vop_ar0_determine_s!.setup( idx ) );
+        mcf.track_vop_push_d( track_dp_shelve~, bhvm_vop_ar0_vacate_s   !.setup( idx ) );
+        mcf.track_vop_push_d( track_dp~,        bhvm_vop_ar0_zro_s      !.setup( idx ) );
         o.mnode.ag1 = idx;
     }
 
@@ -1194,7 +1190,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase2 =
     if( !o.nop ) ERR_fa( "Operator is missing." );
     if( !o.result ) ERR_fa( "Result is missing." );
     ASSERT( o.nop.is_cyclic() );
-    mcf.track_vop_push_d( TYPEOF_track_dp, bhvm_vop_ar1_cpy_s!.setup( o.mnode.ag1, o.mnode.ag0 ) );
+    mcf.track_vop_push_d( track_dp~, bhvm_vop_ar1_cpy_s!.setup( o.mnode.ag1, o.mnode.ag0 ) );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1261,7 +1257,7 @@ func (:builder_s) ::.create_input_nop =
 
     c bhvm_holor_s* h_in = o.input_holors.[ in_idx ];
 
-    if( cur_nop && cur_nop._ == TYPEOF_opal_nop_ar0_param_s )
+    if( cur_nop && cur_nop._ == opal_nop_ar0_param_s~ )
     {
         c bhvm_holor_s* h_cur = cur_nop.cast( m opal_nop_ar0_param_s* ).h.h;
         if( !h_in )

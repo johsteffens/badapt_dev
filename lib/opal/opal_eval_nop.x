@@ -19,7 +19,7 @@
 
 signature void resolve( c @* o );
 
-stamp :result_s = aware bcore_inst
+stamp :result_s = aware x_inst
 {
     sz_t total_tests = 0;
     sz_t solvable_tests = 0;
@@ -33,17 +33,17 @@ stamp :result_s = aware bcore_inst
         if( !o ) return;
         if( o.error )
         {
-            bcore_sink_a_push_fa( BCORE_STDERR, "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_inst_stderr(), "#<sc_t>\n", o.msg.sc );
         }
         else if( o.msg.size > 0 )
         {
-            bcore_sink_a_push_fa( BCORE_STDOUT, "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_inst_stdout(), "#<sc_t>\n", o.msg.sc );
         }
         if( o.total_tests > 0 )
         {
-            bcore_sink_a_push_fa( BCORE_STDOUT, "Total tests ...... #<sz_t>\n", o.total_tests );
-            bcore_sink_a_push_fa( BCORE_STDOUT, "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
-            bcore_sink_a_push_fa( BCORE_STDOUT, "Tolerated errors . #<sz_t>\n", o.tolerated_errors );
+            bcore_sink_a_push_fa( x_inst_stdout(), "Total tests ...... #<sz_t>\n", o.total_tests );
+            bcore_sink_a_push_fa( x_inst_stdout(), "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
+            bcore_sink_a_push_fa( x_inst_stdout(), "Tolerated errors . #<sz_t>\n", o.tolerated_errors );
         }
     };
 };
@@ -52,7 +52,7 @@ stamp :result_s = aware bcore_inst
 
 signature void set( m @* o, c :param_s* src );
 
-stamp :param_s = aware bcore_inst
+stamp :param_s = aware x_inst
 {
     aware opal_nop => nop;
     opal_holor_s => ha;
@@ -63,13 +63,13 @@ stamp :param_s = aware bcore_inst
     sz_t verbosity = 1;
     aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
 
-    func bcore_inst_call . init_x = { o.log = bcore_fork( BCORE_STDOUT ); };
+    func bcore_inst_call . init_x = { o.log = x_inst_stdout().fork(); };
 
     func :.set =
     {
         o.verbosity = sz_max( o.verbosity, src.verbosity );
         o.prsg.set_state_mix( o.prsg, src.prsg );
-        o.log =< bcore_fork( src.log );
+        o.log =< src.log.fork();
         if( !o.ha  ) o.ha  = src.ha.clone();
         if( !o.hb  ) o.hb  = src.hb.clone();
         if( !o.hc  ) o.hc  = src.hc.clone();
@@ -123,7 +123,7 @@ stamp :generator_s = extending :std_s
 
 stamp :show_param_s = extending :std_s
 {
-    func :.run = { bcore_txt_ml_a_to_sink( &o.param, o.param.log ); return result; };
+    func :.run = { o.param.to_sink_txt_ml( o.param.log ); return result; };
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ func (:generator_s) (void randomize_holor( c @* o, m opal_holor_s* h, m bcore_pr
 
     if( o.set_v_type )
     {
-        tp_t type = ( prsg.gen_f3( 0, 1 ) > 0.5 ) ? TYPEOF_f2_t : TYPEOF_f3_t;
+        tp_t type = ( prsg.gen_f3( 0, 1 ) > 0.5 ) ? f2_t~ : f3_t~;
         h.h.v.set_type( type );
     }
 
@@ -367,9 +367,9 @@ func (:ar1_s) :.run =
 
         bhvm_hop_ar0_zro_s_f( out );
 
-        frame.track_run( TYPEOF_track_ap_setup );
-        frame.track_run( TYPEOF_track_dp_setup );
-        frame.track_run( TYPEOF_track_ap );
+        frame.track_run( track_ap_setup~ );
+        frame.track_run( track_dp_setup~ );
+        frame.track_run( track_ap~ );
 
         bhvm_hop_ar0_zro_s_f( gina );
 
@@ -383,7 +383,7 @@ func (:ar1_s) :.run =
         bhvm_hop_ar2_eci_sub_s_f( out, fin, gout );
         scl.set_scalar_f3( 2.0 );
         bhvm_hop_ar2_eci_mul_s_f( gout, scl, gout );
-        frame.track_run( TYPEOF_track_dp );
+        frame.track_run( track_dp~ );
 
         if( !out.is_equal( r.h ) )
         {
@@ -417,7 +417,7 @@ func (:ar1_s) :.run =
                 f3_t g0 = gin.v.get_f3( i );  // dp grad
 
                 in.v.set_f3( i, v0 + in_eps );
-                frame.track_run( TYPEOF_track_ap );
+                frame.track_run( track_ap~ );
 
                 bhvm_hop_ar1_sqrsum_s_f( out, scl );
                 f3_t o0 = scl.v.get_f3( 0 );
@@ -593,9 +593,9 @@ func (:ar2_s) :.run =
 
         bhvm_hop_ar0_zro_s_f( out );
 
-        frame.track_run( TYPEOF_track_ap_setup );
-        frame.track_run( TYPEOF_track_dp_setup );
-        frame.track_run( TYPEOF_track_ap );
+        frame.track_run( track_ap_setup~ );
+        frame.track_run( track_dp_setup~ );
+        frame.track_run( track_ap~ );
 
         bhvm_hop_ar0_zro_s_f( gina );
         bhvm_hop_ar0_zro_s_f( ginb );
@@ -610,7 +610,7 @@ func (:ar2_s) :.run =
         bhvm_hop_ar2_eci_sub_s_f( out, fin, gout );
         scl.set_scalar_f3( 2.0 );
         bhvm_hop_ar2_eci_mul_s_f( gout, scl, gout );
-        frame.track_run( TYPEOF_track_dp );
+        frame.track_run( track_dp~ );
 
         if( !out.is_equal( r.h ) )
         {
@@ -646,7 +646,7 @@ func (:ar2_s) :.run =
                 f3_t g0 = gin.v.get_f3( i );  // dp grad
 
                 in.v.set_f3( i, v0 + in_eps );
-                frame.track_run( TYPEOF_track_ap );
+                frame.track_run( track_ap~ );
 
                 bhvm_hop_ar1_sqrsum_s_f( out, scl );
                 f3_t o0 = scl.v.get_f3( 0 );
