@@ -62,6 +62,8 @@ stamp :meta_s = aware bhvm_mcode_hmeta
     func bhvm_mcode_hmeta.set_node = { o.mnode =< node.fork(); };
 };
 
+stamp :meta_adl_s = x_array { :meta_s => []; };
+
 stamp :s = aware :
 {
     :meta_s      m;

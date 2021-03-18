@@ -2,6 +2,7 @@
 *.xml
 *.xo.h
 *.xo.c
+*.xo.state
 badapt_dev.*
 build/badapt_dev
 *.state

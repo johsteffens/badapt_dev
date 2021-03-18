@@ -20,7 +20,6 @@
 func x_inst.main =
 {
     bcore_main_frame_s^ main_frame;
-    main_frame.first_argument_is_path_to_config = true;
     er_t retv = main_frame.exec( args );
     if( retv ) bcore_error_pop_to_stderr();
     return retv;

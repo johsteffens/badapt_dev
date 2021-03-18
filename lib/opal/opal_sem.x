@@ -170,8 +170,8 @@ group :id = :
     signature void push_child(  m @* o, tp_t tp );
     signature void push_parent( m @* o, tp_t tp );
     signature void to_string(   c @* o, c opal_context* context, m st_s* s );
-    signature    o parse( m @* o, mutable bcore_source* source );
-    signature    o parse_sc( m @* o, sc_t sc );
+    signature er_t parse( m @* o, mutable bcore_source* source );
+    signature er_t parse_sc( m @* o, sc_t sc );
 
     /// for use in other objects
     signature void get_sem_id( c @* o, m :s* sem_id );
@@ -194,17 +194,17 @@ group :id = :
             }
         };
 
-        func :.parse =
+        func :.parse = (try)
         {
             o.clear();
-            while( !source.eos() )
+            while( source.parse_bl( "#?(([0]>='A'&&[0]<='Z')||([0]>='a'&&[0]<='z')||([0]>='0'&&[0]<='9')||([0]=='.'))" ) )
             {
-                if( o.arr.size > 0 ) source.parse_fa( "." );
+                if( o.arr.size > 0 ) source.parse_em_fa( "." );
                 st_s^ name;
-                source.parse_fa( "#name", name.1 );
+                source.parse_em_fa( "#name", name.1 );
                 o.push_tp( btypeof( name.sc ) );
             }
-            return o;
+            return 0;
         };
 
         func :.parse_sc = { return o.parse( bcore_source_string_s_create_sc( sc )^ ); };
