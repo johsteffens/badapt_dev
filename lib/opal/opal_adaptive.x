@@ -42,6 +42,9 @@ stamp :s = aware bhpt_adaptive
     func bhpt_adaptive.status_to_sink;
 
     // ==============================================================
+
+    // === shell functions ==========================================
+
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -198,6 +201,35 @@ func (:builder_s) bhpt_builder.create_adaptive =
 
     return adaptive;
 };
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+//func (:s) shell_help =
+//{
+//    helper.push( "status [verbosity]", "Outputs status of current adaptive. verbosity = 0 ... 10" );
+//    o.cast( bcore_main* ).shell_help_default( helper );
+//};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+//func (:s) shell =
+//{
+//    if( source.parse_bl( "#?w'status'" ) )
+//    {
+//        source.parse_fa( "#skip' '" );
+//        sz_t verbosity = 10;
+//        if( source.parse_bl( "#?([0]>='0'&&[0]<='9')" ) ) source.parse_fa( "#<sz_t*>", &verbosity );
+//        o.status_to_sink( verbosity, sink );
+//        return true;
+//    }
+//
+//    if( o.cast( m bcore_main* ).shell_default( frame, source, sink, control ) )
+//    {
+//        return true;
+//    }
+//
+//    return false;
+//};
 
 // ---------------------------------------------------------------------------------------------------------------------
 

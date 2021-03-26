@@ -630,9 +630,13 @@ func (:context_s) :.setup =
 {
     m bcore_arr_tp_s* arr_tp = bcore_arr_tp_s!^;
 
-    bcore_push_traits_of_ancestor( opal_nop_ar1~, arr_tp );
-    bcore_push_traits_of_ancestor( opal_nop_ar2~, arr_tp );
-    bcore_push_traits_of_ancestor( opal_nop_ar3~, arr_tp );
+    arr_tp.push_arr( x_group_get_arr_traitline_stamps( opal_nop_ar1~ ) );
+    arr_tp.push_arr( x_group_get_arr_traitline_stamps( opal_nop_ar2~ ) );
+    arr_tp.push_arr( x_group_get_arr_traitline_stamps( opal_nop_ar3~ ) );
+
+//    bcore_push_traits_of_ancestor( opal_nop_ar1~, arr_tp );
+//    bcore_push_traits_of_ancestor( opal_nop_ar2~, arr_tp );
+//    bcore_push_traits_of_ancestor( opal_nop_ar3~, arr_tp );
 
     for( sz_t i = 0; i < arr_tp.size; i++ )
     {
