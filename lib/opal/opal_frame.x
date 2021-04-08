@@ -857,6 +857,32 @@ func (:s) :.run_dendrite_pass_adl =
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
+/// shell
+
+func (:s) bcore_shell.op_group = { return :op~; };
+group :op = retrievable
+{
+    stamp :source_s =
+    {
+        func bcore_shell_op.key = { return "source"; };
+        func bcore_shell_op.info = { return "Outputs source code of current adaptive."; };
+        func bcore_shell_op.run = { obj.cast(::s*).source_code_to_sink( sink ); };
+    };
+
+    stamp :hbase_s =
+    {
+        func bcore_shell_op.key = { return "hbase"; };
+        func bcore_shell_op.info = { return "Outputs holor-base of mcode-frame."; };
+        func bcore_shell_op.run =
+        {
+            $* frame = obj.cast(::s*);
+            frame.disassemble_hbase_to_sink( frame.mcf.hbase, 0, sink );
+        };
+    };
+
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 /**********************************************************************************************************************/
 

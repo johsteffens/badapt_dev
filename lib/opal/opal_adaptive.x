@@ -40,10 +40,9 @@ stamp :s = aware bhpt_adaptive
     func bhpt_adaptive.rebind_holors = { o.frame.bind_holors(); };
     func bhpt_adaptive.get_adaptor_probe;
     func bhpt_adaptive.status_to_sink;
+    func (void source_to_sink( @*o, m bcore_sink* sink )) = { o.frame.source_code_to_sink( sink ); };
 
     // ==============================================================
-
-    // === shell functions ==========================================
 
 };
 
@@ -212,7 +211,7 @@ group :op = retrievable
     {
         sz_t verbosity = 10;
         func bcore_shell_op.key = { return "status"; };
-        func bcore_shell_op.info = { return "outputs status of current adaptive; verbosity: 0 ... 10"; };
+        func bcore_shell_op.info = { return "Outputs status of current adaptive. Verbosity: 0 ... 10"; };
         func bcore_shell_op.run = { obj.cast(::s*).status_to_sink( o.verbosity, sink ); };
     };
 };
