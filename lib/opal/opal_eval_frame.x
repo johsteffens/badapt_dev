@@ -112,7 +112,7 @@ stump :std_s = aware :
 
 stamp :show_param_s = extending :std_s
 {
-    func : .run = { o.param.to_sink_txt_ml( o.param.log ); return result; };
+    func : .run = { o.param.cast( x_btml* ).to_sink( o.param.log ); return result; };
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
