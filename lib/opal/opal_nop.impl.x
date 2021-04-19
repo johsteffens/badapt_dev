@@ -96,7 +96,7 @@ func :.solve_default =
         result.type_vop_ap = o.defines_type_vop_ap() ? o.type_vop_ap() : 0;
         assert( result.type_vop_ap );
 
-        bhvm_vop_a_run( bhvm_vop_t_create( result.type_vop_ap )^^.set_args( arr_ci ), hbase.holor_adl.data );
+        bhvm_vop_a_run( bhvm_vop_t_create( result.type_vop_ap ).t_scope( result.type_vop_ap, scope_local ).set_args( arr_ci ), hbase.holor_adl.data );
     }
 
     result.can_settle = can_settle;
