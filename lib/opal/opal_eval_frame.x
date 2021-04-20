@@ -32,11 +32,11 @@ stamp :result_s = aware x_inst
         if( !o ) return;
         if( o.error )
         {
-            bcore_sink_a_push_fa( x_inst_stderr(), "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_sink_stderr(), "#<sc_t>\n", o.msg.sc );
         }
         else if( o.msg.size > 0 )
         {
-            bcore_sink_a_push_fa( x_inst_stdout(), "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_sink_stdout(), "#<sc_t>\n", o.msg.sc );
         }
     };
 };
@@ -66,7 +66,7 @@ stamp :param_s = aware x_inst
     f3_t max_dev = 1E-5;   // if output deviation exceeds this value, an error is generated
     f3_t epsilon = 1E-5;   // for Jacobian estimation
 
-    func bcore_inst_call . init_x = { o.log = x_inst_stdout().fork(); };
+    func bcore_inst_call . init_x = { o.log = x_sink_stdout().fork(); };
 
     func :.set =
     {

@@ -562,7 +562,7 @@ func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
         {
             node.source_point.parse_msg_to_sink_fa
             (
-                x_inst_stderr(),
+                x_sink_stderr(),
                 "Warning: Entry channel [#<sz_t>] '#<sc_t>' has no effect.",
                 __i,
                 node.context.ifnameof( node.name )

@@ -33,17 +33,17 @@ stamp :result_s = aware x_inst
         if( !o ) return;
         if( o.error )
         {
-            bcore_sink_a_push_fa( x_inst_stderr(), "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_sink_stderr(), "#<sc_t>\n", o.msg.sc );
         }
         else if( o.msg.size > 0 )
         {
-            bcore_sink_a_push_fa( x_inst_stdout(), "#<sc_t>\n", o.msg.sc );
+            bcore_sink_a_push_fa( x_sink_stdout(), "#<sc_t>\n", o.msg.sc );
         }
         if( o.total_tests > 0 )
         {
-            bcore_sink_a_push_fa( x_inst_stdout(), "Total tests ...... #<sz_t>\n", o.total_tests );
-            bcore_sink_a_push_fa( x_inst_stdout(), "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
-            bcore_sink_a_push_fa( x_inst_stdout(), "Tolerated errors . #<sz_t>\n", o.tolerated_errors );
+            bcore_sink_a_push_fa( x_sink_stdout(), "Total tests ...... #<sz_t>\n", o.total_tests );
+            bcore_sink_a_push_fa( x_sink_stdout(), "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
+            bcore_sink_a_push_fa( x_sink_stdout(), "Tolerated errors . #<sz_t>\n", o.tolerated_errors );
         }
     };
 };
@@ -63,7 +63,7 @@ stamp :param_s = aware x_inst
     sz_t verbosity = 1;
     aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
 
-    func bcore_inst_call . init_x = { o.log = x_inst_stdout().fork(); };
+    func bcore_inst_call . init_x = { o.log = x_sink_stdout().fork(); };
 
     func :.set =
     {

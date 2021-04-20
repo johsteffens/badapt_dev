@@ -84,10 +84,10 @@ stamp :s = aware :
         sink.push_fa( "\n" );
     };
 
-    func (void to_stdout( c @* o )) = { o.to_sink( x_inst_stdout() ); };
+    func (void to_stdout( c @* o )) = { o.to_sink( x_sink_stdout() ); };
 
     // appends newline
-    func (void to_stdout_nl( c @* o )) = { o.to_sink_nl( x_inst_stdout() ); };
+    func (void to_stdout_nl( c @* o )) = { o.to_sink_nl( x_sink_stdout() ); };
 
     /** compacted version, single line */
     func (void brief_to_sink( c @* o, m bcore_sink* sink )) =
@@ -97,7 +97,7 @@ stamp :s = aware :
         o.h.brief_to_sink( sink );
     };
 
-    func (void brief_to_stdout( c @* o )) = { o.brief_to_sink( x_inst_stdout() ); };
+    func (void brief_to_stdout( c @* o )) = { o.brief_to_sink( x_sink_stdout() ); };
 
     /** multiline version */
     func (void formatted_to_sink( c @* o, m bcore_sink* sink )) =
@@ -108,7 +108,7 @@ stamp :s = aware :
         if( o.m.htp ) sink.push_fa( ")" );
     };
 
-    func (void formatted_to_stdout( c @* o )) = { o.formatted_to_sink( x_inst_stdout() ); };
+    func (void formatted_to_stdout( c @* o )) = { o.formatted_to_sink( x_sink_stdout() ); };
 
     /// sets holor from text source
     func :.parse;
@@ -164,7 +164,7 @@ func (:s) bcore_fp.copy_typed =
 
 func (:s) :.parse =
 {
-     o.m.clear();
+    o.m.clear();
 
     if( source.parse_bl( " #?'<const>'" ) )
     {
