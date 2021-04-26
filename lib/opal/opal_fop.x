@@ -20,7 +20,7 @@
 /**********************************************************************************************************************/
 /// groups, stamps
 
-feature er_t parse( mutable @* o, mutable bcore_source* source );
+feature er_t parse( mutable @* o, mutable x_source* source );
 feature o run( mutable @* o );
 
 stamp :selector_s =
@@ -38,7 +38,7 @@ stamp :selector_s =
     func :.parse = (try)
     {
         o.sem_id.parse( source );
-        source.parse_em_fa( " " );
+        source.parse_fa( " " );
         if( source.parse_bl( "#?'(' " ) )
         {
             while( !source.parse_bl( " #=?')'" ) )
@@ -48,7 +48,7 @@ stamp :selector_s =
                 if( source.parse_bl( " #?w'cyclic'"   ) ) o.cyclic = true;
                 if( source.eos() ) break;
             }
-            source.parse_em_fa( "#?')' " );
+            source.parse_fa( ") " );
         }
 
         if( source.parse_bl( "#?'(' " ) )
@@ -61,7 +61,7 @@ stamp :selector_s =
                 if( source.parse_bl( " #?w'ag1'"    ) ) o.ag1 = true;
                 if( source.eos() ) break;
             }
-            source.parse_em_fa( "#?')' " );
+            source.parse_fa( ") " );
         }
         return 0;
     };
@@ -104,7 +104,7 @@ group :ar0 =
     feature o setup( mutable @* o, mutable opal_frame_s* r );
     stamp :log_s =
     {
-        bcore_sink -> log;
+        aware x_sink -> log;
 
         /// setup-params
         ::selector_s selector;
