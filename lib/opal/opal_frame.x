@@ -149,17 +149,17 @@ signature void reset( m @* o );
 signature void setup( m @* o );
 signature void check_integrity( @* o );
 
-signature o setup_from_source(      m @* o, m bcore_source* source, bhvm_holor_s** en, sz_t size_en );
+signature o setup_from_source(      m @* o, m x_source* source, bhvm_holor_s** en, sz_t size_en );
 signature o setup_from_st(          m @* o,           st_s* st,     bhvm_holor_s** en, sz_t size_en );
 signature o setup_from_sc(          m @* o,           sc_t  sc,     bhvm_holor_s** en, sz_t size_en );
-signature o setup_from_source_adl(  m @* o, m bcore_source* source, bhvm_holor_adl_s* en );
+signature o setup_from_source_adl(  m @* o, m x_source* source, bhvm_holor_adl_s* en );
 signature o setup_from_st_adl(      m @* o,           st_s* st,     bhvm_holor_adl_s* en );
 signature o setup_from_sc_adl(      m @* o,           sc_t  sc,     bhvm_holor_adl_s* en );
 
-signature d @* create_from_source(     m bcore_source* source, bhvm_holor_s** en, sz_t size_en );
+signature d @* create_from_source(     m x_source* source, bhvm_holor_s** en, sz_t size_en );
 signature d @* create_from_st(                   st_s* st,     bhvm_holor_s** en, sz_t size_en );
 signature d @* create_from_sc(                   sc_t  sc,     bhvm_holor_s** en, sz_t size_en );
-signature d @* create_from_source_adl( m bcore_source* source, bhvm_holor_adl_s* en );
+signature d @* create_from_source_adl( m x_source* source, bhvm_holor_adl_s* en );
 signature d @* create_from_st_adl(               st_s* st,     bhvm_holor_adl_s* en );
 signature d @* create_from_sc_adl(               sc_t  sc,     bhvm_holor_adl_s* en );
 
@@ -192,12 +192,12 @@ signature m @* run_dendrite_pass(     m @* o, bhvm_holor_s** ex, sz_t size_ex, m
 signature m @* run_axon_pass_adl    ( m @* o, bhvm_holor_adl_s* en, mutable bhvm_holor_adl_s* ex ); // allocates out
 signature m @* run_dendrite_pass_adl( m @* o, bhvm_holor_adl_s* ex, mutable bhvm_holor_adl_s* en ); // allocates out
 
-signature void disassemble_to_sink(       @* o, mutable bcore_sink* sink );
-signature void disassemble_hbase_to_sink( @* o, bhvm_mcode_hbase_s* hbase, sz_t indent, mutable bcore_sink* sink );
-signature void disassemble_hidx_to_sink(  @* o, bhvm_mcode_hbase_s* hbase, :hidx_s* hidx, sz_t indent, mutable bcore_sink* sink );
-signature void disassemble_track_to_sink( @* o, bhvm_mcode_track_s* track, sz_t indent, mutable bcore_sink* sink );
+signature void disassemble_to_sink(       @* o, mutable x_sink* sink );
+signature void disassemble_hbase_to_sink( @* o, bhvm_mcode_hbase_s* hbase, sz_t indent, mutable x_sink* sink );
+signature void disassemble_hidx_to_sink(  @* o, bhvm_mcode_hbase_s* hbase, :hidx_s* hidx, sz_t indent, mutable x_sink* sink );
+signature void disassemble_track_to_sink( @* o, bhvm_mcode_track_s* track, sz_t indent, mutable x_sink* sink );
 
-signature void source_code_to_sink( @* o, mutable bcore_sink* sink );
+signature void source_code_to_sink( @* o, mutable x_sink* sink );
 signature void cyclic_reset( mutable @* o );
 
 
@@ -215,7 +215,7 @@ stamp :s = aware :
     /** pre-setup parameters ****/
 
     /// advanced logging
-    aware bcore_sink -> log;
+    aware x_sink -> log;
 
     /// In frames the context is part of the regular parameter set including serialization.
     aware opal_context -> context;
@@ -279,7 +279,7 @@ stamp :s = aware :
 
     /// frame setup from string or source; 'in' can be NULL
     func :.setup_from_source;
-    func :.setup_from_st = { return o.setup_from_source( bcore_source_string_s_create_from_string( st )^, en, size_en ); };
+    func :.setup_from_st = { return o.setup_from_source( x_source_create_from_st( st )^, en, size_en ); };
     func :.setup_from_sc = { return o.setup_from_st( st_s_create_sc( sc )^, en, size_en ); };
     func :.create_from_source     = { return @!.setup_from_source( source, en, size_en ); };
     func :.create_from_st         = { return @!.setup_from_st( st, en, size_en ); };

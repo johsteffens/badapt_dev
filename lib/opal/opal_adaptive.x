@@ -40,7 +40,7 @@ stamp :s = aware bhpt_adaptive
     func bhpt_adaptive.rebind_holors = { o.frame.bind_holors(); };
     func bhpt_adaptive.get_adaptor_probe;
     func bhpt_adaptive.status_to_sink;
-    func (void source_to_sink( @*o, m bcore_sink* sink )) = { o.frame.source_code_to_sink( sink ); };
+    func (void source_to_sink( @*o, m x_sink* sink )) = { o.frame.source_code_to_sink( sink ); };
 
     // ==============================================================
 
@@ -159,7 +159,7 @@ func (:builder_s) bhpt_builder.create_adaptive =
 {
     d opal_adaptive_s* adaptive = opal_adaptive_s!;
 
-    m bcore_source* source = NULL;
+    m x_source* source = NULL;
 
     switch( o.src._ )
     {
@@ -171,7 +171,7 @@ func (:builder_s) bhpt_builder.create_adaptive =
 
         case st_s~:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) )^^.cast( m bcore_source* );
+            source = x_source_create_from_st( o.src.cast( c st_s* ) )^^;
         }
         break;
 
@@ -321,7 +321,7 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 {
     d opal_adaptive_cyclic_s* adaptive = opal_adaptive_cyclic_s!;
 
-    m bcore_source* source = NULL;
+    m x_source* source = NULL;
 
     switch( o.src._ )
     {
@@ -333,7 +333,7 @@ func (:cyclic_builder_s) bhpt_builder.create_adaptive =
 
         case st_s~:
         {
-            source = bcore_source_string_s_create_from_string( o.src.cast( c st_s* ) )^^;
+            source = x_source_create_from_st( o.src.cast( c st_s* ) )^^;
         }
         break;
 

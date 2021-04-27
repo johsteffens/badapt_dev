@@ -84,7 +84,7 @@ stamp :node_s = aware :
 
     hidden aware opal_context -> context;
 
-    hidden bcore_source_point_s -> source_point;
+    hidden x_source_point_s -> source_point;
 
     func :.up_index =
     {
@@ -108,7 +108,7 @@ stamp :node_s = aware :
     };
 
     /// Outputs the graph structure in text form to sink
-    func (void graph_to_sink( c @* o, m bcore_sink* sink )) = { o.trace_to_sink( 0, sink ); sink.push_fa( "\n" ); };
+    func (void graph_to_sink( c @* o, m x_sink* sink )) = { o.trace_to_sink( 0, sink ); sink.push_fa( "\n" ); };
 
     /** Recursively sets downlinks for all non-flagged uplinks.
      *  Assumes initial state was normal.
@@ -225,7 +225,7 @@ stamp :cell_s = aware :
     // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
     func bcore_via_call.mutated = { ERR_fa( "Cannot reconstitute." ); };
 
-    func (void graph_to_sink( c @* o, m bcore_sink* sink )) =
+    func (void graph_to_sink( c @* o, m x_sink* sink )) =
     {
         foreach( c opal_net_node_s* node in o.excs ) node.graph_to_sink( sink );
     };
@@ -243,15 +243,15 @@ feature d opal_nop* create_input_nop( c @* o, sz_t in_idx, tp_t in_name, c opal_
 // network builder
 group :builder = :
 {
-    signature void fork_log( m @* o, m bcore_sink* log );
+    signature void fork_log( m @* o, m x_sink* log );
     signature void fork_input_holors( m @* o, c bhvm_holor_s** input_holors, sz_t size_input_holors );
-    signature void build_from_source( m @* o, m opal_net_cell_s* net_cell, m bcore_source* source );
+    signature void build_from_source( m @* o, m opal_net_cell_s* net_cell, m x_source* source );
 
     stamp :s = aware :
     {
         opal_sem_builder_s sem_builder;
         hidden bhvm_holor_adl_s input_holors;
-        hidden aware bcore_sink -> log;
+        hidden aware x_sink -> log;
 
         func :.fork_log = { o->log =< log.fork(); };
 
@@ -279,7 +279,7 @@ group :builder = :
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// recursive trace; exits when the enter membrane of the root cell is reached
-func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m bcore_sink* sink )) =
+func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m x_sink* sink )) =
 {
     if( !o )
     {
@@ -329,7 +329,7 @@ func (:node_s) (void err_fa( m @* o, sc_t format, ... )) =
     va_start( args, format );
     if( o.source_point )
     {
-        o.source_point.parse_err_fv( format, args );
+        o.source_point.parse_error_fv( format, args );
     }
     else
     {
@@ -609,7 +609,7 @@ func (:cell_s)
         m opal_sem_tree_node_s* sem_tree_node,
         m opal_net_node_s* net_node_dn,
         sz_t             depth,
-        m bcore_sink*      log  // optional
+        m x_sink*      log  // optional
     )
 ) =
 {
@@ -628,7 +628,7 @@ func (:cell_s)
 
     if( depth > o.max_depth )
     {
-        cell.source_point.parse_err_fa( "Maximum depth '#<sz_t>' exceeded: This problem might be the result of an indefinite recursion.\n", o.max_depth );
+        cell.source_point.parse_error_fa( "Maximum depth '#<sz_t>' exceeded: This problem might be the result of an indefinite recursion.\n", o.max_depth );
     }
 
     if( link.exit ) // we are backtracing: Thus entering a cell though an exit link
@@ -646,7 +646,7 @@ func (:cell_s)
 
         // since we backtrace, a cell is entered through an 'exit' link
         er_t err = sem_tree.enter( cell, /*node_in*/ sem_tree_node, /*node_out*/ &sem_tree_node );
-        if( err ) cell.source_point.parse_err_fa( "Backtracing '#<sc_t>':\nEntering cell failed.", o.context.ifnameof( name ) );
+        if( err ) cell.source_point.parse_error_fa( "Backtracing '#<sc_t>':\nEntering cell failed.", o.context.ifnameof( name ) );
 
         if( cell.nop )
         {
@@ -737,7 +737,7 @@ func (:cell_s)
         }
         else
         {
-            cell.source_point.parse_err_fa( "Backtracing '#<sc_t>':\nOpen exit link '#<sc_t>'.", o.context.ifnameof( name ), o.context.ifnameof( link.name ) );
+            cell.source_point.parse_error_fa( "Backtracing '#<sc_t>':\nOpen exit link '#<sc_t>'.", o.context.ifnameof( name ), o.context.ifnameof( link.name ) );
         }
     }
     else
@@ -750,11 +750,11 @@ func (:cell_s)
         {
             if( err == 1 )
             {
-                cell.source_point.parse_err_fa( "Backtracing '#<sc_t>':\nExiting from untraced cell.", o.context.ifnameof( name ) );
+                cell.source_point.parse_error_fa( "Backtracing '#<sc_t>':\nExiting from untraced cell.", o.context.ifnameof( name ) );
             }
             else
             {
-                cell.source_point.parse_err_fa( "Backtracing '#<sc_t>':\nExiting cell failed.", o.context.ifnameof( name ) );
+                cell.source_point.parse_error_fa( "Backtracing '#<sc_t>':\nExiting cell failed.", o.context.ifnameof( name ) );
             }
         }
 
@@ -763,11 +763,11 @@ func (:cell_s)
             sz_t index = cell.encs.get_index_by_link( link );
             if( index == -1 )
             {
-                cell.source_point.parse_err_fa( "Backtracing '#<sc_t>':\nEnding trace: No matching input channel.", o.context.ifnameof( name ) );
+                cell.source_point.parse_error_fa( "Backtracing '#<sc_t>':\nEnding trace: No matching input channel.", o.context.ifnameof( name ) );
             }
             if( index >= o.encs.size )
             {
-                cell.source_point.parse_err_fa( "Backtracing '#<sc_t>':\nInput channel boundary exceeded.", o.context.ifnameof( name ) );
+                cell.source_point.parse_error_fa( "Backtracing '#<sc_t>':\nInput channel boundary exceeded.", o.context.ifnameof( name ) );
             }
 
             m opal_net_node_s* net_node_up = o.encs.[ index ];
@@ -785,7 +785,7 @@ func (:cell_s)
             next_link = sem_tree_node.cell.get_enc_by_dn( link );
             if( !next_link )
             {
-                cell.source_point.parse_err_fa
+                cell.source_point.parse_error_fa
                 (
                     "Backtracing '#<sc_t>': Trace terminates in an open link.\n"
                     "Possible Reasons:\n"
@@ -831,7 +831,7 @@ func (:cell_s)
         m @* o,
         m opal_sem_cell_s* sem_cell,
         c opal_net* input_nop_creator,
-        m bcore_sink* log
+        m x_sink* log
     )
 ) =
 {
@@ -935,7 +935,7 @@ func (:node_s) :.mcode_push_ap =
     o.flag = true;
     if( !o.nop    ) ERR_fa( "Operator is missing." );
     if( !o.result ) ERR_fa( "Result is missing." );
-    if( !o.result.codable ) o.source_point.parse_err_fa( "Operator '#<sc_t>': Not codable.", ifnameof( o.nop._ ) );
+    if( !o.result.codable ) o.source_point.parse_error_fa( "Operator '#<sc_t>': Not codable.", ifnameof( o.nop._ ) );
 
     m bhvm_vop_arr_ci_s* arr_ci = bhvm_vop_arr_ci_s!^;
 
@@ -973,7 +973,7 @@ func (:node_s) :.mcode_push_ap =
 func (:node_s) :.isolated_mcode_push =
 {
     if( !o.result ) o.solve( NULL );
-    if( !o.result ) o.source_point.parse_err_fa( "Node '#<sc_t>' has no result.", o.context.ifnameof( o.name ) );
+    if( !o.result ) o.source_point.parse_error_fa( "Node '#<sc_t>' has no result.", o.context.ifnameof( o.name ) );
 
     if( !o.mnode )
     {

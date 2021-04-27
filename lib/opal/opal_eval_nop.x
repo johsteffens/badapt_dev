@@ -33,17 +33,17 @@ stamp :result_s = aware x_inst
         if( !o ) return;
         if( o.error )
         {
-            bcore_sink_a_push_fa( x_sink_stderr(), "#<sc_t>\n", o.msg.sc );
+            x_sink_stderr().push_fa( "#<sc_t>\n", o.msg.sc );
         }
         else if( o.msg.size > 0 )
         {
-            bcore_sink_a_push_fa( x_sink_stdout(), "#<sc_t>\n", o.msg.sc );
+            x_sink_stdout().push_fa( "#<sc_t>\n", o.msg.sc );
         }
         if( o.total_tests > 0 )
         {
-            bcore_sink_a_push_fa( x_sink_stdout(), "Total tests ...... #<sz_t>\n", o.total_tests );
-            bcore_sink_a_push_fa( x_sink_stdout(), "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
-            bcore_sink_a_push_fa( x_sink_stdout(), "Tolerated errors . #<sz_t>\n", o.tolerated_errors );
+            x_sink_stdout().push_fa( "Total tests ...... #<sz_t>\n", o.total_tests );
+            x_sink_stdout().push_fa( "Solvable tests ... #<sz_t> (#<sz_t>%)\n", o.solvable_tests, ( o.solvable_tests * 100 ) / o.total_tests );
+            x_sink_stdout().push_fa( "Tolerated errors . #<sz_t>\n", o.tolerated_errors );
         }
     };
 };
@@ -59,7 +59,7 @@ stamp :param_s = aware x_inst
     opal_holor_s => hb;
     opal_holor_s => hc;
     opal_holor_s => hr;
-    hidden aware bcore_sink -> log;
+    hidden aware x_sink -> log;
     sz_t verbosity = 1;
     aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
 
@@ -269,15 +269,15 @@ func (:ar1_s) :.run =
         sc_t symbol = nop.symbol();
         if( symbol )
         {
-            bcore_sink_a_push_fa( o->param.log, " #<sc_t>( ", symbol );
+            o->param.log.push_fa( " #<sc_t>( ", symbol );
         }
         else
         {
-            bcore_sink_a_push_fa( o->param.log, " <#<sc_t>>( ", ifnameof( nop->_ ) );
+            o->param.log.push_fa( " <#<sc_t>>( ", ifnameof( nop->_ ) );
         }
 
         opal_holor_s_to_sink( ha, o.param.log );
-        bcore_sink_a_push_fa( o.param.log, " )\n" );
+        o.param.log.push_fa( " )\n" );
     }
 
     m opal_nop_solve_result_s* solve_result = opal_nop_solve_result_s!^^;

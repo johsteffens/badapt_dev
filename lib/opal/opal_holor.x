@@ -18,7 +18,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 signature void clear( m @* o );
-signature void parse( m @* o, m bcore_source* source );
+signature void parse( m @* o, m x_source* source );
 
 stamp :meta_s = aware bhvm_mcode_hmeta
 {
@@ -70,7 +70,7 @@ stamp :s = aware :
     bhvm_holor_s h;
     func bcore_fp.copy_typed;
 
-    func (void to_sink( c @* o, m bcore_sink* sink )) =
+    func (void to_sink( c @* o, m x_sink* sink )) =
     {
         if( !o.m.active ) sink.push_fa( "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>" );
@@ -78,7 +78,7 @@ stamp :s = aware :
     };
 
     // appends newline
-    func (void to_sink_nl( c @* o, m bcore_sink* sink )) =
+    func (void to_sink_nl( c @* o, m x_sink* sink )) =
     {
         o.to_sink( sink );
         sink.push_fa( "\n" );
@@ -90,7 +90,7 @@ stamp :s = aware :
     func (void to_stdout_nl( c @* o )) = { o.to_sink_nl( x_sink_stdout() ); };
 
     /** compacted version, single line */
-    func (void brief_to_sink( c @* o, m bcore_sink* sink )) =
+    func (void brief_to_sink( c @* o, m x_sink* sink )) =
     {
         sink.push_fa( o.m.active ? "<active>" : "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>" );
@@ -100,7 +100,7 @@ stamp :s = aware :
     func (void brief_to_stdout( c @* o )) = { o.brief_to_sink( x_sink_stdout() ); };
 
     /** multiline version */
-    func (void formatted_to_sink( c @* o, m bcore_sink* sink )) =
+    func (void formatted_to_sink( c @* o, m x_sink* sink )) =
     {
         sink.push_fa( o.m.active ? "<active>" : "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>(" );
@@ -148,7 +148,7 @@ func (:s) bcore_fp.copy_typed =
         case st_s~:
         {
             assert( inst._ == st_s~ );
-            o.parse( bcore_source_string_s!^^.setup_from_string( inst.cast( m st_s* ) ) );
+            o.parse( x_source_create_from_st( inst.cast( m st_s* ) )^ );
         }
         break;
 
@@ -188,7 +188,7 @@ func (:s) :.parse =
 forward opal_sem_link_s;
 forward opal_sem_cell_s;
 
-func (:s) (void from_sem_link( m @* o, m opal_sem_link_s* link, m opal_sem_cell_s* root, m bcore_sink* log )) =
+func (:s) (void from_sem_link( m @* o, m opal_sem_link_s* link, m opal_sem_cell_s* root, m x_sink* log )) =
 {
     ASSERT( link.up );
     ASSERT( link.cell );
@@ -210,8 +210,8 @@ func (:s) (void from_sem_link( m @* o, m opal_sem_link_s* link, m opal_sem_cell_
     net_frame.from_sem_recursive( link.up, tree, sem_tree_node, up_node, 0, log );
     up_node.solve( NULL );
 
-    if( !up_node.result ) up_node.source_point.parse_err_fa( "Could not solve expression." );
-    if( !up_node.result.h ) up_node.source_point.parse_err_fa( "Expression does not yield a holor." );
+    if( !up_node.result ) up_node.source_point.parse_error_fa( "Could not solve expression." );
+    if( !up_node.result.h ) up_node.source_point.parse_error_fa( "Expression does not yield a holor." );
 
     o.copy( up_node.result.h );
 };

@@ -35,7 +35,7 @@ stamp :selector_s =
     bl_t cyclic;   // node is cyclic
 
     /// syntax: sem_id ([param|adaptive|cyclic]) ([a{x|g}{0|1}][ws ...])
-    func :.parse = (try)
+    func :.parse =
     {
         o.sem_id.parse( source );
         source.parse_fa( " " );

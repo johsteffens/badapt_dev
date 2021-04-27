@@ -32,11 +32,11 @@ stamp :result_s = aware x_inst
         if( !o ) return;
         if( o.error )
         {
-            bcore_sink_a_push_fa( x_sink_stderr(), "#<sc_t>\n", o.msg.sc );
+            x_sink_stderr().push_fa( "#<sc_t>\n", o.msg.sc );
         }
         else if( o.msg.size > 0 )
         {
-            bcore_sink_a_push_fa( x_sink_stdout(), "#<sc_t>\n", o.msg.sc );
+            x_sink_stdout().push_fa( "#<sc_t>\n", o.msg.sc );
         }
     };
 };
@@ -50,7 +50,7 @@ feature m :result_s* run( c @* o, m :result_s* result ); // returns result
 signature void set( m @* o, c :param_s* src );
 stamp :param_s = aware x_inst
 {
-    hidden aware bcore_sink -> log;
+    hidden aware x_sink -> log;
     sz_t verbosity = 1;
     u3_t rval = 1234; // for random generators
 
@@ -291,8 +291,8 @@ func (:plain_s) :.run =
     if( o.param.name.size > 0 && o.param.verbosity >= 2 ) o.param.log.push_fa( "#<sc_t>:\n", o.param.name.sc );
     if( !o.param.src ) ERR_fa( "Source missing." );
 
-    m bcore_source* source = NULL;
-    m bcore_sink* log = o.param.log;
+    m x_source* source = NULL;
+    m x_sink* log = o.param.log;
     sz_t verbosity = o.param.verbosity;
 
     switch( o.param.src._ )
@@ -305,7 +305,7 @@ func (:plain_s) :.run =
 
         case st_s~:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) )^^;
+            source = x_source_create_from_st( o.param.src.cast( c st_s* ) )^^;
         }
         break;
 
@@ -641,7 +641,7 @@ func (:cyclic_s) :.run =
     m opal_frame_s* frame = opal_frame_s!^;
     if( o.param.verbosity >= 20 ) frame.log = o.param.log.fork();
 
-    m bcore_source* source = NULL;
+    m x_source* source = NULL;
 
     switch( o.param.src._ )
     {
@@ -653,7 +653,7 @@ func (:cyclic_s) :.run =
 
         case st_s~:
         {
-            source = bcore_source_string_s_create_from_string( o.param.src.cast( c st_s* ) )^^;
+            source = x_source_create_from_st( o.param.src.cast( c st_s* ) )^^;
         }
         break;
 
@@ -719,7 +719,7 @@ func (:cyclic_s) :.run =
             if( shape_dev || value_dev )
             {
                 m st_s* msg = st_s!^;
-                m bcore_sink* sink = msg;
+                m x_sink* sink = msg;
                 sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
                 sink.push_fa( "\n#p20.{frame_cyclic output} " );
                 h_ex1.brief_to_sink( sink );
@@ -744,7 +744,7 @@ func (:cyclic_s) :.run =
             if( shape_dev || value_dev )
             {
                 m st_s* msg = st_s!^;
-                m bcore_sink* sink = msg;
+                m x_sink* sink = msg;
                 sink.push_fa( "#<sc_t> deviation at output holor '#<sz_t>':", shape_dev ? "Shape" : "Value", i );
                 sink.push_fa( "\n#p20.{Output (frame_cyclic)} " );
                 h_ex1.brief_to_sink( sink );
