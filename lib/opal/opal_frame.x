@@ -47,21 +47,21 @@ group :hidx =
     {
         sz_t [];
 
-        func :.push      = { o.push_c( index ); return o; };
-        func :.get_idx   = { assert( index >= 0 && index < o.size ); return o.[ index ]; };
+        func :.push      { o.push_c( index ); return o; };
+        func :.get_idx   { assert( index >= 0 && index < o.size ); return o.[ index ]; };
 
-        func :.get_pclass_idx =
+        func :.get_pclass_idx
         {
             bhvm_mcode_hmeta* hmeta = hbase.get_hmeta( o.[ index ] );
             return ( hmeta ) ? hmeta.get_node().get_pclass_idx( pclass ) : -1;
         };
 
-        func :.get_pclass_holor = { return hbase.get_holor( o.get_pclass_idx( hbase, pclass, index ) ); };
-        func :.get_pclass_hmeta = { return hbase.get_hmeta( o.get_pclass_idx( hbase, pclass, index ) ); };
+        func :.get_pclass_holor { return hbase.get_holor( o.get_pclass_idx( hbase, pclass, index ) ); };
+        func :.get_pclass_hmeta { return hbase.get_hmeta( o.get_pclass_idx( hbase, pclass, index ) ); };
 
-        func :.create_sub_index_by_sub_id = { return @!.sub_index_by_sub_id( o, hbase, sub_id ); };
+        func :.create_sub_index_by_sub_id { return @!.sub_index_by_sub_id( o, hbase, sub_id ); };
 
-        func :.sub_index_by_sub_id =
+        func :.sub_index_by_sub_id
         {
             o.clear();
             foreach( sz_t e in o )
@@ -74,7 +74,7 @@ group :hidx =
             return o;
         };
 
-        func :.has_unique_sub_id =
+        func :.has_unique_sub_id
         {
             opal_sem_id_s* front_id = NULL;
             foreach( sz_t e in o )
@@ -88,7 +88,7 @@ group :hidx =
             return true;
         };
 
-        func :.has_duplicate_id =
+        func :.has_duplicate_id
         {
             bcore_hmap_tp_s^ hmap;
             foreach( sz_t e in o )
@@ -100,7 +100,7 @@ group :hidx =
             return false;
         };
 
-        func :.get_tailmap =
+        func :.get_tailmap
         {
             tailmap.clear();
             foreach( sz_t e in o )
@@ -114,14 +114,14 @@ group :hidx =
             return o;
         };
 
-        func :.create_tailmap =
+        func :.create_tailmap
         {
             d $* tailmap = bcore_hmap_tpuz_s!;
             o.get_tailmap( hbase, sub_id, tailmap );
             return tailmap;
         };
 
-        func :.replace_index =
+        func :.replace_index
         {
             foreach( m sz_t* e in o )
             {
@@ -241,7 +241,7 @@ stamp :s = aware :
     :hidx_s hidx_ada; // adaptive index
     :hidx_s hidx_cyc; // cyclic index
 
-    func :.reset =
+    func :.reset
     {
         if( !o.is_setup ) return;
         if( !o.mcf ) return;
@@ -250,14 +250,14 @@ stamp :s = aware :
         o.is_setup = false;
     };
 
-    func :.bind_holors =
+    func :.bind_holors
     {
         o.mcf.track_run( track_ap_setup~ );
         o.mcf.track_run( track_dp_setup~ );
         return o;
     };
 
-    func :.setup =
+    func :.setup
     {
         if( o.is_setup ) return;
         if( !o.mcf ) return;
@@ -265,7 +265,7 @@ stamp :s = aware :
         o.is_setup = true;
     };
 
-    func :.check_integrity =
+    func :.check_integrity
     {
         assert( o.context );
         assert( o.mcf );
@@ -273,43 +273,43 @@ stamp :s = aware :
     };
 
     /// shelving/reconstitution
-    func bcore_via_call  . shelve  = { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
-    func bcore_via_call  . mutated = { if( o.is_setup ) { o.reset(); o.setup(); } o.check_integrity(); };
-    func bcore_inst_call . copy_x  = { if( o.is_setup ) { o.reset(); o.setup(); } o.check_integrity(); };
+    func bcore_via_call  . shelve  { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
+    func bcore_via_call  . mutated { if( o.is_setup ) { o.reset(); o.setup(); } o.check_integrity(); };
+    func bcore_inst_call . copy_x  { if( o.is_setup ) { o.reset(); o.setup(); } o.check_integrity(); };
 
     /// frame setup from string or source; 'in' can be NULL
     func :.setup_from_source;
-    func :.setup_from_st = { return o.setup_from_source( x_source_create_from_st( st )^, en, size_en ); };
-    func :.setup_from_sc = { return o.setup_from_st( st_s_create_sc( sc )^, en, size_en ); };
-    func :.create_from_source     = { return @!.setup_from_source( source, en, size_en ); };
-    func :.create_from_st         = { return @!.setup_from_st( st, en, size_en ); };
-    func :.create_from_sc         = { return @!.setup_from_sc( sc, en, size_en ); };
-    func :.setup_from_source_adl  = { return o.setup_from_source( source, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
-    func :.setup_from_st_adl      = { return o.setup_from_st( st, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
-    func :.setup_from_sc_adl      = { return o.setup_from_sc( sc, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
-    func :.create_from_source_adl = { return @!.setup_from_source_adl( source, en ); };
-    func :.create_from_st_adl     = { return @!.setup_from_st_adl( st, en ); };
-    func :.create_from_sc_adl     = { return @!.setup_from_sc_adl( sc, en ); };
+    func :.setup_from_st { return o.setup_from_source( x_source_create_from_st( st )^, en, size_en ); };
+    func :.setup_from_sc { return o.setup_from_st( st_s_create_sc( sc )^, en, size_en ); };
+    func :.create_from_source     { return @!.setup_from_source( source, en, size_en ); };
+    func :.create_from_st         { return @!.setup_from_st( st, en, size_en ); };
+    func :.create_from_sc         { return @!.setup_from_sc( sc, en, size_en ); };
+    func :.setup_from_source_adl  { return o.setup_from_source( source, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_st_adl      { return o.setup_from_st( st, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.setup_from_sc_adl      { return o.setup_from_sc( sc, en ? en.data.cast( bhvm_holor_s** ) : NULL, en ? en.size : 0 ); };
+    func :.create_from_source_adl { return @!.setup_from_source_adl( source, en ); };
+    func :.create_from_st_adl     { return @!.setup_from_st_adl( st, en ); };
+    func :.create_from_sc_adl     { return @!.setup_from_sc_adl( sc, en ); };
 
-    func :.get_size_en  = { return o.hidx_en .size; };
-    func :.get_size_ex  = { return o.hidx_ex .size; };
-    func :.get_size_ada = { return o.hidx_ada.size; };
-    func :.get_size_cyc = { return o.hidx_cyc.size; };
+    func :.get_size_en  { return o.hidx_en .size; };
+    func :.get_size_ex  { return o.hidx_ex .size; };
+    func :.get_size_ada { return o.hidx_ada.size; };
+    func :.get_size_cyc { return o.hidx_cyc.size; };
 
-    func :.get_ap_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
-    func :.get_dp_en  = { return o.hidx_en .get_pclass_holor( o.mcf.hbase, pclass_ag0~, index ); };
-    func :.get_ap_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
-    func :.get_dp_ex  = { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, pclass_ag0~, index ); };
-    func :.get_ap_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
-    func :.get_dp_ada = { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, pclass_ag0~, index ); };
-    func :.get_ap_cyc = { return o.hidx_cyc.get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
+    func :.get_ap_en  { return o.hidx_en .get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
+    func :.get_dp_en  { return o.hidx_en .get_pclass_holor( o.mcf.hbase, pclass_ag0~, index ); };
+    func :.get_ap_ex  { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
+    func :.get_dp_ex  { return o.hidx_ex .get_pclass_holor( o.mcf.hbase, pclass_ag0~, index ); };
+    func :.get_ap_ada { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
+    func :.get_dp_ada { return o.hidx_ada.get_pclass_holor( o.mcf.hbase, pclass_ag0~, index ); };
+    func :.get_ap_cyc { return o.hidx_cyc.get_pclass_holor( o.mcf.hbase, pclass_ax0~, index ); };
 
     func :.transfer_values;
 
     /// resets all cyclic values to the initialization value
-    func :.cyclic_reset = { o.mcf.track_run( track_ap_cyclic_reset~ ); };
+    func :.cyclic_reset { o.mcf.track_run( track_ap_cyclic_reset~ ); };
 
-    func :.run_track = { o.mcf?.track_run( track ); return o; };
+    func :.run_track { o.mcf?.track_run( track ); return o; };
     func :.run_axon_pass;
     func :.run_dendrite_pass;
     func :.run_axon_pass_adl;
@@ -319,7 +319,7 @@ stamp :s = aware :
     func :.disassemble_hidx_to_sink;
     func :.disassemble_track_to_sink;
 
-    func :.source_code_to_sink =
+    func :.source_code_to_sink
     {
         if( !o.source_code ) return;
         sink.push_fa( "#<st_s*>\n", o.source_code );
@@ -385,13 +385,13 @@ stamp :cyclic_s = aware :
     func :.setup;
 
     /// shelving/reconstitution
-    func bcore_via_call  . shelve  = { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
-    func bcore_via_call  . mutated = { if( o.is_setup ) { o.reset(); o.setup(); } };
-    func bcore_inst_call . copy_x  = { if( o.is_setup ) { o.reset(); o.setup(); } };
+    func bcore_via_call  . shelve  { bl_t is_setup = o.is_setup; o.reset(); o.is_setup = is_setup; /* setup flag remembers o's setup state before shelving */ };
+    func bcore_via_call  . mutated { if( o.is_setup ) { o.reset(); o.setup(); } };
+    func bcore_inst_call . copy_x  { if( o.is_setup ) { o.reset(); o.setup(); } };
 
-    func :.get_size_en  = { return o.frame.get_size_en(); };
-    func :.get_size_ex  = { return o.frame.get_size_ex(); };
-    func :.get_size_ada = { return o.frame.get_size_ada(); };
+    func :.get_size_en  { return o.frame.get_size_en(); };
+    func :.get_size_ex  { return o.frame.get_size_ex(); };
+    func :.get_size_ada { return o.frame.get_size_ada(); };
 
     func :.run_axon_pass;
     func :.run_axon_pass_adl;
@@ -401,10 +401,10 @@ stamp :cyclic_s = aware :
     func :.setup_from_frame;
 
     func :.disassemble_to_sink;
-    func :.source_code_to_sink = { if( o.frame ) o.frame.source_code_to_sink( sink ); };
+    func :.source_code_to_sink { if( o.frame ) o.frame.source_code_to_sink( sink ); };
 
     /// resets all cyclic values to the initialization value
-    func :.cyclic_reset =
+    func :.cyclic_reset
     {
         o.frame.mcf.track_run( track_ap_cyclic_reset~ );
         o.unroll_index = 0;
@@ -414,14 +414,14 @@ stamp :cyclic_s = aware :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (void sc_run_ap( sc_t sc, bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex )) =
+func (void sc_run_ap( sc_t sc, bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex ))
 {
     opal_frame_s_create_from_sc( sc, en, size_en )^.run_axon_pass( en, size_en, ex, size_ex );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (void sc_run_dp( sc_t sc, bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en )) =
+func (void sc_run_dp( sc_t sc, bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en ))
 {
     opal_frame_s_create_from_sc( sc, ex, size_ex )^.run_dendrite_pass( ex, size_ex, en, size_en );
 };
@@ -432,7 +432,7 @@ func (void sc_run_dp( sc_t sc, bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s**
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (m st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, opal_context* context, m st_s* st )) =
+func (m st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, opal_context* context, m st_s* st ))
 {
     st.clear();
     if( hmeta && hmeta._ == opal_holor_meta_s~ )
@@ -448,7 +448,7 @@ func (m st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, opal_context* c
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) disassemble_hbase_to_sink =
+func (:s) disassemble_hbase_to_sink
 {
     st_s^ st_buf;
     sz_t hname_length = 0;
@@ -505,7 +505,7 @@ func (:s) disassemble_hbase_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) disassemble_hidx_to_sink =
+func (:s) disassemble_hidx_to_sink
 {
     st_s^ st_buf;
     sz_t hname_length = 0;
@@ -530,7 +530,7 @@ func (:s) disassemble_hidx_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) disassemble_track_to_sink =
+func (:s) disassemble_track_to_sink
 {
     if( !track ) return;
     foreach( m $* vop in track..vop )
@@ -543,7 +543,7 @@ func (:s) disassemble_track_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.disassemble_to_sink =
+func (:s) :.disassemble_to_sink
 {
     m bhvm_mcode_frame_s* mcf = o->mcf;
     m bhvm_mcode_hbase_s* hbase = mcf->hbase;
@@ -604,7 +604,7 @@ func (:s) :.disassemble_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.setup_from_source =
+func (:s) :.setup_from_source
 {
     m $* net_cell = opal_net_cell_s!^;
     m $* net_builder = opal_net_builder_s!^;
@@ -677,7 +677,7 @@ func (:s) :.setup_from_source =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) transfer_values =
+func (:s) transfer_values
 {
     if( !  o.is_setup ) ERR_fa( "o has not been setup." );
     if( !src.is_setup ) ERR_fa( "src has not been setup." );
@@ -718,7 +718,7 @@ func (:s) transfer_values =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_axon_pass =
+func (:s) :.run_axon_pass
 {
     ASSERT( o.is_setup );
 
@@ -767,7 +767,7 @@ func (:s) :.run_axon_pass =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_dendrite_pass =
+func (:s) :.run_dendrite_pass
 {
     ASSERT( o.is_setup );
 
@@ -828,7 +828,7 @@ func (:s) :.run_dendrite_pass =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_axon_pass_adl =
+func (:s) :.run_axon_pass_adl
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
     foreach( m $.2 e in ex; !e.1 ) e.1 = bhvm_holor_s!;
@@ -843,7 +843,7 @@ func (:s) :.run_axon_pass_adl =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.run_dendrite_pass_adl =
+func (:s) :.run_dendrite_pass_adl
 {
     if( en && en.size != o.get_size_en() ) en.set_size( o.get_size_en() );
     foreach( m $.2 e in en; !e.1 ) e.1 = bhvm_holor_s!;
@@ -859,21 +859,21 @@ func (:s) :.run_dendrite_pass_adl =
 // ---------------------------------------------------------------------------------------------------------------------
 /// shell
 
-func (:s) bcore_shell.op_group = { return :op~; };
+func (:s) bcore_shell.op_group { return :op~; };
 group :op = retrievable
 {
     stamp :source_s =
     {
-        func bcore_shell_op.key = { return "source"; };
-        func bcore_shell_op.info = { return "Outputs source code of current adaptive."; };
-        func bcore_shell_op.run = { obj.cast(::s*).source_code_to_sink( sink ); };
+        func bcore_shell_op.key { return "source"; };
+        func bcore_shell_op.info { return "Outputs source code of current adaptive."; };
+        func bcore_shell_op.run { obj.cast(::s*).source_code_to_sink( sink ); };
     };
 
     stamp :hbase_s =
     {
-        func bcore_shell_op.key = { return "hbase"; };
-        func bcore_shell_op.info = { return "Outputs holor-base of mcode-frame."; };
-        func bcore_shell_op.run =
+        func bcore_shell_op.key { return "hbase"; };
+        func bcore_shell_op.info { return "Outputs holor-base of mcode-frame."; };
+        func bcore_shell_op.run
         {
             $* frame = obj.cast(::s*);
             frame.disassemble_hbase_to_sink( frame.mcf.hbase, 0, sink );
@@ -887,7 +887,7 @@ group :op = retrievable
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) :.reset =
+func (:cyclic_s) :.reset
 {
     if( !o.is_setup ) return;
     if( !o.frame ) return;
@@ -910,7 +910,7 @@ func (:cyclic_s) :.reset =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) :.bind_holors =
+func (:cyclic_s) :.bind_holors
 {
     o.frame.bind_holors();
     m bhvm_mcode_hbase_s* hbase = o.frame.mcf.hbase;
@@ -920,7 +920,7 @@ func (:cyclic_s) :.bind_holors =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) :.setup =
+func (:cyclic_s) :.setup
 {
     if( o.is_setup ) return;
     if( !o.frame ) return;
@@ -1002,7 +1002,7 @@ func (:cyclic_s) :.setup =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) :.setup_from_frame =
+func (:cyclic_s) :.setup_from_frame
 {
     o.reset();
     o.frame =< frame.clone();
@@ -1013,7 +1013,7 @@ func (:cyclic_s) :.setup_from_frame =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_axon_pass =
+func( :cyclic_s) :.run_axon_pass
 {
     ASSERT( o.frame );
     assert( o.is_setup );
@@ -1060,7 +1060,7 @@ func( :cyclic_s) :.run_axon_pass =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_axon_pass_adl =
+func( :cyclic_s) :.run_axon_pass_adl
 {
     if( ex && ex.size != o.get_size_ex() ) ex.set_size( o.get_size_ex() );
     foreach( m $.2 e in ex; !e.1 ) e.1 = bhvm_holor_s!;
@@ -1075,7 +1075,7 @@ func( :cyclic_s) :.run_axon_pass_adl =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.disassemble_to_sink =
+func( :cyclic_s) :.disassemble_to_sink
 {
     m opal_frame_s* frame = o.frame;
     m bhvm_mcode_frame_s* mcf = frame.mcf;
@@ -1162,7 +1162,7 @@ func( :cyclic_s) :.disassemble_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_axon_pass_adl_flat =
+func( :cyclic_s) :.run_axon_pass_adl_flat
 {
     ASSERT( o.frame );
     o.cyclic_reset();
@@ -1188,7 +1188,7 @@ func( :cyclic_s) :.run_axon_pass_adl_flat =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :cyclic_s) :.run_dendrite_pass_adl_flat =
+func( :cyclic_s) :.run_dendrite_pass_adl_flat
 {
     ASSERT( o.frame );
     ASSERT( o.is_setup );

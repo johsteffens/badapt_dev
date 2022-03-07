@@ -40,7 +40,7 @@ stamp badapt_problem_recurrent_abc_s = aware badapt_supplier
     f3_t neg_tgt =  0.0;
     aware badapt_loss => preferred_loss = badapt_loss_l2_s;
 
-    func badapt_supplier . preferred_loss = { return o->preferred_loss; };
+    func badapt_supplier . preferred_loss { return o->preferred_loss; };
     func badapt_supplier . get_in_size;
     func badapt_supplier . get_out_size;
     func badapt_supplier . fetch_sample_tio;
@@ -68,7 +68,7 @@ stamp badapt_problem_recurrent_text_s = aware badapt_supplier
     f3_t neg_tgt    =  0.0;
     aware badapt_loss => preferred_loss = badapt_loss_l2_s;
 
-    func badapt_supplier . preferred_loss = { return o->preferred_loss; };
+    func badapt_supplier . preferred_loss { return o->preferred_loss; };
     func badapt_supplier . get_in_size;
     func badapt_supplier . get_out_size;
     func badapt_supplier . fetch_sample_tio;
@@ -84,7 +84,7 @@ stamp badapt_guide_char_encode_s = aware badapt_guide
     st_s             -> charset;
 
     hidden aware bcore_sink -> sink;
-    func bcore_inst_call . init_x = { o->sink = bcore_fork( BCORE_STDOUT ); };
+    func bcore_inst_call . init_x { o->sink = bcore_fork( BCORE_STDOUT ); };
 
     f3_t pos_tgt    =  1.0;
     f3_t neg_tgt    =  0.0;
@@ -116,9 +116,9 @@ stamp badapt_problem_recurrent_utf8_s = aware badapt_supplier
     f3_t neg_tgt    =  0.0;
     aware badapt_loss => preferred_loss = badapt_loss_l2_s;
 
-    func badapt_supplier . preferred_loss = { return o->preferred_loss; };
-    func badapt_supplier . get_in_size    = { return 256; };
-    func badapt_supplier . get_out_size   = { return 256; };
+    func badapt_supplier . preferred_loss { return o->preferred_loss; };
+    func badapt_supplier . get_in_size    { return 256; };
+    func badapt_supplier . get_out_size   { return 256; };
     func badapt_supplier . fetch_sample_tio;
     func badapt_supplier . fetch_sample_vio;
 };
@@ -130,7 +130,7 @@ stamp badapt_guide_utf8_encode_s = aware badapt_guide
     aware badapt_guide => guide_default = badapt_guide_std_s;
 
     hidden aware bcore_sink -> sink;
-    func bcore_inst_call . init_x = { o->sink = bcore_fork( BCORE_STDOUT ); };
+    func bcore_inst_call . init_x { o->sink = bcore_fork( BCORE_STDOUT ); };
 
     f3_t pos_tgt    =  1.0;
     f3_t neg_tgt    =  0.0;

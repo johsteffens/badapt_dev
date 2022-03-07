@@ -35,7 +35,7 @@ stamp :selector_s =
     bl_t cyclic;   // node is cyclic
 
     /// syntax: sem_id ([param|adaptive|cyclic]) ([a{x|g}{0|1}][ws ...])
-    func :.parse =
+    func :.parse
     {
         o.sem_id.parse( source );
         source.parse_fa( " " );
@@ -66,7 +66,7 @@ stamp :selector_s =
         return 0;
     };
 
-    func( hidx get_hidx( @* o, opal_frame_s* frame, m opal_frame_hidx_s* hidx ) ) =
+    func( hidx get_hidx( @* o, opal_frame_s* frame, m opal_frame_hidx_s* hidx ) )
     {
         hidx.clear();
 
@@ -116,7 +116,7 @@ group :ar0 =
         opal_holor_meta_adl_s hmeta_adl;
 
         /// functions
-        func :.setup =
+        func :.setup
         {
             $* hidx = o.selector.get_hidx( r, opal_frame_hidx_s!^ );
             o.holor_adl.set_size( 0 );
@@ -129,7 +129,7 @@ group :ar0 =
             return o;
         };
 
-        func ::.run =
+        func ::.run
         {
             for( sz_t i = 0; i < o.holor_adl.size; i++ )
             {

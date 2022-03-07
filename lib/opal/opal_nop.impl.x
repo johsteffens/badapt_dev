@@ -18,7 +18,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 //func (bl_t solve_default( c @* o, m opal_context* context, d opal_holor_s** a, m :solve_result_s* result )) =
-func :.solve_default =
+func :.solve_default
 {
     ASSERT( result );
     m opal_holor_s.2 r = result.h;
@@ -117,7 +117,7 @@ func :.solve_default =
 
 identifier opal_MAX_ARITY;
 
-func :.solve_node_default =
+func :.solve_node_default
 {
     if( node.flag ) return; // cyclic link
 
@@ -169,7 +169,7 @@ func :.solve_node_default =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_param_s) ::.solve =
+func (:ar1_param_s) ::.solve
 {
     result.h =< a[0].clone();
     result.can_settle    = !a[0].m.active;
@@ -180,7 +180,7 @@ func (:ar1_param_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_param_s) ::.settle =
+func (:ar1_param_s) ::.settle
 {
     d opal_nop_ar0_param_s* nop_param = opal_nop_ar0_param_s!;
     nop_param.h = result.h.clone();
@@ -197,7 +197,7 @@ func (:ar1_param_s) ::.settle =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_adaptive_s) ::.solve =
+func (:ar1_adaptive_s) ::.solve
 {
     if( a[0] )
     {
@@ -223,7 +223,7 @@ func (:ar1_adaptive_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func( :ar1_adaptive_s ) ::.settle =
+func( :ar1_adaptive_s ) ::.settle
 {
     d opal_nop_ar0_adaptive_s* adaptive = opal_nop_ar0_adaptive_s!;
     adaptive.h = result.h.clone();
@@ -241,7 +241,7 @@ func( :ar1_adaptive_s ) ::.settle =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_output_s) ::.solve =
+func (:ar1_output_s) ::.solve
 {
     result.h =< opal_holor_s!;
     result.h.h.fork_from( a[0].h );
@@ -255,7 +255,7 @@ func (:ar1_output_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_output_s) ::.mcode_push_dp_holor =
+func (:ar1_output_s) ::.mcode_push_dp_holor
 {
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     sz_t idx = mcf.push_hm( h, result.h.m );
@@ -271,7 +271,7 @@ func (:ar1_output_s) ::.mcode_push_dp_holor =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_rand_s) ::.solve =
+func (:ar1_rand_s) ::.solve
 {
     result.h =< a[0].clone();
     if( result.h )
@@ -303,7 +303,7 @@ func (:ar1_rand_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_rand_s) ::.settle =
+func (:ar1_rand_s) ::.settle
 {
     ASSERT( result.attached?._ == opal_nop_ar0_rand_s~ );
     m opal_nop_ar0_rand_s* nop_rand = result.attached.cast( m opal_nop_ar0_rand_s* );
@@ -320,7 +320,7 @@ func (:ar1_rand_s) ::.settle =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_cast_htp_s) ::.solve =
+func (:ar1_cast_htp_s) ::.solve
 {
     if( a[0] )
     {
@@ -335,7 +335,7 @@ func (:ar1_cast_htp_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_cast_htp_s) ::.mcode_push_ap_holor =
+func (:ar1_cast_htp_s) ::.mcode_push_ap_holor
 {
     m bhvm_holor_s* h = result.h.h;
     m opal_holor_meta_s* m = result.h.m;
@@ -347,7 +347,7 @@ func (:ar1_cast_htp_s) ::.mcode_push_ap_holor =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_cast_htp_s) ::.mcode_push_dp_holor =
+func (:ar1_cast_htp_s) ::.mcode_push_dp_holor
 {
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     m opal_holor_meta_s* m = result.h.m;
@@ -364,7 +364,7 @@ func (:ar1_cast_htp_s) ::.mcode_push_dp_holor =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_reshape_s) ::.solve =
+func (:ar1_reshape_s) ::.solve
 {
     if( a[0] )
     {
@@ -395,7 +395,7 @@ func (:ar1_reshape_s) ::.solve =
  *  Shape is extracted from the uplink channel 0.
  *  Channel 0 is then replaced by channel 1.
  */
-func (:ar2_reshape_s) ::.solve_node =
+func (:ar2_reshape_s) ::.solve_node
 {
     if( node.flag ) return; // cyclic link
 
@@ -436,7 +436,7 @@ func (:ar2_reshape_s) ::.solve_node =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_reshape_s) ::.mcode_push_ap_holor =
+func (:ar1_reshape_s) ::.mcode_push_ap_holor
 {
     m bhvm_holor_s* h = result.h.h;
     m opal_holor_meta_s* m = result.h.m;
@@ -450,7 +450,7 @@ func (:ar1_reshape_s) ::.mcode_push_ap_holor =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_reshape_s) ::.mcode_push_dp_holor =
+func (:ar1_reshape_s) ::.mcode_push_dp_holor
 {
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     m opal_holor_meta_s* m = result.h.m;
@@ -469,7 +469,7 @@ func (:ar1_reshape_s) ::.mcode_push_dp_holor =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_bmul_s) ::.solve =
+func (:ar2_bmul_s) ::.solve
 {
     ASSERT( result );
     m opal_holor_s** r = result.h;
@@ -705,7 +705,7 @@ func (:ar2_bmul_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_cat_s) ::.solve =
+func (:ar2_cat_s) ::.solve
 {
     result.h =< ( a[0] && a[1] ) ? opal_holor_s! : NULL;
     if( result.h )
@@ -723,7 +723,7 @@ func (:ar2_cat_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_ccat_s) ::.solve =
+func (:ar2_ccat_s) ::.solve
 {
     result.h =< ( a[0] && a[1] ) ? opal_holor_s! : NULL;
     if( result.h )
@@ -746,7 +746,7 @@ func (:ar2_ccat_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_order_inc_s) ::.solve =
+func (:ar2_order_inc_s) ::.solve
 {
     result.h =< ( a[0] && a[1] ) ? opal_holor_s! : NULL;
     if( result.h )
@@ -771,7 +771,7 @@ func (:ar2_order_inc_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_order_inc_s) ::.mcode_push_ap_track =
+func (:ar2_order_inc_s) ::.mcode_push_ap_track
 {
     d bhvm_vop* vop = result.attached.clone();
     vop.set_index( 0, arr_ci.i_of_c( 'b' ) );  // default signature 'ay' would be incorrect in this case
@@ -786,7 +786,7 @@ func (:ar2_order_inc_s) ::.mcode_push_ap_track =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_order_dec_s) ::.solve =
+func (:ar2_order_dec_s) ::.solve
 {
     result.h =< NULL;
     if( a[0] && a[0].m.htp ) return false;
@@ -827,7 +827,7 @@ func (:ar2_order_dec_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_order_dec_s) ::.mcode_push_ap_holor =
+func (:ar2_order_dec_s) ::.mcode_push_ap_holor
 {
     m bhvm_holor_s* h = result.h.h;
     m opal_holor_meta_s* m = result.h.m;
@@ -840,7 +840,7 @@ func (:ar2_order_dec_s) ::.mcode_push_ap_holor =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_order_dec_s) ::.mcode_push_dp_holor =
+func (:ar2_order_dec_s) ::.mcode_push_dp_holor
 {
     m bhvm_holor_s* h = bhvm_holor_s!^.copy_shape_type( result.h.h );
     m opal_holor_meta_s* m = result.h.m;
@@ -858,7 +858,7 @@ func (:ar2_order_dec_s) ::.mcode_push_dp_holor =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_cyclic_s) ::.solve =
+func (:ar2_cyclic_s) ::.solve
 {
     if( a[0] )
     {
@@ -899,7 +899,7 @@ func (:ar2_cyclic_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_cyclic_s) ::.solve_node =
+func (:ar2_cyclic_s) ::.solve_node
 {
     if( node.flag ) return; // cyclic link
 
@@ -937,7 +937,7 @@ func (:ar2_cyclic_s) ::.solve_node =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_rands_s) ::.solve =
+func (:ar2_rands_s) ::.solve
 {
     ASSERT( context );
     result.h =< ( a[0] && a[1] ) ? a[1].clone() : NULL;
@@ -983,7 +983,7 @@ func (:ar2_rands_s) ::.solve =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_rands_s) ::.settle =
+func (:ar2_rands_s) ::.settle
 {
     ASSERT( result.attached?._ == opal_nop_ar0_rand_s~ );
     m opal_nop_ar0_rand_s* nop_rand = result.attached.cast( m opal_nop_ar0_rand_s* );

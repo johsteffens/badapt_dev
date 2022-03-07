@@ -35,7 +35,7 @@ signature void set_nop_d( m @* o, d opal_nop* nop );
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-feature bl_t is_cyclic( c @* o ) = { return false; };
+feature bl_t is_cyclic( c @* o ) { return false; };
 
 signature void mcode_push_ap(               m @* o, m bhvm_mcode_frame_s* mcf );
 signature void cyclic_mcode_push_ap_phase0( m @* o, m bhvm_mcode_frame_s* mcf );
@@ -86,34 +86,34 @@ stamp :node_s = aware :
 
     hidden x_source_point_s -> source_point;
 
-    func :.up_index =
+    func :.up_index
     {
         foreach( m $* e in o.upls ) if( e.node == node ) return __i;
         return -1;
     };
 
-    func :.set_nop_d =
+    func :.set_nop_d
     {
         ASSERT( o->result == NULL );
         o.nop =< nop;
     };
 
-    func :.is_cyclic = { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
+    func :.is_cyclic { return ( o.mnode ) ? o.mnode.cyclic : o.nop.is_cyclic(); };
 
     /// s. opal_nop_solve_node__
-    func (void solve( m @* o, m opal_net_node_adl_s* deferred )) =
+    func (void solve( m @* o, m opal_net_node_adl_s* deferred ))
     {
         if( !o->nop ) o.err_fa( "Node has no operator." );
         o.nop.solve_node( o, deferred );
     };
 
     /// Outputs the graph structure in text form to sink
-    func (void graph_to_sink( c @* o, m x_sink* sink )) = { o.trace_to_sink( 0, sink ); sink.push_fa( "\n" ); };
+    func (void graph_to_sink( c @* o, m x_sink* sink )) { o.trace_to_sink( 0, sink ); sink.push_fa( "\n" ); };
 
     /** Recursively sets downlinks for all non-flagged uplinks.
      *  Assumes initial state was normal.
      */
-    func (void set_downlinks( m @* o )) =
+    func (void set_downlinks( m @* o ))
     {
         if( !o.flag )
         {
@@ -129,7 +129,7 @@ stamp :node_s = aware :
     /** Recursively sets flags for all nodes reachable via uplink.
      *  Assumes initial state was normal.
      */
-    func (void set_flags( m @* o )) =
+    func (void set_flags( m @* o ))
     {
         if( !o.flag )
         {
@@ -160,7 +160,7 @@ signature m :node_s* get_by_id( m @* o, sz_t id );
 stamp :nodes_s = aware x_array
 {
     :node_s => [];
-    func :.get_by_id =
+    func :.get_by_id
     {
         foreach( m $* e in o ) if( e.id == id ) return e;
         return NULL;
@@ -192,12 +192,12 @@ stamp :cell_s = aware :
     func :.is_consistent;
     func :.normalize; // re-entrant
 
-    func :.clear_flags =
+    func :.clear_flags
     {
         foreach( m $* e in o.body ) e.flag = false;
     };
 
-    func :.clear_all_flags =
+    func :.clear_all_flags
     {
         foreach( m $* e in o.body )
         {
@@ -206,14 +206,14 @@ stamp :cell_s = aware :
         }
     };
 
-    func :.solve =
+    func :.solve
     {
         m $* deferred = opal_net_node_adl_s!^;
         foreach( m $* e in o.excs  ) e.solve( deferred );
         foreach( m $* e in deferred ) e.solve( NULL );
     };
 
-    func :.clear_downlinks =
+    func :.clear_downlinks
     {
         foreach( m $* e in o.body ) e.dnls.clear();
     };
@@ -223,9 +223,9 @@ stamp :cell_s = aware :
     func bcore_inst_call.copy_x; // cell is copyable
 
     // cell is (currently) not transferable ( possible with dedicated shelve & mutated implementation )
-    func bcore_via_call.mutated = { ERR_fa( "Cannot reconstitute." ); };
+    func bcore_via_call.mutated { ERR_fa( "Cannot reconstitute." ); };
 
-    func (void graph_to_sink( c @* o, m x_sink* sink )) =
+    func (void graph_to_sink( c @* o, m x_sink* sink ))
     {
         foreach( c opal_net_node_s* node in o.excs ) node.graph_to_sink( sink );
     };
@@ -253,9 +253,9 @@ group :builder = :
         hidden bhvm_holor_adl_s input_holors;
         hidden aware x_sink -> log;
 
-        func :.fork_log = { o->log =< log.fork(); };
+        func :.fork_log { o->log =< log.fork(); };
 
-        func :.fork_input_holors =
+        func :.fork_input_holors
         {
             o.input_holors.set_size( size_input_holors );
             for( sz_t i = 0; i < o.input_holors.size; i++ )
@@ -279,7 +279,7 @@ group :builder = :
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// recursive trace; exits when the enter membrane of the root cell is reached
-func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m x_sink* sink )) =
+func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m x_sink* sink ))
 {
     if( !o )
     {
@@ -323,7 +323,7 @@ func (:node_s) (void trace_to_sink( c @* o, sz_t indent, m x_sink* sink )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:node_s) (void err_fa( m @* o, sc_t format, ... )) =
+func (:node_s) (void err_fa( m @* o, sc_t format, ... ))
 {
     va_list args;
     va_start( args, format );
@@ -341,7 +341,7 @@ func (:node_s) (void err_fa( m @* o, sc_t format, ... )) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// calls op-solve and sets node-holor
-func(:node_s) (void nop_solve( m @* o, m opal_holor_s** arg_h )) =
+func(:node_s) (void nop_solve( m @* o, m opal_holor_s** arg_h ))
 {
     o.result =< opal_nop_solve_result_s!;
 
@@ -378,7 +378,7 @@ func(:node_s) (void nop_solve( m @* o, m opal_holor_s** arg_h )) =
 /** Recursively skips identities.
  *  Assumes initial state was normal and downlinks not set
  */
-func( :node_s) (void skip_identities( m @* o )) =
+func( :node_s) (void skip_identities( m @* o ))
 {
     if( o.flag ) return;
     o.flag = true;
@@ -404,12 +404,12 @@ func( :node_s) (void skip_identities( m @* o )) =
  *  Entry and exit references are forked accordingly.
  *  Node id is identical to body-index.
  */
-func (s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 )) =
+func (s2_t cmp_vd( vc_t o, vc_t v1, vc_t v2 ))
 {
     return ( *( vd_t* )v2 > *( vd_t* )v1 ) ? 1 : ( *( vd_t* )v2 < *( vd_t* )v1 ) ? -1 : 0;
 };
 
-func (:cell_s) :.normalize =
+func (:cell_s) :.normalize
 {
     m bcore_arr_vd_s* arr = bcore_arr_vd_s!^;
     foreach( m $* e in o.body ) arr.push( e );
@@ -461,7 +461,7 @@ func (:cell_s) :.normalize =
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Checks consistency of a normalized cell
-func (:cell_s) :.is_consistent =
+func (:cell_s) :.is_consistent
 {
     foreach( c $* node in o.body )
     {
@@ -504,7 +504,7 @@ func (:cell_s) :.is_consistent =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) bcore_inst_call.copy_x =
+func (:cell_s) bcore_inst_call.copy_x
 {
     foreach( m :node_s* node in o.body )
     {
@@ -538,7 +538,7 @@ func (:cell_s) bcore_inst_call.copy_x =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) :.set_downlinks =
+func (:cell_s) :.set_downlinks
 {
     o.clear_flags();
     o.clear_downlinks();
@@ -552,7 +552,7 @@ func (:cell_s) :.set_downlinks =
 /** Removes all body-nodes not reachable via uplink from exit channels
  *  Creates a warning in case an entry channel is unreachable.
  */
-func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
+func (:cell_s) (void remove_unreachable_nodes( m @* o ))
 {
     o.clear_flags();
     foreach( m :node_s* node in o.excs ) node.set_flags();
@@ -582,7 +582,7 @@ func (:cell_s) (void remove_unreachable_nodes( m @* o )) =
 /** Removes all body-nodes containing an identity operator and relinks remaining nodes accordingly
  *  Clears all downlinks;
  */
-func (:cell_s) (void remove_identities( m @* o )) =
+func (:cell_s) (void remove_identities( m @* o ))
 {
     o.clear_downlinks();
     o.clear_flags();
@@ -611,7 +611,7 @@ func (:cell_s)
         sz_t             depth,
         m x_sink*      log  // optional
     )
-) =
+)
 {
     depth++;
     tp_t name = link.name;
@@ -811,7 +811,7 @@ func (:cell_s)
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// Finalization steps: Solves graph and optimizes it
-func (:cell_s) (void finalize( m @* o )) =
+func (:cell_s) (void finalize( m @* o ))
 {
     o.solve();
     o.remove_identities();
@@ -833,7 +833,7 @@ func (:cell_s)
         c opal_net* input_nop_creator,
         m x_sink* log
     )
-) =
+)
 {
     ASSERT( sem_cell );
 
@@ -901,7 +901,7 @@ func (:cell_s)
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// node occurs in the downtree of o
-func (:node_s) (bl_t recurses_in_downtree( m @* o, c opal_net_node_s* node )) =
+func (:node_s) (bl_t recurses_in_downtree( m @* o, c opal_net_node_s* node ))
 {
     if( o == node ) return true;
     if( o.probe ) return false;
@@ -921,7 +921,7 @@ func (:node_s) (bl_t recurses_in_downtree( m @* o, c opal_net_node_s* node )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:node_s) :.mcode_push_ap =
+func (:node_s) :.mcode_push_ap
 {
     if( o.is_cyclic() )
     {
@@ -970,7 +970,7 @@ func (:node_s) :.mcode_push_ap =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:node_s) :.isolated_mcode_push =
+func (:node_s) :.isolated_mcode_push
 {
     if( !o.result ) o.solve( NULL );
     if( !o.result ) o.source_point.parse_error_fa( "Node '#<sc_t>' has no result.", o.context.ifnameof( o.name ) );
@@ -997,7 +997,7 @@ func (:node_s) :.isolated_mcode_push =
  *  opal_net_node_s_mcode_push_ap for cyclic nodes.
  *  Processes only the non_cyclic (left) up-channel [0]
  */
-func (:node_s) :.cyclic_mcode_push_ap_phase0 =
+func (:node_s) :.cyclic_mcode_push_ap_phase0
 {
     ASSERT( o.is_cyclic() );
 
@@ -1037,7 +1037,7 @@ func (:node_s) :.cyclic_mcode_push_ap_phase0 =
  *  This function is called for all cyclic nodes after mcode_push_ap is completed for the entire network.
  *  Processes the cyclic (right) up-channel [1].
  */
-func (:node_s) :.cyclic_mcode_push_ap_phase1 =
+func (:node_s) :.cyclic_mcode_push_ap_phase1
 {
     ASSERT( o.is_cyclic() );
     if( !o.mnode ) o.cyclic_mcode_push_ap_phase0( mcf );
@@ -1052,7 +1052,7 @@ func (:node_s) :.cyclic_mcode_push_ap_phase1 =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:node_s) :.mcode_push_dp =
+func (:node_s) :.mcode_push_dp
 {
     ASSERT( o );
 
@@ -1116,7 +1116,7 @@ func (:node_s) :.mcode_push_dp =
 /** Recurrent dp phase0:
  *  opal_net_node_s_mcode_push_dp for cyclic nodes.
  */
-func (:node_s) :.cyclic_mcode_push_dp_phase0 =
+func (:node_s) :.cyclic_mcode_push_dp_phase0
 {
     if( !o.flag ) // build gradient computation for this node
     {
@@ -1154,7 +1154,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase0 =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:node_s) :.cyclic_mcode_push_dp_phase1 =
+func (:node_s) :.cyclic_mcode_push_dp_phase1
 {
     ASSERT( o );
     if( !o.nop ) ERR_fa( "Operator is missing." );
@@ -1184,7 +1184,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase1 =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:node_s) :.cyclic_mcode_push_dp_phase2 =
+func (:node_s) :.cyclic_mcode_push_dp_phase2
 {
     ASSERT( o );
     if( !o.nop ) ERR_fa( "Operator is missing." );
@@ -1195,7 +1195,7 @@ func (:node_s) :.cyclic_mcode_push_dp_phase2 =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) :.mcode_push_ap =
+func (:cell_s) :.mcode_push_ap
 {
     ASSERT( o.is_consistent() );
 
@@ -1217,7 +1217,7 @@ func (:cell_s) :.mcode_push_ap =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) mcode_push_dp =
+func (:cell_s) mcode_push_dp
 {
     ASSERT( o.is_consistent() );
     m opal_net_node_adl_s* cyclic_adl   = opal_net_node_adl_s!^;
@@ -1251,7 +1251,7 @@ func (:cell_s) mcode_push_dp =
 /// :builder_s
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:builder_s) ::.create_input_nop =
+func (:builder_s) ::.create_input_nop
 {
     ASSERT( in_idx < o.input_holors.size );
 
@@ -1291,7 +1291,7 @@ func (:builder_s) ::.create_input_nop =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:builder_s) :.build_from_source =
+func (:builder_s) :.build_from_source
 {
     m opal_sem_cell_s* sem_cell = opal_sem_cell_s!^;
     o.sem_builder.build_from_source( sem_cell, source );

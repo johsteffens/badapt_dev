@@ -46,20 +46,20 @@ stamp :meta_s = aware bhvm_mcode_hmeta
      */
     bl_t active = true;
 
-    func :.clear = { o.name = 0; o.htp = false; };
+    func :.clear { o.name = 0; o.htp = false; };
 
-    func bhvm_mcode_hmeta.get_name    = { return o.name; };
-    func bhvm_mcode_hmeta.get_pclass  = { return o.pclass; };
-    func bhvm_mcode_hmeta.is_rollable = { return !o.active || o.mnode.adaptive || ( o.mnode.cyclic && o.pclass == pclass_ax1~ ); };
-    func bhvm_mcode_hmeta.is_active   = { return  o.active; };
+    func bhvm_mcode_hmeta.get_name    { return o.name; };
+    func bhvm_mcode_hmeta.get_pclass  { return o.pclass; };
+    func bhvm_mcode_hmeta.is_rollable { return !o.active || o.mnode.adaptive || ( o.mnode.cyclic && o.pclass == pclass_ax1~ ); };
+    func bhvm_mcode_hmeta.is_active   { return  o.active; };
 
-    func bhvm_mcode_hmeta.get_custom = { return o.custom; };
-    func bhvm_mcode_hmeta.set_custom = { return o.custom =< custom.clone(); };
+    func bhvm_mcode_hmeta.get_custom { return o.custom; };
+    func bhvm_mcode_hmeta.set_custom { return o.custom =< custom.clone(); };
 
-    func bhvm_mcode_hmeta.get_sem_id = { return o.mnode?.sem_id; };
+    func bhvm_mcode_hmeta.get_sem_id { return o.mnode?.sem_id; };
 
-    func bhvm_mcode_hmeta.get_node = { return o.mnode; };
-    func bhvm_mcode_hmeta.set_node = { o.mnode =< node.fork(); };
+    func bhvm_mcode_hmeta.get_node { return o.mnode; };
+    func bhvm_mcode_hmeta.set_node { o.mnode =< node.fork(); };
 };
 
 stamp :meta_adl_s = x_array { :meta_s => []; };
@@ -70,7 +70,7 @@ stamp :s = aware :
     bhvm_holor_s h;
     func bcore_fp.copy_typed;
 
-    func (void to_sink( c @* o, m x_sink* sink )) =
+    func (void to_sink( c @* o, m x_sink* sink ))
     {
         if( !o.m.active ) sink.push_fa( "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>" );
@@ -78,29 +78,29 @@ stamp :s = aware :
     };
 
     // appends newline
-    func (void to_sink_nl( c @* o, m x_sink* sink )) =
+    func (void to_sink_nl( c @* o, m x_sink* sink ))
     {
         o.to_sink( sink );
         sink.push_fa( "\n" );
     };
 
-    func (void to_stdout( c @* o )) = { o.to_sink( x_sink_stdout() ); };
+    func (void to_stdout( c @* o )) { o.to_sink( x_sink_stdout() ); };
 
     // appends newline
-    func (void to_stdout_nl( c @* o )) = { o.to_sink_nl( x_sink_stdout() ); };
+    func (void to_stdout_nl( c @* o )) { o.to_sink_nl( x_sink_stdout() ); };
 
     /** compacted version, single line */
-    func (void brief_to_sink( c @* o, m x_sink* sink )) =
+    func (void brief_to_sink( c @* o, m x_sink* sink ))
     {
         sink.push_fa( o.m.active ? "<active>" : "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>" );
         o.h.brief_to_sink( sink );
     };
 
-    func (void brief_to_stdout( c @* o )) = { o.brief_to_sink( x_sink_stdout() ); };
+    func (void brief_to_stdout( c @* o )) { o.brief_to_sink( x_sink_stdout() ); };
 
     /** multiline version */
-    func (void formatted_to_sink( c @* o, m x_sink* sink )) =
+    func (void formatted_to_sink( c @* o, m x_sink* sink ))
     {
         sink.push_fa( o.m.active ? "<active>" : "<const>" );
         if( o.m.htp ) sink.push_fa( "<htp>(" );
@@ -108,7 +108,7 @@ stamp :s = aware :
         if( o.m.htp ) sink.push_fa( ")" );
     };
 
-    func (void formatted_to_stdout( c @* o )) = { o.formatted_to_sink( x_sink_stdout() ); };
+    func (void formatted_to_stdout( c @* o )) { o.formatted_to_sink( x_sink_stdout() ); };
 
     /// sets holor from text source
     func :.parse;
@@ -120,7 +120,7 @@ stamp :s = aware :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) bcore_fp.copy_typed =
+func (:s) bcore_fp.copy_typed
 {
     m x_inst* inst = ( x_inst* )src;
     switch( type )
@@ -162,7 +162,7 @@ func (:s) bcore_fp.copy_typed =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) :.parse =
+func (:s) :.parse
 {
     o.m.clear();
 
@@ -188,7 +188,7 @@ func (:s) :.parse =
 forward opal_sem_link_s;
 forward opal_sem_cell_s;
 
-func (:s) (void from_sem_link( m @* o, m opal_sem_link_s* link, m opal_sem_cell_s* root, m x_sink* log )) =
+func (:s) (void from_sem_link( m @* o, m opal_sem_link_s* link, m opal_sem_cell_s* root, m x_sink* log ))
 {
     ASSERT( link.up );
     ASSERT( link.cell );

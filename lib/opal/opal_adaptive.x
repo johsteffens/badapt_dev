@@ -32,15 +32,15 @@ stamp :s = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func bhpt_adaptive.get_format_en = { format.copy( o.holor_frame_en ); return format; };
-    func bhpt_adaptive.get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
-    func bhpt_adaptive.axon_pass     = { o.frame.run_axon_pass( ax_en, 1, ax_ex, 1 ); };
-    func bhpt_adaptive.dendrite_pass = { o.frame.run_dendrite_pass( ag_ex, 1, ( ag_en ) ? &ag_en : NULL, ( ag_en ) ? 1 : 0 ); };
-    func bhpt_adaptive.cyclic_reset  = { o.frame.cyclic_reset(); };
-    func bhpt_adaptive.rebind_holors = { o.frame.bind_holors(); };
+    func bhpt_adaptive.get_format_en { format.copy( o.holor_frame_en ); return format; };
+    func bhpt_adaptive.get_format_ex { format.copy( o.holor_frame_ex ); return format; };
+    func bhpt_adaptive.axon_pass     { o.frame.run_axon_pass( ax_en, 1, ax_ex, 1 ); };
+    func bhpt_adaptive.dendrite_pass { o.frame.run_dendrite_pass( ag_ex, 1, ( ag_en ) ? &ag_en : NULL, ( ag_en ) ? 1 : 0 ); };
+    func bhpt_adaptive.cyclic_reset  { o.frame.cyclic_reset(); };
+    func bhpt_adaptive.rebind_holors { o.frame.bind_holors(); };
     func bhpt_adaptive.get_adaptor_probe;
     func bhpt_adaptive.status_to_sink;
-    func (void source_to_sink( @*o, m x_sink* sink )) = { o.frame.source_code_to_sink( sink ); };
+    func (void source_to_sink( @*o, m x_sink* sink )) { o.frame.source_code_to_sink( sink ); };
 
     // ==============================================================
 
@@ -57,8 +57,8 @@ stamp :builder_s = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func bhpt_builder.set_format_en = { o.holor_frame_en.copy( format ); };
-    func bhpt_builder.set_format_ex = { o.holor_frame_ex.copy( format ); };
+    func bhpt_builder.set_format_en { o.holor_frame_en.copy( format ); };
+    func bhpt_builder.set_format_ex { o.holor_frame_ex.copy( format ); };
     func bhpt_builder.create_adaptive;
 
     // ==============================================================
@@ -84,14 +84,14 @@ stamp :cyclic_s = aware bhpt_adaptive
 
     // === adaptive functions =======================================
 
-    func bhpt_adaptive.get_format_en = { format.copy( o.holor_frame_en ); return format; };
-    func bhpt_adaptive.get_format_ex = { format.copy( o.holor_frame_ex ); return format; };
+    func bhpt_adaptive.get_format_en { format.copy( o.holor_frame_en ); return format; };
+    func bhpt_adaptive.get_format_ex { format.copy( o.holor_frame_ex ); return format; };
 
-    func bhpt_adaptive.axon_pass = { o.frame.run_axon_pass( ax_en, 1, ax_ex, 1 ); };
+    func bhpt_adaptive.axon_pass { o.frame.run_axon_pass( ax_en, 1, ax_ex, 1 ); };
     func bhpt_adaptive.dendrite_pass;
     func bhpt_adaptive.cyclic_reset;
     func bhpt_adaptive.get_adaptor_probe;
-    func bhpt_adaptive.rebind_holors = { o.frame.bind_holors(); };
+    func bhpt_adaptive.rebind_holors { o.frame.bind_holors(); };
     func bhpt_adaptive.status_to_sink;
 
     // ==============================================================
@@ -109,8 +109,8 @@ stamp :cyclic_builder_s = aware bhpt_builder
 
     // === builder functions =======================================
 
-    func bhpt_builder.set_format_en = { o.holor_frame_en.copy( format ); };
-    func bhpt_builder.set_format_ex = { o.holor_frame_ex.copy( format ); };
+    func bhpt_builder.set_format_en { o.holor_frame_en.copy( format ); };
+    func bhpt_builder.set_format_ex { o.holor_frame_ex.copy( format ); };
     func bhpt_builder.create_adaptive;
 
     // ==============================================================
@@ -123,7 +123,7 @@ stamp :cyclic_builder_s = aware bhpt_builder
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) bhpt_adaptive.get_adaptor_probe =
+func (:s) bhpt_adaptive.get_adaptor_probe
 {
     probe.set_size( o.frame.get_size_ada() );
     ASSERT( o.frame.is_setup );
@@ -137,7 +137,7 @@ func (:s) bhpt_adaptive.get_adaptor_probe =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:s) bhpt_adaptive.status_to_sink =
+func (:s) bhpt_adaptive.status_to_sink
 {
     if( verbosity >=  1 ) sink.push_fa( "#<sc_t>", ifnameof( o._ ) );
 
@@ -155,7 +155,7 @@ func (:s) bhpt_adaptive.status_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:builder_s) bhpt_builder.create_adaptive =
+func (:builder_s) bhpt_builder.create_adaptive
 {
     d opal_adaptive_s* adaptive = opal_adaptive_s!;
 
@@ -204,15 +204,15 @@ func (:builder_s) bhpt_builder.create_adaptive =
 // ---------------------------------------------------------------------------------------------------------------------
 /// shell
 
-func (:s) bcore_shell.op_group = { return :op~; };
+func (:s) bcore_shell.op_group { return :op~; };
 group :op = retrievable
 {
     stamp :status_s =
     {
         sz_t verbosity = 10;
-        func bcore_shell_op.key = { return "status"; };
-        func bcore_shell_op.info = { return "Outputs status of current adaptive. Verbosity: 0 ... 10"; };
-        func bcore_shell_op.run = { obj.cast(::s*).status_to_sink( o.verbosity, sink ); };
+        func bcore_shell_op.key { return "status"; };
+        func bcore_shell_op.info { return "Outputs status of current adaptive. Verbosity: 0 ... 10"; };
+        func bcore_shell_op.run { obj.cast(::s*).status_to_sink( o.verbosity, sink ); };
     };
 };
 
@@ -223,7 +223,7 @@ group :op = retrievable
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_create( m @* o )) =
+func (:cyclic_s) (void dp_buffer_create( m @* o ))
 {
     o.dp_buffer =< bhvm_holor_adl_s!;
     o.dp_buffer.set_size( o.frame.unroll_size );
@@ -236,7 +236,7 @@ func (:cyclic_s) (void dp_buffer_create( m @* o )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_reset( m @* o )) =
+func (:cyclic_s) (void dp_buffer_reset( m @* o ))
 {
     if( !o.dp_buffer ) opal_adaptive_cyclic_s_dp_buffer_create( o );
     foreach( m $* e in o.dp_buffer ) e.v.zro();
@@ -245,14 +245,14 @@ func (:cyclic_s) (void dp_buffer_reset( m @* o )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_apply( m @* o )) =
+func (:cyclic_s) (void dp_buffer_apply( m @* o ))
 {
     o.frame.run_dendrite_pass_adl_flat( o.dp_buffer, NULL );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_apply_reset( m @* o )) =
+func (:cyclic_s) (void dp_buffer_apply_reset( m @* o ))
 {
     o.dp_buffer_apply();
     o.dp_buffer_reset();
@@ -260,7 +260,7 @@ func (:cyclic_s) (void dp_buffer_apply_reset( m @* o )) =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) bhpt_adaptive.dendrite_pass =
+func (:cyclic_s) bhpt_adaptive.dendrite_pass
 {
     ASSERT( !ag_en );
 
@@ -276,7 +276,7 @@ func (:cyclic_s) bhpt_adaptive.dendrite_pass =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) bhpt_adaptive.cyclic_reset =
+func (:cyclic_s) bhpt_adaptive.cyclic_reset
 {
     o.frame.cyclic_reset();
     if( o.dp_value ) o.dp_buffer_reset();
@@ -284,7 +284,7 @@ func (:cyclic_s) bhpt_adaptive.cyclic_reset =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) bhpt_adaptive.get_adaptor_probe =
+func (:cyclic_s) bhpt_adaptive.get_adaptor_probe
 {
     bhpt_adaptor_probe_s_set_size( probe, o.frame.get_size_ada() );
     m opal_frame_s* frame = o.frame.frame;
@@ -299,7 +299,7 @@ func (:cyclic_s) bhpt_adaptive.get_adaptor_probe =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) bhpt_adaptive.status_to_sink =
+func (:cyclic_s) bhpt_adaptive.status_to_sink
 {
     if( verbosity >=  1 ) sink.push_fa( "#<sc_t>", ifnameof( o._ ) );
 
@@ -317,7 +317,7 @@ func (:cyclic_s) bhpt_adaptive.status_to_sink =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_builder_s) bhpt_builder.create_adaptive =
+func (:cyclic_builder_s) bhpt_builder.create_adaptive
 {
     d opal_adaptive_cyclic_s* adaptive = opal_adaptive_cyclic_s!;
 

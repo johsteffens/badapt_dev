@@ -28,13 +28,13 @@ stamp :frame_s = aware bhpt_adaptor
 
     hidden opal_frame_s => frame;
 
-    func bhpt_adaptor.reset = { if( o.frame ) o.frame.cyclic_reset(); };
+    func bhpt_adaptor.reset { if( o.frame ) o.frame.cyclic_reset(); };
     func bhpt_adaptor.adapt;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:frame_s) bhpt_adaptor.adapt =
+func (:frame_s) bhpt_adaptor.adapt
 {
     if( !o.frame )
     {

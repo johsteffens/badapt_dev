@@ -21,11 +21,11 @@
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-feature m bcore_prsg* get_prsg( m @* o )   = { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return NULL; };
-feature sc_t   nameof( c @* o, tp_t name ) = { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return NULL; };
-feature sc_t ifnameof( c @* o, tp_t name ) = { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return NULL; };
-feature tp_t   typeof( c @* o, sc_t name ) = { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return 0; };
-feature tp_t entypeof( m @* o, sc_t name ) = { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return 0; };
+feature m bcore_prsg* get_prsg( m @* o )   { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return NULL; };
+feature sc_t   nameof( c @* o, tp_t name ) { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return NULL; };
+feature sc_t ifnameof( c @* o, tp_t name ) { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return NULL; };
+feature tp_t   typeof( c @* o, sc_t name ) { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return 0; };
+feature tp_t entypeof( m @* o, sc_t name ) { ERR_fa( "Feature is not implemented in #<sc_t>.", ifnameof( o->_ ) ); return 0; };
 
 // ---------------------------------------------------------------------------------------------------------------------
 

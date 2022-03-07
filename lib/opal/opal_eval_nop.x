@@ -28,7 +28,7 @@ stamp :result_s = aware x_inst
     bl_t error = false;
     st_s msg;
 
-    func :.resolve =
+    func :.resolve
     {
         if( !o ) return;
         if( o.error )
@@ -63,9 +63,9 @@ stamp :param_s = aware x_inst
     sz_t verbosity = 1;
     aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
 
-    func bcore_inst_call . init_x = { o.log = x_sink_stdout().fork(); };
+    func bcore_inst_call . init_x { o.log = x_sink_stdout().fork(); };
 
-    func :.set =
+    func :.set
     {
         o.verbosity = sz_max( o.verbosity, src.verbosity );
         o.prsg.set_state_mix( o.prsg, src.prsg );
@@ -88,8 +88,8 @@ stump :std_s = aware :
 {
     :param_s param;
     func :.run;
-    func :.set_param = { o.param.set( param ); };
-    func bcore_main . main =
+    func :.set_param { o.param.set( param ); };
+    func bcore_main . main
     {
         o.run( :result_s!^^ ).resolve();
         return 0;
@@ -123,7 +123,7 @@ stamp :generator_s = extending :std_s
 
 stamp :show_param_s = extending :std_s
 {
-    func :.run = { o.param.cast( x_btml* ).to_sink( o.param.log ); return result; };
+    func :.run { o.param.cast( x_btml* ).to_sink( o.param.log ); return result; };
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ stamp :set_s = extending :std_s
 {
     :arr_s arr;
 
-    func :.run =
+    func :.run
     {
         foreach( m :* e in o.arr )
         {
@@ -165,7 +165,7 @@ stamp :ar2_s = extending :std_s { aware opal_context => context = opal_nop_conte
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:generator_s) (void randomize_holor( c @* o, m opal_holor_s* h, m bcore_prsg* prsg )) =
+func (:generator_s) (void randomize_holor( c @* o, m opal_holor_s* h, m bcore_prsg* prsg ))
 {
     if( o.set_htp ) h.m.htp = ( prsg.gen_f3( 0, 1 ) > 0.5 );
 
@@ -210,7 +210,7 @@ func (:generator_s) (void randomize_holor( c @* o, m opal_holor_s* h, m bcore_pr
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:generator_s) :.run =
+func (:generator_s) :.run
 {
     ASSERT( o->eval );
     m bcore_prsg* prsg = o.param.prsg.clone()^^;
@@ -249,7 +249,7 @@ func (:generator_s) :.run =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar1_s) :.run =
+func (:ar1_s) :.run
 {
     if( !o.param.nop ) ERR_fa( "Operator missing." );
 
@@ -464,7 +464,7 @@ func (:ar1_s) :.run =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:ar2_s) :.run =
+func (:ar2_s) :.run
 {
     if( !o.param.nop ) ERR_fa( "Operator missing." );
 
