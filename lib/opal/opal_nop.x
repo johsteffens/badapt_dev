@@ -30,7 +30,7 @@ forward opal_net_node_adl_s;
 stamp :context_s = aware opal_context
 {
     aware bcore_prsg => prsg = bcore_prsg_lcg_u3_00_s;
-    func opal_context.get_prsg { return o.prsg; };
+    func opal_context.get_prsg { = o.prsg; };
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -77,15 +77,15 @@ name track_ap_cyclic_update;
  */
 name track_dp_adaptive_zero_grad;
 
-feature sz_t arity( c @* o ) { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o._ ) ); return -1; };
-feature sz_t priority( c @* o ) { return 10; };
-feature sc_t symbol( c @* o )   { return NULL; };
+feature sz_t arity( c @* o ) { ERR_fa( "Not implemented in '#<sc_t>'.", ifnameof( o._ ) ); = -1; };
+feature sz_t priority( c @* o ) = 10;
+feature sc_t symbol( c @* o )   = NULL;
 
 /// Overload 'true' when the symbol shall be declared as reserved keyword in the syntax. In that case the cell of that name cannot be defined locally.
-feature bl_t reserved( c @* o ) { return false; };
+feature bl_t reserved( c @* o ) = false;
 
 /// converts an operator into a correspondent operator of arity n if possible; return NULL if conversion is not supported
-feature d :* create_op_of_arn( c @* o, sz_t n ) { return ( o.arity() == n ) ? o.clone() : NULL; };
+feature d :* create_op_of_arn( c @* o, sz_t n ) = ( o.arity() == n ) ? o.clone() : NULL;
 
 /** Solve computes the result 'r' from an array of arguments 'a'.
   * 'a' represents an array of pointers. The array size is equal to arity.
@@ -132,7 +132,7 @@ stamp :solve_result_s = aware bcore_inst
 };
 
 /// returns true when the operator supports 'elementary cyclic indexing'
-feature bl_t eci( c @* o ) { return false; };
+feature bl_t eci( c @* o ) = false;
 
 /** Low level solving.
   * Returns 'true' in case of success, otherwise check result.msg
@@ -148,13 +148,13 @@ feature void solve_node( m @* o, m opal_net_node_s* node, m opal_net_node_adl_s*
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// indicates that node is a parameter
-feature bl_t is_param( c @* o ) { return false; };
+feature bl_t is_param( c @* o ) = false;
 
 /// indicates that node is cyclic
-feature bl_t is_cyclic( c @* o ) { return false; };
+feature bl_t is_cyclic( c @* o ) = false;
 
 /// indicates that node is adaptive
-feature bl_t is_adaptive( c @* o ) { return false; };
+feature bl_t is_adaptive( c @* o ) = false;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -193,7 +193,7 @@ feature sz_t mcode_push_ap_holor( c @* o, c :solve_result_s* result, c bhvm_vop_
         mcf.track_vop_push_d( track_ap_setup~,  bhvm_vop_ar0_determine_s!.setup( idx ) );
         mcf.track_vop_push_d( track_ap_shelve~, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
     }
-    return idx;
+    = idx;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ feature sz_t mcode_push_dp_holor( c @* o, c :solve_result_s* result, c bhvm_vop_
     mcf.track_vop_push_d( track_dp_setup~,  bhvm_vop_ar0_determine_s!.setup( idx ) );
     mcf.track_vop_push_d( track_dp~,        bhvm_vop_ar0_zro_s!      .setup( idx ) );
     mcf.track_vop_push_d( track_dp_shelve~, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
-    return idx;
+    = idx;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -245,7 +245,7 @@ group :ar0 = retrievable
 {
     extending stump verbatim :_s = aware :
     {
-        func ::.arity { return 0; };
+        func ::.arity { = 0; };
     };
 
     stamp :literal_s =
@@ -255,7 +255,7 @@ group :ar0 = retrievable
         {
             result.h =< o.h.fork();
             result.can_settle = true;
-            return true;
+            = true;
         };
     };
 
@@ -263,13 +263,13 @@ group :ar0 = retrievable
     stamp :param_s =
     {
         opal_holor_s -> h;
-        func ::.is_param { return true; };
+        func ::.is_param = true;
 
         func ::.solve
         {
             result.h =< o.h.fork();
             result.can_settle = false;
-            return true;
+            = true;
         };
     };
 
@@ -278,13 +278,13 @@ group :ar0 = retrievable
     {
         opal_holor_s -> h;
 
-        func ::.is_adaptive { return true; };
+        func ::.is_adaptive = true;
 
         func ::.solve
         {
             result.h =< o.h.fork();
             result.can_settle = false;
-            return true;
+            = true;
         };
 
         func ::.mcode_push_ap_holor
@@ -298,7 +298,7 @@ group :ar0 = retrievable
                 mcf.track_vop_push_d( track_ap_setup~,  bhvm_vop_ar0_randomize_s!.setup( idx ) );
                 mcf.track_vop_push_d( track_ap_shelve~, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
             }
-            return idx;
+            = idx;
         };
 
         func ::.mcode_push_dp_holor
@@ -309,7 +309,7 @@ group :ar0 = retrievable
             mcf.track_vop_push_d( track_dp_setup~,              bhvm_vop_ar0_determine_s!.setup( idx ) );
             mcf.track_vop_push_d( track_dp_shelve~,             bhvm_vop_ar0_vacate_s!   .setup( idx ) );
             mcf.track_vop_push_d( track_dp_adaptive_zero_grad~, bhvm_vop_ar0_zro_s!      .setup( idx ) );
-            return idx;
+            = idx;
         };
 
     };
@@ -327,7 +327,7 @@ group :ar0 = retrievable
         {
             result.h =< o.h.fork();
             result.can_settle = false;
-            return true;
+            = true;
         };
 
         func ::.mcode_push_ap_holor
@@ -346,7 +346,7 @@ group :ar0 = retrievable
             mcf.track_vop_push_d( track_ap_setup~,  bhvm_vop_ar0_determine_s!.setup( idx ) );
             mcf.track_vop_push_d( track_ap_shelve~, bhvm_vop_ar0_vacate_s!   .setup( idx ) );
 
-            return idx;
+            = idx;
         };
     };
 };
@@ -357,13 +357,13 @@ group :ar1 = retrievable
 {
     extending stump verbatim :_s = aware :
     {
-        func ::.arity { return 1; };
-        func ::.reserved { return true; };
+        func ::.arity = 1;
+        func ::.reserved = true;
     };
 
     stamp :identity_s =
     {
-        func ::.priority { return 8; };
+        func ::.priority = 8;
         func ::.solve
         {
             result.h =< opal_holor_s_create();
@@ -373,21 +373,21 @@ group :ar1 = retrievable
             result.can_settle    = !a[0].m.active;
             result.type_vop_ap   = bhvm_vop_ar1_cpy_s~;
             result.type_vop_dp_a = bhvm_vop_ar1_acc_s~;
-            return true;
+            = true;
         };
     };
 
     stamp :param_s =
     {
-        func ::.priority { return 8; };
+        func ::.priority = 8;
         func ::.solve;
         func ::.settle;
     };
 
     stamp :f3_s =
     {
-        func ::.priority { return 8; };
-        func ::.symbol   { return "f3_t"; };
+        func ::.priority = 8;
+        func ::.symbol   = "f3_t";
         func ::.solve
         {
             result.h =< a[0].clone();
@@ -395,14 +395,14 @@ group :ar1 = retrievable
             result.can_settle = ( result.h ) && !result.h.m.active;
             result.type_vop_ap   = bhvm_vop_ar1_cpy_s~;
             result.type_vop_dp_a = bhvm_vop_ar1_acc_s~;
-            return true;
+            = true;
         };
     };
 
     stamp :f2_s =
     {
-        func ::.priority { return 8; };
-        func ::.symbol   { return "f2_t"; };
+        func ::.priority = 8;
+        func ::.symbol   = "f2_t";
         func ::.solve
         {
             result.h =< a[0].clone();
@@ -410,166 +410,164 @@ group :ar1 = retrievable
             result.can_settle    = ( result.h ) && !result.h.m.active;
             result.type_vop_ap   = bhvm_vop_ar1_cpy_s~;
             result.type_vop_dp_a = bhvm_vop_ar1_acc_s~;
-            return true;
+            = true;
         };
     };
 
     stamp :neg_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "neg"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_neg_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar1_neg_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "neg";
+        func ::.type_vop_ap   = bhvm_vop_ar1_neg_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar1_neg_dp_s~;
         func ::.create_op_of_arn
-        {
-            return ( n == 2 ) ? (::*)::ar2_sub_s!
-                 : ( n == 1 ) ? (::*)o.clone()
-                 : NULL;
-        };
+            = ( n == 2 ) ? (::*)::ar2_sub_s!
+            : ( n == 1 ) ? (::*)o.clone()
+            : NULL;
     };
 
     stamp :floor_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "floor"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_floor_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority      = 8;
+        func ::.symbol        = "floor";
+        func ::.type_vop_ap   = bhvm_vop_ar1_floor_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :ceil_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "ceil"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_ceil_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority      = 8;
+        func ::.symbol        = "ceil";
+        func ::.type_vop_ap   = bhvm_vop_ar1_ceil_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :abs_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "abs"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_abs_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_abs_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "abs";
+        func ::.type_vop_ap   = bhvm_vop_ar1_abs_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_abs_dp_s~;
     };
 
     stamp :exp_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "exp"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_exp_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_exp_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "exp";
+        func ::.type_vop_ap   = bhvm_vop_ar1_exp_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_exp_dp_s~;
     };
 
     stamp :log_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "log"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_log_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_log_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "log";
+        func ::.type_vop_ap   = bhvm_vop_ar1_log_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_log_dp_s~;
     };
 
     stamp :inv_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "inv"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_inv_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_inv_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "inv";
+        func ::.type_vop_ap   = bhvm_vop_ar1_inv_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_inv_dp_s~;
     };
 
     stamp :sqr_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "sqr"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_sqr_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_sqr_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "sqr";
+        func ::.type_vop_ap   = bhvm_vop_ar1_sqr_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_sqr_dp_s~;
     };
 
     stamp :srt_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "srt"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_srt_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_srt_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "srt";
+        func ::.type_vop_ap   = bhvm_vop_ar1_srt_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_srt_dp_s~;
     };
 
     stamp :sigm_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "sigm"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_sigm_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_sigm_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "sigm";
+        func ::.type_vop_ap   = bhvm_vop_ar1_sigm_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_sigm_dp_s~;
     };
 
     stamp :sigm_hard_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "sigm_hard"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_sigm_hard_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_sigm_hard_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "sigm_hard";
+        func ::.type_vop_ap   = bhvm_vop_ar1_sigm_hard_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_sigm_hard_dp_s~;
     };
 
     stamp :sigm_leaky_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "sigm_leaky"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_sigm_leaky_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_sigm_leaky_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "sigm_leaky";
+        func ::.type_vop_ap   = bhvm_vop_ar1_sigm_leaky_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_sigm_leaky_dp_s~;
     };
 
     stamp :tanh_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "tanh"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_tanh_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_tanh_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "tanh";
+        func ::.type_vop_ap   = bhvm_vop_ar1_tanh_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_tanh_dp_s~;
     };
 
     stamp :tanh_hard_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "tanh_hard"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_tanh_hard_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_tanh_hard_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "tanh_hard";
+        func ::.type_vop_ap   = bhvm_vop_ar1_tanh_hard_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_tanh_hard_dp_s~;
     };
 
     stamp :tanh_leaky_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "tanh_leaky"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_tanh_leaky_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_tanh_leaky_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "tanh_leaky";
+        func ::.type_vop_ap   = bhvm_vop_ar1_tanh_leaky_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_tanh_leaky_dp_s~;
     };
 
     stamp :softplus_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "softplus"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_softplus_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_softplus_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "softplus";
+        func ::.type_vop_ap   = bhvm_vop_ar1_softplus_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_softplus_dp_s~;
     };
 
     stamp :softmax_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "softmax"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_softmax_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_softmax_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "softmax";
+        func ::.type_vop_ap   = bhvm_vop_ar1_softmax_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_softmax_dp_s~;
     };
 
     stamp :relu_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "relu"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_relu_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_relu_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "relu";
+        func ::.type_vop_ap   = bhvm_vop_ar1_relu_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_relu_dp_s~;
     };
 
     stamp :relu_leaky_s =
     {
-        func ::.priority      { return 8; };
-        func ::.symbol        { return "relu_leaky"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar1_relu_leaky_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_relu_leaky_dp_s~; };
+        func ::.priority      = 8;
+        func ::.symbol        = "relu_leaky";
+        func ::.type_vop_ap   = bhvm_vop_ar1_relu_leaky_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_relu_leaky_dp_s~;
     };
 
     /// formal output (used for resolving the network; not part of syntax)
@@ -586,8 +584,8 @@ group :ar1 = retrievable
     stamp :adaptive_s =
     {
         tp_t name;
-        func ::.priority    { return 8; };
-        func ::.is_adaptive { return true; };
+        func ::.priority    = 8;
+        func ::.is_adaptive = true;
         func ::.solve;
         func ::.settle;
     };
@@ -597,8 +595,8 @@ group :ar1 = retrievable
     /// returns leading dimension as constant
     stamp :dimof_s =
     {
-        func ::.symbol   { return "dimof"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "dimof";
+        func ::.priority = 8;
         func ::.solve
         {
             if( a[0] )
@@ -609,15 +607,15 @@ group :ar1 = retrievable
                 result.can_settle = true;
             }
             result.codable = false;
-            return true;
-        };
-    };
+            = true;
+        }
+    }
 
     /// returns volume as constant
     stamp :volof_s =
     {
-        func ::.symbol   { return "volof"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "volof";
+        func ::.priority = 8;
         func ::.solve
         {
             if( a[0] )
@@ -628,8 +626,8 @@ group :ar1 = retrievable
                 result.can_settle = true;
             }
             result.codable = false;
-            return true;
-        };
+            = true;
+        }
     };
 
     /** Converts input holor to constant.
@@ -638,8 +636,8 @@ group :ar1 = retrievable
      */
     stamp :constof_s =
     {
-        func ::.symbol   { return "constof"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "constof";
+        func ::.priority = 8;
         func ::.solve
         {
             if( a[0] )
@@ -650,15 +648,15 @@ group :ar1 = retrievable
                 result.can_settle = true;
             }
             result.codable = false;
-            return true;
-        };
+            = true;
+        }
     };
 
     /// returns input holor as constant where all values are set to zero
     stamp :zeroof_s =
     {
-        func ::.symbol   { return "zeroof"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "zeroof";
+        func ::.priority = 8;
         func ::.solve
         {
             if( a[0] )
@@ -670,15 +668,15 @@ group :ar1 = retrievable
                 result.can_settle = true;
             }
             result.codable = false;
-            return true;
+            = true;
         };
     };
 
     /// returns shape-only (vacant holor) as constant
     stamp :shapeof_s =
     {
-        func ::.symbol   { return "shapeof"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "shapeof";
+        func ::.priority = 8;
         func ::.solve
         {
             if( a[0] )
@@ -691,7 +689,7 @@ group :ar1 = retrievable
                 result.can_settle = true;
             }
             result.codable = false;
-            return true;
+            = true;
         };
     };
 
@@ -703,8 +701,8 @@ group :ar1 = retrievable
      */
     stamp :rand_s =
     {
-        func ::.symbol   { return "rand"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "rand";
+        func ::.priority = 8;
         func ::.solve;
         func ::.settle;
     };
@@ -712,8 +710,8 @@ group :ar1 = retrievable
     /// Cast operator reinterpreting a holor as transposed.
     stamp :cast_htp_s =
     {
-        func ::.priority  { return 12; };
-        func ::.symbol    { return "htp"; };
+        func ::.priority  = 12;
+        func ::.symbol    = "htp";
         func ::.solve;
         func ::.mcode_push_ap_holor;
         func ::.mcode_push_dp_holor;
@@ -725,7 +723,7 @@ group :ar1 = retrievable
     stamp :reshape_s =
     {
         bhvm_shape_s shape;
-        func ::.priority  { return 8; };
+        func ::.priority  = 8;
         // no symbol because this operator is created from ar2_reshape
         func ::.solve;
         func ::.mcode_push_ap_holor;
@@ -740,70 +738,70 @@ group :ar2 = retrievable
 {
     extending stump verbatim :_s = aware :
     {
-        func ::.arity { return 2; };
-        func ::.reserved { return true; };
+        func ::.arity = 2;
+        func ::.reserved = true;
     };
 
     stamp :add_s =
     {
-        func ::.priority      { return 8; };
-        func ::.eci           { return true; };
-        func ::.symbol        { return "+"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar2_add_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar1_add_dp_a_s~; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar1_add_dp_b_s~; };
+        func ::.priority      = 8;
+        func ::.eci           = true;
+        func ::.symbol        = "+";
+        func ::.type_vop_ap   = bhvm_vop_ar2_add_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar1_add_dp_a_s~;
+        func ::.type_vop_dp_b = bhvm_vop_ar1_add_dp_b_s~;
     };
 
     stamp :sub_s =
     {
-        func ::.priority      { return 8; };
-        func ::.eci           { return true; };
-        func ::.symbol        { return "-"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar2_sub_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar1_sub_dp_a_s~; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar1_sub_dp_b_s~; };
+        func ::.priority      = 8;
+        func ::.eci           = true;
+        func ::.symbol        = "-";
+        func ::.type_vop_ap   = bhvm_vop_ar2_sub_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar1_sub_dp_a_s~;
+        func ::.type_vop_dp_b = bhvm_vop_ar1_sub_dp_b_s~;
         func ::.create_op_of_arn
         {
-            return ( n == 2 ) ? (::*)@_clone( o )
+            = ( n == 2 ) ? (::*)@_clone( o )
                  : ( n == 1 ) ? (::*)::ar1_neg_s_create()
                  : NULL;
-        };
+        }
     };
 
     stamp :mul_s =
     {
-        func ::.priority      { return 10; };
-        func ::.eci           { return true; };
-        func ::.symbol        { return "*"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar2_mul_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_mul_dp_a_s~; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar2_mul_dp_b_s~; };
+        func ::.priority      = 10;
+        func ::.eci           = true;
+        func ::.symbol        = "*";
+        func ::.type_vop_ap   = bhvm_vop_ar2_mul_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_mul_dp_a_s~;
+        func ::.type_vop_dp_b = bhvm_vop_ar2_mul_dp_b_s~;
     };
 
     stamp :div_s =
     {
-        func ::.priority      { return 10; };
-        func ::.eci           { return true; };
-        func ::.symbol        { return "/"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar2_div_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar2_div_dp_a_s~; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar3_div_dp_b_s~; };
+        func ::.priority      = 10;
+        func ::.eci           = true;
+        func ::.symbol        = "/";
+        func ::.type_vop_ap   = bhvm_vop_ar2_div_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar2_div_dp_a_s~;
+        func ::.type_vop_dp_b = bhvm_vop_ar3_div_dp_b_s~;
     };
 
     stamp :pow_s =
     {
-        func ::.priority      { return 12; };
-        func ::.eci           { return true; };
-        func ::.symbol        { return "^"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar2_pow_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar3_pow_dp_a_s~; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar3_pow_dp_b_s~; };
+        func ::.priority      = 12;
+        func ::.eci           = true;
+        func ::.symbol        = "^";
+        func ::.type_vop_ap   = bhvm_vop_ar2_pow_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar3_pow_dp_a_s~;
+        func ::.type_vop_dp_b = bhvm_vop_ar3_pow_dp_b_s~;
     };
 
     stamp :bmul_s =
     {
-        func ::.priority { return 10; };
-        func ::.symbol   { return "**"; };
+        func ::.priority = 10;
+        func ::.symbol   = "**";
         func ::.solve;
     };
 
@@ -811,74 +809,74 @@ group :ar2 = retrievable
 
     stamp :logic_equal_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return "=="; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_equal_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = "==";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_equal_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :logic_unequal_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return "!="; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_unequal_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = "!=";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_unequal_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :logic_larger_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return ">"; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_larger_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = ">";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_larger_s~;
+        func ::.mcode_push_dp_holor { = -1; }; // no gradient
     };
 
     stamp :logic_smaller_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return "<"; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_smaller_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = "<";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_smaller_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :logic_larger_equal_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return ">="; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_larger_equal_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = ">=";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_larger_equal_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :logic_smaller_equal_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return "<="; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_smaller_equal_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = "<=";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_smaller_equal_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :logic_and_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return "&&"; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_and_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = "&&";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_and_s~;
+        func ::.mcode_push_dp_holor = -1; // no gradient
     };
 
     stamp :logic_or_s =
     {
-        func ::.priority    { return 6; };
-        func ::.eci         { return true; };
-        func ::.symbol      { return "||"; };
-        func ::.type_vop_ap { return bhvm_vop_ar2_logic_or_s~; };
-        func ::.mcode_push_dp_holor { return -1; }; // no gradient
+        func ::.priority    = 6;
+        func ::.eci         = true;
+        func ::.symbol      = "||";
+        func ::.type_vop_ap = bhvm_vop_ar2_logic_or_s~;
+        func ::.mcode_push_dp_holor { = -1; }; // no gradient
     };
 
     /// special operators ------------------------------------------------------
@@ -886,40 +884,40 @@ group :ar2 = retrievable
     // constructive concatenation defined in bhvm_holor_s_cat_set
     stamp :cat_s =
     {
-        func ::.priority { return 6; };
-        func ::.symbol   { return ":"; };
+        func ::.priority = 6;
+        func ::.symbol   = ":";
         func ::.solve;
-        func ::.type_vop_ap   { return bhvm_vop_ar2_cat_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar1_cat_dp_a_s~; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar1_cat_dp_b_s~; };
+        func ::.type_vop_ap   = bhvm_vop_ar2_cat_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar1_cat_dp_a_s~;
+        func ::.type_vop_dp_b = bhvm_vop_ar1_cat_dp_b_s~;
     };
 
     // conservative concatenation defined in bhvm_holor_s_ccat_set
     stamp :ccat_s =
     {
-        func ::.priority { return 8; };
-        func ::.symbol   { return "::"; };
+        func ::.priority = 8;
+        func ::.symbol   = "::";
         func ::.solve;
-        func ::.type_vop_ap   { return bhvm_vop_ar2_ccat_s~; };
-        func ::.type_vop_dp_a { return bhvm_vop_ar1_ccat_dp_a_s~; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar1_ccat_dp_b_s~; };
+        func ::.type_vop_ap   = bhvm_vop_ar2_ccat_s~;
+        func ::.type_vop_dp_a = bhvm_vop_ar1_ccat_dp_a_s~;
+        func ::.type_vop_dp_b = bhvm_vop_ar1_ccat_dp_b_s~;
     };
 
     stamp :order_inc_s =
     {
-        func ::.priority { return 21; };
-        func ::.symbol   { return "["; };
+        func ::.priority = 21;
+        func ::.symbol   = "[";
         func ::.solve;
         func ::.mcode_push_ap_track;
-        func ::.type_vop_dp_a { return 0; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar1_add_dp_b_s~; };
+        func ::.type_vop_dp_a = 0;
+        func ::.type_vop_dp_b = bhvm_vop_ar1_add_dp_b_s~;
     };
 
     // r-value is (scalar) index
     stamp :order_dec_s =
     {
-        func ::.priority { return 20; };
-        func ::.symbol   { return "]"; };
+        func ::.priority = 20;
+        func ::.symbol   = "]";
         func ::.solve;
         func ::.mcode_push_ap_holor;
         func ::.mcode_push_dp_holor;
@@ -931,13 +929,13 @@ group :ar2 = retrievable
     {
         tp_t name;
 
-        func ::.priority { return 8; };
-        func ::.is_cyclic { return true; };
+        func ::.priority = 8;
+        func ::.is_cyclic = true;
         func ::.solve;
         func ::.solve_node;  // Implemented in opal_net.c
         func ::.mcode_push_ap_track { ERR_fa( "Not implemented." ); };
         func ::.mcode_push_dp_track { ERR_fa( "Not implemented." ); };
-        func ::.mcode_push_dp_holor { ERR_fa( "Not implemented." ); return -1; };
+        func ::.mcode_push_dp_holor { ERR_fa( "Not implemented." ); = -1; };
     };
 
     /** Binary self-seeding random generator
@@ -947,8 +945,8 @@ group :ar2 = retrievable
      */
     stamp :rands_s =
     {
-        func ::.symbol   { return "rands"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "rands";
+        func ::.priority = 8;
         func ::.solve;
         func ::.settle;
     };
@@ -958,13 +956,13 @@ group :ar2 = retrievable
      */
     stamp :reshape_s =
     {
-        func ::.symbol   { return "reshape"; };
-        func ::.priority { return 8; };
+        func ::.symbol   = "reshape";
+        func ::.priority = 8;
 
         func ::.solve
         {
             ERR_fa( "This function should never be called from feature 'solve_node'." );
-            return false;
+            = false;
         };
 
         /** Explicitly solves node with this operator; creates operator ar1_reshape replacing uplink channel 0 with channel 1.
@@ -981,19 +979,19 @@ group :ar3 = retrievable
 {
     extending stump verbatim :_s = aware :
     {
-        func ::.arity    { return 3; };
-        func ::.reserved { return true; };
+        func ::.arity    = 3;
+        func ::.reserved = true;
     };
 
     stamp :iff_s =
     {
-        func ::.priority      { return 4; };
-        func ::.eci           { return true; };
-        func ::.symbol        { return "iff"; };
-        func ::.type_vop_ap   { return bhvm_vop_ar3_iff_s~; };
-        func ::.type_vop_dp_a { return 0; };
-        func ::.type_vop_dp_b { return bhvm_vop_ar2_iff_dp_b_s~; };
-        func ::.type_vop_dp_c { return bhvm_vop_ar2_iff_dp_c_s~; };
+        func ::.priority      = 4;
+        func ::.eci           = true;
+        func ::.symbol        = "iff";
+        func ::.type_vop_ap   = bhvm_vop_ar3_iff_s~;
+        func ::.type_vop_dp_a = 0;
+        func ::.type_vop_dp_b = bhvm_vop_ar2_iff_dp_b_s~;
+        func ::.type_vop_dp_c = bhvm_vop_ar2_iff_dp_c_s~;
     };
 
 };

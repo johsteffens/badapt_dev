@@ -314,7 +314,7 @@ stamp :link_s = aware :
     private :link_s -> dn;   // down link
     private :cell_s* cell; // cell owning the link (only if link is part of membrane)
     bl_t     exit; // true: link is of cell's exit membrane. false: entry membrane
-    func :. get_name = :get_name_;
+    func :. get_name :get_name_;
     func :.set_name_visible   { o->name = name; o->visible = true; };
     func :.set_name_invisible { o->name = name; o->visible = false; };
     func :.is_visible { return o->visible; };
@@ -430,7 +430,7 @@ stamp :cell_s = aware :
     // if cell is a wrapper, wrapped_cell is the cell being wrapped
     private :cell_s    -> wrapped_cell;
 
-    func :.get_name = :get_name_;
+    func :.get_name :get_name_;
 
     func :.set_name_visible   { o->name = name; o->visible = true; };
     func :.set_name_invisible { o->name = name; o->visible = false; };
