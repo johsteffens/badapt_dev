@@ -66,7 +66,7 @@ stamp :selector_s =
         return 0;
     };
 
-    func( hidx get_hidx( @* o, opal_frame_s* frame, m opal_frame_hidx_s* hidx ) )
+    func hidx get_hidx( @* o, opal_frame_s* frame, m opal_frame_hidx_s* hidx )
     {
         hidx.clear();
 

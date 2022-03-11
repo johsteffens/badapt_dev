@@ -414,14 +414,14 @@ stamp :cyclic_s = aware :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (void sc_run_ap( sc_t sc, bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex ))
+func void sc_run_ap( sc_t sc, bhvm_holor_s** en, sz_t size_en, m bhvm_holor_s** ex, sz_t size_ex )
 {
     opal_frame_s_create_from_sc( sc, en, size_en )^.run_axon_pass( en, size_en, ex, size_ex );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (void sc_run_dp( sc_t sc, bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en ))
+func void sc_run_dp( sc_t sc, bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s** en, sz_t size_en )
 {
     opal_frame_s_create_from_sc( sc, ex, size_ex )^.run_dendrite_pass( ex, size_ex, en, size_en );
 };
@@ -432,7 +432,7 @@ func (void sc_run_dp( sc_t sc, bhvm_holor_s** ex, sz_t size_ex, m bhvm_holor_s**
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (m st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, opal_context* context, m st_s* st ))
+func m st_s* hmeta_get_global_name_st( bhvm_mcode_hmeta* hmeta, opal_context* context, m st_s* st )
 {
     st.clear();
     if( hmeta && hmeta._ == opal_holor_meta_s~ )

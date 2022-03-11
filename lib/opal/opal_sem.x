@@ -54,12 +54,12 @@ group :context = opal_context
             return o.setup_cell( ::cell_s! );
         };
 
-        func (tp_t entypeof_fv( m @* o, sc_t format, va_list args ))
+        func tp_t entypeof_fv( m @* o, sc_t format, va_list args )
         {
             return o.entypeof( st_s_create_fv( format, args )^.sc );
         };
 
-        func (tp_t entypeof_fa( m @* o, sc_t format, ... ))
+        func tp_t entypeof_fa( m @* o, sc_t format, ... )
         {
             va_list args; va_start( args, format );
             tp_t tp = o.entypeof_fv( format, args );
@@ -67,7 +67,7 @@ group :context = opal_context
             return tp;
         };
 
-        func (tp_t parse_name( m @* o, m x_source* source ))
+        func tp_t parse_name( m @* o, m x_source* source )
         {
             m st_s* name = st_s!^;
             source.parse_fa( " #name", name );
@@ -75,10 +75,10 @@ group :context = opal_context
             return o.entypeof( name.sc );
         };
 
-        func (bl_t is_control_type(  c @* o, tp_t name )) { return o.control_types.exists( name ); };
-        func (bl_t is_reserved_name( c @* o, tp_t name )) { return o.reserved_names.exists( name ); };
+        func bl_t is_control_type(  c @* o, tp_t name ) { return o.control_types.exists( name ); };
+        func bl_t is_reserved_name( c @* o, tp_t name ) { return o.reserved_names.exists( name ); };
 
-        func (tp_t parse_var_name( m @* o, m x_source* source ))
+        func tp_t parse_var_name( m @* o, m x_source* source )
         {
             tp_t name = o.parse_name( source );
             if( o.is_reserved_name( name ) )
@@ -97,10 +97,10 @@ group :stack =
     stamp :s = aware :
     {
         bcore_arr_vd_s arr;
-        func (sz_t size( c @* o )) { return o.arr.size; };
-        func (m x_inst* push( m @* o, m x_inst* value )) { o.arr.push( value ); return value; };
-        func (m x_inst* pop(  m @* o )) { return (x_inst*)o.arr.pop(); };
-        func (m x_inst* pop_of_type(  m @* o, tp_t type, m x_source* source ))
+        func sz_t size( c @* o ) { return o.arr.size; };
+        func m x_inst* push( m @* o, m x_inst* value ) { o.arr.push( value ); return value; };
+        func m x_inst* pop(  m @* o ) { return (x_inst*)o.arr.pop(); };
+        func m x_inst* pop_of_type(  m @* o, tp_t type, m x_source* source )
         {
             m x_inst* v = o.pop();
             if( v._ == type ) return v;
@@ -108,7 +108,7 @@ group :stack =
             return NULL;
         };
 
-        func (m x_inst* pop_of_value( m @* o, m x_inst* value, m x_source* source ))
+        func m x_inst* pop_of_value( m @* o, m x_inst* value, m x_source* source )
         {
             m x_inst* v = o.pop();
             if( v == value ) return v;
@@ -116,22 +116,22 @@ group :stack =
             return NULL;
         };
 
-        func (bl_t is_of_type( m @* o, sz_t idx, tp_t type ))
+        func bl_t is_of_type( m @* o, sz_t idx, tp_t type )
         {
             if( idx <= 0 || idx > o.arr.size ) return false;
             return *(aware_t*)o.arr.[ o.arr.size - idx ] == type;
         };
 
-        func (bl_t is_of_value( m @* o, sz_t idx, m x_inst* value ))
+        func bl_t is_of_value( m @* o, sz_t idx, m x_inst* value )
         {
             if( idx <= 0 || idx > o.arr.size ) return false;
             return ( o.arr.[ o.arr.size - idx ].cast( m x_inst* ) == value );
         };
 
-        func (m ::link_s* pop_link( m @* o, m x_source* source )) { return o.pop_of_type( ::link_s~, source ).cast(m ::link_s*); };
-        func (m ::cell_s* pop_cell( m @* o, m x_source* source )) { return o.pop_of_type( ::cell_s~, source ).cast(m ::cell_s*); };
+        func m ::link_s* pop_link( m @* o, m x_source* source ) { return o.pop_of_type( ::link_s~, source ).cast(m ::link_s*); };
+        func m ::cell_s* pop_cell( m @* o, m x_source* source ) { return o.pop_of_type( ::cell_s~, source ).cast(m ::cell_s*); };
 
-        func (m ::link_s* pop_link_or_exit( m @* o, m x_source* source ))
+        func m ::link_s* pop_link_or_exit( m @* o, m x_source* source )
         {
             m x_inst* v = o.pop();
             if     ( v._ == ::link_s~ )
@@ -209,17 +209,17 @@ group :id = :
 
         func :.parse_sc { return o.parse( x_source_create_from_sc( sc )^ ); };
 
-        func (s2_t cmp(           @* o, @* b )) { return o.arr.cmp( b.arr ); };
-        func (bl_t is_equal(      @* o, @* b )) { return o.cmp( b ) == 0; };
-        func (bl_t matches_front( @* o, @* b )) { s2_t v = o.cmp( b ); return v == 0 || v == 1; };
-        func (bl_t matches_tail(  @* o, @* b ))
+        func s2_t cmp(           @* o, @* b ) { return o.arr.cmp( b.arr ); };
+        func bl_t is_equal(      @* o, @* b ) { return o.cmp( b ) == 0; };
+        func bl_t matches_front( @* o, @* b ) { s2_t v = o.cmp( b ); return v == 0 || v == 1; };
+        func bl_t matches_tail(  @* o, @* b )
         {
             if( o.arr.size > b.arr.size ) return false;
             foreach( tp_t t in o.arr ) if( t != b.arr.[ b.arr.size - o.arr.size + __i ] ) return false;
             return true;
         };
 
-        func (tp_t get_front_hash( @* o, sz_t size ))
+        func tp_t get_front_hash( @* o, sz_t size )
         {
             size = sz_max( size, o.arr.size );
             tp_t hash = bcore_tp_init();
@@ -227,7 +227,7 @@ group :id = :
             return hash;
         };
 
-        func (tp_t get_tail_hash( @* o, sz_t size ))
+        func tp_t get_tail_hash( @* o, sz_t size )
         {
             size = sz_max( size, o.arr.size );
             sz_t start = o.arr.size - size;
@@ -236,16 +236,16 @@ group :id = :
             return hash;
         };
 
-        func (tp_t get_tail_hash_after_sub_id( @* o, @* sub_id ))
+        func tp_t get_tail_hash_after_sub_id( @* o, @* sub_id )
         {
             sz_t index = o.find( sub_id );
             index = ( index < 0 ) ? 0 : index + sub_id.arr.size;
             return o.get_tail_hash( o.arr.size - index );
         };
 
-        func (tp_t get_hash( @* o )) { return o.get_front_hash( o.arr.size ); };
+        func tp_t get_hash( @* o ) { return o.get_front_hash( o.arr.size ); };
 
-        func (o copy_front( mutable @* o, @* b, sz_t size ))
+        func o copy_front( mutable @* o, @* b, sz_t size )
         {
             sz_t min_size = sz_min( size, b.arr.size );
             o.arr.set_size( min_size );
@@ -253,7 +253,7 @@ group :id = :
             return o;
         };
 
-        func (o copy_tail( mutable @* o, @* b, sz_t size ))
+        func o copy_tail( mutable @* o, @* b, sz_t size )
         {
             sz_t min_size = sz_min( size, b.arr.size );
             o.arr.set_size( min_size );
@@ -261,11 +261,11 @@ group :id = :
             return o;
         };
 
-        func (d @* create_front( @* o, sz_t size )) { return @!.copy_front( o, size ); };
-        func (d @* create_tail ( @* o, sz_t size )) { return @!.copy_tail ( o, size ); };
+        func d @* create_front( @* o, sz_t size ) { return @!.copy_front( o, size ); };
+        func d @* create_tail ( @* o, sz_t size ) { return @!.copy_tail ( o, size ); };
 
         /// returns index of first match or -1 if not found;
-        func (sz_t find( @* o, @* b ))
+        func sz_t find( @* o, @* b )
         {
             if( b.arr.size > o.arr.size ) return -1;
             for( sz_t i = 0; i < o.arr.size; i++ )
@@ -373,7 +373,7 @@ stamp :links_s = aware x_array
         return count;
     };
 
-    func (m @* trace_to_cell_membrane( m @* o ));
+    func m @* trace_to_cell_membrane( m @* o );
 
 };
 
@@ -461,9 +461,9 @@ stamp :cell_s = aware :
     };
 
     // push semantic item to cell's body ...
-    func (m :* push_sem( m @* o, tp_t type )) { return o.body!.push_t( type ); };
-    func (m :link_s* push_link( m @* o )) { return o.push_sem( :link_s~ ).cast( m :link_s* ); };
-    func (m @* push_cell( m @* o ))
+    func m :* push_sem( m @* o, tp_t type ) { return o.body!.push_t( type ); };
+    func m :link_s* push_link( m @* o ) { return o.push_sem( :link_s~ ).cast( m :link_s* ); };
+    func m @* push_cell( m @* o )
     {
         m @* cell = o.push_sem( @~ ).cast( m @* );
         cell->parent = o;
@@ -472,35 +472,35 @@ stamp :cell_s = aware :
         return cell;
     };
 
-    func (m @* push_cell_nop_d_invisible( m @* o, d opal_nop* nop )) { m @* cell = o.push_cell_nop_d( nop ); cell.visible = false; return cell; };
-    func (m @* set_source( m @* o, m x_source* source )) { o.source_point.setup_from_source( source ); return o; };
-    func (m @* push_cell_nop_d_set_source( m @* o, d opal_nop* nop, m x_source* source )) { return o.push_cell_nop_d( nop ).set_source( source ); };
-    func (m @* push_cell_nop_d(                      m @* o, d opal_nop* nop ));
-    func (m @* push_cell_nop_d_invisible_set_source( m @* o, d opal_nop* nop, m x_source* source )) { return o.push_cell_nop_d_invisible( nop ).set_source( source ); };
-    func (m @* push_wrap_cell_hard( m @* o, m @* src )) { return o.push_cell().wrap_cell_hard( src ); };
-    func (m @* push_wrap_cell_soft( m @* o, m @* src )) { return o.push_cell().wrap_cell_soft( src ); };
-    func (m @* push_rewrap_cell_soft(     m @* o, m @* src )) { return o.push_cell().rewrap_cell_soft( src ); };
-    func (m @* push_wrap_cell_set_source( m @* o, m @* src, m x_source* source )) { return o.push_wrap_cell_soft( src ).set_source( source ); };
+    func m @* push_cell_nop_d_invisible( m @* o, d opal_nop* nop ) { m @* cell = o.push_cell_nop_d( nop ); cell.visible = false; return cell; };
+    func m @* set_source( m @* o, m x_source* source ) { o.source_point.setup_from_source( source ); return o; };
+    func m @* push_cell_nop_d_set_source( m @* o, d opal_nop* nop, m x_source* source ) { return o.push_cell_nop_d( nop ).set_source( source ); };
+    func m @* push_cell_nop_d(                      m @* o, d opal_nop* nop );
+    func m @* push_cell_nop_d_invisible_set_source( m @* o, d opal_nop* nop, m x_source* source ) { return o.push_cell_nop_d_invisible( nop ).set_source( source ); };
+    func m @* push_wrap_cell_hard( m @* o, m @* src ) { return o.push_cell().wrap_cell_hard( src ); };
+    func m @* push_wrap_cell_soft( m @* o, m @* src ) { return o.push_cell().wrap_cell_soft( src ); };
+    func m @* push_rewrap_cell_soft(     m @* o, m @* src ) { return o.push_cell().rewrap_cell_soft( src ); };
+    func m @* push_wrap_cell_set_source( m @* o, m @* src, m x_source* source ) { return o.push_wrap_cell_soft( src ).set_source( source ); };
 
-    func (void create_args_out( m @* o, m x_source* source ));
-    func (void create_args_in(  m @* o, m :cell_s* frame, m x_source* source ));
-    func (void wrap_cell(       m @* o, m :cell_s* cell ));
-    func (void             parse(               m @* o,                      m x_source* source ));
-    func (void             parse_body(          m @* o,                      m x_source* source ));
-    func (m opal_sem*        evaluate_sem(        m @* o,                    m x_source* source ));
-    func (m opal_sem*        evaluate_sem_stack(  m @* o, m :stack_s* stack, m x_source* source ));
-    func (m opal_sem_cell_s* evaluate_cell(       m @* o,                    m x_source* source ));
-    func (m opal_sem_cell_s* evaluate_cell_stack( m @* o, m :stack_s* stack, m x_source* source ));
-    func (m opal_sem_link_s* evaluate_link(       m @* o,                    m x_source* source ));
-    func (m opal_sem_link_s* evaluate_link_stack( m @* o, m :stack_s* stack, m x_source* source ));
-    func (void             set_channels(        m @* o, sz_t excs, sz_t encs ));
+    func void create_args_out( m @* o, m x_source* source );
+    func void create_args_in(  m @* o, m :cell_s* frame, m x_source* source );
+    func void wrap_cell(       m @* o, m :cell_s* cell );
+    func void               parse(               m @* o,                    m x_source* source );
+    func void               parse_body(          m @* o,                    m x_source* source );
+    func m opal_sem*        evaluate_sem(        m @* o,                    m x_source* source );
+    func m opal_sem*        evaluate_sem_stack(  m @* o, m :stack_s* stack, m x_source* source );
+    func m opal_sem_cell_s* evaluate_cell(       m @* o,                    m x_source* source );
+    func m opal_sem_cell_s* evaluate_cell_stack( m @* o, m :stack_s* stack, m x_source* source );
+    func m opal_sem_link_s* evaluate_link(       m @* o,                    m x_source* source );
+    func m opal_sem_link_s* evaluate_link_stack( m @* o, m :stack_s* stack, m x_source* source );
+    func void               set_channels(        m @* o, sz_t excs, sz_t encs );
 
     /// Context wrappers
-    func (sc_t nameof(   c @* o, tp_t name )) { return o.context.nameof( name ); };
-    func (sc_t ifnameof( c @* o, tp_t name )) { return o.context.ifnameof( name ); };
-    func (tp_t entypeof( c @* o, sc_t name )) { return o.context.entypeof( name ); };
-    func (tp_t entypeof_fv( c @* o, sc_t format, va_list args )) { return o.context.entypeof( st_s_create_fv( format, args )^->sc ); };
-    func (tp_t entypeof_fa( c @* o, sc_t format, ... ))
+    func sc_t nameof(   c @* o, tp_t name ) { return o.context.nameof( name ); };
+    func sc_t ifnameof( c @* o, tp_t name ) { return o.context.ifnameof( name ); };
+    func tp_t entypeof( c @* o, sc_t name ) { return o.context.entypeof( name ); };
+    func tp_t entypeof_fv( c @* o, sc_t format, va_list args ) { return o.context.entypeof( st_s_create_fv( format, args )^->sc ); };
+    func tp_t entypeof_fa( c @* o, sc_t format, ... )
     {
         va_list args; va_start( args, format );
         tp_t tp = o.entypeof_fv( format, args );
@@ -508,11 +508,11 @@ stamp :cell_s = aware :
         return tp;
     };
 
-    func (tp_t parse_name(       c @* o, m x_source* source )) { return o.context.parse_name( source ); };
-    func (tp_t parse_op2_symbol( c @* o, m x_source* source )) { return o.context.parse_op2_symbol( source ); };
-    func (bl_t is_control_type(  c @* o, tp_t name )) { return o.context.is_control_type( name ); };
-    func (bl_t is_reserved_name( c @* o, tp_t name )) { return o.context.is_reserved_name( name ); };
-    func (tp_t parse_var_name(   c @* o, m x_source* source )) { return o.context.parse_var_name( source ); };
+    func tp_t parse_name(       c @* o, m x_source* source ) { return o.context.parse_name( source ); };
+    func tp_t parse_op2_symbol( c @* o, m x_source* source ) { return o.context.parse_op2_symbol( source ); };
+    func bl_t is_control_type(  c @* o, tp_t name ) { return o.context.is_control_type( name ); };
+    func bl_t is_reserved_name( c @* o, tp_t name ) { return o.context.is_reserved_name( name ); };
+    func tp_t parse_var_name(   c @* o, m x_source* source ) { return o.context.parse_var_name( source ); };
 
 };
 
@@ -603,7 +603,7 @@ group :tree = :
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:context_s) (tp_t parse_op2_symbol( c @* o, m x_source* source ))
+func (:context_s) tp_t parse_op2_symbol( c @* o, m x_source* source )
 {
     c bcore_arr_st_s* arr = o.arr_symbol_op2;
 
@@ -682,7 +682,7 @@ func (:context_s) :.setup
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (d :link_s* link_s_create_setup( tp_t name, m :link_s* up, m :link_s* dn, m :cell_s* cell, bl_t exit ))
+func d :link_s* link_s_create_setup( tp_t name, m :link_s* up, m :link_s* dn, m :cell_s* cell, bl_t exit )
 {
     d :link_s* o = :link_s!;
     o.set_name_visible( name );
@@ -696,7 +696,7 @@ func (d :link_s* link_s_create_setup( tp_t name, m :link_s* up, m :link_s* dn, m
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Traces link to next membrane; returns NULL in case trace ends in open link
-func (:link_s) (m @* trace_to_cell_membrane( m @* o ))
+func (:link_s) m @* trace_to_cell_membrane( m @* o )
 {
     if( !o || o.cell ) return o;
     return o.up.trace_to_cell_membrane();
@@ -705,7 +705,7 @@ func (:link_s) (m @* trace_to_cell_membrane( m @* o ))
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Traces link to next cell; returns NULL in case trace ends in open link
-func (:link_s) (m :cell_s* trace_to_cell( m @* o ))
+func (:link_s) m :cell_s* trace_to_cell( m @* o )
 {
     m :link_s* link = o.trace_to_cell_membrane();
     if( link )
@@ -739,7 +739,7 @@ func (:cell_s) set_channels
 /** Adds a wrapping membrane only exposing unspecified entry links.
   * links of src are not modified; returns o
   */
-func (:cell_s) (m @* wrap_cell_soft( m @* o, m @* src ))
+func (:cell_s) m @* wrap_cell_soft( m @* o, m @* src )
 {
     ASSERT( !o.body );
     ASSERT( !o.nop  );
@@ -773,7 +773,7 @@ func (:cell_s) (m @* wrap_cell_soft( m @* o, m @* src ))
   * Explicitly moves entry links of src to the wrapping membrane
   * Returns o.
   */
-func (:cell_s) (m @* wrap_cell_hard( m @* o, m :cell_s* src ))
+func (:cell_s) m @* wrap_cell_hard( m @* o, m :cell_s* src )
 {
     ASSERT( !o.body );
     ASSERT( !o.nop  );
@@ -805,7 +805,7 @@ func (:cell_s) (m @* wrap_cell_hard( m @* o, m :cell_s* src ))
  *  Does not (!) move specified links of the root cell.
  *  Returns o.
  */
-func (:cell_s) (m @* rewrap_cell_soft( m @* o, m :cell_s* src ))
+func (:cell_s) m @* rewrap_cell_soft( m @* o, m :cell_s* src )
 {
     ASSERT( !o.body );
     ASSERT( !o.nop  );
@@ -858,7 +858,7 @@ func (:cell_s) push_cell_nop_d
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (m @* push_cell_const_scalar( m @* o, tp_t type, f3_t v ))
+func (:cell_s) m @* push_cell_const_scalar( m @* o, tp_t type, f3_t v )
 {
     d opal_nop_ar0_literal_s* literal = opal_nop_ar0_literal_s!;
     literal.h = opal_holor_s!;
@@ -869,7 +869,7 @@ func (:cell_s) (m @* push_cell_const_scalar( m @* o, tp_t type, f3_t v ))
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void assert_identifier_not_yet_defined( c @* o, tp_t name, m x_source* source ))
+func (:cell_s) void assert_identifier_not_yet_defined( c @* o, tp_t name, m x_source* source )
 {
     if( o.encs.name_exists( name ) || ( o.body && o.body.name_exists( name ) ) )
     {
@@ -880,7 +880,7 @@ func (:cell_s) (void assert_identifier_not_yet_defined( c @* o, tp_t name, m x_s
 // ---------------------------------------------------------------------------------------------------------------------
 
 /// parses ( ... <- ... )
-func (:cell_s) (void parse_signature( m @* o, m x_source* source ))
+func (:cell_s) void parse_signature( m @* o, m x_source* source )
 {
     source.parse_fa( " (" );
 
@@ -948,7 +948,7 @@ func (:cell_s) parse
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (d st_s* create_signature( c @* o ))
+func (:cell_s) d st_s* create_signature( c @* o )
 {
     d st_s* s = st_s!;
     s.push_fa( "(" );
@@ -961,7 +961,7 @@ func (:cell_s) (d st_s* create_signature( c @* o ))
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void parse_verify_signature( c @* o, m x_source* source ))
+func (:cell_s) void parse_verify_signature( c @* o, m x_source* source )
 {
     source.parse_fa( " (" );
 
@@ -1127,7 +1127,7 @@ func (:cell_s) parse_body
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void evaluate_set_encs( m @* o, m :cell_s* parent, m x_source* source ))
+func (:cell_s) void evaluate_set_encs( m @* o, m :cell_s* parent, m x_source* source )
 {
     m :stack_s* stack = :stack_s!^;
     m st_s* name = st_s!^;
@@ -1201,7 +1201,7 @@ func (:cell_s) (void evaluate_set_encs( m @* o, m :cell_s* parent, m x_source* s
  *  The catenated cell is then wrapped again to leave only undefined input links exposed.
  *  The last soft-wrapping is done for convenience because some code using this function assumes arity == encs.size.
  */
-func (:cell_s) (m :cell_s* recat_cell( m @* o, m :cell_s* c1, m :cell_s* c2, m x_source* source ))
+func (:cell_s) m :cell_s* recat_cell( m @* o, m :cell_s* c1, m :cell_s* c2, m x_source* source )
 {
     m :cell_s* cell = o.push_cell();
     cell.source_point.setup_from_source( source );
@@ -1271,7 +1271,7 @@ func (:cell_s) (m :cell_s* recat_cell( m @* o, m :cell_s* c1, m :cell_s* c2, m x
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cell_s) (void evaluate_stack( m @* o, m :stack_s* stack, m x_source* source ))
+func (:cell_s) void evaluate_stack( m @* o, m :stack_s* stack, m x_source* source )
 {
     m st_s* name = st_s!^;
 
@@ -1841,7 +1841,7 @@ func (:builder_s) :.build_from_source
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:tree_node_s) (er_t enter( m @* o, m ::cell_s* cell, m :node_s.2 node_out ))
+func (:tree_node_s) er_t enter( m @* o, m ::cell_s* cell, m :node_s.2 node_out )
 {
     m :node_s* node = NULL;
     foreach( m :node_s* e in o ) node = ( e.cell == cell ) ? e : node;
@@ -1858,7 +1858,7 @@ func (:tree_node_s) (er_t enter( m @* o, m ::cell_s* cell, m :node_s.2 node_out 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:tree_node_s) (er_t exit( m @* o, m ::cell_s* cell, bl_t test_for_wrapper, m :node_s.2 node_out ))
+func (:tree_node_s) er_t exit( m @* o, m ::cell_s* cell, bl_t test_for_wrapper, m :node_s.2 node_out )
 {
     m :node_s* node = o;
 
@@ -1884,7 +1884,7 @@ func (:tree_node_s) (er_t exit( m @* o, m ::cell_s* cell, bl_t test_for_wrapper,
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:tree_node_s) (m x_source_point_s* get_nearest_source_point( m @* o ))
+func (:tree_node_s) m x_source_point_s* get_nearest_source_point( m @* o )
 {
     if( !o || !o.cell ) return NULL;
     return o.cell.source_point.ifd( o.cell.source_point.source, o.parent.get_nearest_source_point() );

@@ -166,7 +166,7 @@ stamp :cyclic_s = extending :std_s
  *  jac_mdl stores jacobians in the form [in-channels][out-channels]
  */
 
-func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl ))
+func (opal_frame_s) void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )
 {
     ASSERT( o.is_setup );
 
@@ -219,7 +219,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (opal_frame_s) (void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl ))
+func (opal_frame_s) void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )
 {
     o.clone()^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
 };
@@ -229,7 +229,7 @@ func (opal_frame_s) (void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, 
 /** Estimates jacobians for adaptive and exit channels of last axon pass, given epsilon.
  *  jac_mdl stores jacobians in the form [ada-channels][out-channels]
  */
-func (opal_frame_s) (void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_adl_s* adl_en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl ))
+func (opal_frame_s) void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_adl_s* adl_en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )
 {
     ASSERT( o.is_setup );
 
@@ -279,7 +279,7 @@ func (opal_frame_s) (void mutable_estimate_jacobian_ada( m @* o, c bhvm_holor_ad
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (opal_frame_s) (void estimate_jacobian_ada( c @* o, c bhvm_holor_adl_s* adl_en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl ))
+func (opal_frame_s) void estimate_jacobian_ada( c @* o, c bhvm_holor_adl_s* adl_en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )
 {
     o.clone()^.mutable_estimate_jacobian_ada( adl_en, epsilon, jac_mdl );
 };
@@ -568,7 +568,7 @@ func (:plain_s) :.run
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl ))
+func (opal_frame_cyclic_s) void mutable_estimate_jacobian_en( m @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )
 {
     ASSERT( o.is_setup );
 
@@ -625,7 +625,7 @@ func (opal_frame_cyclic_s) (void mutable_estimate_jacobian_en( m @* o, c bhvm_ho
 /** Estimates jacobians for entry and exit channels of last axon pass, given epsilon.
  *  jac_mdl stores jacobians in the form [in-channels][out-channels]
  */
-func (opal_frame_cyclic_s) (void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl ))
+func (opal_frame_cyclic_s) void estimate_jacobian_en( c @* o, c bhvm_holor_adl_s* en, f3_t epsilon, m bhvm_holor_mdl_s* jac_mdl )
 {
     o.clone()^.mutable_estimate_jacobian_en( en, epsilon, jac_mdl );
 };

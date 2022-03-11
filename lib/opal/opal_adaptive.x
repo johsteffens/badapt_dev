@@ -40,7 +40,7 @@ stamp :s = aware bhpt_adaptive
     func bhpt_adaptive.rebind_holors { o.frame.bind_holors(); };
     func bhpt_adaptive.get_adaptor_probe;
     func bhpt_adaptive.status_to_sink;
-    func (void source_to_sink( @*o, m x_sink* sink )) { o.frame.source_code_to_sink( sink ); };
+    func void source_to_sink( @*o, m x_sink* sink ) { o.frame.source_code_to_sink( sink ); };
 
     // ==============================================================
 
@@ -223,7 +223,7 @@ group :op = retrievable
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_create( m @* o ))
+func (:cyclic_s) void dp_buffer_create( m @* o )
 {
     o.dp_buffer =< bhvm_holor_adl_s!;
     o.dp_buffer.set_size( o.frame.unroll_size );
@@ -236,7 +236,7 @@ func (:cyclic_s) (void dp_buffer_create( m @* o ))
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_reset( m @* o ))
+func (:cyclic_s) void dp_buffer_reset( m @* o )
 {
     if( !o.dp_buffer ) opal_adaptive_cyclic_s_dp_buffer_create( o );
     foreach( m $* e in o.dp_buffer ) e.v.zro();
@@ -245,14 +245,14 @@ func (:cyclic_s) (void dp_buffer_reset( m @* o ))
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_apply( m @* o ))
+func (:cyclic_s) void dp_buffer_apply( m @* o )
 {
     o.frame.run_dendrite_pass_adl_flat( o.dp_buffer, NULL );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func (:cyclic_s) (void dp_buffer_apply_reset( m @* o ))
+func (:cyclic_s) void dp_buffer_apply_reset( m @* o )
 {
     o.dp_buffer_apply();
     o.dp_buffer_reset();
