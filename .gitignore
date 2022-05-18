@@ -10,4 +10,4 @@ dev
 bin
 obj
 temp
-
+*.bmarks
